@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.6.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton", "Proton\Proton.csproj", "{101F0276-086A-4955-A762-75CA8527E8CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton", "src\Proton\Proton.csproj", "{101F0276-086A-4955-A762-75CA8527E8CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.Client", "Proton.Client\Proton.Client.csproj", "{68DD9A4F-42F3-431E-AE1F-6A68F391B790}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.Client", "src\Proton.Client\Proton.Client.csproj", "{68DD9A4F-42F3-431E-AE1F-6A68F391B790}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.TestPeer", "Proton.TestPeer\Proton.TestPeer.csproj", "{74E2D2C1-C0A6-40BC-8BB5-C213E95ACD73}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.TestPeer", "src\Proton.TestPeer\Proton.TestPeer.csproj", "{74E2D2C1-C0A6-40BC-8BB5-C213E95ACD73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.Tests", "Proton.Tests\Proton.Tests.csproj", "{D5844EF9-4F95-4FEA-ADB0-A7F51024ADEA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.Tests", "test\Proton.Tests\Proton.Tests.csproj", "{D5844EF9-4F95-4FEA-ADB0-A7F51024ADEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.Client.Tests", "Proton.Client.Tests\Proton.Client.Tests.csproj", "{BB4EA4F2-EA31-447F-83B5-F8F594437D28}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.Client.Tests", "test\Proton.Client.Tests\Proton.Client.Tests.csproj", "{BB4EA4F2-EA31-447F-83B5-F8F594437D28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.TestPeer.Tests", "Proton.TestPeer.Tests\Proton.TestPeer.Tests.csproj", "{93F313B9-519F-43CF-9ECC-BA10AB45F7CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proton.TestPeer.Tests", "test\Proton.TestPeer.Tests\Proton.TestPeer.Tests.csproj", "{93F313B9-519F-43CF-9ECC-BA10AB45F7CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

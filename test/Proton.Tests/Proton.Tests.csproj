@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Proton.TestPeer\Proton.TestPeer.csproj" />
+    <ProjectReference Include="..\..\src\Proton\Proton.csproj" />
+    <ProjectReference Include="..\..\src\Proton.TestPeer\Proton.TestPeer.csproj" />
   </ItemGroup>
 
 </Project>
