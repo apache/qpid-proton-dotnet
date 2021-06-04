@@ -15,10 +15,21 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Buffer
+namespace Apache.Qpid.Proton.Codec.Encoders
 {
-    public interface IProtonBuffer
-    {
+   /// <summary>
+   /// Defines a factory class that creates Proton specific Encoder types.
+   /// </summary>
+   public sealed class ProtonEncoderFactory
+   {
+      public static ProtonEncoder Create()
+      {
+         return new ProtonEncoder(); // TODO
+      }
 
-    }
+      public static ProtonEncoder CreateSasl()
+      {
+         return new ProtonEncoder(); // TODO
+      }
+   }
 }

@@ -15,10 +15,20 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Buffer
+namespace Apache.Qpid.Proton.Codec.Encoders
 {
-    public interface IProtonBuffer
-    {
+   public sealed class ProtonEncoder : IEncoder
+   {
+      private ProtonEncoderState cachedEncoderState;
 
-    }
+      public IEncoderState NewEncoderState()
+      {
+         return new ProtonEncoderState(this);
+      }
+
+      public IEncoderState CachedEncoderState()
+      {
+         return cachedEncoderState ??= new ProtonEncoderState(this);
+      }
+   }
 }

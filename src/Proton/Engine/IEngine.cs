@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Buffer
+namespace Apache.Qpid.Proton.Engine
 {
-    public interface IProtonBuffer
-    {
+   /// <summary>
+   /// Defines an AMQP Protocol Engine interface that should be used to implement
+   /// an AMQP Engine.  The Eg
+   /// </summary>
+   public interface IEngine 
+   {
 
-    }
+   }
 }

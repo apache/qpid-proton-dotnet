@@ -15,10 +15,34 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Buffer
-{
-    public interface IProtonBuffer
-    {
+using Apache.Qpid.Proton.Buffer;
 
-    }
+namespace Apache.Qpid.Proton.Codec.Encoders
+{
+   public class ProtonEncoderState : IEncoderState 
+   {
+      private ProtonEncoder encoder;
+
+      public ProtonEncoderState(ProtonEncoder encoder)
+      {
+         this.encoder = encoder;
+      }
+
+      public void Reset()
+      {
+         // Nothing needed yet.
+      }
+
+      public IEncoder Encoder
+      {
+         get { return this.encoder; }
+      }
+
+      public IProtonBuffer EncodeUtf8(IProtonBuffer buffer, string value)
+      {
+         // TODO
+
+         return buffer;
+      }
+   }
 }
