@@ -17,16 +17,8 @@
 
 namespace Apache.Qpid.Proton.Types
 {
-    public interface IDescribedType
-    {
-        /// <summary>
-        /// Returns the AMQP Descriptor that defines the Described Type
-        /// </summary>
-        object Descriptor { get; }
-
-        /// <summary>
-        /// Returns the Described value conveyed in this AMQP Described Type
-        /// </summary>
-        object Described { get; }
-    }
+   public sealed class Symbol
+   {
+      
+   }
 }

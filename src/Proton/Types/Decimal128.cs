@@ -15,18 +15,12 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Types
 {
-    public interface IDescribedType
-    {
-        /// <summary>
-        /// Returns the AMQP Descriptor that defines the Described Type
-        /// </summary>
-        object Descriptor { get; }
+   public sealed class Decimal128
+   {
 
-        /// <summary>
-        /// Returns the Described value conveyed in this AMQP Described Type
-        /// </summary>
-        object Described { get; }
-    }
+   }
 }

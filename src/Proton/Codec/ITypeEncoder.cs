@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Codec
       /// The Type that this decoder can write.
       /// </summary>
       /// <returns>The Type value that this type encoder writes</returns>
-      Type DecodesType();
+      Type EncodesType();
 
       /// <summary>
       /// Returns true if the value that this encoder is going to write is an array type.

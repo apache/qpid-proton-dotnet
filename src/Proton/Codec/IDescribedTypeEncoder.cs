@@ -15,18 +15,23 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types
-{
-    public interface IDescribedType
-    {
-        /// <summary>
-        /// Returns the AMQP Descriptor that defines the Described Type
-        /// </summary>
-        object Descriptor { get; }
+using System;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Types;
 
-        /// <summary>
-        /// Returns the Described value conveyed in this AMQP Described Type
-        /// </summary>
-        object Described { get; }
-    }
+namespace Apache.Qpid.Proton.Codec
+{
+   public interface IDescribedTypeEncoder<V> : ITypeEncoder<V>
+   {
+      /// <summary>
+      /// Returns an AMQP Symbol code that describes the type to be encoded
+      /// </summary>
+      Symbol DescriptorSymbol { get; }
+
+      /// <summary>
+      /// Returns an AMQP unsigned int numeric code that describes the type to be encoded
+      /// </summary>
+      uint? DescriptorCode { get; }
+
+   }
 }
