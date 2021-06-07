@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-using System;
-using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec

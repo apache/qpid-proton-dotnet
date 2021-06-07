@@ -19,7 +19,7 @@ using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec
 {
-   public interface IDescribedTypeDecoder<V> : ITypeDecoder<V>
+   public interface IStreamDescribedTypeDecoder<V> : ITypeDecoder<V>
    {
       /// <summary>
       /// Returns an AMQP Symbol code that describes the type to be decoded
