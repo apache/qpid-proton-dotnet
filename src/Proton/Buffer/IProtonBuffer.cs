@@ -17,8 +17,28 @@
 
 namespace Apache.Qpid.Proton.Buffer
 {
-    public interface IProtonBuffer
-    {
+   public interface IProtonBuffer
+   {
+      /// <summary>
+      /// Returns if this buffer implementation has a backing byte array.  If it does
+      /// than the various array access methods will allow calls, otherwise an exception
+      /// will be thrown if there is no backing array and an access operation occurs.
+      /// </summary>
+      /// <returns>true if the buffer has a backing byte array</returns>
+      bool HasArray();
 
-    }
+      /// <summary>
+      /// If the buffer implementation has a backing array this method returns that array
+      /// this method returns it, otherwise it will throw an exception to indicate that.
+      /// </summary>
+      byte[] Array { get; }
+
+      /// <summary>
+      /// If the buffer implementation has a backing array this method returns that array
+      /// offset used to govern where reads and writes start in the wrapped array, otherwise 
+      /// it will throw an exception to indicate that.
+      /// </summary>
+      int ArrayOffset { get; }
+
+   }
 }
