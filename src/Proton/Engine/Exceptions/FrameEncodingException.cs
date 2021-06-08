@@ -16,34 +16,33 @@
  */
 
 using System;
+using Apache.Qpid.Proton.Types.Transport;
 
-namespace Apache.Qpid.Proton.Codec
+namespace Apache.Qpid.Proton.Engine.Exceptions
 {
-   public class EncodeException : Exception
+   public sealed class FrameEncodingException : ProtocolVioltationException
    {
       /// <summary>
-      /// Creates a default EncodeException.
+      /// Creates a default version of this exception type.
       /// </summary>
-      public EncodeException() : base()
+      public FrameEncodingException() : base(AmqpError.INTERNAL_ERROR)
       {         
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
-      public EncodeException(string message) : base(message)
+      /// <param name="message">Description of the error</param>
+      public FrameEncodingException(string message) : base(AmqpError.INTERNAL_ERROR, message)
       {
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
+      /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public EncodeException(string message, Exception cause) : base(message, cause)
+      public FrameEncodingException(string message, Exception cause) : base(AmqpError.INTERNAL_ERROR, message, cause)
       {
       }
    }

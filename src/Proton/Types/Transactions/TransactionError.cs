@@ -15,19 +15,24 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types
+namespace Apache.Qpid.Proton.Types.Transport
 {
-   public sealed class Symbol
+   public static class TransactionError
    {
       /// <summary>
-      /// Lookup or create a singleton instance of the given Symbol that has the
-      /// matching name to the string value provided.
-      /// </summary>
-      /// <param name="value">the stringified symbol name</param>
-      /// <returns>A singleton instance of the named Symbol</returns>
-      public static Symbol Lookup(string value)
-      {
-         return null;
-      }
+      /// The remote sent a transactional request with an unknown transaction id.
+      /// </summary>                 
+      public static Symbol UNKNOWN_ID = Symbol.Lookup("amqp:transaction:unknown-id");
+
+      /// <summary>
+      /// The transaction has been rolled back by the remote and cannot be operated upon.
+      /// </summary>                 
+      public static Symbol TRANSACTION_ROLLBACK = Symbol.Lookup("amqp:transaction:rollback");
+
+      /// <summary>
+      /// The transaction has timed out by the remote and cannot be operated upon.
+      /// </summary>                 
+      public static Symbol TRANSACTION_TIMEOUT = Symbol.Lookup("amqp:transaction:timeout");
+
    }
 }

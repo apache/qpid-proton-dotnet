@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Codec
       /// </summary>
       /// <param name="message">Description of the decoding error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public DecodeException(string message, Exception cause) : base(message)
+      public DecodeException(string message, Exception cause) : base(message, cause)
       {
       }
    }

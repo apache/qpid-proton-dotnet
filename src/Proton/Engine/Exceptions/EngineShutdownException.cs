@@ -17,33 +17,35 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Codec
+namespace Apache.Qpid.Proton.Engine.Exceptions
 {
-   public class EncodeException : Exception
+   /// <summary>
+   /// Engine state exception thrown when an operation cannot be performed on an already
+   /// shutdown engine instance.
+   /// </summary>
+   public class EngineShutdownException : EngineStateException
    {
       /// <summary>
-      /// Creates a default EncodeException.
+      /// Creates a default version of this exception type.
       /// </summary>
-      public EncodeException() : base()
+      public EngineShutdownException() : base()
       {         
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
-      public EncodeException(string message) : base(message)
+      /// <param name="message">Description of the error</param>
+      public EngineShutdownException(string message) : base(message)
       {
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
+      /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public EncodeException(string message, Exception cause) : base(message, cause)
+      public EngineShutdownException(string message, Exception cause) : base(message, cause)
       {
       }
    }

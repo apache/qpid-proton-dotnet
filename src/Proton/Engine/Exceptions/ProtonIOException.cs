@@ -17,33 +17,34 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Codec
+namespace Apache.Qpid.Proton.Engine.Exceptions
 {
-   public class EncodeException : Exception
+   /// <summary>
+   /// Exception type that indicates an IO error has occured that is likely unrecoverable.
+   /// </summary>
+   public class ProtonIOException : ProtonException
    {
       /// <summary>
-      /// Creates a default EncodeException.
+      /// Creates a default version of this exception type.
       /// </summary>
-      public EncodeException() : base()
+      public ProtonIOException() : base()
       {         
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
-      public EncodeException(string message) : base(message)
+      /// <param name="message">Description of the error</param>
+      public ProtonIOException(string message) : base(message)
       {
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
+      /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public EncodeException(string message, Exception cause) : base(message, cause)
+      public ProtonIOException(string message, Exception cause) : base(message, cause)
       {
       }
    }

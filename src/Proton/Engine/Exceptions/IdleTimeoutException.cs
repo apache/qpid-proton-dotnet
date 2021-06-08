@@ -16,34 +16,37 @@
  */
 
 using System;
+using Apache.Qpid.Proton.Types;
 
-namespace Apache.Qpid.Proton.Codec
+namespace Apache.Qpid.Proton.Engine.Exceptions
 {
-   public class EncodeException : Exception
+   /// <summary>
+   /// Error thrown when the Engine idle checking detects a timeout condition and
+   /// shuts down the engine and places it in an error state.
+   /// </summary>
+   public class IdleTimeoutException : ProtonException
    {
       /// <summary>
-      /// Creates a default EncodeException.
+      /// Creates a default version of this exception type.
       /// </summary>
-      public EncodeException() : base()
+      public IdleTimeoutException() : base()
       {         
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
-      public EncodeException(string message) : base(message)
+      /// <param name="message">Description of the error</param>
+      public IdleTimeoutException(string message) : base(message)
       {
       }
 
       /// <summary>
-      /// Create a new EncodeException instance with the given message that describes the
-      /// specifics of the encoding error.
+      /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="message">Description of the encoding error</param>
+      /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public EncodeException(string message, Exception cause) : base(message, cause)
+      public IdleTimeoutException(string message, Exception cause) : base(message, cause)
       {
       }
    }
