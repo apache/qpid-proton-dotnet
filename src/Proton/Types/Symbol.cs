@@ -15,10 +15,46 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Buffer;
+using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+
 namespace Apache.Qpid.Proton.Types
 {
-   public sealed class Symbol
+   public sealed class Symbol : IEquatable<Symbol>, IComparable, IComparable<Symbol>
    {
+      private static readonly IDictionary<IProtonBuffer, Symbol> buffersToSymbols =
+         new ConcurrentDictionary<IProtonBuffer, Symbol>();
+      private static readonly IDictionary<string, Symbol> stringsToSymbls =
+         new ConcurrentDictionary<string, Symbol>();
+
+      private static readonly Symbol EMPTY_SYMBOL = new Symbol();
+
+      // Prevents the Symbol cache from growing overly large if abused by creating overly
+      // large Symbols which would all be stored in the symbol cache.
+      private static readonly uint MAX_CACHED_SYMBOL_SIZE = 64;
+
+      // Lazy allocated based on calls to stringify the given Symbol
+      private string symbolString;
+
+      private readonly IProtonBuffer underlying;
+      private readonly int hashCode;
+
+      private Symbol()
+      {
+         underlying = null; // TODO: Buffer allocator for empty buffer
+         symbolString = "";
+         hashCode = 32;
+      }
+
+      private Symbol(IProtonBuffer buffer)
+      {
+         underlying = buffer;
+         hashCode = buffer.GetHashCode();
+      }
+
       /// <summary>
       /// Lookup or create a singleton instance of the given Symbol that has the
       /// matching name to the string value provided.
@@ -27,7 +63,138 @@ namespace Apache.Qpid.Proton.Types
       /// <returns>A singleton instance of the named Symbol</returns>
       public static Symbol Lookup(string value)
       {
-         return null;
+         if (value == null)
+         {
+            return null;
+         }
+         else if (value.Length == 0)
+         {
+            return EMPTY_SYMBOL;
+         }
+         else
+         {
+            Symbol symbol = null;
+
+            if (!stringsToSymbls.TryGetValue(value, out symbol))
+            {
+               // TODO
+            }
+
+            return symbol;
+         }
+      }
+
+      /// <summary>
+      /// Lookup or create a singleton instance of the given Symbol that has the
+      /// matching byte contents as the given buffer, if none exists a new Symbol
+      /// is created using the given buffer which is not copied but used directly.
+      /// </summary>
+      /// <param name="value">the stringified symbol name</param>
+      /// <returns>A singleton instance of the named Symbol</returns>
+      public static Symbol Lookup(IProtonBuffer value)
+      {
+         return Lookup(value, false);
+      }
+
+      /// <summary>
+      /// Lookup or create a singleton instance of the given Symbol that has the
+      /// matching byte contents as the given buffer, if none exists a new Symbol
+      /// is created using the given buffer which is not copied if the provided
+      /// boolean option requests it.
+      /// </summary>
+      /// <param name="value">the stringified symbol name</param>
+      /// <param name="copyOnCreate">should the given buffer be copied if a Symbol is created</param>
+      /// <returns>A singleton instance of the named Symbol</returns>
+      public static Symbol Lookup(IProtonBuffer value, bool copyOnCreate)
+      {
+         if (value == null)
+         {
+            return null;
+         }
+         else if (!value.Readable)
+         {
+            return EMPTY_SYMBOL;
+         }
+         else
+         {
+            Symbol symbol = null;
+
+            if (!buffersToSymbols.TryGetValue(value, out symbol))
+            {
+               // TODO
+            }
+
+            return symbol;
+         }
+      }
+
+      /// <summary>
+      /// Returns the number of ASCII characters that comprise this Symbol
+      /// </summary>
+      public int Length
+      {
+         get { return underlying.ReadableBytes; }
+      }
+
+      /// <summary>
+      /// Writes a copy of the Symbol bytes to the given buffer.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the Symbol bytes to</param>
+      public void WriteTo(IProtonBuffer buffer)
+      {
+         // TODO
+      }
+
+      public override string ToString()
+      {
+         if (symbolString == null && underlying.Readable)
+         {
+            symbolString = underlying.ToString(Encoding.ASCII);
+            if (symbolString.Length <= MAX_CACHED_SYMBOL_SIZE)
+            {
+               if (!stringsToSymbls.TryAdd(symbolString, this))
+               {
+                  symbolString = stringsToSymbls[symbolString].symbolString;
+               }
+            }
+         }
+
+         return symbolString ?? "";
+      }
+
+      public override int GetHashCode()
+      {
+         return hashCode;
+      }
+
+      public override bool Equals(object symbol)
+      {
+         if (symbol == null || symbol.GetType() != GetType())
+         {
+            return false;
+         }
+
+         return Equals(symbol as Symbol);
+      }
+
+      public bool Equals(Symbol symbol)
+      {
+         if (symbol == null)
+         {
+            return false;
+         }
+
+         return underlying.Equals(symbol.underlying);
+      }
+
+      public int CompareTo(Symbol other)
+      {
+         return underlying.CompareTo(other.underlying);
+      }
+
+      public int CompareTo(object other)
+      {
+         return CompareTo(other as Symbol);
       }
    }
 }
