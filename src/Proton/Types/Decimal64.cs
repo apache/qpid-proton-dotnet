@@ -21,6 +21,45 @@ namespace Apache.Qpid.Proton.Types
 {
    public sealed class Decimal64
    {
+      private readonly ulong bits;
 
+      public Decimal64(ulong bits)
+      {
+         this.bits = bits;
+      }
+
+      public int CompareTo(Decimal64 value)
+      {
+        return (this.bits < value.bits) ? -1 : ((this.bits == value.bits) ? 0 : 1);
+      }
+
+      public bool Equals(Decimal64 obj)
+      {
+         if (obj == null)
+         {
+            return false;
+         }
+         else
+         {
+            return this.bits == obj.bits;
+         }
+      }
+
+      public override bool Equals(object obj)
+      {
+         if (obj == null || GetType() != obj.GetType())
+         {
+            return false;
+         }
+         else
+         {
+            return Equals(obj as Decimal64);
+         }
+      }
+
+      public override int GetHashCode()
+      {
+         return this.bits.GetHashCode();
+      }
    }
 }

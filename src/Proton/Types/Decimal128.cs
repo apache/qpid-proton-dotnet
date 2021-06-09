@@ -21,6 +21,49 @@ namespace Apache.Qpid.Proton.Types
 {
    public sealed class Decimal128
    {
+      private readonly ulong lsb;
+      private readonly ulong msb;
 
+      public Decimal128(ulong lsb, ulong msb)
+      {
+         this.lsb = lsb;
+         this.msb = msb;
+      }
+
+      public int CompareTo(Decimal128 value)
+      {
+         return -1;  // TODO
+      }
+
+      public bool Equals(Decimal128 obj)
+      {
+         if (obj == null)
+         {
+            return false;
+         }
+         else
+         {
+            return this.msb == obj.msb && this.lsb == obj.lsb;
+         }
+      }
+
+      public override bool Equals(object obj)
+      {
+         if (obj == null || GetType() != obj.GetType())
+         {
+            return false;
+         }
+         else
+         {
+            return Equals(obj as Decimal128);
+         }
+      }
+
+      public override int GetHashCode()
+      {
+         int result = (int)(msb ^ (msb >> 32));
+         result = 31 * result + (int)(lsb ^ (lsb >> 32));
+         return result;
+      }
    }
 }
