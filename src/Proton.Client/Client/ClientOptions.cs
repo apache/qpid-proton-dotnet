@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Client
       public string Id { get; set; }
 
       /// <summary>
-      /// Clone this options instance, chancges to the cloned options are not reflected
+      /// Clone this options instance, changes to the cloned options are not reflected
       /// in this options instance.
       /// </summary>
       /// <returns>A deep copy of this options instance.</returns>
