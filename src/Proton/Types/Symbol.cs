@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Types
    {
       private static readonly IDictionary<IProtonBuffer, Symbol> buffersToSymbols =
          new ConcurrentDictionary<IProtonBuffer, Symbol>();
-      private static readonly IDictionary<string, Symbol> stringsToSymbls =
+      private static readonly IDictionary<string, Symbol> stringsToSymbols =
          new ConcurrentDictionary<string, Symbol>();
 
       private static readonly Symbol EMPTY_SYMBOL = new Symbol();
@@ -75,9 +75,16 @@ namespace Apache.Qpid.Proton.Types
          {
             Symbol symbol = null;
 
-            if (!stringsToSymbls.TryGetValue(value, out symbol))
+            if (!stringsToSymbols.TryGetValue(value, out symbol))
             {
-               // TODO
+               symbol = Lookup(ProtonByteBufferAllocator.INSTANCE.Wrap(Encoding.ASCII.GetBytes(value)));
+
+               if (symbol.Length <= MAX_CACHED_SYMBOL_SIZE)
+               {
+                  // Try and keep the Symbol instance consistent with the one that is stored
+                  // in the buffer to symbol dictionary.
+                  stringsToSymbols[value] = symbol;
+               }
             }
 
             return symbol;
@@ -121,7 +128,24 @@ namespace Apache.Qpid.Proton.Types
 
             if (!buffersToSymbols.TryGetValue(value, out symbol))
             {
-               // TODO
+               if (copyOnCreate)
+               {
+                  int symbolSize = value.ReadableBytes;
+                  IProtonBuffer copy = ProtonByteBufferAllocator.INSTANCE.Allocate(symbolSize, symbolSize);
+                  value.CopyInto(value.ReadOffset, copy, 0, symbolSize);
+                  copy.WriteOffset = symbolSize;
+                  value = copy;
+               }
+
+               symbol = new Symbol(value);
+
+               if (symbol.Length <= MAX_CACHED_SYMBOL_SIZE)
+               {
+                  if (!buffersToSymbols.TryAdd(value, symbol))
+                  {
+                     symbol = buffersToSymbols[value];
+                  }
+               }
             }
 
             return symbol;
@@ -142,7 +166,7 @@ namespace Apache.Qpid.Proton.Types
       /// <param name="buffer">The buffer to write the Symbol bytes to</param>
       public void WriteTo(IProtonBuffer buffer)
       {
-         // TODO
+         underlying.CopyInto(underlying.ReadOffset, buffer, buffer.WriteOffset, underlying.ReadableBytes);
       }
 
       public override string ToString()
@@ -152,9 +176,9 @@ namespace Apache.Qpid.Proton.Types
             symbolString = underlying.ToString(Encoding.ASCII);
             if (symbolString.Length <= MAX_CACHED_SYMBOL_SIZE)
             {
-               if (!stringsToSymbls.TryAdd(symbolString, this))
+               if (!stringsToSymbols.TryAdd(symbolString, this))
                {
-                  symbolString = stringsToSymbls[symbolString].symbolString;
+                  symbolString = stringsToSymbols[symbolString].symbolString;
                }
             }
          }
