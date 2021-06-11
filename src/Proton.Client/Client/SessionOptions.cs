@@ -79,6 +79,8 @@ namespace Apache.Qpid.Proton.Client
          {
             other.Properties = new Dictionary<string, object>(Properties);
          }
+         other.OutgoingCapacity = OutgoingCapacity;
+         other.IncomingCapacity = IncomingCapacity;
 
          return other;
       }
@@ -140,6 +142,28 @@ namespace Apache.Qpid.Proton.Client
       /// a new session.
       /// </summary>
       public IDictionary<string, object> Properties { get; set; }
+
+      /// <summary>
+      /// Configures the incoming capacity for each session created with these options.  The incoming
+      /// capacity controls how much buffering a session will allow before applying back pressure to
+      /// the remote thereby preventing excessive memory overhead.
+      ///
+      /// This is an advanced option and in most cases the client defaults should be left in place unless
+      /// a specific issue needs to be addressed.
+      /// </summary>
+      public uint IncomingCapacity { get; set; } = DEFAULT_SESSION_INCOMING_CAPACITY;
+
+      /// <summary>
+      /// Configures the outgoing capacity for a session created with these options.  The outgoing
+      /// capacity controls how much buffering a session will allow before applying back pressure to
+      /// the local thereby preventing excessive memory overhead while writing large amounts of data
+      /// and the client is experiencing back-pressure due to the remote not keeping pace.
+      ///
+      /// This is an advanced option and in most cases the client defaults should be left in place unless
+      /// a specific issue needs to be addressed.  Setting this value incorrectly can lead to senders that
+      /// either block frequently or experience very poor overall performance.
+      /// </summary>
+      public uint OutgoingCapacity { get; set; } = DEFAULT_SESSION_OUTGOING_CAPACITY;
 
    }
 }

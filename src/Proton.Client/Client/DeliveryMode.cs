@@ -15,41 +15,28 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Engine
+using System;
+using System.Collections.Generic;
+
+namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// Enumerates the possible states that the Proton AMQP engine can occupy.
+   /// Defines the delivery modes that a sender or receiver can be configured with.
    /// </summary>
-   public enum EngineState
+   public enum DeliveryMode
    {
       /// <summary>
-      /// The engine has not yet been started and is safe to configure.
+      /// At most once delivery mode which configures the sender or receiver to
+      /// request presettled deliveries.  This is lowest level of reliability but
+      /// the fastest overall mode as it does not require round trips from the
+      /// remote to accept or settle the delivery.
       /// </summary>
-      Idle,
+      AtMostOnce,
 
       /// <summary>
-      /// Indicates the engine is in the starting phase and configuration is safe to use now.
+      /// At least once deliver mode which configures the sender or receiver to
+      /// require that delivery be settled upon receipt.
       /// </summary>
-      Starting,
-
-      /// <summary>
-      /// The engine has been started and no changes to configuration are permissible.
-      /// </summary>
-      Started,
-
-      /// <summary>
-      /// The engine has encountered an error and is no longer usable.
-      /// </summary>
-      Failed,
-
-      /// <summary>
-      /// Engine is shutting down and all pending work should be completed.
-      /// </summary>
-      ShuttingDown,
-
-      /// <summary>
-      /// The engine has been shutdown and can no longer be used.
-      /// </summary>
-      Shutdown
+      AtLeastOnce
    }
 }
