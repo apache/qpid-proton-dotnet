@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Creates a default receiver options instance.
       /// </summary>
-      public ReceiverOptions()
+      public ReceiverOptions() : base()
       {
       }
 
@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new receiver options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The sender options instance to copy</param>
-      public ReceiverOptions(ReceiverOptions other)
+      public ReceiverOptions(ReceiverOptions other) : base()
       {
          other.CopyInto(this);
       }

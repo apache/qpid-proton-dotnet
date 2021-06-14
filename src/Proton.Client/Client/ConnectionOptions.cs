@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Creates a default Connection options instance.
       /// </summary>
-      public ConnectionOptions()
+      public ConnectionOptions() : base()
       {
       }
 
@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new Connection options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The connection options instance to copy</param>
-      public ConnectionOptions(ConnectionOptions other)
+      public ConnectionOptions(ConnectionOptions other) : base()
       {
          other.CopyInto(this);
       }

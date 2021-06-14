@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Creates a default session options instance.
       /// </summary>
-      public SessionOptions()
+      public SessionOptions() : base()
       {
       }
 
@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new session options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The session options instance to copy</param>
-      public SessionOptions(SessionOptions other)
+      public SessionOptions(SessionOptions other) : base()
       {
          other.CopyInto(this);
       }

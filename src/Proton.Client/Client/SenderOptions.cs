@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Creates a default sender options instance.
       /// </summary>
-      public SenderOptions()
+      public SenderOptions() : base()
       {
       }
 
@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new sender options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The sender options instance to copy</param>
-      public SenderOptions(SenderOptions other)
+      public SenderOptions(SenderOptions other) : base()
       {
          other.CopyInto(this);
       }

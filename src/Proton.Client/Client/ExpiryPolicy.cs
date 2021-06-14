@@ -16,48 +16,34 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
-   public class ClientOptions : ICloneable
+   /// <summary>
+   /// Expiry policy for a terminus.
+   /// </summary>
+   public enum ExpiryPolicy
    {
       /// <summary>
-      /// Creates a default Client options instance.
+      /// Eligible for expiry on Link close.
       /// </summary>
-      public ClientOptions() : base()
-      {
-      }
+      LinkClose,
 
       /// <summary>
-      /// Create a new Client options instance whose settings are copied from the instance provided.
+      /// Eligible for expiry when the associated Session is closed.
       /// </summary>
-      /// <param name="other">The Client options instance to copy</param>
-      public ClientOptions(ClientOptions other) : base()
-      {
-         other.CopyInto(this);
-      }
+      SessionClose,
 
       /// <summary>
-      /// Configure the Container Id that is set on new Connections created from a
-      /// Client instance that was created with these options.
+      /// Eligible for expiry when the associated Connection is closed.
       /// </summary>
-      public string Id { get; set; }
+      ConnectionClose,
 
       /// <summary>
-      /// Clone this options instance, changes to the cloned options are not reflected
-      /// in this options instance.
+      /// Terminus never expires
       /// </summary>
-      /// <returns>A deep copy of this options instance.</returns>
-      public object Clone()
-      {
-         return CopyInto(new ClientOptions());
-      }
+      None
 
-      protected ClientOptions CopyInto(ClientOptions other)
-      {
-         other.Id = this.Id;
-
-         return other;
-      }
    }
 }

@@ -16,32 +16,27 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
-   public class ClientOptions : ICloneable
+   public class TargetOptions : TerminusOptions, ICloneable
    {
       /// <summary>
-      /// Creates a default Client options instance.
+      /// Creates a default target options instance.
       /// </summary>
-      public ClientOptions() : base()
+      public TargetOptions() : base()
       {
       }
 
       /// <summary>
-      /// Create a new Client options instance whose settings are copied from the instance provided.
+      /// Create a target options instance that copies the configuration from the given instance.
       /// </summary>
-      /// <param name="other">The Client options instance to copy</param>
-      public ClientOptions(ClientOptions other) : base()
+      /// <param name="other">The target options instance to copy</param>
+      public TargetOptions(TargetOptions other) : base()
       {
          other.CopyInto(this);
       }
-
-      /// <summary>
-      /// Configure the Container Id that is set on new Connections created from a
-      /// Client instance that was created with these options.
-      /// </summary>
-      public string Id { get; set; }
 
       /// <summary>
       /// Clone this options instance, changes to the cloned options are not reflected
@@ -50,14 +45,14 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>A deep copy of this options instance.</returns>
       public object Clone()
       {
-         return CopyInto(new ClientOptions());
+         return CopyInto(new TargetOptions());
       }
 
-      protected ClientOptions CopyInto(ClientOptions other)
+      protected TargetOptions CopyInto(TargetOptions other)
       {
-         other.Id = this.Id;
+         base.CopyInto(other);
 
-         return other;
+         return this;
       }
    }
 }
