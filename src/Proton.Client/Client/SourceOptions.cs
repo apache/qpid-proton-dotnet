@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Client
          return CopyInto(new SourceOptions());
       }
 
-      protected SourceOptions CopyInto(SourceOptions other)
+      internal SourceOptions CopyInto(SourceOptions other)
       {
          base.CopyInto(other);
 

@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Client
          return CopyInto(new ConnectionOptions());
       }
 
-      protected ConnectionOptions CopyInto(ConnectionOptions other)
+      internal ConnectionOptions CopyInto(ConnectionOptions other)
       {
          other.User = User;
          other.Password = Password;
@@ -85,6 +85,8 @@ namespace Apache.Qpid.Proton.Client
          {
             other.Properties = new Dictionary<string, object>(Properties);
          }
+
+         SaslOptions.CopyInto(other.SaslOptions);
 
          return other;
       }
@@ -187,6 +189,26 @@ namespace Apache.Qpid.Proton.Client
       /// a new connection.
       /// </summary>
       public IDictionary<string, object> Properties { get; set; }
+
+      /// <summary>
+      /// Gets the SASL options instance associated with these connection options.
+      /// </summary>
+      public SaslOptions SaslOptions { get; } = new SaslOptions();
+
+      /// <summary>
+      /// Quick access to enable and disable reconnection for newly created connections that
+      /// use these options.
+      /// </summary>
+      public bool ReconnectEnabled
+      {
+         get { return ReconnectOptions.ReconnectEnabled; }
+         set { ReconnectOptions.ReconnectEnabled = value; }
+      }
+
+      /// <summary>
+      /// Gets the Reconnection options that control client reconnection behavior.
+      /// </summary>
+      public ReconnectOptions ReconnectOptions { get; } = new ReconnectOptions();
 
    }
 }

@@ -20,14 +20,14 @@ using System;
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// A single AMQP Connection instance.
+   /// A single AMQP delivery tracker instance.
    /// </summary>
-   public interface IConnection : IDisposable
+   public interface IDelivery : IDisposable
    {
       /// <summary>
-      /// Returns the parent client instance that created this connection.
+      /// Returns the parent receiver instance where this delivery arrived.
       /// </summary>
-      IClient Client { get; }
+      IReceiver Receiver { get; }
 
    }
 }

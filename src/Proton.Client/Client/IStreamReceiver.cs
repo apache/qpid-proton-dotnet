@@ -20,14 +20,10 @@ using System;
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// A single AMQP Connection instance.
+   /// A single AMQP stream receiver instance
    /// </summary>
-   public interface IConnection : IDisposable
+   public interface IStreamReceiver : IReceiver
    {
-      /// <summary>
-      /// Returns the parent client instance that created this connection.
-      /// </summary>
-      IClient Client { get; }
 
    }
 }

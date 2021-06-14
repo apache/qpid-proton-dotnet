@@ -43,12 +43,12 @@ namespace Apache.Qpid.Proton.Client
       /// in this options instance.
       /// </summary>
       /// <returns>A deep copy of this options instance.</returns>
-      public object Clone()
+      public virtual object Clone()
       {
          return CopyInto(new ReceiverOptions());
       }
 
-      protected ReceiverOptions CopyInto(ReceiverOptions other)
+      internal ReceiverOptions CopyInto(ReceiverOptions other)
       {
          other.LinkName = LinkName;
          other.AutoAccept = AutoAccept;
@@ -74,8 +74,21 @@ namespace Apache.Qpid.Proton.Client
             other.Properties = new Dictionary<string, object>(Properties);
          }
 
+         SourceOptions.CopyInto(other.SourceOptions);
+         TargetOptions.CopyInto(other.TargetOptions);
+
          return other;
       }
+
+      /// <summary>
+      /// Gets the source options configuration instance for these Receiver options
+      /// </summary>
+      public SourceOptions SourceOptions { get; } = new SourceOptions();
+
+      /// <summary>
+      /// Gets the target options configuration instance for these Receiver options
+      /// </summary>
+      public TargetOptions TargetOptions { get; } = new TargetOptions();
 
       /// <summary>
       /// Configures the link name that is assigned to the receiver created from these options.

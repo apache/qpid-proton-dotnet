@@ -18,5 +18,10 @@
         {
             "path": "test/Proton.TestPeer.Tests"
         }
-    ]
+   ],
+   "settings": {
+      "cSpell.words": [
+         "Sasl"
+      ]
+   }
 }

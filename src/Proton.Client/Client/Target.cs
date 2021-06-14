@@ -21,43 +21,44 @@ using System.Collections.Generic;
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// Base options type for the terminus configuration for Source and Target types
-   /// that configure the nodes for Sender and Receiver links.
+   /// Represents the remote Target instance for a sender or receiver link
    /// </summary>
-   public abstract class TerminusOptions
+   public interface Target
    {
       /// <summary>
-      /// Configures the Terminus durability mode.
+      /// The address value of the remote target node.
       /// </summary>
-      public DurabilityMode? DurabilityMode { get; set; }
+      string Address { get; }
 
       /// <summary>
-      /// Terminus timeout configuration.
+      /// The durability mode assigned to the target source node.
       /// </summary>
-      public uint? Timeout { get; set; }
+      DurabilityMode DurabilityMode { get; }
 
       /// <summary>
-      /// Configures the expiry policy for the Terminus.
+      /// The expiry timeout assigned to the remote target node.
       /// </summary>
-      public ExpiryPolicy? ExpiryPolicy { get; set; }
+      uint Timeout { get; }
 
       /// <summary>
-      /// Capabilities that are assigned to the created Terminus
+      /// The expiry policy assigned to the remote target node.
       /// </summary>
-      public string[] Capabilities { get; set; }
+      ExpiryPolicy ExpiryPolicy { get; }
 
-      internal void CopyInto(TerminusOptions other)
-      {
-         other.DurabilityMode = DurabilityMode;
-         other.ExpiryPolicy = ExpiryPolicy;
-         other.Timeout = Timeout;
+      /// <summary>
+      /// Indicates if the remote target node was created dynamically.
+      /// </summary>
+      bool Dynamic { get; }
 
-         if (Capabilities != null)
-         {
-            string[] copyOf = new string[Capabilities.Length];
-            Array.Copy(Capabilities, copyOf, Capabilities.Length);
-            other.Capabilities = copyOf;
-         }
-      }
+      /// <summary>
+      /// The node properties assigned to a dynamically created target node.
+      /// </summary>
+      IDictionary<string, object> DynamicNodeProperties { get; }
+
+      /// <summary>
+      /// The set of capabilities assigned on the remote target node.
+      /// </summary>
+      ISet<string> Capabilities { get; }
+
    }
 }

@@ -16,43 +16,28 @@
  */
 
 using System;
-using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
-   public class TargetOptions : TerminusOptions, ICloneable
+   /// <summary>
+   /// A single AMQP sender instance.
+   /// </summary>
+   public interface ISender : IDisposable
    {
       /// <summary>
-      /// Creates a default target options instance.
+      /// Returns the parent client instance that hosts this sender.
       /// </summary>
-      public TargetOptions() : base()
-      {
-      }
+      IClient Client { get; }
 
       /// <summary>
-      /// Create a target options instance that copies the configuration from the given instance.
+      /// Returns the parent connection instance that hosts this sender.
       /// </summary>
-      /// <param name="other">The target options instance to copy</param>
-      public TargetOptions(TargetOptions other) : base()
-      {
-         other.CopyInto(this);
-      }
+      IConnection Connection { get; }
 
       /// <summary>
-      /// Clone this options instance, changes to the cloned options are not reflected
-      /// in this options instance.
+      /// Returns the parent session instance that created this sender.
       /// </summary>
-      /// <returns>A deep copy of this options instance.</returns>
-      public object Clone()
-      {
-         return CopyInto(new TargetOptions());
-      }
+      ISession Session { get; }
 
-      internal TargetOptions CopyInto(TargetOptions other)
-      {
-         base.CopyInto(other);
-
-         return this;
-      }
    }
 }

@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Client
          return CopyInto(new SessionOptions());
       }
 
-      protected SessionOptions CopyInto(SessionOptions other)
+      internal SessionOptions CopyInto(SessionOptions other)
       {
          other.SendTimeout = SendTimeout;
          other.RequestTimeout = RequestTimeout;

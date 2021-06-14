@@ -43,12 +43,12 @@ namespace Apache.Qpid.Proton.Client
       /// in this options instance.
       /// </summary>
       /// <returns>A deep copy of this options instance.</returns>
-      public object Clone()
+      public virtual object Clone()
       {
          return CopyInto(new SenderOptions());
       }
 
-      protected SenderOptions CopyInto(SenderOptions other)
+      internal SenderOptions CopyInto(SenderOptions other)
       {
          other.LinkName = LinkName;
          other.AutoSettle = AutoSettle;
@@ -71,8 +71,21 @@ namespace Apache.Qpid.Proton.Client
             other.Properties = new Dictionary<string, object>(Properties);
          }
 
+         SourceOptions.CopyInto(other.SourceOptions);
+         TargetOptions.CopyInto(other.TargetOptions);
+
          return other;
       }
+
+      /// <summary>
+      /// Gets the source options configuration instance for these Sender options
+      /// </summary>
+      public SourceOptions SourceOptions { get; } = new SourceOptions();
+
+      /// <summary>
+      /// Gets the target options configuration instance for these Sender options
+      /// </summary>
+      public TargetOptions TargetOptions { get; } = new TargetOptions();
 
       /// <summary>
       /// Configures the link name that is assigned to the sender created from these options.

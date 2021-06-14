@@ -20,20 +20,24 @@ using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
-   public class TargetOptions : TerminusOptions, ICloneable
+   /// <summary>
+   /// Reconnection options which will control how a connection deals will connection loss
+   /// and or inability to connect to the host it was provided at create time.
+   /// </summary>
+   public class ReconnectOptions : ICloneable
    {
       /// <summary>
-      /// Creates a default target options instance.
+      /// Creates a default reconnect options instance.
       /// </summary>
-      public TargetOptions() : base()
+      public ReconnectOptions() : base()
       {
       }
 
       /// <summary>
-      /// Create a target options instance that copies the configuration from the given instance.
+      /// Create a new reconnection options instance whose settings are copied from the instance provided.
       /// </summary>
-      /// <param name="other">The target options instance to copy</param>
-      public TargetOptions(TargetOptions other) : base()
+      /// <param name="other">The reconnect options instance to copy</param>
+      public ReconnectOptions(ReconnectOptions other) : base()
       {
          other.CopyInto(this);
       }
@@ -43,16 +47,23 @@ namespace Apache.Qpid.Proton.Client
       /// in this options instance.
       /// </summary>
       /// <returns>A deep copy of this options instance.</returns>
-      public object Clone()
+      public virtual object Clone()
       {
-         return CopyInto(new TargetOptions());
+         return CopyInto(new ReconnectOptions());
       }
 
-      internal TargetOptions CopyInto(TargetOptions other)
+      internal ReconnectOptions CopyInto(ReconnectOptions other)
       {
-         base.CopyInto(other);
+         other.ReconnectEnabled = ReconnectEnabled;
 
-         return this;
+         return other;
       }
+
+      /// <summary>
+      /// Configure if a connection will attempt reconnection if connection is lost or cannot
+      /// be established to the primary host provided at create time.
+      /// </summary>
+      public bool ReconnectEnabled { get; set; }
+
    }
 }

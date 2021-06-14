@@ -20,14 +20,13 @@ using System;
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// A single AMQP Connection instance.
+   /// A single AMQP Message instance used by senders and receivers to provide a lower
+   /// level abstraction around an AMQP message than the basic IMessage type but still
+   /// provides the IMessage interface simpler access where needed.
    /// </summary>
-   public interface IConnection : IDisposable
+   /// <typeparam name="T">The type that comprises the message body</typename>
+   public interface IAdvancedMessage<T> : IMessage<T>
    {
-      /// <summary>
-      /// Returns the parent client instance that created this connection.
-      /// </summary>
-      IClient Client { get; }
 
    }
 }

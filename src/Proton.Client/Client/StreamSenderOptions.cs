@@ -20,20 +20,20 @@ using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
-   public class TargetOptions : TerminusOptions, ICloneable
+   public class StreamSenderOptions : SenderOptions, ICloneable
    {
       /// <summary>
-      /// Creates a default target options instance.
+      /// Creates a default stream sender options instance.
       /// </summary>
-      public TargetOptions() : base()
+      public StreamSenderOptions() : base()
       {
       }
 
       /// <summary>
-      /// Create a target options instance that copies the configuration from the given instance.
+      /// Create a new stream sender options instance whose settings are copied from the instance provided.
       /// </summary>
-      /// <param name="other">The target options instance to copy</param>
-      public TargetOptions(TargetOptions other) : base()
+      /// <param name="other">The stream sender options instance to copy</param>
+      public StreamSenderOptions(StreamSenderOptions other) : base()
       {
          other.CopyInto(this);
       }
@@ -43,16 +43,9 @@ namespace Apache.Qpid.Proton.Client
       /// in this options instance.
       /// </summary>
       /// <returns>A deep copy of this options instance.</returns>
-      public object Clone()
+      public override object Clone()
       {
-         return CopyInto(new TargetOptions());
-      }
-
-      internal TargetOptions CopyInto(TargetOptions other)
-      {
-         base.CopyInto(other);
-
-         return this;
+         return CopyInto(new StreamSenderOptions());
       }
    }
 }
