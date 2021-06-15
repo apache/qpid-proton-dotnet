@@ -20,8 +20,20 @@ using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
+   /// <summary>
+   /// Special sender options that are applied the streaming senders which allow
+   /// transmission of large message payloads.
+   /// </summary>
    public class StreamSenderOptions : SenderOptions, ICloneable
    {
+      /// <summary>
+      /// Defines the default pending write buffering size which is used to control how
+      /// much outgoing data can be buffered for local writing before the sender has back
+      /// pressured applied to avoid out of memory conditions due to overly large pending
+      /// batched writes.
+      /// </summary>
+      public static readonly uint DEFAULT_PENDING_WRITES_BUFFER_SIZE = SessionOptions.DEFAULT_SESSION_OUTGOING_CAPACITY;
+
       /// <summary>
       /// Creates a default stream sender options instance.
       /// </summary>
@@ -38,6 +50,14 @@ namespace Apache.Qpid.Proton.Client
          other.CopyInto(this);
       }
 
+      internal StreamSenderOptions CopyInto(StreamSenderOptions other)
+      {
+         other.WriteBufferSize = WriteBufferSize;
+         other.PendingWriteBufferSize = PendingWriteBufferSize;
+
+         return base.CopyInto(other) as StreamSenderOptions;
+      }
+
       /// <summary>
       /// Clone this options instance, changes to the cloned options are not reflected
       /// in this options instance.
@@ -47,5 +67,22 @@ namespace Apache.Qpid.Proton.Client
       {
          return CopyInto(new StreamSenderOptions());
       }
+
+      /// <summary>
+      /// Configures the overall number of bytes the stream sender will buffer before automatically
+      /// flushing the currently buffered bytes.  By default the stream sender implementation chooses
+      /// a value for this buffer limit based on the configured frame size limits of the connection.
+      /// </summary>
+      public uint WriteBufferSize { get; set; }
+
+      /// <summary>
+      /// Sets the overall number of bytes the stream sender will allow to be pending for write before
+      /// applying back pressure to the stream write caller. By default the stream sender implementation
+      /// chooses a value for this pending write limit based on the configured frame size limits of the
+      /// connection.  This is an advanced option and should not be used unless the impact of doing so
+      /// is understood by the user.
+      /// </summary>
+      public uint PendingWriteBufferSize { get; set; }
+
    }
 }

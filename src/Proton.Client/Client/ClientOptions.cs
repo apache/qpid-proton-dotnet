@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Client
          return CopyInto(new ClientOptions());
       }
 
-      protected ClientOptions CopyInto(ClientOptions other)
+      internal ClientOptions CopyInto(ClientOptions other)
       {
          other.Id = this.Id;
 

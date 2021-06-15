@@ -15,31 +15,15 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// An immutable error condition that carries information that aids in
-   /// determining the factors that lead to the error.
+   /// Special streaming sender related tracker that is linked to a stream
+   /// sender message and provides the tracker functions for those types of
+   /// messages.
    /// </summary>
-   public interface ErrorCondition
+   public interface IStreamTracker : ITracker
    {
-      /// <summary>
-      /// Indicates the type of error that this condition conveys
-      /// </summary>
-      string Condition { get; }
-
-      /// <summary>
-      /// A description of the condition that resulted in this error.
-      /// </summary>
-      string Description { get; }
-
-      /// <summary>
-      /// Optional supplementary information that aids in processing this error.
-      /// </summary>
-      IDictionary<string, object> Info { get; }
 
    }
 }

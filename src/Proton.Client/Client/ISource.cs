@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Client
    /// <summary>
    /// Represents the remote Source instance for a sender or receiver link
    /// </summary>
-   public interface Source
+   public interface ISource
    {
       /// <summary>
       /// The address value of the remote source node.
@@ -68,12 +68,12 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The default outcome that is assigned on the remote source node.
       /// </summary>
-      DeliveryState DefaultOutcome { get; }
+      IDeliveryState DefaultOutcome { get; }
 
       /// <summary>
       /// The set of supported outcomes on the remote source node.
       /// </summary>
-      ISet<DeliveryState.State> Outcomes { get; }
+      ISet<IDeliveryState.State> Outcomes { get; }
 
       /// <summary>
       /// The set of capabilities assigned on the remote source node.

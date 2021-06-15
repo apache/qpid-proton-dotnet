@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Client
    /// <summary>
    /// Represents the remote Target instance for a sender or receiver link
    /// </summary>
-   public interface Target
+   public interface ITarget
    {
       /// <summary>
       /// The address value of the remote target node.

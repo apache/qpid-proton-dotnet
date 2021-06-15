@@ -23,6 +23,13 @@ namespace Apache.Qpid.Proton.Client
    public class StreamReceiverOptions : ReceiverOptions, ICloneable
    {
       /// <summary>
+      /// Defines the default read buffering size which is used to control how much incoming
+      /// data can be buffered before the remote has back pressured applied to avoid out of
+      /// memory conditions.
+      /// </summary>
+      public static readonly uint DEFAULT_READ_BUFFER_SIZE = SessionOptions.DEFAULT_SESSION_INCOMING_CAPACITY;
+
+      /// <summary>
       /// Creates a default stream receiver options instance.
       /// </summary>
       public StreamReceiverOptions() : base()
@@ -33,7 +40,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new stream receiver options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The stream receiver options instance to copy</param>
-      public StreamReceiverOptions(StreamReceiverOptions other) : base()
+      public StreamReceiverOptions(StreamReceiverOptions other) : this()
       {
          other.CopyInto(this);
       }
@@ -47,5 +54,26 @@ namespace Apache.Qpid.Proton.Client
       {
          return CopyInto(new StreamReceiverOptions());
       }
+
+      internal StreamReceiverOptions CopyInto(StreamReceiverOptions other)
+      {
+         other.ReadBufferSize = ReadBufferSize;
+
+         return base.CopyInto(other) as StreamReceiverOptions;
+      }
+
+      /// <summary>
+      /// Configures the incoming buffer capacity (in bytes) that the stream receiver created
+      /// with these options.
+      /// </summary>
+      /// <remarks>
+      /// When the remote peer is sending incoming data for a streamed delivery the  amount that
+      /// is stored in memory before back pressure is applied to the remote is controlled by this
+      /// option. If the user does not read incoming data as it arrives this limit can prevent out
+      /// of memory errors that might otherwise arise as the remote attempts to immediately send
+      /// all contents of very large message payloads.
+      /// </remarks>
+      public uint ReadBufferSize { get; set; }
+
    }
 }

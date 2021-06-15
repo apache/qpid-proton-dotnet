@@ -54,12 +54,12 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The default outcome to assign to the source configuration.
       /// </summary>
-      DeliveryState DefaultOutcome { get; set; }
+      IDeliveryState DefaultOutcome { get; set; }
 
       /// <summary>
       /// The supported outcomes that are assigned to the source configuration.
       /// </summary>
-      DeliveryState.State[] Outcomes { get; set; }
+      IDeliveryState.State[] Outcomes { get; set; }
 
       /// <summary>
       /// Clone this options instance, changes to the cloned options are not reflected
@@ -81,7 +81,7 @@ namespace Apache.Qpid.Proton.Client
 
          if (Outcomes != null)
          {
-            DeliveryState.State[] outcomes = new DeliveryState.State[Outcomes.Length];
+            IDeliveryState.State[] outcomes = new IDeliveryState.State[Outcomes.Length];
             Array.Copy(Outcomes, outcomes, Outcomes.Length);
             other.Outcomes = outcomes;
          }
