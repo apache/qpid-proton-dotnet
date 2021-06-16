@@ -24,6 +24,29 @@ namespace Apache.Qpid.Proton.Client
    /// </summary>
    public interface IStreamDelivery : IDelivery
    {
+      /// <inheritdoc cref="IDelivery.Receiver"/>
+      new IStreamReceiver Receiver { get; }
+
+      /// <inheritdoc cref="IDelivery.Message"/>
+      new IStreamReceiverMessage Message<Stream>();
+
+      /// <inheritdoc cref="IDelivery.Accept"/>
+      new IStreamDelivery Accept();
+
+      /// <inheritdoc cref="IDelivery.Release"/>
+      new IStreamDelivery Release();
+
+      /// <inheritdoc cref="IDelivery.Reject(string, string)"/>
+      new IStreamDelivery Reject(string condition, string description);
+
+      /// <inheritdoc cref="IDelivery.Modified(bool, bool)"/>
+      new IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere);
+
+      /// <inheritdoc cref="IDelivery.Disposition(IDeliveryState, bool)"/>
+      new IStreamDelivery Disposition(IDeliveryState state, bool settled);
+
+      /// <inheritdoc cref="IDelivery.Settle"/>
+      new IStreamDelivery Settle();
 
    }
 }

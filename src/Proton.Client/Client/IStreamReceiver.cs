@@ -24,6 +24,43 @@ namespace Apache.Qpid.Proton.Client
    /// </summary>
    public interface IStreamReceiver : IReceiver
    {
+      /// <summary>
+      /// Blocking receive method that waits forever for the remote to provide some or all of a delivery
+      /// for consumption. This method returns a streamed delivery instance that allows for consumption
+      /// or the incoming delivery as it arrives.
+      /// </summary>
+      /// <remarks>
+      /// Receive calls will only grant credit on their own if a credit window is configured in the options
+      /// which by default will have been configured.  If the client application has not configured a credit
+      /// window then this method won't grant or extend the credit window but will wait for a delivery
+      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// </remarks>
+      /// <returns>The next available delivery</returns>
+      new IStreamDelivery Receive();
+
+      /// <summary>
+      /// Blocking receive method that waits for the specified time period for the remote to provide a
+      /// delivery for consumption before returning null if none was received. This method returns a
+      /// streamed delivery instance that allows for consumption or the incoming delivery as it arrives.
+      /// </summary>
+      /// <remarks>
+      /// Receive calls will only grant credit on their own if a credit window is configured in the options
+      /// which by default will have been configured.  If the client application has not configured a credit
+      /// window then this method won't grant or extend the credit window but will wait for a delivery
+      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// </remarks>
+      new IStreamDelivery Receive(TimeSpan timeout);
+
+      /// <summary>
+      /// Non-blocking receive method that either returns a delivery is one is immediately available
+      /// or returns null if none is currently at hand. This method returns a streamed delivery instance
+      /// that allows for consumption or the incoming delivery as it arrives.
+      /// </summary>
+      /// <returns>A delivery if one is immediately available or null if not</returns>
+      new IStreamDelivery TryReceive();
+
+      /// <inheritdoc cref="IReceiver.AddCredit(int)"/>
+      new IStreamDelivery AddCredit(int credit);
 
    }
 }

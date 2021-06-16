@@ -178,7 +178,13 @@ namespace Apache.Qpid.Proton.Client
       ICollection<string> DesiredCapabilities { get; }
 
       /// <summary>
+      /// Adds credit to the Receiver link for use when there receiver has not been configured with
+      /// with a credit window.  When credit window is configured credit replenishment is automatic
+      /// and calling this method will result in an exception indicating that the operation is invalid.
       ///
+      /// If the Receiver is draining and this method is called an exception will be thrown to
+      /// indicate that credit cannot be replenished until the remote has drained the existing link
+      /// credit.
       /// </summary>
       /// <param name="credit">The amount of new credit to add to the existing credit if any</param>
       /// <returns>This receiver instance.</returns>
@@ -210,7 +216,7 @@ namespace Apache.Qpid.Proton.Client
       IDelivery Receive(TimeSpan timeout);
 
       /// <summary>
-      /// Non-blocking receive method that either returns a delivery is one is immediately available
+      /// Non-blocking receive method that either returns a delivery if one is immediately available
       /// or returns null if none is currently at hand.
       /// </summary>
       /// <returns>A delivery if one is immediately available or null if not</returns>

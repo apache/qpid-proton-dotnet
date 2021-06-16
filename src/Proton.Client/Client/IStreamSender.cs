@@ -15,15 +15,36 @@
  * limitations under the License.
  */
 
-using System;
+using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// A single AMQP stream sender instance
+   /// A single AMQP stream sender instance which can be used to transmit large message
+   /// payloads to the remote without needing to load the full message contents into
+   /// memory.  The streaming sender will also provide flow control that attempts to
+   /// provide additional safety values for out of memory situations.
    /// </summary>
    public interface IStreamSender : ISender
    {
+      /// <summary>
+      /// Creates and returns a new streamable message that can be used by the caller to perform
+      /// streaming sends of large message payload data.  Only one streamed message can be active
+      /// at a time so any successive calls to begin a new streaming message will throw an error
+      /// to indicate that the previous instance has not yet been completed.
+      /// </summary>
+      /// <returns>This stream sender instance</returns>
+      IStreamSenderMessage BeginMessage();
+
+      /// <summary>
+      /// Creates and returns a new streamable message that can be used by the caller to perform
+      /// streaming sends of large message payload data.  Only one streamed message can be active
+      /// at a time so any successive calls to begin a new streaming message will throw an error
+      /// to indicate that the previous instance has not yet been completed.
+      /// </summary>
+      /// <param name="deliveryAnnotations">The delivery annotations to transmit with the message</param>
+      /// <returns>This stream sender instance</returns>
+      IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations);
 
    }
 }

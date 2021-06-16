@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Returns if the outgoing stream message has been completed.
       /// </summary>
-       bool Completed { get; }
+      bool Completed { get; }
 
       /// <summary>
       /// Marks the currently streaming message as being aborted. Once aborted no further
@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="options">options to apply to the created stream</param>
       /// <returns>A write only stream instance used to write the message body</returns>
-      Stream body(OutputStreamOptions options);
+      Stream GetBodyStream(OutputStreamOptions options);
 
       /// <summary>
       ///

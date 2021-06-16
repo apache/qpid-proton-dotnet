@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
@@ -24,6 +26,26 @@ namespace Apache.Qpid.Proton.Client
    /// </summary>
    public interface IStreamTracker : ITracker
    {
+      /// <inheritdoc cref="ITracker.Sender"/>
+      new IStreamSender Sender { get; }
+
+      /// <inheritdoc cref="ITracker.Settle"/>
+      new IStreamTracker Settle();
+
+      /// <inheritdoc cref="ITracker.Disposition(IDeliveryState, bool)"/>
+      new IStreamTracker Disposition(IDeliveryState state, bool settle);
+
+      /// <inheritdoc cref="ITracker.AwaitSettlement"/>
+      new IStreamTracker AwaitSettlement();
+
+      /// <inheritdoc cref="ITracker.AwaitSettlement(TimeSpan)"/>
+      new IStreamTracker AwaitSettlement(TimeSpan timeout);
+
+      /// <inheritdoc cref="ITracker.AwaitAccepted"/>
+      new IStreamTracker AwaitAccepted();
+
+      /// <inheritdoc cref="ITracker.AwaitAccepted(TimeSpan)"/>
+      new IStreamTracker AwaitAccepted(TimeSpan timeout);
 
    }
 }
