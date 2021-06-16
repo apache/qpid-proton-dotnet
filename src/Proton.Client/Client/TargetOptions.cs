@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -33,7 +32,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a target options instance that copies the configuration from the given instance.
       /// </summary>
       /// <param name="other">The target options instance to copy</param>
-      public TargetOptions(TargetOptions other) : base()
+      public TargetOptions(TargetOptions other) : this()
       {
          other.CopyInto(this);
       }

@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>

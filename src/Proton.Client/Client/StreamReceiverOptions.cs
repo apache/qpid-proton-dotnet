@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {

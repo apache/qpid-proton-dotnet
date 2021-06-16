@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types.Messaging;
 

@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new SASL options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The connection options instance to copy</param>
-      public SaslOptions(SaslOptions other) : base()
+      public SaslOptions(SaslOptions other) : this()
       {
          other.CopyInto(this);
       }

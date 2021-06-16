@@ -71,6 +71,7 @@ namespace Apache.Qpid.Proton.Client
          other.DrainTimeout = DrainTimeout;
          other.ChannelMax = ChannelMax;
          other.MaxFrameSize = MaxFrameSize;
+         other.TraceFrames = TraceFrames;
          if (OfferedCapabilities != null && OfferedCapabilities.Length > 0)
          {
             string[] copyOf = new string[OfferedCapabilities.Length];
@@ -209,6 +210,12 @@ namespace Apache.Qpid.Proton.Client
       /// Gets the Reconnection options that control client reconnection behavior.
       /// </summary>
       public ReconnectOptions ReconnectOptions { get; } = new ReconnectOptions();
+
+      /// <summary>
+      /// Controls if the client will attempt to trigger the AMQP engine to trace
+      /// all incoming and outgoing frames via the logger.
+      /// </summary>
+      bool TraceFrames { get; set; }
 
    }
 }

@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -45,7 +44,7 @@ namespace Apache.Qpid.Proton.Client
       /// Create a new stream sender options instance whose settings are copied from the instance provided.
       /// </summary>
       /// <param name="other">The stream sender options instance to copy</param>
-      public StreamSenderOptions(StreamSenderOptions other) : base()
+      public StreamSenderOptions(StreamSenderOptions other) : this()
       {
          other.CopyInto(this);
       }

@@ -27,6 +27,27 @@ namespace Apache.Qpid.Proton.Client
    /// </summary>
    public interface IStreamReceiverMessage : IAdvancedMessage<Stream>
    {
+      /// <summary>
+      /// Returns the stream delivery that is linked to this message.
+      /// </summary>
+      IStreamDelivery Delivery { get; }
+
+      /// <summary>
+      /// Returns the stream receiver instance that owns this incoming stream message.
+      /// </summary>
+      IStreamReceiver Receiver { get; }
+
+      /// <summary>
+      /// Check if the streamed delivery that was assigned to this message has been
+      /// marked as aborted by the remote.
+      /// </summary>
+      bool Aborted { get; }
+
+      /// <summary>
+      /// Check if the streamed delivery that was assigned to this message has been
+      /// marked as complete by the remote.
+      /// </summary>
+      bool Completed { get; }
 
    }
 }
