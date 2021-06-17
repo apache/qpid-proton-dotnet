@@ -87,6 +87,8 @@ namespace Apache.Qpid.Proton.Client
             other.Properties = new Dictionary<string, object>(Properties);
          }
 
+         TransportOptions.CopyInto(other.TransportOptions);
+         SslOptions.CopyInto(other.SslOptions);
          SaslOptions.CopyInto(other.SaslOptions);
 
          return other;
@@ -216,6 +218,26 @@ namespace Apache.Qpid.Proton.Client
       /// all incoming and outgoing frames via the logger.
       /// </summary>
       bool TraceFrames { get; set; }
+
+      /// <summary>
+      /// Configuration of the I/O layer options.
+      /// </summary>
+      TransportOptions TransportOptions { get; } = new TransportOptions();
+
+      /// <summary>
+      /// Quick access to enable and disable SSL for newly created connections that
+      /// use these options.
+      /// </summary>
+      public bool SslEnabled
+      {
+         get { return SslOptions.SslEnabled; }
+         set { SslOptions.SslEnabled = value; }
+      }
+
+      /// <summary>
+      /// Configuration that controls the SSL I/O layer if enabled.
+      /// </summary>
+      SslOptions SslOptions { get; } = new SslOptions();
 
    }
 }
