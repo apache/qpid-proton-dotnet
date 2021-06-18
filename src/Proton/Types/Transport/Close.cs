@@ -15,27 +15,36 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Types.Transport
 {
-   public interface IPerformative : ICloneable
+   public sealed class Close : IPerformative
    {
-      /// <summary>
-      /// Provides the type of this performative.
-      /// </summary>
-      PerformativeType Type { get; }
+      public static readonly ulong DescriptorCode = 0x0000000000000018UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:close:list");
 
-      /// <summary>
-      /// Visit the performative using a handler instance and provided context data.
-      /// </summary>
-      /// <typeparam name="T">The type of context that is provided</typeparam>
-      /// <param name="handler">The handler instance to visit</param>
-      /// <param name="payload">The payload that the performative was sent with</param>
-      /// <param name="channel">The channel the perforamative was sent on</param>
-      /// <param name="context">The context for this visitation</param>
-      void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context);
+      public ErrorCondition Error { get; set; }
 
+      public Close() : base() { }
+
+      public Close(Close other) : this() => this.Error = (ErrorCondition)other.Error.Clone();
+
+      public object Clone()
+      {
+         return new Close(this);
+      }
+
+      public PerformativeType Type => PerformativeType.Close;
+
+      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
+      {
+         handler.HandleClose(this, payload, channel, context);
+      }
+
+      public new string ToString()
+      {
+         return "Close{" + "error=" + Error + '}';
+      }
    }
 }
