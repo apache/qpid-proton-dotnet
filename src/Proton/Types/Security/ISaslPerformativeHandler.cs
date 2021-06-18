@@ -15,26 +15,23 @@
  * limitations under the License.
  */
 
-using System;
-
 namespace Apache.Qpid.Proton.Types.Security
 {
-   public interface SaslPerformative : ICloneable
+   /// <summary>
+   /// Handler Interface that can be used to implement a visitor pattern
+   /// of processing the SASL exchange process.
+   /// </summary>
+   /// <typeparam name="E">The type of the context used in the processing</typeparam>
+   public interface ISaslPerformativeHandler<E>
    {
-      /// <summary>
-      /// Provides the enumeration value that identifies this type.
-      /// </summary>
-      SaslPerformativeType Type { get; }
+      void HandleMechanisms(SaslMechanisms saslMechanisms, E context) { }
 
-      /// <summary>
-      /// Invokes the appropriate handler method for the type where this method
-      /// was called. Provides a context object type that is passed to aid in the
-      /// event processing.
-      /// </summary>
-      /// <typeparam name="T">context type to provide to the event handler</typeparam>
-      /// <param name="handler">The SASL performative handler to invoke</param>
-      /// <param name="context">The context object to provide to the handler</param>
-      void Invoke<T>(SaslPerformativeHandler<T> handler, T context);
+      void HandleInit(SaslInit saslInit, E context) { }
 
+      void HandleChallenge(SaslChallenge saslChallenge, E context) { }
+
+      void HandleResponse(SaslResponse saslResponse, E context) { }
+
+      void HandleOutcome(SaslOutcome saslOutcome, E context) { }
    }
 }

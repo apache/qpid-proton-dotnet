@@ -19,7 +19,7 @@ using System;
 
 namespace Apache.Qpid.Proton.Types.Security
 {
-   public class SaslMechanisms : SaslPerformative
+   public class SaslMechanisms : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000040UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-mechanisms:list");
@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Types.Security
 
       public SaslPerformativeType Type => SaslPerformativeType.Mechanisms;
 
-      public void Invoke<T>(SaslPerformativeHandler<T> handler, T context)
+      public void Invoke<T>(ISaslPerformativeHandler<T> handler, T context)
       {
          handler.HandleMechanisms(this, context);
       }

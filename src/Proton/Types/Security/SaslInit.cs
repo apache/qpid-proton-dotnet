@@ -20,7 +20,7 @@ using Apache.Qpid.Proton.Engine.Utils;
 
 namespace Apache.Qpid.Proton.Types.Security
 {
-   public class SaslInit : SaslPerformative
+   public class SaslInit : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000041UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-init:list");
@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Types.Security
 
       public SaslPerformativeType Type => SaslPerformativeType.Init;
 
-      public void Invoke<T>(SaslPerformativeHandler<T> handler, T context)
+      public void Invoke<T>(ISaslPerformativeHandler<T> handler, T context)
       {
          handler.HandleInit(this, context);
       }
