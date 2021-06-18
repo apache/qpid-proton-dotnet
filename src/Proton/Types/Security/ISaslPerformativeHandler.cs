@@ -21,17 +21,17 @@ namespace Apache.Qpid.Proton.Types.Security
    /// Handler Interface that can be used to implement a visitor pattern
    /// of processing the SASL exchange process.
    /// </summary>
-   /// <typeparam name="E">The type of the context used in the processing</typeparam>
-   public interface ISaslPerformativeHandler<E>
+   /// <typeparam name="T">The type of the context used in the processing</typeparam>
+   public interface ISaslPerformativeHandler<T>
    {
-      void HandleMechanisms(SaslMechanisms saslMechanisms, E context) { }
+      void HandleMechanisms(SaslMechanisms saslMechanisms, T context) { }
 
-      void HandleInit(SaslInit saslInit, E context) { }
+      void HandleInit(SaslInit saslInit, T context) { }
 
-      void HandleChallenge(SaslChallenge saslChallenge, E context) { }
+      void HandleChallenge(SaslChallenge saslChallenge, T context) { }
 
-      void HandleResponse(SaslResponse saslResponse, E context) { }
+      void HandleResponse(SaslResponse saslResponse, T context) { }
 
-      void HandleOutcome(SaslOutcome saslOutcome, E context) { }
+      void HandleOutcome(SaslOutcome saslOutcome, T context) { }
    }
 }
