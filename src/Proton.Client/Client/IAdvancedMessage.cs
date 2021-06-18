@@ -33,9 +33,8 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Creates a new advanced message instance using the Proton implementation.
       /// </summary>
-      /// <typeparam name="E">The body that should be conveyed in the message</typeparam>
       /// <returns>A new advanced message instance.</returns>
-      static new IAdvancedMessage<E> Create<E>() => IMessage<E>.Create<E>() as IAdvancedMessage<E>;
+      static new IAdvancedMessage<T> Create() => IMessage<T>.Create() as IAdvancedMessage<T>;
 
       /// <summary>
       /// Provides access to the AMQP Header instance that is carried in the message.

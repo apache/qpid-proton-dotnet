@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <typeparam name="E">The type that the message body will be</typeparam>
       /// <returns>a new message instance with an empty body.</returns>
-      static IMessage<E> Create<E>()
+      static IMessage<T> Create()
       {
          return null;  // TODO
       }
@@ -43,9 +43,8 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Create and return an IMessage that will carry the body section provided
       /// </summary>
-      /// <typeparam name="E">The type that the message body will be</typeparam>
       /// <returns>a new message instance with the provided body.</returns>
-      static IMessage<E> Create<E>(E value)
+      static IMessage<T> Create(T value)
       {
          return null;  // TODO
       }

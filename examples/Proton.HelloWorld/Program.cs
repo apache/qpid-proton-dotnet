@@ -39,8 +39,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          using IReceiver receiver = connection.OpenReceiver(address);
          using ISender sender = connection.OpenSender(address);
 
-         // TODO: Figure out cleaner way to implement or create static factory class
-         sender.Send(IMessage<String>.Create<String>("Hello World"));
+         sender.Send(IMessage<String>.Create("Hello World"));
 
          IDelivery delivery = receiver.Receive();
          IMessage<String> received = delivery.Message<String>();
