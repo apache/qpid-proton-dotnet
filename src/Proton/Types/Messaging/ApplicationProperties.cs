@@ -15,10 +15,45 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class ApplicationProperties
+   public sealed class ApplicationProperties : ISection, IBodySection<IDictionary<string, object>>
    {
+      public SectionType Type => SectionType.ApplicationProperties;
 
+      object ISection.Value { get { return this.Value; } }
+
+      public IDictionary<string, object> Value { get; set; }
+
+      public object Clone()
+      {
+         return null; // TODO
+      }
+
+      public new bool Equals(object other)
+      {
+         if (other == null || !this.GetType().Equals(other.GetType()))
+         {
+            return false;
+         }
+         else
+         {
+            return Equals(other as ApplicationProperties);
+         }
+      }
+
+      public bool Equals(ApplicationProperties other)
+      {
+         if (Value == null && other.Value == null)
+         {
+            return true;
+         }
+         else
+         {
+            return Value == null ? false : Value.Equals(other);
+         }
+      }
    }
 }

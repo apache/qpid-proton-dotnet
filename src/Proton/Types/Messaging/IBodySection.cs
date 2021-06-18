@@ -17,12 +17,12 @@
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public interface Section
+   public interface IBodySection<T>
    {
       /// <summary>
-      /// Gets the enumeration that defines this section type
+      /// The value type that is conveyed in this Section.
       /// </summary>
-      SectionType SectionType { get; }
+      T Value { get; }
 
    }
 }

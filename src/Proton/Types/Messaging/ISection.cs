@@ -15,19 +15,21 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Header : ISection
+   public interface ISection : ICloneable
    {
-      public SectionType Type => SectionType.Header;
+      /// <summary>
+      /// Gets the enumeration that defines this section type
+      /// </summary>
+      SectionType Type { get; }
 
-      byte? Durable { get; set; }
+      /// <summary>
+      /// The value type that is conveyed in this Section.
+      /// </summary>
+      object Value { get; }
 
-      public object Value { get; set; }
-
-      public object Clone()
-      {
-         return null; // TODO
-      }
    }
 }

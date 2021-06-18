@@ -1,23 +1,26 @@
 {
     "folders": [
-        {
-            "path": "src/Proton"
-        },
-        {
-            "path": "src/Proton.Client"
-        },
-        {
-            "path": "src/Proton.TestPeer"
-        },
-        {
-            "path": "test/Proton.Tests"
-        },
-        {
-            "path": "test/Proton.Client.Tests"
-        },
-        {
-            "path": "test/Proton.TestPeer.Tests"
-        }
+      {
+         "path": "src/Proton"
+      },
+      {
+         "path": "src/Proton.Client"
+      },
+      {
+         "path": "src/Proton.TestPeer"
+      },
+      {
+         "path": "test/Proton.Tests"
+      },
+      {
+         "path": "test/Proton.Client.Tests"
+      },
+      {
+         "path": "test/Proton.TestPeer.Tests"
+      },
+      {
+         "path": "examples/Proton.HelloWorld"
+      }
    ],
    "settings": {
       "cSpell.words": [

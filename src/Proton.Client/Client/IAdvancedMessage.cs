@@ -91,7 +91,7 @@ namespace Apache.Qpid.Proton.Client
       /// </remarks>
       /// <param name="section">The section to add to the collection of sections in this message</param>
       /// <returns>This advanced message instance.</returns>
-      IAdvancedMessage<T> AddBodySection(Section section);
+      IAdvancedMessage<T> AddBodySection(ISection section);
 
       /// <summary>
       /// Sets the body section instances to use when encoding this message. The value set
@@ -103,14 +103,14 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="sections">The collection of body sections to assign to this message</param>
       /// <returns>This advanced message instance.</returns>
-      IAdvancedMessage<T> SetBodySections(ICollection<Section> section);
+      IAdvancedMessage<T> SetBodySections(ICollection<ISection> section);
 
       /// <summary>
       /// Create and return an unmodifiable read-only collection that contains the section instances
       /// currently assigned to this message.
       /// </summary>
       /// <returns>a read-only view of the sections in this message's body</returns>
-      ICollection<Section> GetBodySections();
+      ICollection<ISection> GetBodySections();
 
       /// <summary>
       /// Clears all currently set body sections from this message instance.
@@ -123,7 +123,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="consumer">Function to invoke for each section in the message</param>
       /// <returns>This advanced message instance.</returns>
-      IAdvancedMessage<T> ForEachBodySection(Func<Section> consumer);
+      IAdvancedMessage<T> ForEachBodySection(Func<ISection> consumer);
 
       /// <summary>
       /// Encodes the advanced message for transmission by the client. The provided delivery
