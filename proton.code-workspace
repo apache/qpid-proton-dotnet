@@ -19,13 +19,19 @@
          "path": "test/Proton.TestPeer.Tests"
       },
       {
-         "path": "examples/Proton.HelloWorld"
+         "path": "examples/Example.HelloWorld"
       },
       {
-         "path": "examples/Proton.Receive"
+         "path": "examples/Example.Receive"
       },
       {
-         "path": "examples/Proton.Send"
+         "path": "examples/Example.Send"
+      },
+      {
+         "path": "examples/Example.Request"
+      },
+      {
+         "path": "examples/Example.Respond"
       }
    ],
    "settings": {
