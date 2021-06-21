@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
       {
          string serverHost = Environment.GetEnvironmentVariable("HOST") ?? "localhost";
          int serverPort = Convert.ToInt32(Environment.GetEnvironmentVariable("PORT") ?? "5672");
-         string address = Environment.GetEnvironmentVariable("ADDRESS") ?? "hello-world-example";
+         string address = Environment.GetEnvironmentVariable("ADDRESS") ?? "send-receive-example";
 
          IClient client = IClient.Create();
 
