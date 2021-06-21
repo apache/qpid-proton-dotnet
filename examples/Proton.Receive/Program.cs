@@ -22,6 +22,8 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
 {
    class Program
    {
+      private static readonly int MessageCount = 100;
+
       static void Main(string[] args)
       {
          string serverHost = Environment.GetEnvironmentVariable("HOST") ?? "localhost";
@@ -36,13 +38,13 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
 
          using IConnection connection = client.Connect(serverHost, serverPort, options);
          using IReceiver receiver = connection.OpenReceiver(address);
-         using ISender sender = connection.OpenSender(address);
 
-         sender.Send(IMessage<String>.Create("Hello World"));
-
-         IDelivery delivery = receiver.Receive();
-         IMessage<String> received = delivery.Message<String>();
-         Console.WriteLine("Received message with body: " + received.Body);
+         for (int i = 0; i < MessageCount; ++i)
+         {
+            IDelivery delivery = receiver.Receive();
+            IMessage<String> received = delivery.Message<String>();
+            Console.WriteLine("Received message with body: " + received.Body);
+         }
       }
    }
 }

@@ -20,6 +20,12 @@
       },
       {
          "path": "examples/Proton.HelloWorld"
+      },
+      {
+         "path": "examples/Proton.Receive"
+      },
+      {
+         "path": "examples/Proton.Send"
       }
    ],
    "settings": {

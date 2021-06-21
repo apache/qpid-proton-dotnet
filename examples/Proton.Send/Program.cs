@@ -22,6 +22,8 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
 {
    class Program
    {
+      private static readonly int MessageCount = 100;
+
       static void Main(string[] args)
       {
          string serverHost = Environment.GetEnvironmentVariable("HOST") ?? "localhost";
@@ -35,14 +37,16 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          options.Password = Environment.GetEnvironmentVariable("PASSWORD");
 
          using IConnection connection = client.Connect(serverHost, serverPort, options);
-         using IReceiver receiver = connection.OpenReceiver(address);
          using ISender sender = connection.OpenSender(address);
 
-         sender.Send(IMessage<String>.Create("Hello World"));
+         for (int i = 0; i < MessageCount; ++i)
+         {
+            IMessage<string> message = IMessage<string>.Create(string.Format("Hello World! [%s]", i));
+            ITracker tracker = sender.Send(message);
+            tracker.AwaitSettlement();
 
-         IDelivery delivery = receiver.Receive();
-         IMessage<String> received = delivery.Message<String>();
-         Console.WriteLine("Received message with body: " + received.Body);
+            Console.WriteLine(string.Format("Sent message to %s: %s", sender.Address, message.Body));
+         }
       }
    }
 }
