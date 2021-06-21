@@ -298,5 +298,24 @@ namespace Apache.Qpid.Proton.Types.Transport
       {
          handler.HandleAttach(this, payload, channel, context);
       }
+
+      public new string ToString()
+      {
+        return "Attach{" +
+            "name='" + name + '\'' +
+            ", handle=" + (HasHandle() ? handle : "null") +
+            ", role=" + (HasRole() ? role : "null") +
+            ", sndSettleMode=" + (HasSenderSettleMode() ? sndSettleMode : "null") +
+            ", rcvSettleMode=" + (HasReceiverSettleMode() ? rcvSettleMode : "null") +
+            ", source=" + source +
+            ", target=" + target +
+            ", unsettled=" + unsettled +
+            ", incompleteUnsettled=" + (HasIncompleteUnsettled() ? incompleteUnsettled : "null") +
+            ", initialDeliveryCount=" + (HasInitialDeliveryCount() ? initialDeliveryCount : "null") +
+            ", maxMessageSize=" + maxMessageSize +
+            ", offeredCapabilities=" + (offeredCapabilities == null ? "null" : offeredCapabilities) +
+            ", desiredCapabilities=" + (desiredCapabilities == null ? "null" : desiredCapabilities) +
+            ", properties=" + properties + '}';
+      }
    }
 }

@@ -15,18 +15,29 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types
+namespace Apache.Qpid.Proton.Types.Transport
 {
-   public interface IDescribedType
+   /// <summary>
+   /// Interface that defines a visitor for AMQP Header instances which can
+   /// be used to process incoming and outgoing AMQP headers or other related
+   /// processing.
+   /// </summary>
+   /// <typeparam name="E">The context that is provided for the event handler</typeparam>
+   public interface HeaderHandler<E>
    {
       /// <summary>
-      /// Returns the AMQP Descriptor that defines the Described Type
+      /// Handles AMQP Header events
       /// </summary>
-      object Descriptor { get; }
+      /// <param name="header">The AMQP Header instance</param>
+      /// <param name="context">The context provied to the event handler</param>
+      void HandleAMQPHeader(AmqpHeader header, E context) { }
 
       /// <summary>
-      /// Returns the Described value conveyed in this AMQP Described Type
+      /// Handles SASL Header events
       /// </summary>
-      object Described { get; }
+      /// <param name="header">The SASL Header instance</param>
+      /// <param name="context">The context provied to the event handler</param>
+      void HandleSASLHeader(AmqpHeader header, E context) { }
+
    }
 }

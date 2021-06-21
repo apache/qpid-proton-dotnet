@@ -138,6 +138,34 @@ namespace Apache.Qpid.Proton.Buffer
       IProtonBuffer CopyInto(int srcPos, IProtonBuffer dest, int destPos, int length);
 
       /// <summary>
+      /// Returns a copy of this buffer's readable bytes. Modifying the content of the
+      /// returned buffer will not affect this buffers contents. The two buffers will
+      /// maintain separate offsets.  The returned copy has the write offset set to the
+      /// length of the copy meaning that the entire copied region is read for reading.
+      /// </summary>
+      /// <returns>A new buffer with a copy of the readable bytes in this buffer</returns>
+      IProtonBuffer Copy()
+      {
+         int offset = ReadOffset;
+         int length = ReadableBytes;
+
+         return Copy(offset, length);
+      }
+
+      /// <summary>
+      /// Returns a copy of this buffer's readable bytes. Modifying the content of the
+      /// returned buffer will not affect this buffers contents. The two buffers will
+      /// maintain separate offsets. The amount and start of the data to be copied is
+      /// provided by the index and length arguments. The returned copy has the write
+      /// offset set to the length of the copy meaning that the entire copied region
+      /// is read for reading.
+      /// </summary>
+      /// <param name="index">The read offset where the copy begins</param>
+      /// <param name="length">The number of bytes to copy</param>
+      /// <returns>A new buffer with a copy of the readable bytes in the specified region</returns>
+      IProtonBuffer Copy(int index, int length);
+
+      /// <summary>
       /// Coverts the readable bytes in this buffer into a string value using the Encoding value
       /// provided. The underlying read and write offset values are not modified as a result of this
       /// operation.

@@ -26,17 +26,17 @@ namespace Apache.Qpid.Proton.Types.Transport
    /// <typeparam name="T">The type of the context used in the processing</typeparam>
    public interface IPerformativeHandler<T>
    {
-      // void HandleOpen(Open open, IProtonBuffer payload, int channel, T context) { }
+      void HandleOpen(Open open, IProtonBuffer payload, int channel, T context) { }
 
-      // void HandleBegin(Begin begin, IProtonBuffer payload, int channel, T context) { }
+      void HandleBegin(Begin begin, IProtonBuffer payload, int channel, T context) { }
 
       void HandleAttach(Attach attach, IProtonBuffer payload, int channel, T context) { }
 
-      // void HandleFlow(Flow flow, IProtonBuffer payload, int channel, T context) { }
+      void HandleFlow(Flow flow, IProtonBuffer payload, int channel, T context) { }
 
-      // void HandleTransfer(Transfer transfer, IProtonBuffer payload, int channel, T context) { }
+      void HandleTransfer(Transfer transfer, IProtonBuffer payload, int channel, T context) { }
 
-      // void HandleDisposition(Disposition disposition, IProtonBuffer payload, int channel, T context) { }
+      void HandleDisposition(Disposition disposition, IProtonBuffer payload, int channel, T context) { }
 
       void HandleDetach(Detach detach, IProtonBuffer payload, int channel, T context) { }
 
