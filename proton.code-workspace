@@ -44,6 +44,12 @@
       },
       {
          "path": "examples/Example.TransactedSender"
+      },
+      {
+         "path": "examples/Example.StreamingFileReceiver"
+      },
+      {
+         "path": "examples/Example.StreamingFileSender"
       }
    ],
    "settings": {
