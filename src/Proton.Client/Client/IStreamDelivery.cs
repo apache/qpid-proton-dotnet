@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client
       new IStreamReceiver Receiver { get; }
 
       /// <inheritdoc cref="IDelivery.Message"/>
-      new IStreamReceiverMessage Message<Stream>();
+      IStreamReceiverMessage Message();
 
       /// <inheritdoc cref="IDelivery.Accept"/>
       new IStreamDelivery Accept();
@@ -48,5 +48,10 @@ namespace Apache.Qpid.Proton.Client
       /// <inheritdoc cref="IDelivery.Settle"/>
       new IStreamDelivery Settle();
 
+      #region Default implementations for hidden base interface methods
+
+      IMessage<Stream> IDelivery.Message<Stream>() => (IMessage<Stream>) this.Message();
+
+      #endregion
    }
 }
