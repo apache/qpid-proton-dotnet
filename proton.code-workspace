@@ -19,37 +19,7 @@
          "path": "test/Proton.TestPeer.Tests"
       },
       {
-         "path": "examples/Example.HelloWorld"
-      },
-      {
-         "path": "examples/Example.Receive"
-      },
-      {
-         "path": "examples/Example.Send"
-      },
-      {
-         "path": "examples/Example.Request"
-      },
-      {
-         "path": "examples/Example.Respond"
-      },
-      {
-         "path": "examples/Example.LargeMessageReceiver"
-      },
-      {
-         "path": "examples/Example.LargeMessageSender"
-      },
-      {
-         "path": "examples/Example.TransactedReceiver"
-      },
-      {
-         "path": "examples/Example.TransactedSender"
-      },
-      {
-         "path": "examples/Example.StreamingFileReceiver"
-      },
-      {
-         "path": "examples/Example.StreamingFileSender"
+         "path": "examples"
       }
    ],
    "settings": {
