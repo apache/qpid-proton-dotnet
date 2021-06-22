@@ -255,5 +255,62 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       ICollection<string> DesiredCapabilities { get; }
 
+      /// <summary>
+      /// Opens a new transaction scoped to this {@link Session} if one is not already active.
+      /// <para>
+      /// A Session that has an active transaction will perform all sends and all delivery
+      /// dispositions under that active transaction.  If the user wishes to send with the same
+      /// session but outside of a transaction they user must commit the active transaction and
+      /// not request that a new one be started. A session can only have one active transaction
+      /// at a time and as such any call to begin while there is a currently active transaction
+      /// will throw an ClientTransactionNotActiveException to indicate that the operation being
+      /// requested is not valid at that time.
+      /// </para>
+      /// </summary>
+      /// <remarks>
+      /// This is a blocking method that will return successfully only after a new transaction
+      /// has been started.
+      /// </remarks>
+      /// <returns>This Session instance</returns>
+      ISession BeginTransaction();
+
+      /// <summary>
+      /// Commit the currently active transaction in this Session.
+      /// <para>
+      /// Commit the currently active transaction in this Session but does not start a new
+      /// transaction automatically.  If there is no current transaction this method will throw
+      /// an ClientTransactionNotActiveException to indicate this error.  If the active transaction
+      /// has entered an in doubt state or was remotely rolled back this method will throw an error
+      /// to indicate that the commit failed and that a new transaction need to be started by the
+      /// user. When a transaction rolled back error occurs the user should assume that all work
+      /// performed under that transaction has failed and will need to be attempted under a new
+      /// transaction.
+      /// </para>
+      /// </summary>
+      /// <remarks>
+      /// This is a blocking method that will return successfully only after the transaction
+      /// has been committed.
+      /// </remarks>
+      /// <returns>This Session instance</returns>
+      ISession CommitTransaction();
+
+      /// <summary>
+      /// Roll back the currently active transaction in this Session.
+      /// <para>
+      /// Roll back the currently active transaction in this Session but does not automatically
+      /// start a new transaction. If there is no current transaction this method will throw an
+      /// ClientTransactionNotActiveException to indicate this error.  If the active transaction
+      /// has entered an in doubt state or was remotely rolled back this method will throw an
+      /// error to indicate that the roll back failed and that a new transaction need to be
+      /// started by the user.
+      /// </para>
+      /// </summary>
+      /// <remarks>
+      /// This is a blocking method that will return successfully only after the transaction
+      /// has been rolled back.
+      /// </remarks>
+      /// <returns>This Session instance</returns>
+      ISession RollbackTransaction();
+
    }
 }

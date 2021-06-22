@@ -38,6 +38,12 @@
       },
       {
          "path": "examples/Example.LargeMessageSender"
+      },
+      {
+         "path": "examples/Example.TransactedReceiver"
+      },
+      {
+         "path": "examples/Example.TransactedSender"
       }
    ],
    "settings": {
