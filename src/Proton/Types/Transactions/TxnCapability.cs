@@ -17,22 +17,18 @@
 
 namespace Apache.Qpid.Proton.Types.Transport
 {
-   public static class TransactionError
+   public static class TxnCapability
    {
-      /// <summary>
-      /// The remote sent a transactional request with an unknown transaction id.
-      /// </summary>
-      public static readonly Symbol UNKNOWN_ID = Symbol.Lookup("amqp:transaction:unknown-id");
 
-      /// <summary>
-      /// The transaction has been rolled back by the remote and cannot be operated upon.
-      /// </summary>
-      public static readonly Symbol TRANSACTION_ROLLBACK = Symbol.Lookup("amqp:transaction:rollback");
+      public static readonly Symbol LOCAL_TXN = Symbol.Lookup("amqp:local-transactions");
 
-      /// <summary>
-      /// The transaction has timed out by the remote and cannot be operated upon.
-      /// </summary>
-      public static readonly Symbol TRANSACTION_TIMEOUT = Symbol.Lookup("amqp:transaction:timeout");
+      public static readonly Symbol DISTRIBUTED_TXN = Symbol.Lookup("amqp:distributed-transactions");
+
+      public static readonly Symbol PROMOTABLE_TXN = Symbol.Lookup("amqp:promotable-transactions");
+
+      public static readonly Symbol MULTI_TXNS_PER_SSN = Symbol.Lookup("amqp:multi-txns-per-ssn");
+
+      public static readonly Symbol MULTI_SSNS_PER_TXN = Symbol.Lookup("amqp:multi-ssns-per-txn");
 
    }
 }

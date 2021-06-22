@@ -102,7 +102,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleDetach(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Detach{" +
                 "handle=" + (HasHandle() ? Handle : "null") +

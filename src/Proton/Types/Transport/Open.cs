@@ -216,7 +216,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleOpen(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Open{" +
                 " containerId='" + containerId + '\'' +

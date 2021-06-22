@@ -15,29 +15,26 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types.Transport
+namespace Apache.Qpid.Proton.Engine
 {
-   public static class SessionError
+   /// <summary>
+   /// Represents the state of an AMQP Session.
+   /// </summary>
+   public enum SessionState
    {
       /// <summary>
-      /// The peer violated incoming window for the session.
+      /// Indicates that the targeted end of the Session (local or remote) has not yet been opened.
       /// </summary>
-      public static readonly Symbol WINDOW_VIOLATION = Symbol.Lookup("amqp:session:window-violation");
+      Idle,
 
       /// <summary>
-      /// Input was received for a link that was detached with an error.
+      /// Indicates that the targeted end of the Session (local or remote) is currently open.
       /// </summary>
-      public static readonly Symbol ERRANT_LINK = Symbol.Lookup("amqp:session:errant-link");
+      Active,
 
       /// <summary>
-      /// An attach was received using a handle that is already in use for an attached link.
+      /// Indicates that the targeted end of the Session (local or remote) has been closed.
       /// </summary>
-      public static readonly Symbol HANDLE_IN_USE = Symbol.Lookup("amqp:session:handle-in-use");
-
-      /// <summary>
-      /// A frame (other than attach) was received referencing a handle which is not currently in use of an attached link.
-      /// </summary>
-      public static readonly Symbol UNATTACHED_HANDLE = Symbol.Lookup("amqp:session:unattached-handle");
-
+      Closed
    }
 }

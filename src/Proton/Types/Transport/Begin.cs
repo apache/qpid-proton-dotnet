@@ -187,7 +187,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleBegin(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
         return "Begin{" +
                "remoteChannel=" + (HasRemoteChannel() ? remoteChannel : "null") +

@@ -15,24 +15,11 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types.Transport
+using System;
+
+namespace Apache.Qpid.Proton.Types.Tramsactions
 {
-   public static class TransactionError
+   public interface GlobalTxnId : ICloneable
    {
-      /// <summary>
-      /// The remote sent a transactional request with an unknown transaction id.
-      /// </summary>
-      public static readonly Symbol UNKNOWN_ID = Symbol.Lookup("amqp:transaction:unknown-id");
-
-      /// <summary>
-      /// The transaction has been rolled back by the remote and cannot be operated upon.
-      /// </summary>
-      public static readonly Symbol TRANSACTION_ROLLBACK = Symbol.Lookup("amqp:transaction:rollback");
-
-      /// <summary>
-      /// The transaction has timed out by the remote and cannot be operated upon.
-      /// </summary>
-      public static readonly Symbol TRANSACTION_TIMEOUT = Symbol.Lookup("amqp:transaction:timeout");
-
    }
 }

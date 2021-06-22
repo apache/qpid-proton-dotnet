@@ -19,13 +19,18 @@ using System;
 
 namespace Apache.Qpid.Proton.Types
 {
-   public sealed class Decimal64
+   public sealed class Decimal64 : IComparable, IComparable<Decimal64>, IEquatable<Decimal64>
    {
       private readonly ulong bits;
 
       public Decimal64(ulong bits)
       {
          this.bits = bits;
+      }
+
+      public int CompareTo(object value)
+      {
+         return CompareTo((Decimal64) value);
       }
 
       public int CompareTo(Decimal64 value)

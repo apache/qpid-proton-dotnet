@@ -21,25 +21,25 @@ namespace Apache.Qpid.Proton.Types.Transport
    {
       /// <summary>
       /// An operator intervened to close the connection for some reason. The client could retry at some later date.
-      /// </summary>                 
-      public static Symbol CONNECTION_FORCED = Symbol.Lookup("amqp:connection:forced");
+      /// </summary>
+      public static readonly Symbol CONNECTION_FORCED = Symbol.Lookup("amqp:connection:forced");
 
       /// <summary>
       /// A valid frame header cannot be formed from the incoming byte stream.
-      /// </summary>                 
-      public static Symbol FRAMING_ERROR = Symbol.Lookup("amqp:connection:framing-error");
+      /// </summary>
+      public static readonly Symbol FRAMING_ERROR = Symbol.Lookup("amqp:connection:framing-error");
 
       /// <summary>
       /// The container is no longer available on the current connection. The peer SHOULD
       /// attempt reconnection to the container using the details provided in the info map.
-      /// 
+      ///
       /// hostname: the hostname of the container hosting the terminus. This is the value that SHOULD be
       ///           supplied in the hostname field of the open frame, and during SASL and TLS negotiation
       ///           (if used).
       /// network-host: the DNS hostname or IP address of the machine hosting the container.
       /// port: the port number on the machine hosting the container.
-      /// </summary>                 
-      public static Symbol REDIRECT = Symbol.Lookup("amqp:connection:redirect");
+      /// </summary>
+      public static readonly Symbol REDIRECT = Symbol.Lookup("amqp:connection:redirect");
 
    }
 }

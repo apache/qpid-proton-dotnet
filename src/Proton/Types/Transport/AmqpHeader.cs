@@ -174,7 +174,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return true;
       }
 
-      public new String ToString()
+      public override String ToString()
       {
          StringBuilder builder = new StringBuilder();
          for (int i = 0; i < buffer.ReadableBytes; ++i)

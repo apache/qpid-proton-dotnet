@@ -19,13 +19,18 @@ using System;
 
 namespace Apache.Qpid.Proton.Types
 {
-   public sealed class Decimal32 : IComparable<Decimal32>, IEquatable<Decimal32>
+   public sealed class Decimal32 : IComparable, IComparable<Decimal32>, IEquatable<Decimal32>
    {
       private readonly uint bits;
 
       public Decimal32(uint bits)
       {
          this.bits = bits;
+      }
+
+      public int CompareTo(object value)
+      {
+         return CompareTo((Decimal32) value);
       }
 
       public int CompareTo(Decimal32 value)

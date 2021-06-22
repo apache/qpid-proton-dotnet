@@ -326,7 +326,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleFlow(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Flow{" +
                 "nextIncomingId=" + (HasNextIncomingId() ? nextIncomingId : "null") +

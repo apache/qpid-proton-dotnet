@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleClose(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Close{" + "error=" + Error + '}';
       }

@@ -175,6 +175,20 @@ namespace Apache.Qpid.Proton.Buffer
       string ToString(Encoding encoding);
 
       /// <summary>
+      /// Indexed access to single unsigned byte values within the buffer which does not modify
+      /// the read or write index value.  The given index must adhere to the same constraints
+      /// as the get byte and set byte level APIs in this buffer class.
+      /// </summary>
+      /// <param name="i"></param>
+      /// <returns>The unsigned byte value that is present at the given index</returns>
+      /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
+      byte this[int i]
+      {
+         get => GetUnsignedByte(i);
+         set => SetUnsignedByte(i, value);
+      }
+
+      /// <summary>
       /// Reads a single byte from the given index and returns a boolean value indicating if the
       /// byte was zero (false) or greater than zero (true).
       /// </summary>

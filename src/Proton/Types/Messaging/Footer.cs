@@ -15,10 +15,79 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Footer
+   public sealed class Footer : IBodySection<IDictionary<Symbol, object>>
    {
+      public static readonly ulong DescriptorCode = 0x0000000000000078UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:footer:map");
 
+      public SectionType Type => SectionType.Footer;
+
+      public IDictionary<Symbol, object> Value { get; set; }
+
+      public Footer() : base()
+      {
+      }
+
+      public Footer(Footer other) : this()
+      {
+         if (other.Value != null)
+         {
+            Value = new Dictionary<Symbol, object>(other.Value);
+         }
+      }
+
+      public object Clone()
+      {
+         return new Footer(this);
+      }
+
+      public override string ToString()
+      {
+         return "Footer{ " + Value + " }";
+      }
+
+      public override int GetHashCode()
+      {
+         const int prime = 31;
+         int result = 1;
+         result = prime * result + ((Value == null) ? 0 : Value.GetHashCode());
+         return result;
+      }
+
+      public override bool Equals(object other)
+      {
+         if (other == null || !this.GetType().Equals(other.GetType()))
+         {
+            return false;
+         }
+         else
+         {
+            return Equals(other as Footer);
+         }
+      }
+
+      public bool Equals(Footer other)
+      {
+         if (this == other)
+         {
+            return true;
+         }
+         else if (other == null)
+         {
+            return false;
+         }
+         else if (Value == null && other.Value == null)
+         {
+            return true;
+         }
+         else
+         {
+            return Value == null ? false : Value.Equals(other.Value);
+         }
+      }
    }
 }

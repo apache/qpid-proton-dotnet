@@ -19,20 +19,46 @@ using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class ApplicationProperties : ISection, IBodySection<IDictionary<string, object>>
+   public sealed class ApplicationProperties : IBodySection<IDictionary<string, object>>
    {
-      public SectionType Type => SectionType.ApplicationProperties;
+      public static readonly ulong DescriptorCode = 0x0000000000000073UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:properties:list");
 
-      object ISection.Value { get { return this.Value; } }
+      public SectionType Type => SectionType.ApplicationProperties;
 
       public IDictionary<string, object> Value { get; set; }
 
-      public object Clone()
+      public ApplicationProperties() : base()
       {
-         return null; // TODO
       }
 
-      public new bool Equals(object other)
+      public ApplicationProperties(ApplicationProperties other) : this()
+      {
+         if (other.Value != null)
+         {
+            Value = new Dictionary<string, object>(other.Value);
+         }
+      }
+
+      public object Clone()
+      {
+         return new ApplicationProperties(this);
+      }
+
+      public override string ToString()
+      {
+         return "ApplicationProperties{ " + Value + " }";
+      }
+
+      public override int GetHashCode()
+      {
+         const int prime = 31;
+         int result = 1;
+         result = prime * result + ((Value == null) ? 0 : Value.GetHashCode());
+         return result;
+      }
+
+      public override bool Equals(object other)
       {
          if (other == null || !this.GetType().Equals(other.GetType()))
          {
@@ -46,13 +72,21 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public bool Equals(ApplicationProperties other)
       {
-         if (Value == null && other.Value == null)
+         if (this == other)
+         {
+            return true;
+         }
+         else if (other == null)
+         {
+            return false;
+         }
+         else if (Value == null && other.Value == null)
          {
             return true;
          }
          else
          {
-            return Value == null ? false : Value.Equals(other);
+            return Value == null ? false : Value.Equals(other.Value);
          }
       }
    }

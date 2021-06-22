@@ -15,32 +15,37 @@
  * limitations under the License.
  */
 
+using System;
+using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Types.Tramsactions
 {
-   public sealed class Coordinator : ITerminus
+   public sealed class TransactionalState : ICloneable
    {
-      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000030UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:coordinator:list");
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000034UL;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:transactional-state:list");
 
-      public Coordinator() : base() { }
+      public TransactionalState() : base() { }
 
-      public Coordinator(Coordinator other) : this()
+      public TransactionalState(TransactionalState other) : this()
       {
-         Capabilities = (Symbol[])other.Capabilities?.Clone();
+         TxnId = other.TxnId?.Copy();
+         Outcome = (IOutcome)other.Outcome?.Clone();
       }
 
-      public Symbol[] Capabilities { get; set; }
+      public IProtonBuffer TxnId { get; set; }
+
+      public IOutcome Outcome { get; set; }
 
       public object Clone()
       {
-         return new Coordinator(this);
+         return new TransactionalState(this);
       }
 
       public override string ToString()
       {
-         return "Coordinator{" + "capabilities=" + Capabilities + '}';
+         return "TransactionalState{" + "txnId=" + TxnId + ", outcome=" + Outcome + '}';
       }
    }
 }

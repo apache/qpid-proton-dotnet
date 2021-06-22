@@ -19,6 +19,9 @@ using System;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
+   /// <summary>
+   /// Serves as a marker interface for the AMQP Outcome types.
+   /// </summary>
    public interface IOutcome : ICloneable
    {
    }

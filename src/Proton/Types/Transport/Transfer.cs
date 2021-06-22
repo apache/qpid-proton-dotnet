@@ -321,7 +321,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleTransfer(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Transfer{" +
                 "handle=" + (HasHandle() ? handle : "null") +

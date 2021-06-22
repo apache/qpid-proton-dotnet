@@ -15,24 +15,32 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types.Transport
+using System;
+
+namespace Apache.Qpid.Proton.Types.Tramsactions
 {
-   public static class TransactionError
+   public sealed class Declare : ICloneable
    {
-      /// <summary>
-      /// The remote sent a transactional request with an unknown transaction id.
-      /// </summary>
-      public static readonly Symbol UNKNOWN_ID = Symbol.Lookup("amqp:transaction:unknown-id");
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000031UL;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:declare:list");
 
-      /// <summary>
-      /// The transaction has been rolled back by the remote and cannot be operated upon.
-      /// </summary>
-      public static readonly Symbol TRANSACTION_ROLLBACK = Symbol.Lookup("amqp:transaction:rollback");
+      public Declare() : base() { }
 
-      /// <summary>
-      /// The transaction has timed out by the remote and cannot be operated upon.
-      /// </summary>
-      public static readonly Symbol TRANSACTION_TIMEOUT = Symbol.Lookup("amqp:transaction:timeout");
+      public Declare(Declare other) : this()
+      {
+         GlobalTxnId = (GlobalTxnId)(other.GlobalTxnId?.Clone());
+      }
 
+      public GlobalTxnId GlobalTxnId { get; set; }
+
+      public object Clone()
+      {
+         return new Declare(this);
+      }
+
+      public override string ToString()
+      {
+         return "Declare{" + "globalTxnId=" + GlobalTxnId + '}';
+      }
    }
 }

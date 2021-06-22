@@ -299,7 +299,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleAttach(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
         return "Attach{" +
             "name='" + name + '\'' +

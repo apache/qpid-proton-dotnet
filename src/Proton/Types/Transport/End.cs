@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleEnd(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "End{" + "error=" + Error + '}';
       }

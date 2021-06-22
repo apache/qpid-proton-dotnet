@@ -206,7 +206,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          handler.HandleDisposition(this, payload, channel, context);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Disposition{" +
                 "role=" + role +
