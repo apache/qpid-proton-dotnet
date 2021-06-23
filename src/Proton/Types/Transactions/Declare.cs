@@ -17,7 +17,7 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Types.Tramsactions
+namespace Apache.Qpid.Proton.Types.Transactions
 {
    public sealed class Declare : ICloneable
    {

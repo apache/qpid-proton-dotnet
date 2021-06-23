@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types.Transport
+namespace Apache.Qpid.Proton.Types.Transactions
 {
    public static class TxnCapability
    {

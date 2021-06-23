@@ -34,11 +34,17 @@ namespace Apache.Qpid.Proton.Types.Messaging
          ExpiryPolicy = other.ExpiryPolicy;
          Timeout = other.Timeout;
          Dynamic = other.Dynamic;
-         DynamicNodeProperties = other.DynamicNodeProperties; // TODO - Copy this map if set
+         if (other.DynamicNodeProperties != null)
+         {
+            DynamicNodeProperties = new Dictionary<Symbol, object>(other.DynamicNodeProperties);
+         }
          DistributionMode = other.DistributionMode;
-         Filter = other.Filter;  // TODO - Copy this map if set
+         if (other.Filter != null)
+         {
+            Filter = new Dictionary<Symbol, object>(other.Filter);
+         }
          DefaultOutcome = other.DefaultOutcome;
-         Outcomes = other.Outcomes;  // TODO - Copy this array if set
+         Outcomes = (Symbol[]) other.Outcomes?.Clone();
          Capabilities = other.Capabilities;
       }
 

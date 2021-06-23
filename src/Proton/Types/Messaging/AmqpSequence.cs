@@ -19,35 +19,35 @@ using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class ApplicationProperties : IBodySection<IDictionary<string, object>>
+   public sealed class AmqpSequence : IBodySection<IList<object>>
    {
-      public static readonly ulong DescriptorCode = 0x0000000000000073UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:properties:list");
+      public static readonly ulong DescriptorCode = 0x0000000000000076UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:amqp-sequence:list");
 
-      public SectionType Type => SectionType.ApplicationProperties;
+      public SectionType Type => SectionType.AmqpSequence;
 
-      public IDictionary<string, object> Value { get; set; }
+      public IList<object> Value { get; set; }
 
-      public ApplicationProperties() : base()
+      public AmqpSequence() : base()
       {
       }
 
-      public ApplicationProperties(ApplicationProperties other) : this()
+      public AmqpSequence(AmqpSequence other) : this()
       {
          if (other.Value != null)
          {
-            Value = new Dictionary<string, object>(other.Value);
+            Value = new List<object>(other.Value);
          }
       }
 
       public object Clone()
       {
-         return new ApplicationProperties(this);
+         return new AmqpSequence(this);
       }
 
       public override string ToString()
       {
-         return "ApplicationProperties{ " + Value + " }";
+         return "AmqpSequence{ " + Value + " }";
       }
 
       public override int GetHashCode()
@@ -66,11 +66,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((ApplicationProperties) other);
+            return Equals((AmqpSequence) other);
          }
       }
 
-      public bool Equals(ApplicationProperties other)
+      public bool Equals(AmqpSequence other)
       {
          if (this == other)
          {

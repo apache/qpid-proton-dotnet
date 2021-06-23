@@ -17,7 +17,7 @@
 
 using Apache.Qpid.Proton.Types.Messaging;
 
-namespace Apache.Qpid.Proton.Types.Tramsactions
+namespace Apache.Qpid.Proton.Types.Transactions
 {
    public sealed class Coordinator : ITerminus
    {

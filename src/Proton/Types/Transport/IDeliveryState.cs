@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Types.Transport
 {
-   public interface IDeliveryState
+   public interface IDeliveryState : IEquatable<IDeliveryState>
    {
       /// <summary>
       /// Provides the enumeration that defines the delivery state type.

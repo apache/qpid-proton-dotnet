@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override string ToString()
       {
-         return "Footer{ " + Value + " }";
+         return "MessageAnnotations{ " + Value + " }";
       }
 
       public override int GetHashCode()

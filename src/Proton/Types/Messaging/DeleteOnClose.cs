@@ -15,37 +15,25 @@
  * limitations under the License.
  */
 
-using System;
-using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Types.Messaging;
-
-namespace Apache.Qpid.Proton.Types.Transactions
+namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class TransactionalState : ICloneable
+   public sealed class DeleteOnClose : ILifetimePolicy
    {
-      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000034UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:transactional-state:list");
+      public static readonly ulong DescriptorCode = 0x000000000000002bUL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:delete-on-close:list");
 
-      public TransactionalState() : base() { }
+      /// <summary>
+      /// The singelton instance of this lifetime policy
+      /// </summary>
+      public static DeleteOnClose Instance { get; } = new DeleteOnClose();
 
-      public TransactionalState(TransactionalState other) : this()
+      private DeleteOnClose()
       {
-         TxnId = other.TxnId?.Copy();
-         Outcome = (IOutcome)other.Outcome?.Clone();
-      }
-
-      public IProtonBuffer TxnId { get; set; }
-
-      public IOutcome Outcome { get; set; }
-
-      public object Clone()
-      {
-         return new TransactionalState(this);
       }
 
       public override string ToString()
       {
-         return "TransactionalState{" + "txnId=" + TxnId + ", outcome=" + Outcome + '}';
+         return "DeleteOnClose{}";
       }
    }
 }

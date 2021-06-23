@@ -18,7 +18,7 @@
 using System;
 using Apache.Qpid.Proton.Buffer;
 
-namespace Apache.Qpid.Proton.Types.Tramsactions
+namespace Apache.Qpid.Proton.Types.Transactions
 {
    public sealed class Discharge : ICloneable
    {

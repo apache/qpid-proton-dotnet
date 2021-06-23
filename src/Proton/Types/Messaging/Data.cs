@@ -15,39 +15,39 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
+using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class ApplicationProperties : IBodySection<IDictionary<string, object>>
+   public sealed class Data : IBodySection<IProtonBuffer>
    {
-      public static readonly ulong DescriptorCode = 0x0000000000000073UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:properties:list");
+      public static readonly ulong DescriptorCode = 0x0000000000000075UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:data:binary");
 
-      public SectionType Type => SectionType.ApplicationProperties;
+      public SectionType Type => SectionType.Data;
 
-      public IDictionary<string, object> Value { get; set; }
+      public IProtonBuffer Value { get; set; }
 
-      public ApplicationProperties() : base()
+      public Data() : base()
       {
       }
 
-      public ApplicationProperties(ApplicationProperties other) : this()
+      public Data(Data other) : this()
       {
          if (other.Value != null)
          {
-            Value = new Dictionary<string, object>(other.Value);
+            Value = other.Value?.Copy();
          }
       }
 
       public object Clone()
       {
-         return new ApplicationProperties(this);
+         return new Data(this);
       }
 
       public override string ToString()
       {
-         return "ApplicationProperties{ " + Value + " }";
+         return "Data{ " + Value + " }";
       }
 
       public override int GetHashCode()
@@ -66,11 +66,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((ApplicationProperties) other);
+            return Equals((AmqpValue) other);
          }
       }
 
-      public bool Equals(ApplicationProperties other)
+      public bool Equals(Data other)
       {
          if (this == other)
          {
