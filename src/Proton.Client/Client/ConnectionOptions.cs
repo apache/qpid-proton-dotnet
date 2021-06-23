@@ -32,6 +32,11 @@ namespace Apache.Qpid.Proton.Client
       public static readonly ushort DEFAULT_CHANNEL_MAX = 65535;
       public static readonly uint DEFAULT_MAX_FRAME_SIZE = 65536;
 
+      public event EventHandler<ConnectionEvent> Connected;
+      public event EventHandler<DisconnectionEvent> Disconnected;
+      public event EventHandler<DisconnectionEvent> Interrupted;
+      public event EventHandler<ConnectionEvent> Reconnected;
+
       /// <summary>
       /// Creates a default Connection options instance.
       /// </summary>
@@ -90,6 +95,13 @@ namespace Apache.Qpid.Proton.Client
          TransportOptions.CopyInto(other.TransportOptions);
          SslOptions.CopyInto(other.SslOptions);
          SaslOptions.CopyInto(other.SaslOptions);
+
+         // Copy event sets as currently set and any changes to the source will
+         // not be reflected in the target as the lists are copy on write.
+         other.Connected = Connected;
+         other.Disconnected = Disconnected;
+         other.Interrupted = Interrupted;
+         other.Reconnected = Reconnected;
 
          return other;
       }
@@ -237,7 +249,30 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Configuration that controls the SSL I/O layer if enabled.
       /// </summary>
-      SslOptions SslOptions { get; } = new SslOptions();
+      public SslOptions SslOptions { get; } = new SslOptions();
 
+      #region Connection Lifecycle Event Triggers
+
+      internal virtual void OnConnected(IConnection source, string host, int port)
+      {
+         Connected?.Invoke(source, new ConnectionEvent(host, port));
+      }
+
+      internal virtual void OnDisconnected(IConnection source, string host, int port, Exception cause)
+      {
+         Disconnected?.Invoke(source, new DisconnectionEvent(host, port, cause));
+      }
+
+      internal virtual void OnInterrupted(IConnection source, string host, int port, Exception cause)
+      {
+         Interrupted?.Invoke(source, new DisconnectionEvent(host, port, cause));
+      }
+
+      internal virtual void OnReconnected(IConnection source, string host, int port)
+      {
+         Reconnected?.Invoke(source, new ConnectionEvent(host, port));
+      }
+
+      #endregion
    }
 }
