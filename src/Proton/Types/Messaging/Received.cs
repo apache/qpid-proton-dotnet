@@ -48,7 +48,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override bool Equals(object other)
       {
-         return other == null ? false : other.GetType() == GetType();
+         if (other == null || other.GetType() == GetType())
+         {
+            return false;
+         }
+         else
+         {
+            return Equals((Received) other);
+         }
       }
 
       public bool Equals(IDeliveryState state)

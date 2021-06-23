@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((AmqpValue) other);
+            return Equals((Data) other);
          }
       }
 

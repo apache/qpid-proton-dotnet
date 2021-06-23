@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals(other as DeliveryAnnotations);
+            return Equals((DeliveryAnnotations) null);
          }
       }
 

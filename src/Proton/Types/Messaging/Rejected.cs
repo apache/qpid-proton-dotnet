@@ -48,7 +48,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override bool Equals(object other)
       {
-         return other == null ? false : other.GetType() == GetType();
+         if (other == null || other.GetType() == GetType())
+         {
+            return false;
+         }
+         else
+         {
+            return Equals((Rejected) other);
+         }
       }
 
       public bool Equals(IDeliveryState state)
@@ -73,9 +80,13 @@ namespace Apache.Qpid.Proton.Types.Messaging
             {
                return false;
             }
+            else if (Error != null)
+            {
+               return Error.Equals(other.Error);
+            }
             else
             {
-               return other.Error.Equals(Error);
+               return true;
             }
          }
       }

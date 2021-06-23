@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Types.Transactions
 {
-   public sealed class TransactionalState : ICloneable
+   public sealed class TransactionalState : IDeliveryState
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000034UL;
       public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:transactional-state:list");
@@ -34,9 +34,68 @@ namespace Apache.Qpid.Proton.Types.Transactions
          Outcome = (IOutcome)other.Outcome?.Clone();
       }
 
+      public DeliveryStateType Type => DeliveryStateType.Transactional;
+
       public IProtonBuffer TxnId { get; set; }
 
       public IOutcome Outcome { get; set; }
+
+      public override int GetHashCode()
+      {
+         return base.GetHashCode();
+      }
+
+      public override bool Equals(object other)
+      {
+         if (other == null || other.GetType() == GetType())
+         {
+            return false;
+         }
+         else
+         {
+            return Equals((TransactionalState)other);
+         }
+      }
+
+      public bool Equals(IDeliveryState state)
+      {
+         if (state == this)
+         {
+            return true;
+         }
+         else if (state is null)
+         {
+            return false;
+         }
+         else if (GetType() != state.GetType())
+         {
+            return false;
+         }
+         else
+         {
+            TransactionalState other = (TransactionalState)state;
+
+            if ((other.TxnId is null && TxnId is not null) || (other.Outcome is null && Outcome is not null))
+            {
+               return false;
+            }
+            else
+            {
+               if (TxnId != null && !TxnId.Equals(other.TxnId))
+               {
+                  return false;
+               }
+               else if (Outcome != null && !Outcome.Equals(other.Outcome))
+               {
+                  return false;
+               }
+               else
+               {
+                  return true;
+               }
+            }
+         }
+      }
 
       public object Clone()
       {
