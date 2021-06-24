@@ -16,6 +16,8 @@
  */
 
 using System;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Engine.Exceptions;
 
 namespace Apache.Qpid.Proton.Engine
 {
@@ -57,6 +59,65 @@ namespace Apache.Qpid.Proton.Engine
       /// Provides the current engine operating state.
       /// </summary>
       EngineState EngineState { get; }
+
+      /// <summary>
+      /// Gets the Connection instance that is associated with this Engine instance.
+      /// It is valid for an engine implementation to not return a Connection instance
+      /// prior to the engine having been started although it is recommended that one
+      /// be available immediately to prevent confusion.
+      /// </summary>
+      IConnection Connection { get; }
+
+      /// <summary>
+      /// Starts the engine and returns the Connection instance that is bound to this
+      /// Engine. A non-started Engine will not allow ingestion of any inbound data and
+      /// a Connection linked to the engine that was obtained from the engine cannot
+      /// produce any outbound data.
+      /// </summary>
+      /// <returns>This Engine instance</returns>
+      /// <exception cref="EngineStateException">If the engine state is already failed or shutdown</exception>
+      IEngine Start();
+
+      /// <summary>
+      /// Shutdown the engine preventing any future outbound or inbound processing.
+      /// </summary>
+      /// <remarks>
+      /// When the engine is shut down any resources, Connection, Session or Link instances
+      /// that have an engine shutdown event handler registered will be notified and should
+      /// react by locally closing that resource if they wish to ensure that the resource's
+      /// local close event handler gets signaled if that resource is not already locally
+      /// closed.
+      /// </remarks>
+      /// <returns>This Engine instance</returns>
+      IEngine Shutdown();
+
+      /// <summary>
+      /// Transition the Engine to a failed state if not already closed or closing.
+      /// </summary>
+      /// <remarks>
+      /// If called when the engine has not failed the engine will be transitioned to the
+      /// failed state and the method will return an appropriate EngineFailedException that
+      /// wraps the given cause.  If called after the engine was shutdown the method returns
+      /// an EngineShutdownException indicating that the engine was already shutdown.
+      /// Repeated calls to this method while the engine is in the failed state must not
+      /// alter the original failure error or elicit new engine failed event notifications.
+      /// </remarks>
+      /// <param name="cause">The exception that led to the Engine being failed</param>
+      /// <returns>The exception that caused the engine to be transitioned to the failed state</returns>
+      EngineStateException EngineFailed(Exception cause);
+
+      /// <summary>
+      /// Provide data input for this Engine from some external source. If the engine is not
+      /// writable when this method is called an EngineNotWritableException will be thrown
+      /// unless the reason for the not writable state is due to engine failure or the engine
+      /// already having been shut down in which case the appropriate EngineStateException
+      /// will be thrown to indicate the reason.
+      /// </summary>
+      /// <param name="input">The binary data to ingest into the engine</param>
+      /// <returns>This Engine instance</returns>
+      /// <exception cref="EngineNotWritableException">If the engine is not currently accepting input</exception>
+      /// <exception cref="EngineStateException">If the engine state is already failed or shutdown</exception>
+      IEngine Ingest(IProtonBuffer input);
 
    }
 }
