@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Codec
       IDecoderState CachedDecoderState();
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -55,9 +55,9 @@ namespace Apache.Qpid.Proton.Codec
       bool? ReadBoolean(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Codec
       bool ReadBoolean(IProtonBuffer buffer, IDecoderState state, bool defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -80,9 +80,9 @@ namespace Apache.Qpid.Proton.Codec
       sbyte? ReadByte(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -93,7 +93,7 @@ namespace Apache.Qpid.Proton.Codec
       sbyte ReadByte(IProtonBuffer buffer, IDecoderState state, sbyte defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -105,9 +105,9 @@ namespace Apache.Qpid.Proton.Codec
       byte? ReadUnsignedByte(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Codec
       byte ReadUnsignedByte(IProtonBuffer buffer, IDecoderState state, byte defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -130,9 +130,9 @@ namespace Apache.Qpid.Proton.Codec
       char? ReadCharacter(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -143,7 +143,7 @@ namespace Apache.Qpid.Proton.Codec
       char ReadCharacter(IProtonBuffer buffer, IDecoderState state, char defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -155,7 +155,7 @@ namespace Apache.Qpid.Proton.Codec
       Decimal32 ReadDecimal32(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -167,7 +167,7 @@ namespace Apache.Qpid.Proton.Codec
       Decimal64 ReadDecimal64(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -179,7 +179,7 @@ namespace Apache.Qpid.Proton.Codec
       Decimal128 ReadDecimal128(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -191,9 +191,9 @@ namespace Apache.Qpid.Proton.Codec
       short? ReadShort(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -204,7 +204,7 @@ namespace Apache.Qpid.Proton.Codec
       short ReadShort(IProtonBuffer buffer, IDecoderState state, short defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -216,9 +216,9 @@ namespace Apache.Qpid.Proton.Codec
       ushort? ReadUnsignedShort(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -229,7 +229,7 @@ namespace Apache.Qpid.Proton.Codec
       ushort ReadUnsignedShort(IProtonBuffer buffer, IDecoderState state, ushort defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -241,9 +241,9 @@ namespace Apache.Qpid.Proton.Codec
       int? ReadInt(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -254,7 +254,7 @@ namespace Apache.Qpid.Proton.Codec
       int ReadInt(IProtonBuffer buffer, IDecoderState state, int defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -266,9 +266,9 @@ namespace Apache.Qpid.Proton.Codec
       uint? ReadUnsignedInt(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -279,7 +279,7 @@ namespace Apache.Qpid.Proton.Codec
       uint ReadUnsignedInt(IProtonBuffer buffer, IDecoderState state, uint defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -291,9 +291,9 @@ namespace Apache.Qpid.Proton.Codec
       long? ReadLong(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -304,7 +304,7 @@ namespace Apache.Qpid.Proton.Codec
       long ReadLong(IProtonBuffer buffer, IDecoderState state, long defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -316,9 +316,9 @@ namespace Apache.Qpid.Proton.Codec
       ulong? ReadUnsignedLong(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -329,7 +329,7 @@ namespace Apache.Qpid.Proton.Codec
       ulong ReadUnsignedLong(IProtonBuffer buffer, IDecoderState state, ulong defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -341,9 +341,9 @@ namespace Apache.Qpid.Proton.Codec
       float? ReadFloat(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -354,7 +354,7 @@ namespace Apache.Qpid.Proton.Codec
       float ReadFloat(IProtonBuffer buffer, IDecoderState state, float defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -366,9 +366,9 @@ namespace Apache.Qpid.Proton.Codec
       double? ReadDouble(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it or the default if the 
-      /// encoding type is null. If the next value in  the byte stream is not of the requested type 
-      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types 
+      /// Reads the encoded value from the given byte buffer and returns it or the default if the
+      /// encoding type is null. If the next value in  the byte stream is not of the requested type
+      /// an error is thrown.  If the caller wishes to recover from errors due to unexpected types
       /// the byte stream should be marked and reset in order to make additional read attempts.
       /// </summary>
       /// <param name="buffer">The buffer to read the encoded value from</param>
@@ -379,7 +379,7 @@ namespace Apache.Qpid.Proton.Codec
       double ReadDouble(IProtonBuffer buffer, IDecoderState state, double defaultValue);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -391,7 +391,7 @@ namespace Apache.Qpid.Proton.Codec
       IProtonBuffer ReadBinary(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -403,7 +403,7 @@ namespace Apache.Qpid.Proton.Codec
       string ReadString(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -415,7 +415,7 @@ namespace Apache.Qpid.Proton.Codec
       Symbol ReadSymbol(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -427,7 +427,7 @@ namespace Apache.Qpid.Proton.Codec
       string ReadSymbolAsString(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -439,7 +439,7 @@ namespace Apache.Qpid.Proton.Codec
       ulong? ReadTimestamp(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -451,7 +451,7 @@ namespace Apache.Qpid.Proton.Codec
       Guid? ReadGuid(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -463,7 +463,7 @@ namespace Apache.Qpid.Proton.Codec
       object ReadObject(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -475,7 +475,7 @@ namespace Apache.Qpid.Proton.Codec
       T ReadObject<T>(IProtonBuffer buffer, IDecoderState state, Type type);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -487,7 +487,7 @@ namespace Apache.Qpid.Proton.Codec
       T[] ReadMultiple<T>(IProtonBuffer buffer, IDecoderState state, Type type);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -499,7 +499,7 @@ namespace Apache.Qpid.Proton.Codec
       IDictionary<K, V> ReadMap<K, V>(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in 
+      /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
       /// the byte stream is not of the requested type an error is thrown.  If the caller wishes to
       /// recover from errors due to unexpected types the byte stream should be marked and reset in
       /// order to make additional read attempts.
@@ -519,7 +519,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="buffer">The buffer to read the encoded value from</param>
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ITypeDecoder<T> ReadNextTypeDecoder<T>(IProtonBuffer buffer, IDecoderState state);
+      ITypeDecoder ReadNextTypeDecoder(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
       /// Peeks ahead in the given IProtonBuffer instance and returns a ITypeDecoder that can read the
@@ -532,7 +532,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="buffer">The buffer to read the encoded value from</param>
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ITypeDecoder<T> PeekNextTypeDecoder<T>(IProtonBuffer buffer, IDecoderState state);
+      ITypeDecoder PeekNextTypeDecoder(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
       /// Allows for a custom described type decoder to be registered with this decoder instance
@@ -541,7 +541,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <typeparam name="V">Type that the decoder manages</typeparam>
       /// <param name="decoder">A described type decoder to register</param>
       /// <returns>This IDecoder instance.</returns>
-      IDecoder RegisterDescribedTypeDecoder<V>(IDescribedTypeDecoder<V> decoder);
+      IDecoder RegisterDescribedTypeDecoder(IDescribedTypeDecoder decoder);
 
    }
 }

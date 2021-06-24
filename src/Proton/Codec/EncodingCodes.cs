@@ -20,7 +20,7 @@ namespace Apache.Qpid.Proton.Codec
    /// <summary>
    /// Enumeration of the AMQP type encoding codes
    /// </summary>
-   public enum EncodingCode : byte
+   public enum EncodingCodes : byte
    {
       /// <summary>
       /// Indicates that the value that follows will be an AMQP Described Type
@@ -48,22 +48,22 @@ namespace Apache.Qpid.Proton.Codec
       BooleanFalse = 0x42,
 
       /// <summary>
-      /// Indicates that the next byte repesents an unsigned byte value.
+      /// Indicates that the next byte represents an unsigned byte value.
       /// </summary>
       UByte = 0x50,
 
       /// <summary>
-      /// Indicates that the next two bytes repesents an unsigned short value.
+      /// Indicates that the next two bytes represents an unsigned short value.
       /// </summary>
       UShort = 0x60,
 
       /// <summary>
-      /// Indicates that the next four bytes repesents an unsigned integer value.
+      /// Indicates that the next four bytes represents an unsigned integer value.
       /// </summary>
       UInt = 0x70,
 
       /// <summary>
-      /// Compact encoding where the next byte repesents an unsigned integer value.
+      /// Compact encoding where the next byte represents an unsigned integer value.
       /// </summary>
       SmallUInt = 0x52,
 
@@ -73,12 +73,12 @@ namespace Apache.Qpid.Proton.Codec
       UInt0 = 0x43,
 
       /// <summary>
-      /// Indicates that the next eight bytes repesents an unsigned long value.
+      /// Indicates that the next eight bytes represents an unsigned long value.
       /// </summary>
       ULong = 0x80,
 
       /// <summary>
-      /// Compact encoding where the next byte repesents an unsigned long value.
+      /// Compact encoding where the next byte represents an unsigned long value.
       /// </summary>
       SmallULong = 0x53,
 
@@ -88,72 +88,72 @@ namespace Apache.Qpid.Proton.Codec
       ULong0 = 0x44,
 
       /// <summary>
-      /// Indicates that the next byte repesents an signed byte value.
+      /// Indicates that the next byte represents an signed byte value.
       /// </summary>
       Byte = 0x51,
-      
+
       /// <summary>
-      /// Indicates that the next two bytes repesents an signed short value.
+      /// Indicates that the next two bytes represents an signed short value.
       /// </summary>
       Short = 0x61,
 
       /// <summary>
-      /// Indicates that the next four bytes repesents an signed integer value.
+      /// Indicates that the next four bytes represents an signed integer value.
       /// </summary>
       Int = 0x71,
 
       /// <summary>
-      /// Compact encoding where the next byte repesents a signed integer value.
+      /// Compact encoding where the next byte represents a signed integer value.
       /// </summary>
       SmallInt = 0x54,
 
       /// <summary>
-      /// Indicates that the next eight bytes repesents an signed long value.
+      /// Indicates that the next eight bytes represents an signed long value.
       /// </summary>
       Long = 0x81,
 
       /// <summary>
-      /// Compact encoding where the next byte repesents a signed long value.
+      /// Compact encoding where the next byte represents a signed long value.
       /// </summary>
       SmallLong = 0x55,
 
       /// <summary>
-      /// Indicates that the next four bytes repesents an float value.
+      /// Indicates that the next four bytes represents an float value.
       /// </summary>
       Float = 0x72,
 
       /// <summary>
-      /// Indicates that the next eight bytes repesents an double value.
+      /// Indicates that the next eight bytes represents an double value.
       /// </summary>
       Double = 0x82,
 
       /// <summary>
-      /// Indicates that the next four bytes repesents an AMQP Decimal32 value.
+      /// Indicates that the next four bytes represents an AMQP Decimal32 value.
       /// </summary>
       Decimal32 = 0x74,
 
       /// <summary>
-      /// Indicates that the next eight bytes repesents an AMQP Decimal64 value.
+      /// Indicates that the next eight bytes represents an AMQP Decimal64 value.
       /// </summary>
       Decimal64 = 0x84,
 
       /// <summary>
-      /// Indicates that the next sixteen bytes repesents an AMQP Decimal128 value.
+      /// Indicates that the next sixteen bytes represents an AMQP Decimal128 value.
       /// </summary>
       Decimal128 = 0x94,
 
       /// <summary>
-      /// Indicates that the next two bytes repesents an character value.
+      /// Indicates that the next two bytes represents an character value.
       /// </summary>
       Char = 0x73,
 
       /// <summary>
-      /// Indicates that the next four bytes repesents an AMQP Timestamp value.
+      /// Indicates that the next four bytes represents an AMQP Timestamp value.
       /// </summary>
       Timestamp = 0x83,
 
       /// <summary>
-      /// Indicates that the next sixteen bytes repesents an UUID value.
+      /// Indicates that the next sixteen bytes represents an UUID value.
       /// </summary>
       Uuid = 0x98,
 
@@ -207,40 +207,40 @@ namespace Apache.Qpid.Proton.Codec
 
       /// <summary>
       /// Indicates that a List encoding follows and the next eight bytes will indicate the total list
-      /// encoding size and the number of entries in the list respectively as integer values. Each element 
+      /// encoding size and the number of entries in the list respectively as integer values. Each element
       /// of the list is then encoded using their noraml AMQP encoded form.
       /// </summary>
       List32 = 0xd0,
 
       /// <summary>
       /// Indicates that a small Map encoding follows and the next two bytes will indicate the total Map
-      /// encoding size and the number of entries in the Map respectively (read as integer vlaues). . 
-      /// Each entry of the Map is then encoded using their noraml AMQP encoded form. The total Map size 
+      /// encoding size and the number of entries in the Map respectively (read as integer vlaues). .
+      /// Each entry of the Map is then encoded using their noraml AMQP encoded form. The total Map size
       /// is one half the number of elements indicated by the number of entries value read.
       /// </summary>
       Map8 = 0xc1,
 
       /// <summary>
       /// Indicates that a Map encoding follows and the next eight bytes will indicate the total Map
-      /// encoding size and the number of entries in the Map respectively (read as integer vlaues). 
-      /// Each entry of the Map is then encoded using their noraml AMQP encoded form. The total Map 
+      /// encoding size and the number of entries in the Map respectively (read as integer vlaues).
+      /// Each entry of the Map is then encoded using their noraml AMQP encoded form. The total Map
       /// size is one half the number of elements indicated by the number of entries value read.
       /// </summary>
       Map32 = 0xd1,
 
       /// <summary>
-      /// Indicates that a small array encoding follows.  The array is encoded using the next three 
+      /// Indicates that a small array encoding follows.  The array is encoded using the next three
       /// bytes to represent the total encoded array size, the number of entries in the array and the
       /// encoding code of the type that comprieses the array in that order.
       /// </summary>
       Array8 = 0xe0,
 
       /// <summary>
-      /// Indicates that a array encoding follows.  The array is encoded using the next nine 
+      /// Indicates that a array encoding follows.  The array is encoded using the next nine
       /// bytes to represent the total encoded array size, the number of entries in the array and the
       /// encoding code of the type that comprieses the array in that order.
       /// </summary>
       Array32 = 0xf0
-      
+
    }
 }

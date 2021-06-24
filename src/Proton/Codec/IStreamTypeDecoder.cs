@@ -23,8 +23,7 @@ namespace Apache.Qpid.Proton.Codec
    /// <summary>
    /// Defines an interface for an decoder of a specific type.
    /// </summary>
-   /// <typeparam name="V">The type that this decoder manages</typeparam>
-   public interface IStreamTypeDecoder<V>
+   public interface IStreamTypeDecoder
    {
       /// <summary>
       /// The Type that this decoder can read.
@@ -44,15 +43,15 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="stream">The stream where the encoded bytes can be read from</param>
       /// <param name="state">The decoder state that can be used during decode</param>
       /// <returns>The decoded value from the byte stream</returns>
-      V ReadValue(Stream stream, IDecoderState state);
+      object ReadValue(Stream stream, IStreamDecoderState state);
 
       /// <summary>
-      /// Skiips the value that this decoder is handling by skipping the encoded bytes
+      /// Skips the value that this decoder is handling by skipping the encoded bytes
       /// in the provided buffer instance.
       /// </summary>
       /// <param name="stream">The stream where the encoded bytes can be read from</param>
       /// <param name="state">The decoder state that can be used during decode</param>
-      void SkipValue(Stream stream, IDecoderState state);
+      void SkipValue(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads a series of this type that have been encoded into the body of an Array type.
@@ -64,7 +63,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">The decoder state that can be used during decode</param>
       /// <param name="count">the number of elements that the encoded array contains</param>
       /// <returns>The decoded array from the given stream</returns>
-      V[] ReadArrayElements(Stream stream, IDecoderState state, int count);
+      Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count);
 
    }
 }

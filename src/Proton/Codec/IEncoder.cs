@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Codec
 {
    /// <summary>
    /// Defines an Encoder type that translates AMQP performatives into their
-   /// encoded byte representations.  
+   /// encoded byte representations.
    /// </summary>
    public interface IEncoder
    {
@@ -273,7 +273,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">An encoder state instance to use when encoding</param>
       /// <param name="value">The value to be written</param>
       /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
-      void WriteObject(IProtonBuffer buffer, IEncoderState state, Object value);
+      void WriteObject(IProtonBuffer buffer, IEncoderState state, object value);
 
       /// <summary>
       /// Writes the AMQP array encoding for the given value to the given buffer.
@@ -291,7 +291,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <typeparam name="V">The type that the given encoder handles</typeparam>
       /// <param name="encoder">The encoder type instance to register with this encoder</param>
       /// <returns>This encoder instance</returns>
-      IEncoder RegisterDescribedTypeEncoder<V>(IDescribedTypeEncoder<V> encoder);
+      IEncoder RegisterDescribedTypeEncoder(IDescribedTypeEncoder encoder);
 
       /// <summary>
       /// Lookup a Type encoder using an instance of the type to be encoded.
@@ -299,7 +299,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <typeparam name="V">The Type that the encoder manages</typeparam>
       /// <param name="value">an instance of the type whose encoder is being looked up</param>
       /// <returns></returns>
-      ITypeEncoder<V> LookupTypeEncoder<V>(Object value);
+      ITypeEncoder LookupTypeEncoder<V>(Object value);
 
       /// <summary>
       /// Lookup a Type encoder using Type value of the type to be encoded.
@@ -307,7 +307,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <typeparam name="V">The Type that the encoder manages</typeparam>
       /// <param name="value">a Type instance for the type whose encoder is being looked up</param>
       /// <returns></returns>
-      ITypeEncoder<V> LookupTypeEncoder<V>(Type typeClass);
+      ITypeEncoder LookupTypeEncoder<V>(Type typeClass);
 
    }
 }

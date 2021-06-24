@@ -23,8 +23,7 @@ namespace Apache.Qpid.Proton.Codec
    /// <summary>
    /// Defines an interface for an decoder of a specific type.
    /// </summary>
-   /// <typeparam name="V">The type that this decoder manages</typeparam>
-   public interface ITypeDecoder<V>
+   public interface ITypeDecoder
    {
       /// <summary>
       /// The Type that this decoder can read.
@@ -44,10 +43,10 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="buffer">The buffer where the encoded bytes can be read from</param>
       /// <param name="state">The decoder state that can be used during decode</param>
       /// <returns>The decoded value from the byte stream</returns>
-      V ReadValue(IProtonBuffer buffer, IDecoderState state);
+      object ReadValue(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
-      /// Skiips the value that this decoder is handling by skipping the encoded bytes
+      /// Skips the value that this decoder is handling by skipping the encoded bytes
       /// in the provided buffer instance.
       /// </summary>
       /// <param name="buffer">The buffer where the encoded bytes can be read from</param>
@@ -64,7 +63,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">The decoder state that can be used during decode</param>
       /// <param name="count">the number of elements that the encoded array contains</param>
       /// <returns>The decoded array from the given buffer</returns>
-      V[] ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count);
+      Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count);
 
    }
 }

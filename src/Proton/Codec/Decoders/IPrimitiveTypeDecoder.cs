@@ -15,21 +15,17 @@
  * limitations under the License.
  */
 
-using Apache.Qpid.Proton.Types;
-
 namespace Apache.Qpid.Proton.Codec
 {
-   public interface IStreamDescribedTypeDecoder : ITypeDecoder
+   /// <summary>
+   /// Defines an interface for an decoder of a primitive types
+   /// </summary>
+   public interface IPrimitiveTypeDecoder : ITypeDecoder, IStreamTypeDecoder
    {
       /// <summary>
-      /// Returns an AMQP Symbol code that describes the type to be decoded
+      /// Get the AMQP encoding code byte for the type this decoder handles.
       /// </summary>
-      Symbol DescriptorSymbol { get; }
-
-      /// <summary>
-      /// Returns an AMQP unsigned int numeric code that describes the type to be decoded
-      /// </summary>
-      uint? DescriptorCode { get; }
+      byte EncodingCode { get; }
 
    }
 }

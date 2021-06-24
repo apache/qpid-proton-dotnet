@@ -24,7 +24,14 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public sealed class ProtonEncoder : IEncoder
    {
+      // The encoders for primitives are fixed and cannot be altered by users who want
+      // to register custom encoders, these encoders are stateless so they can be safely
+      // made static to reduce overhead of creating and destroying this type.
+      // TODO - Create static type encoders
+
       private ProtonEncoderState cachedEncoderState;
+
+      private readonly IDictionary<Type, ITypeEncoder> typeEncoders = new Dictionary<Type, ITypeEncoder>();
 
       public IEncoderState NewEncoderState()
       {
@@ -171,17 +178,17 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       }
 
-      public IEncoder RegisterDescribedTypeEncoder<V>(IDescribedTypeEncoder<V> encoder)
+      public IEncoder RegisterDescribedTypeEncoder(IDescribedTypeEncoder encoder)
       {
          return this;
       }
 
-      public ITypeEncoder<V> LookupTypeEncoder<V>(Object value)
+      public ITypeEncoder LookupTypeEncoder<V>(Object value)
       {
          return null;
       }
 
-      public ITypeEncoder<V> LookupTypeEncoder<V>(Type typeClass)
+      public ITypeEncoder LookupTypeEncoder<V>(Type typeClass)
       {
          return null;
       }

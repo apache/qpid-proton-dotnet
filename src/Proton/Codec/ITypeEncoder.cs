@@ -23,8 +23,7 @@ namespace Apache.Qpid.Proton.Codec
    /// <summary>
    /// Defines an interface for an encoder of a specific type.
    /// </summary>
-   /// <typeparam name="V">The type that this encoder manages</typeparam>
-   public interface ITypeEncoder<V>
+   public interface ITypeEncoder
    {
       /// <summary>
       /// The Type that this decoder can write.
@@ -39,12 +38,12 @@ namespace Apache.Qpid.Proton.Codec
       bool IsArrayType();
 
       /// <summary>
-      /// Encodes the given value into the provided buffer. 
+      /// Encodes the given value into the provided buffer.
       /// </summary>
       /// <param name="buffer">The buffer where the encoded bytes are to be written</param>
       /// <param name="state">The encoder state to use when writing the bytes</param>
       /// <param name="value">The value to be encoded</param>
-      void WriteType(IProtonBuffer buffer, IEncoderState state, V value);
+      void WriteType(IProtonBuffer buffer, IEncoderState state, object value);
 
       /// <summary>
       /// Encodes a full array encoding of the given array elements into the provided buffer.
