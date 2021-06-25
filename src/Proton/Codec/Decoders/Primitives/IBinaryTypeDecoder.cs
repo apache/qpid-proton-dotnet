@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-using System;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
-   public interface BinaryTypeDecoder : IPrimitiveTypeDecoder
+   public interface IBinaryTypeDecoder : IPrimitiveTypeDecoder
    {
       /// <summary>
       /// Reads the encoded size value for the encoded binary payload and returns it. The

@@ -35,6 +35,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       static ProtonDecoder()
       {
          primitiveDecoders[((int)EncodingCodes.Boolean)] = new BooleanTypeDecoder();
+         primitiveDecoders[((int)EncodingCodes.VBin8)] = new Binary8TypeDecoder();
+         primitiveDecoders[((int)EncodingCodes.VBin32)] = new Binary32TypeDecoder();
       }
 
       /// <summary>

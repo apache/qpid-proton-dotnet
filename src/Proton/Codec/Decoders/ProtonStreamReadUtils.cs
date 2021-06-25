@@ -266,7 +266,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// <param name="stream">The stream where the value should be read from</param>
       /// <param name="amount">The number of bytes to advance the current stream position by</param>
       /// <returns>The stream that was provided to this method.</returns>
-      public static Stream skipBytes(Stream stream, long amount)
+      public static Stream SkipBytes(Stream stream, long amount)
       {
          try
          {
