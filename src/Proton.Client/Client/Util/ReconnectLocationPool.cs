@@ -118,11 +118,6 @@ namespace Apache.Qpid.Proton.Client.Util
       /// <returns>This reconnect locations pool</returns>
       public ReconnectLocationPool Add(ReconnectLocation location)
       {
-         if (location == null)
-         {
-            throw new ArgumentNullException("Locations added cannot be null");
-         }
-
          lock (entries)
          {
             if (!entries.Contains(location))
@@ -141,11 +136,6 @@ namespace Apache.Qpid.Proton.Client.Util
       /// <returns>This reconnect locations pool</returns>
       public ReconnectLocationPool AddFirst(ReconnectLocation location)
       {
-         if (location == null)
-         {
-            throw new ArgumentNullException("Locations added cannot be null");
-         }
-
          lock (entries)
          {
             if (!entries.Contains(location))
@@ -165,14 +155,10 @@ namespace Apache.Qpid.Proton.Client.Util
       /// <returns>true if a value was removed from the pool, and false otherwise</returns>
       public bool Remove(ReconnectLocation location)
       {
-         if (location != null)
+         lock (entries)
          {
-            lock (entries)
-            {
-               return entries.Remove(location);
-            }
+            return entries.Remove(location);
          }
-         return false;
       }
 
       /// <summary>
@@ -182,13 +168,11 @@ namespace Apache.Qpid.Proton.Client.Util
       /// <returns>This reconnection location pool instance</returns>
       public ReconnectLocationPool RemoveAll(ReconnectLocation location)
       {
-         if (location != null)
+         lock (entries)
          {
-            lock (entries)
-            {
-               entries.Clear();
-            }
+            entries.Clear();
          }
+
          return this;
       }
 
