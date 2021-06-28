@@ -34,14 +34,14 @@ namespace Apache.Qpid.Proton.Codec
       /// values with the decoder instance.
       /// </summary>
       /// <returns></returns>
-      IDecoderState NewDecoderState();
+      IStreamDecoderState NewDecoderState();
 
       /// <summary>
       /// Returns a cached decoder state instance that can be used be single threaded readers that
       /// use this decoder instance.
       /// </summary>
       /// <returns>A cached decoder state object that can be used by single threaded readerss</returns>
-      IDecoderState CachedDecoderState();
+      IStreamDecoderState CachedDecoderState();
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      bool? ReadBoolean(Stream stream, IDecoderState state);
+      bool? ReadBoolean(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      bool ReadBoolean(Stream stream, IDecoderState state, bool defaultValue);
+      bool ReadBoolean(Stream stream, IStreamDecoderState state, bool defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      sbyte? ReadByte(Stream stream, IDecoderState state);
+      sbyte? ReadByte(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -91,7 +91,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      sbyte ReadByte(Stream stream, IDecoderState state, sbyte defaultValue);
+      sbyte ReadByte(Stream stream, IStreamDecoderState state, sbyte defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -103,7 +103,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      byte? ReadUnsignedByte(Stream stream, IDecoderState state);
+      byte? ReadUnsignedByte(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -116,7 +116,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      byte ReadUnsignedByte(Stream stream, IDecoderState state, byte defaultValue);
+      byte ReadUnsignedByte(Stream stream, IStreamDecoderState state, byte defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      char? ReadCharacter(Stream stream, IDecoderState state);
+      char? ReadCharacter(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -141,7 +141,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      char ReadCharacter(Stream stream, IDecoderState state, char defaultValue);
+      char ReadCharacter(Stream stream, IStreamDecoderState state, char defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -153,7 +153,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      Decimal32 ReadDecimal32(Stream stream, IDecoderState state);
+      Decimal32 ReadDecimal32(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -165,7 +165,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      Decimal64 ReadDecimal64(Stream stream, IDecoderState state);
+      Decimal64 ReadDecimal64(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -177,7 +177,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      Decimal128 ReadDecimal128(Stream stream, IDecoderState state);
+      Decimal128 ReadDecimal128(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -189,7 +189,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      short? ReadShort(Stream stream, IDecoderState state);
+      short? ReadShort(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -202,7 +202,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      short ReadShort(Stream stream, IDecoderState state, short defaultValue);
+      short ReadShort(Stream stream, IStreamDecoderState state, short defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -214,7 +214,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ushort? ReadUnsignedShort(Stream stream, IDecoderState state);
+      ushort? ReadUnsignedShort(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -227,7 +227,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ushort ReadUnsignedShort(Stream stream, IDecoderState state, ushort defaultValue);
+      ushort ReadUnsignedShort(Stream stream, IStreamDecoderState state, ushort defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -239,7 +239,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      int? ReadInt(Stream stream, IDecoderState state);
+      int? ReadInt(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -252,7 +252,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      int ReadInt(Stream stream, IDecoderState state, int defaultValue);
+      int ReadInt(Stream stream, IStreamDecoderState state, int defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -264,7 +264,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      uint? ReadUnsignedInt(Stream stream, IDecoderState state);
+      uint? ReadUnsignedInt(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -277,7 +277,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      uint ReadUnsignedInt(Stream stream, IDecoderState state, uint defaultValue);
+      uint ReadUnsignedInt(Stream stream, IStreamDecoderState state, uint defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -289,7 +289,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      long? ReadLong(Stream stream, IDecoderState state);
+      long? ReadLong(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -302,7 +302,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      long ReadLong(Stream stream, IDecoderState state, long defaultValue);
+      long ReadLong(Stream stream, IStreamDecoderState state, long defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -314,7 +314,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ulong? ReadUnsignedLong(Stream stream, IDecoderState state);
+      ulong? ReadUnsignedLong(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -327,7 +327,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ulong ReadUnsignedLong(Stream stream, IDecoderState state, ulong defaultValue);
+      ulong ReadUnsignedLong(Stream stream, IStreamDecoderState state, ulong defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -339,7 +339,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      float? ReadFloat(Stream stream, IDecoderState state);
+      float? ReadFloat(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -352,7 +352,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      float ReadFloat(Stream stream, IDecoderState state, float defaultValue);
+      float ReadFloat(Stream stream, IStreamDecoderState state, float defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -364,7 +364,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      double? ReadDouble(Stream stream, IDecoderState state);
+      double? ReadDouble(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -377,7 +377,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      double ReadDouble(Stream stream, IDecoderState state, double defaultValue);
+      double ReadDouble(Stream stream, IStreamDecoderState state, double defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -389,7 +389,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      IProtonBuffer ReadBinary(Stream stream, IDecoderState state);
+      IProtonBuffer ReadBinary(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -401,7 +401,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      string ReadString(Stream stream, IDecoderState state);
+      string ReadString(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -413,7 +413,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      Symbol ReadSymbol(Stream stream, IDecoderState state);
+      Symbol ReadSymbol(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -425,7 +425,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      string ReadSymbolAsString(Stream stream, IDecoderState state);
+      string ReadSymbolAsString(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -437,7 +437,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ulong? ReadTimestamp(Stream stream, IDecoderState state);
+      ulong? ReadTimestamp(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -449,7 +449,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      Guid? ReadGuid(Stream stream, IDecoderState state);
+      Guid? ReadGuid(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -461,7 +461,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      object ReadObject(Stream stream, IDecoderState state);
+      object ReadObject(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -473,7 +473,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      T ReadObject<T>(Stream stream, IDecoderState state, Type type);
+      T ReadObject<T>(Stream stream, IStreamDecoderState state, Type type);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -485,7 +485,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      T[] ReadMultiple<T>(Stream stream, IDecoderState state, Type type);
+      T[] ReadMultiple<T>(Stream stream, IStreamDecoderState state, Type type);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -497,7 +497,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      IDictionary<K, V> ReadMap<K, V>(Stream stream, IDecoderState state);
+      IDictionary<K, V> ReadMap<K, V>(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -509,7 +509,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      IList<V> ReadList<V>(Stream stream, IDecoderState state);
+      IList<V> ReadList<V>(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads from the given IProtonstream instance and returns a ITypeDecoder that can read the
@@ -520,7 +520,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="stream">The stream to read the encoded value from</param>
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ITypeDecoder ReadNextTypeDecoder<T>(Stream stream, IDecoderState state);
+      ITypeDecoder ReadNextTypeDecoder<T>(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Peeks ahead in the given IProtonstream instance and returns a ITypeDecoder that can read the
@@ -533,7 +533,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="stream">The stream to read the encoded value from</param>
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ITypeDecoder PeekNextTypeDecoder(Stream stream, IDecoderState state);
+      ITypeDecoder PeekNextTypeDecoder(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Allows for a custom described type decoder to be registered with this decoder instance

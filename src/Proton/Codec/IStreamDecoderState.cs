@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Codec
    public interface IStreamDecoderState
    {
       /// <summary>
-      /// Resets the decoder after a complete decode operation freeing any held 
+      /// Resets the decoder after a complete decode operation freeing any held
       /// resources and preparing for a new decode operation.
       /// </summary>
       void Reset();
@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <summary>
       /// Gets the IDecoder instance that was used when creating this decoder state object.
       /// </summary>
-      IDecoder Decoder { get; }
+      IStreamDecoder Decoder { get; }
 
       /// <summary>
       /// Decodes an encoded UTF-8 string value from the given buffer.  The number of bytes
@@ -46,6 +46,6 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="length">The encoded size of the UTF-8 string.</param>
       /// <returns>A string value decoded from the UTF-8 bytes</returns>
       string DecodeUtf8(Stream stream, int length);
-      
+
    }
 }

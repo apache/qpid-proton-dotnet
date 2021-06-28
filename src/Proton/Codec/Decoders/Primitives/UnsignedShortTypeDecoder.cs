@@ -21,30 +21,30 @@ using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
-   public class BooleanTypeDecoder : AbstractPrimitiveTypeDecoder
+   public sealed class UnsignedShortTypeDecoder : AbstractPrimitiveTypeDecoder
    {
-      public override EncodingCodes EncodingCode => EncodingCodes.Boolean;
+      public override EncodingCodes EncodingCode => EncodingCodes.UShort;
 
-      public override Type DecodesType() => typeof(Boolean);
+      public override Type DecodesType() => typeof(ushort);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-        return buffer.ReadByte() == 0 ? false : true;
+         return buffer.ReadUnsignedShort();
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         return ProtonStreamReadUtils.ReadByte(stream) == 0 ? false : true;
+         return ProtonStreamReadUtils.ReadUnsignedShort(stream);
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         buffer.ReadByte();
+         buffer.SkipBytes(sizeof(ushort));
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         ProtonStreamReadUtils.SkipBytes(stream, 1);
+         ProtonStreamReadUtils.SkipBytes(stream, sizeof(ushort));
       }
    }
 }

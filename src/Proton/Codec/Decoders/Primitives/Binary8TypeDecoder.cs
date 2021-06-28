@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
    public sealed class Binary8TypeDecoder : AbstractBinaryTypeDecoder
    {
-      public override byte EncodingCode => (byte) EncodingCodes.VBin8;
+      public override EncodingCodes EncodingCode => EncodingCodes.VBin8;
 
       public override int ReadSize(IProtonBuffer buffer, IDecoderState state)
       {

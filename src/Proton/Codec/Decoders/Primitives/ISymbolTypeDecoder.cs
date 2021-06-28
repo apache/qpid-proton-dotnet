@@ -15,17 +15,13 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Codec
+namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
    /// <summary>
-   /// Defines an interface for an decoder of a primitive types
+   /// Interface for type decoders that handle AMQP Symbol encodings.
    /// </summary>
-   public interface IPrimitiveTypeDecoder : ITypeDecoder, IStreamTypeDecoder
+   public interface ISymbolTypeDecoder : IPrimitiveTypeDecoder
    {
-      /// <summary>
-      /// Get the AMQP encoding code byte for the type this decoder handles.
-      /// </summary>
-      EncodingCodes EncodingCode { get; }
 
    }
 }

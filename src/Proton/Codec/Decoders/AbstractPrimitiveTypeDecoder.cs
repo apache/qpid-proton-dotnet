@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       #region Interface methods handed off to the subclass
 
-      public abstract byte EncodingCode { get; }
+      public abstract EncodingCodes EncodingCode { get; }
 
       public abstract Type DecodesType();
 

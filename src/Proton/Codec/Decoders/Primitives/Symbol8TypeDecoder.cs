@@ -15,17 +15,23 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Codec
-{
-   /// <summary>
-   /// Defines an interface for an decoder of a primitive types
-   /// </summary>
-   public interface IPrimitiveTypeDecoder : ITypeDecoder, IStreamTypeDecoder
-   {
-      /// <summary>
-      /// Get the AMQP encoding code byte for the type this decoder handles.
-      /// </summary>
-      EncodingCodes EncodingCode { get; }
+using System.IO;
+using Apache.Qpid.Proton.Buffer;
 
+namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
+{
+   public sealed class Symbol8TypeDecoder : AbstractSymbolTypeDecoder
+   {
+      public override EncodingCodes EncodingCode => EncodingCodes.Sym8;
+
+      protected override int ReadSize(IProtonBuffer buffer, IDecoderState state)
+      {
+         return buffer.ReadByte();
+      }
+
+      protected override int ReadSize(Stream stream, IStreamDecoderState state)
+      {
+         return ProtonStreamReadUtils.ReadByte(stream);
+      }
    }
 }

@@ -15,17 +15,34 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Codec
-{
-   /// <summary>
-   /// Defines an interface for an decoder of a primitive types
-   /// </summary>
-   public interface IPrimitiveTypeDecoder : ITypeDecoder, IStreamTypeDecoder
-   {
-      /// <summary>
-      /// Get the AMQP encoding code byte for the type this decoder handles.
-      /// </summary>
-      EncodingCodes EncodingCode { get; }
+using System;
+using System.IO;
+using Apache.Qpid.Proton.Buffer;
 
+namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
+{
+   public class BooleanTrueTypeDecoder : BooleanTypeDecoder
+   {
+      public override EncodingCodes EncodingCode => EncodingCodes.BooleanTrue;
+
+      public override Type DecodesType() => typeof(Boolean);
+
+      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      {
+        return true;
+      }
+
+      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      {
+         return true;
+      }
+
+      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
+      {
+      }
+
+      public override void SkipValue(Stream stream, IStreamDecoderState state)
+      {
+      }
    }
 }
