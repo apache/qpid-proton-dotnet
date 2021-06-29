@@ -23,7 +23,7 @@ using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Types.Messaging;
 
-namespace Apache.Qpid.Proton.Codec.Decoders
+namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 {
    public sealed class AttachTypeDecoder : AbstractDescribedTypeDecoder
    {

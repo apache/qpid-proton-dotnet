@@ -32,6 +32,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public AmqpSequence(IList<object> list) : base()
+      {
+         Value = list;
+      }
+
       public AmqpSequence(AmqpSequence other) : this()
       {
          if (other.Value != null)
