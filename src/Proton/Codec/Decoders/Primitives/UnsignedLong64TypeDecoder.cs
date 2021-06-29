@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
-   public sealed class UnsignedLng32TypeDecoder : AbstractPrimitiveTypeDecoder
+   public sealed class UnsignedLong64TypeDecoder : AbstractPrimitiveTypeDecoder
    {
       public override EncodingCodes EncodingCode => EncodingCodes.ULong;
 

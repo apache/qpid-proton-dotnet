@@ -54,5 +54,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          ProtonStreamReadUtils.SkipBytes(stream, BYTES);
       }
+
+      public static Guid ReadUuid(IProtonBuffer buffer)
+      {
+         byte[] guidBytes = new byte[BYTES];
+         buffer.ReadBytes(guidBytes);
+
+         return new Guid(guidBytes);
+      }
+
+      public static Guid ReadUuid(Stream stream)
+      {
+         return new Guid(ProtonStreamReadUtils.ReadBytes(stream, BYTES));
+      }
    }
 }

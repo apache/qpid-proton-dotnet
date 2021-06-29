@@ -472,7 +472,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      T ReadObject<T>(IProtonBuffer buffer, IDecoderState state, Type type);
+      T ReadObject<T>(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
@@ -484,7 +484,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      T[] ReadMultiple<T>(IProtonBuffer buffer, IDecoderState state, Type type);
+      T[] ReadMultiple<T>(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte buffer and returns it.  If the next value in

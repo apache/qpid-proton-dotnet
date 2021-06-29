@@ -15,11 +15,34 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Types.Transport
 {
    public enum ReceiverSettleMode
    {
       First,
       Second
+   }
+
+   public static class ReceiverSettleModeExtension
+   {
+      public static byte ByteValue(this ReceiverSettleMode mode)
+      {
+         return (byte)mode;
+      }
+
+      public static ReceiverSettleMode ValueOf(byte mode)
+      {
+         switch (mode)
+         {
+            case 0:
+               return ReceiverSettleMode.First;
+            case 1:
+               return ReceiverSettleMode.Second;
+            default:
+               throw new ArgumentOutOfRangeException("Receiver settlement role value out or range [0...1]");
+         }
+      }
    }
 }

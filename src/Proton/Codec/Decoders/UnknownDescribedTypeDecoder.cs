@@ -16,36 +16,12 @@
  */
 
 using System;
+using System.IO;
 
-namespace Apache.Qpid.Proton.Types.Transport
+namespace Apache.Qpid.Proton.Codec.Decoders
 {
-   public enum SenderSettleMode
+   public sealed class UnkownDescribedTypeDecoder
    {
-      Unsettled,
-      Settled,
-      Mixed
-   }
-
-   public static class SenderSettleModeExtension
-   {
-      public static byte ByteValue(this SenderSettleMode mode)
-      {
-         return (byte)mode;
-      }
-
-      public static SenderSettleMode ValueOf(byte mode)
-      {
-         switch (mode)
-         {
-            case 0:
-               return SenderSettleMode.Unsettled;
-            case 1:
-               return SenderSettleMode.Settled;
-            case 2:
-               return SenderSettleMode.Mixed;
-            default:
-               throw new ArgumentOutOfRangeException("Sender settlement role value out or range [0...2]");
-         }
-      }
+      // TODO
    }
 }

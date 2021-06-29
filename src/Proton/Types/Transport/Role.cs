@@ -38,5 +38,10 @@ namespace Apache.Qpid.Proton.Types.Transport
       {
          return role == Role.Receiver;
       }
+
+      public static Role ValueOf(bool role)
+      {
+         return role ? Role.Receiver : Role.Sender;
+      }
    }
 }

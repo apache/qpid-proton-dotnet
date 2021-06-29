@@ -15,37 +15,30 @@
  * limitations under the License.
  */
 
-using System;
-
-namespace Apache.Qpid.Proton.Types.Transport
+namespace Apache.Qpid.Proton.Types
 {
-   public enum SenderSettleMode
+   /// <summary>
+   /// Defines an object that can carry an AMQP descriport and some object which
+   /// was decoded from the encoding of an AMQP described type not known to the
+   /// codec in use when decoding it.
+   /// </summary>
+   public sealed class UnknownDescribedType
    {
-      Unsettled,
-      Settled,
-      Mixed
-   }
-
-   public static class SenderSettleModeExtension
-   {
-      public static byte ByteValue(this SenderSettleMode mode)
+      internal UnknownDescribedType(object descriptor, object described)
       {
-         return (byte)mode;
+         Descriptor = descriptor;
+         Described = described;
       }
 
-      public static SenderSettleMode ValueOf(byte mode)
-      {
-         switch (mode)
-         {
-            case 0:
-               return SenderSettleMode.Unsettled;
-            case 1:
-               return SenderSettleMode.Settled;
-            case 2:
-               return SenderSettleMode.Mixed;
-            default:
-               throw new ArgumentOutOfRangeException("Sender settlement role value out or range [0...2]");
-         }
-      }
+      /// <summary>
+      /// Access the descriptor that was used to describe this type
+      /// </summary>
+      public object Descriptor { get; }
+
+      /// <summary>
+      /// Access the object that was conveyed in this described type.
+      /// </summary>
+      public object Described { get; }
+
    }
 }

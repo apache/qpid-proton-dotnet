@@ -19,7 +19,7 @@ using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec
 {
-   public interface IStreamDescribedTypeDecoder : ITypeDecoder
+   public interface IStreamDescribedTypeDecoder : IStreamTypeDecoder
    {
       /// <summary>
       /// Returns an AMQP Symbol code that describes the type to be decoded
@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <summary>
       /// Returns an AMQP unsigned int numeric code that describes the type to be decoded
       /// </summary>
-      uint? DescriptorCode { get; }
+      ulong DescriptorCode { get; }
 
    }
 }

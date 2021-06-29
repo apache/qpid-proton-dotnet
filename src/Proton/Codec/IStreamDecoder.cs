@@ -473,7 +473,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      T ReadObject<T>(Stream stream, IStreamDecoderState state, Type type);
+      T ReadObject<T>(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -485,7 +485,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      T[] ReadMultiple<T>(Stream stream, IStreamDecoderState state, Type type);
+      T[] ReadMultiple<T>(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -520,7 +520,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="stream">The stream to read the encoded value from</param>
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ITypeDecoder ReadNextTypeDecoder<T>(Stream stream, IStreamDecoderState state);
+      IStreamTypeDecoder ReadNextTypeDecoder(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Peeks ahead in the given IProtonstream instance and returns a ITypeDecoder that can read the
@@ -533,7 +533,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="stream">The stream to read the encoded value from</param>
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      ITypeDecoder PeekNextTypeDecoder(Stream stream, IStreamDecoderState state);
+      IStreamTypeDecoder PeekNextTypeDecoder(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Allows for a custom described type decoder to be registered with this decoder instance
@@ -541,7 +541,7 @@ namespace Apache.Qpid.Proton.Codec
       /// </summary>
       /// <param name="decoder">A described type decoder to register</param>
       /// <returns>This IDecoder instance.</returns>
-      IDecoder RegisterDescribedTypeDecoder(IDescribedTypeDecoder decoder);
+      IStreamTypeDecoder RegisterDescribedTypeDecoder(IStreamDescribedTypeDecoder decoder);
 
    }
 }
