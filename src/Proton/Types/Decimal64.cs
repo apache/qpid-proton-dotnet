@@ -21,6 +21,8 @@ namespace Apache.Qpid.Proton.Types
 {
    public sealed class Decimal64 : IComparable, IComparable<Decimal64>, IEquatable<Decimal64>
    {
+      public static readonly int Bytes = 8;
+
       private readonly ulong bits;
 
       public Decimal64(ulong bits)
@@ -30,12 +32,12 @@ namespace Apache.Qpid.Proton.Types
 
       public int CompareTo(object value)
       {
-         return CompareTo((Decimal64) value);
+         return CompareTo((Decimal64)value);
       }
 
       public int CompareTo(Decimal64 value)
       {
-        return (this.bits < value.bits) ? -1 : ((this.bits == value.bits) ? 0 : 1);
+         return (this.bits < value.bits) ? -1 : ((this.bits == value.bits) ? 0 : 1);
       }
 
       public bool Equals(Decimal64 obj)

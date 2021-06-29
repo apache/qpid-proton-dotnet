@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
+using System;
 using System.IO;
+using System.Collections;
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
@@ -27,6 +29,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public abstract class AbstractListTypeDecoder : AbstractPrimitiveTypeDecoder, IListTypeDecoder
    {
+      public override Type DecodesType() => typeof(IList);
+
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
          int size = ReadSize(buffer, state);
@@ -69,6 +73,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          }
 
          return list;
+      }
+
+      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
+      {
+         buffer.SkipBytes(ReadSize(buffer, state));
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)

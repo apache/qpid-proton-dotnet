@@ -21,6 +21,8 @@ namespace Apache.Qpid.Proton.Types
 {
    public sealed class Decimal128 : IComparable, IComparable<Decimal128>, IEquatable<Decimal128>
    {
+      public static readonly int Bytes = 16;
+
       private readonly ulong lsb;
       private readonly ulong msb;
 
@@ -32,7 +34,7 @@ namespace Apache.Qpid.Proton.Types
 
       public int CompareTo(object value)
       {
-         return CompareTo((Decimal128) value);
+         return CompareTo((Decimal128)value);
       }
 
       public int CompareTo(Decimal128 value)

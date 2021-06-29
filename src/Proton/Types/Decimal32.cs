@@ -21,6 +21,8 @@ namespace Apache.Qpid.Proton.Types
 {
    public sealed class Decimal32 : IComparable, IComparable<Decimal32>, IEquatable<Decimal32>
    {
+      public static readonly int Bytes = 4;
+
       private readonly uint bits;
 
       public Decimal32(uint bits)

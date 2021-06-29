@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
@@ -27,6 +29,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public abstract class AbstractMapTypeDecoder : AbstractPrimitiveTypeDecoder, IMapTypeDecoder
    {
+      public override Type DecodesType() => typeof(IDictionary);
+
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
          int size = ReadSize(buffer, state);
@@ -82,6 +86,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          }
 
          return map;
+      }
+
+      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
+      {
+         buffer.SkipBytes(ReadSize(buffer, state));
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
