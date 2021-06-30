@@ -32,6 +32,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public ApplicationProperties(IDictionary<string, object> value) : this()
+      {
+         Value = value;
+      }
+
       public ApplicationProperties(ApplicationProperties other) : this()
       {
          if (other.Value != null)

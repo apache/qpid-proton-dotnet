@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Types.Messaging
 {
    public enum TerminusExpiryPolicy
@@ -23,5 +25,45 @@ namespace Apache.Qpid.Proton.Types.Messaging
       SessionEnd,
       ConnectionClose,
       Never
+   }
+
+   public static class TerminusExpiryPolicyExtension
+   {
+      public static uint UintValue(this TerminusExpiryPolicy mode)
+      {
+         return (uint)mode;
+      }
+
+      public static TerminusExpiryPolicy ValueOf(Symbol policy)
+      {
+         if (policy == null)
+         {
+            return TerminusExpiryPolicy.SessionEnd;
+         }
+
+         return ValueOf(policy.ToString());
+      }
+
+      public static TerminusExpiryPolicy ValueOf(string policy)
+      {
+         if (policy == null)
+         {
+            return TerminusExpiryPolicy.SessionEnd;
+         }
+
+         switch (policy)
+         {
+            case "link-detach":
+               return TerminusExpiryPolicy.LinkDetach;
+            case "session-end":
+               return TerminusExpiryPolicy.SessionEnd;
+            case "connection-close":
+               return TerminusExpiryPolicy.ConnectionClose;
+            case "never":
+               return TerminusExpiryPolicy.Never;
+            default:
+               throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + policy);
+         }
+      }
    }
 }

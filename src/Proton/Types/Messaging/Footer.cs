@@ -32,6 +32,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public Footer(IDictionary<Symbol, object> value) : this()
+      {
+         Value = value;
+      }
+
       public Footer(Footer other) : this()
       {
          if (other.Value != null)

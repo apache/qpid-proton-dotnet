@@ -32,6 +32,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public Data(IProtonBuffer value) : this()
+      {
+         Value = value;
+      }
+
       public Data(Data other) : this()
       {
          if (other.Value != null)

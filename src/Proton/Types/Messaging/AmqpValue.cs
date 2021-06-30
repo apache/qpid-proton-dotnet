@@ -30,6 +30,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public AmqpValue(object value) :this()
+      {
+         Value = value;
+      }
+
       public AmqpValue(AmqpValue other) : this()
       {
          if (other.Value != null)

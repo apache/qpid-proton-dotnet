@@ -32,6 +32,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public MessageAnnotations(IDictionary<Symbol, object> value) : this()
+      {
+         Value = value;
+      }
+
       public MessageAnnotations(MessageAnnotations other) : this()
       {
          if (other.Value != null)

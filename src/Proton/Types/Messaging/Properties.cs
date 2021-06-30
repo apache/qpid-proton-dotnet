@@ -49,8 +49,8 @@ namespace Apache.Qpid.Proton.Types.Messaging
       private object correlationId;
       private string contentType;
       private string contentEncoding;
-      private uint absoluteExpiryTime;
-      private uint creationTime;
+      private ulong absoluteExpiryTime;
+      private ulong creationTime;
       private string groupId;
       private uint groupSequence;
       private string replyToGroupId;
@@ -165,7 +165,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
       }
 
-      public uint AbsoluteExpiryTime
+      public ulong AbsoluteExpiryTime
       {
          get { return absoluteExpiryTime; }
          set
@@ -175,7 +175,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
       }
 
-      public uint CreationTime
+      public ulong CreationTime
       {
          get { return creationTime; }
          set

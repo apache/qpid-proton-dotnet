@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Types.Messaging
 {
    public enum TerminusDurability
@@ -22,5 +24,28 @@ namespace Apache.Qpid.Proton.Types.Messaging
       None,
       Configuration,
       UnsettledState
+   }
+
+   public static class TerminusDurabilityExtension
+   {
+      public static uint UintValue(this TerminusDurability mode)
+      {
+         return (uint)mode;
+      }
+
+      public static TerminusDurability ValueOf(uint mode)
+      {
+         switch (mode)
+         {
+            case 0:
+               return TerminusDurability.None;
+            case 1:
+               return TerminusDurability.Configuration;
+            case 2:
+               return TerminusDurability.UnsettledState;
+            default:
+               throw new ArgumentOutOfRangeException("Terminus Durability value out or range [0...2]");
+         }
+      }
    }
 }
