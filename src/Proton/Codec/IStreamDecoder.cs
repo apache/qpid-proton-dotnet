@@ -264,7 +264,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      uint? ReadUnsignedInt(Stream stream, IStreamDecoderState state);
+      uint? ReadUnsignedInteger(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it or the default if the
@@ -277,7 +277,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      uint ReadUnsignedInt(Stream stream, IStreamDecoderState state, uint defaultValue);
+      uint ReadUnsignedInteger(Stream stream, IStreamDecoderState state, uint defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte stream and returns it.  If the next value in
@@ -510,6 +510,17 @@ namespace Apache.Qpid.Proton.Codec
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
       IList<V> ReadList<V>(Stream stream, IStreamDecoderState state);
+
+      /// <summary>
+      /// This method expects to read a Binary encoded type from the provided stream and
+      /// constructs a IDeliveryTag type that wraps the bytes encoded. If the encoding is
+      /// NULL AMQP type then this method returns null.
+      /// </summary>
+      /// <param name="stream">The stream to read the encoded value from</param>
+      /// <param name="state">A decoder state instance to use when decoding</param>
+      /// <returns>The decoded object or null if the encoding was null.</returns>
+      /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
+      IDeliveryTag ReadDeliveryTag(Stream stream, IStreamDecoderState state);
 
       /// <summary>
       /// Reads from the given IProtonstream instance and returns a ITypeDecoder that can read the

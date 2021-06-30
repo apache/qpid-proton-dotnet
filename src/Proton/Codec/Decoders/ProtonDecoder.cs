@@ -390,7 +390,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public uint? ReadUnsignedInt(IProtonBuffer buffer, IDecoderState state)
+      public uint? ReadUnsignedInteger(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
@@ -409,7 +409,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public uint ReadUnsignedInt(IProtonBuffer buffer, IDecoderState state, uint defaultValue)
+      public uint ReadUnsignedInteger(IProtonBuffer buffer, IDecoderState state, uint defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
@@ -736,6 +736,23 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          else
          {
             throw SignalUnexpectedType(val, typeof(T).MakeArrayType());
+         }
+      }
+
+      public IDeliveryTag ReadDeliveryTag(IProtonBuffer buffer, IDecoderState state)
+      {
+         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+
+         switch (encodingCode)
+         {
+            case EncodingCodes.VBin8:
+               return new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(buffer, state));
+            case EncodingCodes.VBin32:
+               return new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(buffer, state));
+            case EncodingCodes.Null:
+               return null;
+            default:
+               throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
          }
       }
 

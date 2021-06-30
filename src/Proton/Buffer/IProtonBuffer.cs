@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// will be thrown if there is no backing array and an access operation occurs.
       /// </summary>
       /// <returns>true if the buffer has a backing byte array</returns>
-      bool HasArray();
+      bool HasArray { get; }
 
       /// <summary>
       /// If the buffer implementation has a backing array this method returns that array

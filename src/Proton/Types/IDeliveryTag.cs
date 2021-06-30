@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Types
    /// A representation of the byte value that comprises the delivery tag
    /// that is assigned to the first transfer frame of each new delivery.
    /// </summary>
-   public interface IDeliveryTag : ICloneable
+   public interface IDeliveryTag : ICloneable, IEquatable<IDeliveryTag>
    {
       /// <summary>
       /// The number of bytes that comprise the delivery tag body

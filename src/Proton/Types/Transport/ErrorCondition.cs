@@ -23,8 +23,8 @@ namespace Apache.Qpid.Proton.Types.Transport
 {
    public sealed class ErrorCondition : ICloneable
    {
-      public static readonly ulong DESCRIPTOR_CODE = 0x000000000000001dUL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:error:list");
+      public static readonly ulong DescriptorCode = 0x000000000000001dUL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:error:list");
 
       public ErrorCondition(Symbol condition) : this(condition, null, null) { }
 
