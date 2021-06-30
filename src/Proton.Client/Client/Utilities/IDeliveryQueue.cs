@@ -18,7 +18,7 @@
 using System;
 using System.Threading;
 
-namespace Apache.Qpid.Proton.Client.Util
+namespace Apache.Qpid.Proton.Client.Utilities
 {
    /// <summary>
    /// A generic delivery queue used to hold messages or other delivery objects

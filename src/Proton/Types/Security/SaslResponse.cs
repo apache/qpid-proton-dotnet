@@ -16,7 +16,7 @@
  */
 
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Engine.Utils;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Types.Security
 {

@@ -19,9 +19,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Apache.Qpid.Proton.Engine.Utils;
 
-namespace Apache.Qpid.Proton.Engine.Utils
+namespace Apache.Qpid.Proton.Utilities
 {
    public class RingQueueTests
    {

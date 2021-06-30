@@ -19,7 +19,7 @@ using System;
 using System.Text;
 using System.Threading;
 
-namespace Apache.Qpid.Proton.Client.Util
+namespace Apache.Qpid.Proton.Client.Utilities
 {
    public sealed class IdGenerator
    {

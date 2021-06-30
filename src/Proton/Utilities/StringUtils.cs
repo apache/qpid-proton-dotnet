@@ -18,7 +18,7 @@
 using System.Text;
 using Apache.Qpid.Proton.Buffer;
 
-namespace Apache.Qpid.Proton.Engine.Utils
+namespace Apache.Qpid.Proton.Utilities
 {
    /// <summary>
    /// A collection of utility methods used for String types such as truncation

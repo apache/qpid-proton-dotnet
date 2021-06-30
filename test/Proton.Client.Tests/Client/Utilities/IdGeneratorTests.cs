@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
 
-namespace Apache.Qpid.Proton.Client.Util
+namespace Apache.Qpid.Proton.Client.Utilities
 {
    public class IdGeneratorTests
    {

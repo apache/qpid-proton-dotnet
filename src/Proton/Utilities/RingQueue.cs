@@ -19,7 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Apache.Qpid.Proton.Engine.Utils
+namespace Apache.Qpid.Proton.Utilities
 {
    /// <summary>
    /// Simple Ring Queue implementation that has an enforced max size value.

@@ -20,7 +20,7 @@ using System.Threading;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Client.Impl;
 
-namespace Apache.Qpid.Proton.Client.Util
+namespace Apache.Qpid.Proton.Client.Utilities
 {
    /// <summary>
    /// Simple first in / first out delivery queue with no reordering for

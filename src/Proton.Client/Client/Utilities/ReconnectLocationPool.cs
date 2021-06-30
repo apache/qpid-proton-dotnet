@@ -18,7 +18,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Apache.Qpid.Proton.Client.Util
+namespace Apache.Qpid.Proton.Client.Utilities
 {
    public sealed class ReconnectLocationPool
    {
