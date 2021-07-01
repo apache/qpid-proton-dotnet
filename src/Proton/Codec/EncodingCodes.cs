@@ -201,29 +201,29 @@ namespace Apache.Qpid.Proton.Codec
       /// <summary>
       /// Indicates that a small List encoding follows and the next two bytes will indicate the total list
       /// encoding size and the number of entries in the list respectively. Each element of the list is
-      /// then encoded using their noraml AMQP encoded form.
+      /// then encoded using their normal AMQP encoded form.
       /// </summary>
       List8 = 0xc0,
 
       /// <summary>
       /// Indicates that a List encoding follows and the next eight bytes will indicate the total list
       /// encoding size and the number of entries in the list respectively as integer values. Each element
-      /// of the list is then encoded using their noraml AMQP encoded form.
+      /// of the list is then encoded using their normal AMQP encoded form.
       /// </summary>
       List32 = 0xd0,
 
       /// <summary>
       /// Indicates that a small Map encoding follows and the next two bytes will indicate the total Map
-      /// encoding size and the number of entries in the Map respectively (read as integer vlaues). .
-      /// Each entry of the Map is then encoded using their noraml AMQP encoded form. The total Map size
+      /// encoding size and the number of entries in the Map respectively (read as integer values). .
+      /// Each entry of the Map is then encoded using their normal AMQP encoded form. The total Map size
       /// is one half the number of elements indicated by the number of entries value read.
       /// </summary>
       Map8 = 0xc1,
 
       /// <summary>
       /// Indicates that a Map encoding follows and the next eight bytes will indicate the total Map
-      /// encoding size and the number of entries in the Map respectively (read as integer vlaues).
-      /// Each entry of the Map is then encoded using their noraml AMQP encoded form. The total Map
+      /// encoding size and the number of entries in the Map respectively (read as integer values).
+      /// Each entry of the Map is then encoded using their normal AMQP encoded form. The total Map
       /// size is one half the number of elements indicated by the number of entries value read.
       /// </summary>
       Map32 = 0xd1,
@@ -231,14 +231,14 @@ namespace Apache.Qpid.Proton.Codec
       /// <summary>
       /// Indicates that a small array encoding follows.  The array is encoded using the next three
       /// bytes to represent the total encoded array size, the number of entries in the array and the
-      /// encoding code of the type that comprieses the array in that order.
+      /// encoding code of the type that comprises the array in that order.
       /// </summary>
       Array8 = 0xe0,
 
       /// <summary>
       /// Indicates that a array encoding follows.  The array is encoded using the next nine
       /// bytes to represent the total encoded array size, the number of entries in the array and the
-      /// encoding code of the type that comprieses the array in that order.
+      /// encoding code of the type that comprises the array in that order.
       /// </summary>
       Array32 = 0xf0
 
