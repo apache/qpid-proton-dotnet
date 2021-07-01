@@ -66,22 +66,22 @@ namespace Apache.Qpid.Proton.Buffer
       /// Returns true if the current read offset is less than the current write offset meaning
       /// there are bytes available for reading.
       /// </summary>
-      bool Readable { get; }
+      bool Readable => WriteOffset - ReadOffset > 0;
 
       /// <summary>
       /// Returns the number of bytes that can currently be read from this buffer.
       /// </summary>
-      int ReadableBytes { get; }
+      int ReadableBytes => WriteOffset - ReadOffset;
 
       /// <summary>
       /// Returns true if write offset is less than the current buffer capacity limit.
       /// </summary>
-      bool Writable { get; }
+      bool Writable => Capacity - WriteOffset > 0;
 
       /// <summary>
       /// Returns the number of bytes that can currently be written from this buffer.
       /// </summary>
-      int WritableBytes { get; }
+      int WritableBytes => Capacity - WriteOffset;
 
       /// <summary>
       /// Gets or sets the current read offset in this buffer.  If the read offset is set to
