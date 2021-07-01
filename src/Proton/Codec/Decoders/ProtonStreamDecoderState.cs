@@ -16,17 +16,19 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Buffer;
+using System.IO;
 
 namespace Apache.Qpid.Proton.Codec.Decoders
 {
-   public class ProtonDecoderState : IDecoderState
+   public class ProtonStreamDecoderState : IStreamDecoderState
    {
-      private ProtonDecoder decoder;
+      private ProtonStreamDecoder decoder;
 
-      public ProtonDecoderState(ProtonDecoder decoder)
+      public IStreamDecoder Decoder => decoder;
+
+      public ProtonStreamDecoderState(ProtonStreamDecoder parent) : base()
       {
-         this.decoder = decoder;
+         this.decoder = parent;
       }
 
       /// <summary>
@@ -34,47 +36,39 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// done from the decoder associated with this decoder state instance.  If no
       /// decoder is registered then the implementation uses its own decoding algorithm.
       /// </summary>
-      public IUtf8Decoder Utf8Decoder { get; set; }
+      public IUtf8StreamDecoder Utf8Decoder { get; set; }
 
       public void Reset()
       {
-         // Nothing needed yet.
+         throw new System.NotImplementedException();
       }
 
-      public IDecoder Decoder
-      {
-         get { return this.decoder; }
-      }
-
-      public string DecodeUtf8(IProtonBuffer buffer, int length)
+      public string DecodeUtf8(Stream stream, int length)
       {
          if (Utf8Decoder == null)
          {
-            return InternalDecode(buffer, length);
+            return InternalDecode(stream, length);
          }
          else
          {
-            int originalPosition = buffer.ReadOffset;
-
             try
             {
-               return Utf8Decoder.DecodeUTF8(buffer, length);
+               return Utf8Decoder.DecodeUTF8(stream, length);
             }
             catch (Exception ex)
             {
                throw new DecodeException("Cannot parse encoded UTF8 String", ex);
             }
-            finally
-            {
-               buffer.ReadOffset = originalPosition + length;
-            }
          }
       }
 
-      private string InternalDecode(IProtonBuffer buffer, int length)
+      private string InternalDecode(Stream stream, int length)
       {
          byte[] byteArray = new byte[length];
-         buffer.GetBytes(buffer.ReadOffset, byteArray);
+         if (stream.Read(byteArray, 0, length) != length)
+         {
+            throw new DecodeEOFException("Unable to read the required number of bytes to decode a string");
+         }
 
          return System.Text.Encoding.UTF8.GetString(byteArray);
       }

@@ -552,7 +552,7 @@ namespace Apache.Qpid.Proton.Codec
       /// </summary>
       /// <param name="decoder">A described type decoder to register</param>
       /// <returns>This IDecoder instance.</returns>
-      IStreamTypeDecoder RegisterDescribedTypeDecoder(IStreamDescribedTypeDecoder decoder);
+      IStreamDecoder RegisterDescribedTypeDecoder(IStreamDescribedTypeDecoder decoder);
 
    }
 }

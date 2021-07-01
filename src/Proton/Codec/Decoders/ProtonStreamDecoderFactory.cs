@@ -25,11 +25,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders
    /// <summary>
    /// Defines a factory class that creates Proton specific Decoder types.
    /// </summary>
-   public sealed class ProtonDecoderFactory
+   public sealed class ProtonStreamDecoderFactory
    {
-      public static ProtonDecoder Create()
+      public static ProtonStreamDecoder Create()
       {
-         ProtonDecoder decoder = new ProtonDecoder();
+         ProtonStreamDecoder decoder = new ProtonStreamDecoder();
 
          AddMessagingTypeDecoders(decoder);
          AddTransactionTypeDecoders(decoder);
@@ -38,16 +38,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return decoder;
       }
 
-      public static ProtonDecoder CreateSasl()
+      public static ProtonStreamDecoder CreateSasl()
       {
-         ProtonDecoder decoder = new ProtonDecoder();
+         ProtonStreamDecoder decoder = new ProtonStreamDecoder();
 
          AddSaslTypeDecoders(decoder);
 
          return decoder;
       }
 
-      private static void AddMessagingTypeDecoders(ProtonDecoder Decoder)
+      private static void AddMessagingTypeDecoders(ProtonStreamDecoder Decoder)
       {
          Decoder.RegisterDescribedTypeDecoder(new AcceptedTypeDecoder());
          Decoder.RegisterDescribedTypeDecoder(new AmqpSequenceTypeDecoder());
@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          Decoder.RegisterDescribedTypeDecoder(new TargetTypeDecoder());
       }
 
-      private static void AddTransactionTypeDecoders(ProtonDecoder Decoder)
+      private static void AddTransactionTypeDecoders(ProtonStreamDecoder Decoder)
       {
          Decoder.RegisterDescribedTypeDecoder(new CoordinatorTypeDecoder());
          Decoder.RegisterDescribedTypeDecoder(new DeclaredTypeDecoder());
@@ -80,7 +80,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          Decoder.RegisterDescribedTypeDecoder(new TransactionalStateTypeDecoder());
       }
 
-      private static void AddTransportTypeDecoders(ProtonDecoder Decoder)
+      private static void AddTransportTypeDecoders(ProtonStreamDecoder Decoder)
       {
          Decoder.RegisterDescribedTypeDecoder(new AttachTypeDecoder());
          Decoder.RegisterDescribedTypeDecoder(new BeginTypeDecoder());
@@ -94,7 +94,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          Decoder.RegisterDescribedTypeDecoder(new TransferTypeDecoder());
       }
 
-      private static void AddSaslTypeDecoders(ProtonDecoder decoder)
+      private static void AddSaslTypeDecoders(ProtonStreamDecoder decoder)
       {
          decoder.RegisterDescribedTypeDecoder(new SaslChallengeTypeDecoder());
          decoder.RegisterDescribedTypeDecoder(new SaslInitTypeDecoder());

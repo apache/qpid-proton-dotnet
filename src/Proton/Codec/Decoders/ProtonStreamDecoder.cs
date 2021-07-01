@@ -17,13 +17,14 @@
 
 using System;
 using System.Collections.Generic;
-using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Codec.Decoders.Primitives;
+using System.IO;
+using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Decoders
 {
-   public sealed class ProtonDecoder : IDecoder
+   public sealed class ProtonStreamDecoder : IStreamDecoder
    {
       /// <summary>
       /// The decoders for primitives are fixed and cannot be altered by users who want
@@ -32,7 +33,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// </summary>
       private static readonly IPrimitiveTypeDecoder[] primitiveDecoders = new IPrimitiveTypeDecoder[256];
 
-      static ProtonDecoder()
+      static ProtonStreamDecoder()
       {
          primitiveDecoders[((int)EncodingCodes.Boolean)] = new BooleanTypeDecoder();
          primitiveDecoders[((int)EncodingCodes.BooleanTrue)] = new BooleanTrueTypeDecoder();
@@ -91,13 +92,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// Registry of decoders for described types which can be updated with user defined
       /// decoders as well as the default decoders.
       /// </summary>
-      private IDictionary<object, IDescribedTypeDecoder> describedTypeDecoders =
-         new Dictionary<object, IDescribedTypeDecoder>();
+      private IDictionary<object, IStreamDescribedTypeDecoder> describedTypeDecoders =
+         new Dictionary<object, IStreamDescribedTypeDecoder>();
 
       /// <summary>
       /// Quick access to decoders that handle AMQP types like Transfer, Properties etc.
       /// </summary>
-      private IDescribedTypeDecoder[] amqpTypeDecoders = new IDescribedTypeDecoder[256];
+      private IStreamDescribedTypeDecoder[] amqpTypeDecoders = new IStreamDescribedTypeDecoder[256];
 
       // Internal Decoders used to prevent user to access Proton specific decoding methods
       private static readonly Symbol8TypeDecoder symbol8Decoder;
@@ -111,21 +112,21 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       private static readonly String8TypeDecoder string8Decoder;
       private static readonly String32TypeDecoder string32Decoder;
 
-      private ProtonDecoderState cachedDecoderState;
+      private ProtonStreamDecoderState cachedDecoderState;
 
-      public IDecoderState NewDecoderState()
+      public IStreamDecoderState NewDecoderState()
       {
-         return new ProtonDecoderState(this);
+         return new ProtonStreamDecoderState(this);
       }
 
-      public IDecoderState CachedDecoderState()
+      public IStreamDecoderState CachedDecoderState()
       {
-         return cachedDecoderState ??= new ProtonDecoderState(this);
+         return cachedDecoderState ??= new ProtonStreamDecoderState(this);
       }
 
-      public bool? ReadBoolean(IProtonBuffer buffer, IDecoderState state)
+      public bool? ReadBoolean(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -134,7 +135,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.BooleanFalse:
                return false;
             case EncodingCodes.Boolean:
-               return buffer.ReadByte() == 0 ? false : true;
+               return stream.ReadByte() == 0 ? false : true;
             case EncodingCodes.Null:
                return null;
             default:
@@ -142,9 +143,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public bool ReadBoolean(IProtonBuffer buffer, IDecoderState state, bool defaultValue)
+      public bool ReadBoolean(Stream stream, IStreamDecoderState state, bool defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -153,7 +154,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.BooleanFalse:
                return false;
             case EncodingCodes.Boolean:
-               return buffer.ReadByte() == 0 ? false : true;
+               return stream.ReadByte() == 0 ? false : true;
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -161,14 +162,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public sbyte? ReadByte(IProtonBuffer buffer, IDecoderState state)
+      public sbyte? ReadByte(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Byte:
-               return buffer.ReadByte();
+               return ProtonStreamReadUtils.ReadByte(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -176,14 +177,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public sbyte ReadByte(IProtonBuffer buffer, IDecoderState state, sbyte defaultValue)
+      public sbyte ReadByte(Stream stream, IStreamDecoderState state, sbyte defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Byte:
-               return buffer.ReadByte();
+               return ProtonStreamReadUtils.ReadByte(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -191,14 +192,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public byte? ReadUnsignedByte(IProtonBuffer buffer, IDecoderState state)
+      public byte? ReadUnsignedByte(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.UByte:
-               return buffer.ReadUnsignedByte();
+               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -206,14 +207,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public byte ReadUnsignedByte(IProtonBuffer buffer, IDecoderState state, byte defaultValue)
+      public byte ReadUnsignedByte(Stream stream, IStreamDecoderState state, byte defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.UByte:
-               return buffer.ReadUnsignedByte();
+               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -221,14 +222,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public char? ReadCharacter(IProtonBuffer buffer, IDecoderState state)
+      public char? ReadCharacter(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Char:
-               return (char)buffer.ReadInt();
+               return (char)ProtonStreamReadUtils.ReadInt(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -236,14 +237,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public char ReadCharacter(IProtonBuffer buffer, IDecoderState state, char defaultValue)
+      public char ReadCharacter(Stream stream, IStreamDecoderState state, char defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Char:
-               return (char)buffer.ReadInt();
+               return (char)ProtonStreamReadUtils.ReadInt(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -251,14 +252,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public Decimal32 ReadDecimal32(IProtonBuffer buffer, IDecoderState state)
+      public Decimal32 ReadDecimal32(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Decimal32:
-               return new Decimal32(buffer.ReadUnsignedInt());
+               return new Decimal32(ProtonStreamReadUtils.ReadUnsignedInt(stream));
             case EncodingCodes.Null:
                return null;
             default:
@@ -266,14 +267,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public Decimal64 ReadDecimal64(IProtonBuffer buffer, IDecoderState state)
+      public Decimal64 ReadDecimal64(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Decimal64:
-               return new Decimal64(buffer.ReadUnsignedLong());
+               return new Decimal64(ProtonStreamReadUtils.ReadUnsignedLong(stream));
             case EncodingCodes.Null:
                return null;
             default:
@@ -281,14 +282,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public Decimal128 ReadDecimal128(IProtonBuffer buffer, IDecoderState state)
+      public Decimal128 ReadDecimal128(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Decimal128:
-               return new Decimal128(buffer.ReadUnsignedLong(), buffer.ReadUnsignedLong());
+               return new Decimal128(ProtonStreamReadUtils.ReadUnsignedLong(stream), ProtonStreamReadUtils.ReadUnsignedLong(stream));
             case EncodingCodes.Null:
                return null;
             default:
@@ -296,14 +297,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public short? ReadShort(IProtonBuffer buffer, IDecoderState state)
+      public short? ReadShort(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Short:
-               return buffer.ReadShort();
+               return ProtonStreamReadUtils.ReadShort(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -311,14 +312,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public short ReadShort(IProtonBuffer buffer, IDecoderState state, short defaultValue)
+      public short ReadShort(Stream stream, IStreamDecoderState state, short defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Short:
-               return buffer.ReadShort();
+               return ProtonStreamReadUtils.ReadShort(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -326,14 +327,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public ushort? ReadUnsignedShort(IProtonBuffer buffer, IDecoderState state)
+      public ushort? ReadUnsignedShort(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.UShort:
-               return buffer.ReadUnsignedShort();
+               return ProtonStreamReadUtils.ReadUnsignedShort(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -341,14 +342,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public ushort ReadUnsignedShort(IProtonBuffer buffer, IDecoderState state, ushort defaultValue)
+      public ushort ReadUnsignedShort(Stream stream, IStreamDecoderState state, ushort defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.UShort:
-               return buffer.ReadUnsignedShort();
+               return ProtonStreamReadUtils.ReadUnsignedShort(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -356,16 +357,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public int? ReadInt(IProtonBuffer buffer, IDecoderState state)
+      public int? ReadInt(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.SmallInt:
-               return buffer.ReadByte();
+               return ProtonStreamReadUtils.ReadByte(stream);
             case EncodingCodes.Int:
-               return buffer.ReadInt();
+               return ProtonStreamReadUtils.ReadInt(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -373,16 +374,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public int ReadInt(IProtonBuffer buffer, IDecoderState state, int defaultValue)
+      public int ReadInt(Stream stream, IStreamDecoderState state, int defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.SmallInt:
-               return buffer.ReadByte();
+               return ProtonStreamReadUtils.ReadByte(stream);
             case EncodingCodes.Int:
-               return buffer.ReadInt();
+               return ProtonStreamReadUtils.ReadInt(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -390,18 +391,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public uint? ReadUnsignedInteger(IProtonBuffer buffer, IDecoderState state)
+      public uint? ReadUnsignedInteger(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.UInt0:
                return 0u;
             case EncodingCodes.SmallUInt:
-               return buffer.ReadUnsignedByte();
+               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
             case EncodingCodes.UInt:
-               return buffer.ReadUnsignedInt();
+               return ProtonStreamReadUtils.ReadUnsignedInt(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -409,18 +410,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public uint ReadUnsignedInteger(IProtonBuffer buffer, IDecoderState state, uint defaultValue)
+      public uint ReadUnsignedInteger(Stream stream, IStreamDecoderState state, uint defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.UInt0:
                return 0u;
             case EncodingCodes.SmallUInt:
-               return buffer.ReadUnsignedByte();
+               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
             case EncodingCodes.UInt:
-               return buffer.ReadUnsignedInt();
+               return ProtonStreamReadUtils.ReadUnsignedInt(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -428,16 +429,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public long? ReadLong(IProtonBuffer buffer, IDecoderState state)
+      public long? ReadLong(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.SmallLong:
-               return buffer.ReadByte();
+               return ProtonStreamReadUtils.ReadByte(stream);
             case EncodingCodes.Long:
-               return buffer.ReadLong();
+               return ProtonStreamReadUtils.ReadLong(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -445,16 +446,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public long ReadLong(IProtonBuffer buffer, IDecoderState state, long defaultValue)
+      public long ReadLong(Stream stream, IStreamDecoderState state, long defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.SmallLong:
-               return buffer.ReadByte();
+               return ProtonStreamReadUtils.ReadByte(stream);
             case EncodingCodes.Long:
-               return buffer.ReadLong();
+               return ProtonStreamReadUtils.ReadLong(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -462,18 +463,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public ulong? ReadUnsignedLong(IProtonBuffer buffer, IDecoderState state)
+      public ulong? ReadUnsignedLong(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.ULong0:
                return 0ul;
             case EncodingCodes.SmallULong:
-               return buffer.ReadUnsignedByte();
+               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
             case EncodingCodes.ULong:
-               return buffer.ReadUnsignedLong();
+               return ProtonStreamReadUtils.ReadUnsignedLong(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -481,18 +482,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public ulong ReadUnsignedLong(IProtonBuffer buffer, IDecoderState state, ulong defaultValue)
+      public ulong ReadUnsignedLong(Stream stream, IStreamDecoderState state, ulong defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.ULong0:
                return 0ul;
             case EncodingCodes.SmallULong:
-               return buffer.ReadUnsignedByte();
+               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
             case EncodingCodes.ULong:
-               return buffer.ReadUnsignedLong();
+               return ProtonStreamReadUtils.ReadUnsignedLong(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -500,14 +501,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public float? ReadFloat(IProtonBuffer buffer, IDecoderState state)
+      public float? ReadFloat(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Float:
-               return buffer.ReadFloat();
+               return ProtonStreamReadUtils.ReadFloat(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -515,14 +516,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public float ReadFloat(IProtonBuffer buffer, IDecoderState state, float defaultValue)
+      public float ReadFloat(Stream stream, IStreamDecoderState state, float defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Float:
-               return buffer.ReadFloat();
+               return ProtonStreamReadUtils.ReadFloat(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -530,14 +531,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public double? ReadDouble(IProtonBuffer buffer, IDecoderState state)
+      public double? ReadDouble(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Double:
-               return buffer.ReadDouble();
+               return ProtonStreamReadUtils.ReadDouble(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -545,14 +546,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public double ReadDouble(IProtonBuffer buffer, IDecoderState state, double defaultValue)
+      public double ReadDouble(Stream stream, IStreamDecoderState state, double defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Double:
-               return buffer.ReadDouble();
+               return ProtonStreamReadUtils.ReadDouble(stream);
             case EncodingCodes.Null:
                return defaultValue;
             default:
@@ -560,16 +561,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public IProtonBuffer ReadBinary(IProtonBuffer buffer, IDecoderState state)
+      public IProtonBuffer ReadBinary(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.VBin8:
-               return (IProtonBuffer)binary8Decoder.ReadValue(buffer, state);
+               return (IProtonBuffer)binary8Decoder.ReadValue(stream, state);
             case EncodingCodes.VBin32:
-               return (IProtonBuffer)binary32Decoder.ReadValue(buffer, state);
+               return (IProtonBuffer)binary32Decoder.ReadValue(stream, state);
             case EncodingCodes.Null:
                return null;
             default:
@@ -577,16 +578,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public string ReadString(IProtonBuffer buffer, IDecoderState state)
+      public string ReadString(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Str8:
-               return (string)string8Decoder.ReadValue(buffer, state);
+               return (string)string8Decoder.ReadValue(stream, state);
             case EncodingCodes.Str32:
-               return (string)string32Decoder.ReadValue(buffer, state);
+               return (string)string32Decoder.ReadValue(stream, state);
             case EncodingCodes.Null:
                return null;
             default:
@@ -594,16 +595,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public Symbol ReadSymbol(IProtonBuffer buffer, IDecoderState state)
+      public Symbol ReadSymbol(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Sym8:
-               return (Symbol)symbol8Decoder.ReadValue(buffer, state);
+               return (Symbol)symbol8Decoder.ReadValue(stream, state);
             case EncodingCodes.Sym32:
-               return (Symbol)symbol32Decoder.ReadValue(buffer, state);
+               return (Symbol)symbol32Decoder.ReadValue(stream, state);
             case EncodingCodes.Null:
                return null;
             default:
@@ -611,19 +612,19 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public string ReadSymbolAsString(IProtonBuffer buffer, IDecoderState state)
+      public string ReadSymbolAsString(Stream stream, IStreamDecoderState state)
       {
-         return ReadSymbol(buffer, state).ToString();
+         return ReadSymbol(stream, state).ToString();
       }
 
-      public ulong? ReadTimestamp(IProtonBuffer buffer, IDecoderState state)
+      public ulong? ReadTimestamp(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Timestamp:
-               return buffer.ReadUnsignedLong();
+               return ProtonStreamReadUtils.ReadUnsignedLong(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -631,14 +632,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public Guid? ReadGuid(IProtonBuffer buffer, IDecoderState state)
+      public Guid? ReadGuid(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Uuid:
-               return UuidTypeDecoder.ReadUuid(buffer);
+               return UuidTypeDecoder.ReadUuid(stream);
             case EncodingCodes.Null:
                return null;
             default:
@@ -646,16 +647,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public IDictionary<K, V> ReadMap<K, V>(IProtonBuffer buffer, IDecoderState state)
+      public IDictionary<K, V> ReadMap<K, V>(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.Map8:
-               return (IDictionary<K, V>)map8Decoder.ReadValue(buffer, state);
+               return (IDictionary<K, V>)map8Decoder.ReadValue(stream, state);
             case EncodingCodes.Map32:
-               return (IDictionary<K, V>)map32Decoder.ReadValue(buffer, state);
+               return (IDictionary<K, V>)map32Decoder.ReadValue(stream, state);
             case EncodingCodes.Null:
                return null;
             default:
@@ -663,18 +664,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public IList<V> ReadList<V>(IProtonBuffer buffer, IDecoderState state)
+      public IList<V> ReadList<V>(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.List0:
                return (IList<V>)Array.Empty<V>();
             case EncodingCodes.List8:
-               return (IList<V>)list8Decoder.ReadValue(buffer, state);
+               return (IList<V>)list8Decoder.ReadValue(stream, state);
             case EncodingCodes.List32:
-               return (IList<V>)list32Decoder.ReadValue(buffer, state);
+               return (IList<V>)list32Decoder.ReadValue(stream, state);
             case EncodingCodes.Null:
                return null;
             default:
@@ -682,21 +683,21 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public object ReadObject(IProtonBuffer buffer, IDecoderState state)
+      public object ReadObject(Stream stream, IStreamDecoderState state)
       {
-         ITypeDecoder decoder = ReadNextTypeDecoder(buffer, state);
+         IStreamTypeDecoder decoder = ReadNextTypeDecoder(stream, state);
 
          if (decoder == null)
          {
             throw new DecodeException("Unknown type constructor in encoded bytes");
          }
 
-         return decoder.ReadValue(buffer, state);
+         return decoder.ReadValue(stream, state);
       }
 
-      public T ReadObject<T>(IProtonBuffer buffer, IDecoderState state)
+      public T ReadObject<T>(Stream stream, IStreamDecoderState state)
       {
-         object result = ReadObject(buffer, state);
+         object result = ReadObject(stream, state);
 
          if (result.GetType().IsAssignableTo(typeof(T)))
          {
@@ -708,9 +709,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public T[] ReadMultiple<T>(IProtonBuffer buffer, IDecoderState state)
+      public T[] ReadMultiple<T>(Stream stream, IStreamDecoderState state)
       {
-         Object val = ReadObject(buffer, state);
+         Object val = ReadObject(stream, state);
 
          if (val == null)
          {
@@ -739,16 +740,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public IDeliveryTag ReadDeliveryTag(IProtonBuffer buffer, IDecoderState state)
+      public IDeliveryTag ReadDeliveryTag(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.VBin8:
-               return new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(buffer, state));
+               return new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(stream, state));
             case EncodingCodes.VBin32:
-               return new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(buffer, state));
+               return new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(stream, state));
             case EncodingCodes.Null:
                return null;
             default:
@@ -756,31 +757,38 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public ITypeDecoder ReadNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
+      public IStreamTypeDecoder ReadNextTypeDecoder(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(buffer);
+         EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          if (encodingCode == EncodingCodes.DescribedTypeIndicator)
          {
-            int readPos = buffer.ReadOffset;
-            try
+            if (stream.CanSeek)
             {
-               ulong result = ReadUnsignedLong(buffer, state) ?? Byte.MaxValue;
+               long position = stream.Position;
+               try
+               {
+                  ulong result = ReadUnsignedLong(stream, state) ?? 255;
 
-               if (result > 0 && result < Byte.MaxValue && amqpTypeDecoders[(int)result] != null)
-               {
-                  return amqpTypeDecoders[(int)result];
+                  if (result > 0 && result < Byte.MaxValue && amqpTypeDecoders[(int)result] != null)
+                  {
+                     return amqpTypeDecoders[(int)result];
+                  }
+                  else
+                  {
+                     stream.Seek(position, SeekOrigin.Begin);
+                     return SlowReadNextTypeDecoder(stream, state);
+                  }
                }
-               else
+               catch (Exception)
                {
-                  buffer.ReadOffset = readPos;
-                  return SlowReadNextTypeDecoder(buffer, state);
+                  stream.Seek(position, SeekOrigin.Begin);
+                  return SlowReadNextTypeDecoder(stream, state);
                }
             }
-            catch (Exception)
+            else
             {
-               buffer.ReadOffset = readPos;
-               return SlowReadNextTypeDecoder(buffer, state);
+               return SlowReadNextTypeDecoder(stream, state);
             }
          }
          else
@@ -789,46 +797,68 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      private ITypeDecoder SlowReadNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
+      private IStreamTypeDecoder SlowReadNextTypeDecoder(Stream stream, IStreamDecoderState state)
       {
-         Object descriptor;
-         int readPos = buffer.ReadOffset;
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
+         object descriptor;
 
-         try
+         switch (encodingCode)
          {
-            descriptor = ReadUnsignedLong(buffer, state);
-         }
-         catch (Exception)
-         {
-            buffer.ReadOffset = readPos;
-            descriptor = ReadObject(buffer, state);
+            case EncodingCodes.SmallULong:
+               descriptor = ProtonStreamReadUtils.ReadUnsignedByte(stream);
+               break;
+            case EncodingCodes.ULong:
+               descriptor = ProtonStreamReadUtils.ReadUnsignedLong(stream);
+               break;
+            case EncodingCodes.Sym8:
+               descriptor = symbol8Decoder.ReadValue(stream, state);
+               break;
+            case EncodingCodes.Sym32:
+               descriptor = symbol32Decoder.ReadValue(stream, state);
+               break;
+            default:
+               throw new DecodeException("Expected Descriptor type but found encoding: " + encodingCode);
          }
 
-         ITypeDecoder typeDecoder = describedTypeDecoders[descriptor];
-         if (typeDecoder == null)
+         IStreamTypeDecoder streamTypeDecoder = describedTypeDecoders[descriptor];
+         if (streamTypeDecoder == null)
          {
-            typeDecoder = HandleUnknownDescribedType(descriptor);
+            streamTypeDecoder = HandleUnknownDescribedType(descriptor);
          }
 
-         return typeDecoder;
+         return streamTypeDecoder;
       }
 
-      public ITypeDecoder PeekNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
+      public IStreamTypeDecoder PeekNextTypeDecoder(Stream stream, IStreamDecoderState state)
       {
-         int offset = buffer.ReadOffset;
-         try
+         if (stream.CanSeek)
          {
-            return ReadNextTypeDecoder(buffer, state);
+            long position = stream.Position;
+            try
+            {
+               return ReadNextTypeDecoder(stream, state);
+            }
+            finally
+            {
+               try
+               {
+                  stream.Seek(position, SeekOrigin.Begin);
+               }
+               catch (IOException e)
+               {
+                  throw new DecodeException("Error while reseting marked stream", e);
+               }
+            }
          }
-         finally
+         else
          {
-            buffer.ReadOffset = offset;
+            throw new InvalidOperationException("The provided stream doesn't support stream marks");
          }
       }
 
-      public IDecoder RegisterDescribedTypeDecoder(IDescribedTypeDecoder decoder)
+      public IStreamDecoder RegisterDescribedTypeDecoder(IStreamDescribedTypeDecoder decoder)
       {
-         IDescribedTypeDecoder describedTypeDecoder = decoder;
+         IStreamDescribedTypeDecoder describedTypeDecoder = decoder;
 
          // Cache AMQP type decoders in the quick lookup array.
          if (decoder.DescriptorCode.CompareTo(amqpTypeDecoders.Length) < 0)
@@ -842,15 +872,15 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return this;
       }
 
-      private static EncodingCodes ReadEncodingCode(IProtonBuffer buffer)
+      private static EncodingCodes ReadEncodingCode(Stream stream)
       {
          try
          {
-            return (EncodingCodes)buffer.ReadByte();
+            return (EncodingCodes)stream.ReadByte();
          }
          catch (IndexOutOfRangeException error)
          {
-            throw new DecodeEOFException("Read of new type failed because buffer exhausted.", error);
+            throw new DecodeEOFException("Read of new type failed because stream exhausted.", error);
          }
       }
 
@@ -860,9 +890,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");
       }
 
-      private ITypeDecoder HandleUnknownDescribedType(in Object descriptor)
+      private IStreamTypeDecoder HandleUnknownDescribedType(in Object descriptor)
       {
-         ITypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
+         IStreamTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
          describedTypeDecoders.Add(descriptor, (UnknownDescribedTypeDecoder)typeDecoder);
 
          return typeDecoder;

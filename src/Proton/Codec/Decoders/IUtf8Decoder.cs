@@ -15,30 +15,26 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Types
+using Apache.Qpid.Proton.Buffer;
+
+namespace Apache.Qpid.Proton.Codec
 {
    /// <summary>
-   /// Defines an object that can carry an AMQP descriport and some object which
-   /// was decoded from the encoding of an AMQP described type not known to the
-   /// codec in use when decoding it.
+   /// Interface for an external UTF8 Decoder that can be supplied by a client
+   /// which implements custom decoding logic optimized for the application using
+   /// the Codec.
    /// </summary>
-   public sealed class UnknownDescribedType : IDescribedType
+   public interface IUtf8Decoder
    {
-      internal UnknownDescribedType(object descriptor, object described)
-      {
-         Descriptor = descriptor;
-         Described = described;
-      }
-
       /// <summary>
-      /// Access the descriptor that was used to describe this type
+      /// Decodes a String from the given UTF8 Bytes advancing the buffer read index
+      /// by the given length value once complete.  If the implementation does not advance
+      /// the buffer read index the outcome of future decode calls is not defined.
       /// </summary>
-      public object Descriptor { get; }
-
-      /// <summary>
-      /// Access the object that was conveyed in this described type.
-      /// </summary>
-      public object Described { get; }
+      /// <param name="buffer">The buffer that carries the UTF8 bytes</param>
+      /// <param name="utf8length">the length of the UTF8 string</param>
+      /// <returns>The decoded UTF-8 string</returns>
+      string DecodeUTF8(IProtonBuffer buffer, int utf8length);
 
    }
 }

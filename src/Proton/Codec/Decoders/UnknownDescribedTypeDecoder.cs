@@ -17,11 +17,78 @@
 
 using System;
 using System.IO;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec.Decoders
 {
-   public sealed class UnkownDescribedTypeDecoder
+   public sealed class UnknownDescribedTypeDecoder : AbstractDescribedTypeDecoder
    {
-      // TODO
+      private object descriptor;
+
+      public UnknownDescribedTypeDecoder(object descriptor) : base()
+      {
+         this.descriptor = descriptor;
+      }
+
+      public override Symbol DescriptorSymbol => descriptor as Symbol;
+
+      public override ulong DescriptorCode => ((ulong)(descriptor is ulong ? descriptor : 0));
+
+      public override Type DecodesType() => typeof(IDescribedType);
+
+      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      {
+         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+         object described = decoder.ReadValue(buffer, state);
+
+         return new UnknownDescribedType(descriptor, described);
+      }
+
+      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
+      {
+         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+         UnknownDescribedType[] result = new UnknownDescribedType[count];
+
+         for (int i = 0; i < count; ++i)
+         {
+            Object described = decoder.ReadValue(buffer, state);
+            result[i] = new UnknownDescribedType(descriptor, described);
+         }
+
+         return result;
+      }
+
+      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
+      {
+         state.Decoder.ReadNextTypeDecoder(buffer, state).SkipValue(buffer, state);
+      }
+
+      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      {
+         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
+         object described = decoder.ReadValue(stream, state);
+
+         return new UnknownDescribedType(descriptor, described);
+      }
+
+      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
+      {
+         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
+         UnknownDescribedType[] result = new UnknownDescribedType[count];
+
+         for (int i = 0; i < count; ++i)
+         {
+            Object described = decoder.ReadValue(stream, state);
+            result[i] = new UnknownDescribedType(descriptor, described);
+         }
+
+         return result;
+      }
+
+      public override void SkipValue(Stream stream, IStreamDecoderState state)
+      {
+         state.Decoder.ReadNextTypeDecoder(stream, state).SkipValue(stream, state);
+      }
    }
 }
