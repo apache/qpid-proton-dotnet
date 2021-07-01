@@ -15,53 +15,35 @@
  * limitations under the License.
  */
 
-using System.Text;
+using System;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec.Encoders
 {
-   public class ProtonEncoderState : IEncoderState
+   public sealed class UnknownDescripbedTypeEncoder : ITypeEncoder
    {
-      private ProtonEncoder encoder;
+      public Type EncodesType => typeof(IDescribedType);
 
-      public ProtonEncoderState(ProtonEncoder encoder)
+      public bool IsArrayType => false;
+
+      public void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
-         this.encoder = encoder;
+         IDescribedType theType = (IDescribedType)value;
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
+         state.Encoder.WriteObject(buffer, state, theType.Descriptor);
+         state.Encoder.WriteObject(buffer, state, theType.Described);
       }
 
-      public void Reset()
+      public void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value)
       {
-         // Nothing needed yet.
+         throw new NotImplementedException("Unable to write unknown types as arrays");
       }
 
-      public IEncoder Encoder
+      public void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
-         get { return this.encoder; }
-      }
-
-      public IUtf8Encoder Utf8Encoder { get; set; }
-
-      public IProtonBuffer EncodeUtf8(IProtonBuffer buffer, string value)
-      {
-         if (Utf8Encoder == null)
-         {
-            EncodeUtf8Sequence(buffer, value);
-         }
-         else
-         {
-            Utf8Encoder.EncodeUTF8(buffer, value);
-         }
-
-         return buffer;
-      }
-
-      private void EncodeUtf8Sequence(IProtonBuffer buffer, string value)
-      {
-         UTF8Encoding utf8 = new UTF8Encoding();
-
-         byte[] encoded = utf8.GetBytes(value);
-
-         buffer.WriteBytes(encoded);
+         throw new NotImplementedException("Unable to write unknown types as arrays");
       }
    }
 }
