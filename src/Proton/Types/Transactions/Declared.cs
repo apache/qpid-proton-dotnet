@@ -17,34 +17,32 @@
 
 using System;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Types.Transactions
 {
-   public sealed class Discharge : ICloneable
+   public sealed class Declared : ICloneable
    {
-      public static readonly ulong DescriptorCode = 0x0000000000000032UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:discharge:list");
+      public static readonly ulong DescriptorCode = 0x0000000000000033UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:Declared:list");
 
-      public Discharge() : base() { }
+      public Declared() : base() { }
 
-      public Discharge(Discharge other) : this()
+      public Declared(Declared other) : this()
       {
          TxnId = other.TxnId?.Copy();
-         Fail = other.Fail;
       }
 
       public IProtonBuffer TxnId { get; set; }
 
-      public bool Fail { get; set; }
-
       public object Clone()
       {
-         return new Discharge(this);
+         return new Declared(this);
       }
 
       public override string ToString()
       {
-         return "Discharge{" + "txnId=" + TxnId + ", fail=" + Fail + '}';
+         return "Declared{" + "txnId=" + StringUtils.ToQuotedString(TxnId) + '}';
       }
    }
 }

@@ -21,8 +21,8 @@ namespace Apache.Qpid.Proton.Types.Transactions
 {
    public sealed class Declare : ICloneable
    {
-      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000031UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:declare:list");
+      public static readonly ulong DescriptorCode = 0x0000000000000031UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:declare:list");
 
       public Declare() : base() { }
 

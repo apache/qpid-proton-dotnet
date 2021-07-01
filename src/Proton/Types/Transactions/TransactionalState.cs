@@ -23,8 +23,8 @@ namespace Apache.Qpid.Proton.Types.Transactions
 {
    public sealed class TransactionalState : IDeliveryState
    {
-      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000034UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = Symbol.Lookup("amqp:transactional-state:list");
+      public static readonly ulong DescriptorCode = 0x0000000000000034UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:transactional-state:list");
 
       public TransactionalState() : base() { }
 
