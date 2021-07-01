@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.Str8;
 
-      public override Type DecodesType() => typeof(string);
+      public override Type DecodesType => typeof(string);
 
       protected override int ReadSize(IProtonBuffer buffer, IDecoderState state)
       {

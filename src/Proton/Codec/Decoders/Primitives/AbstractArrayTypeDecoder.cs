@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
    public abstract class AbstractArrayTypeDecoder : AbstractPrimitiveTypeDecoder, IPrimitiveArrayTypeDecoder
    {
-      public override Type DecodesType() => typeof(Array);
+      public override Type DecodesType => typeof(Array);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

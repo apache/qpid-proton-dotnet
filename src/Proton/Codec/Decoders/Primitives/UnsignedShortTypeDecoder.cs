@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.UShort;
 
-      public override Type DecodesType() => typeof(ushort);
+      public override Type DecodesType => typeof(ushort);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

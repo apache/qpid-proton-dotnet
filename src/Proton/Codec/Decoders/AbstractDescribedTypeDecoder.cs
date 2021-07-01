@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public abstract class AbstractDescribedTypeDecoder : IDescribedTypeDecoder, IStreamDescribedTypeDecoder
    {
-      public bool IsArrayType() => false;
+      public bool IsArrayType => false;
 
       #region Described Type Encoder API
 
@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public abstract ulong DescriptorCode { get; }
 
-      public abstract Type DecodesType();
+      public abstract Type DecodesType { get; }
 
       public abstract object ReadValue(IProtonBuffer buffer, IDecoderState state);
 

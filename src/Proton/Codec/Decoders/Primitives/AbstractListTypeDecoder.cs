@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public abstract class AbstractListTypeDecoder : AbstractPrimitiveTypeDecoder, IListTypeDecoder
    {
-      public override Type DecodesType() => typeof(IList);
+      public override Type DecodesType => typeof(IList);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

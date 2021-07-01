@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
 
       public override ulong DescriptorCode => TransactionalState.DescriptorCode;
 
-      public override Type DecodesType() => typeof(TransactionalState);
+      public override Type DecodesType => typeof(TransactionalState);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

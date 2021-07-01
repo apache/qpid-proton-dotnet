@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public override ulong DescriptorCode => ((ulong)(descriptor is ulong ? descriptor : 0));
 
-      public override Type DecodesType() => typeof(IDescribedType);
+      public override Type DecodesType => typeof(IDescribedType);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

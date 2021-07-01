@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public abstract class AbstractSymbolTypeDecoder : AbstractPrimitiveTypeDecoder, ISymbolTypeDecoder
    {
-      public override Type DecodesType() => typeof(Symbol);
+      public override Type DecodesType => typeof(Symbol);
 
       public override Symbol ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

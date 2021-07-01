@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
 
       public override ulong DescriptorCode => SaslResponse.DescriptorCode;
 
-      public override Type DecodesType() => typeof(SaslResponse);
+      public override Type DecodesType => typeof(SaslResponse);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

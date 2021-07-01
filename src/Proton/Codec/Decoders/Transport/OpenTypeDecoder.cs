@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       public override ulong DescriptorCode => Open.DescriptorCode;
 
-      public override Type DecodesType() => typeof(Open);
+      public override Type DecodesType => typeof(Open);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

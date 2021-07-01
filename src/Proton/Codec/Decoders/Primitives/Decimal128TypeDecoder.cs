@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.Decimal64;
 
-      public override Type DecodesType() => typeof(Decimal128);
+      public override Type DecodesType => typeof(Decimal128);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

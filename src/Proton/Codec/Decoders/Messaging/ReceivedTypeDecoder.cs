@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override ulong DescriptorCode => Received.DescriptorCode;
 
-      public override Type DecodesType() => typeof(Received);
+      public override Type DecodesType => typeof(Received);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

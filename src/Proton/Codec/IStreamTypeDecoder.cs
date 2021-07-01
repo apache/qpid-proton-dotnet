@@ -29,13 +29,13 @@ namespace Apache.Qpid.Proton.Codec
       /// The Type that this decoder can read.
       /// </summary>
       /// <returns>The Type value that this type decoder decodes</returns>
-      Type DecodesType();
+      Type DecodesType { get; }
 
       /// <summary>
       /// Returns true if the value that this decoder is going to read is an array type.
       /// </summary>
       /// <returns>true if the decoder instance will read an array types</returns>
-      bool IsArrayType();
+      bool IsArrayType { get; }
 
       /// <summary>
       /// Reads this decoders managed type from the given buffer and returns it.

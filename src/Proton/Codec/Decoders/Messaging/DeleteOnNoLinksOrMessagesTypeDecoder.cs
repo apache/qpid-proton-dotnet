@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override ulong DescriptorCode => DeleteOnNoLinksOrMessages.DescriptorCode;
 
-      public override Type DecodesType() => typeof(DeleteOnNoLinksOrMessages);
+      public override Type DecodesType => typeof(DeleteOnNoLinksOrMessages);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

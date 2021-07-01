@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.UByte;
 
-      public override Type DecodesType() => typeof(byte);
+      public override Type DecodesType => typeof(byte);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

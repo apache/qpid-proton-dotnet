@@ -23,11 +23,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public abstract class AbstractPrimitiveTypeDecoder : IPrimitiveTypeDecoder
    {
-      public bool IsArrayType() => false;
+      public bool IsArrayType => false;
 
       public Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
       {
-         Array array = Array.CreateInstance(DecodesType(), count);
+         Array array = Array.CreateInstance(DecodesType, count);
          for (int i = 0; i < count; ++i)
          {
             array.SetValue(ReadValue(buffer, state), i);
@@ -38,7 +38,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
       {
-         Array array = Array.CreateInstance(DecodesType(), count);
+         Array array = Array.CreateInstance(DecodesType, count);
          for (int i = 0; i < count; ++i)
          {
             array.SetValue(ReadValue(stream, state), i);
@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public abstract EncodingCodes EncodingCode { get; }
 
-      public abstract Type DecodesType();
+      public abstract Type DecodesType { get; }
 
       public abstract object ReadValue(IProtonBuffer buffer, IDecoderState state);
 

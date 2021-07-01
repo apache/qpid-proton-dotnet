@@ -24,6 +24,6 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public interface IStringTypeDecoder : IPrimitiveTypeDecoder
    {
-      new Type DecodesType() => typeof(string);
+      new Type DecodesType => typeof(string);
    }
 }

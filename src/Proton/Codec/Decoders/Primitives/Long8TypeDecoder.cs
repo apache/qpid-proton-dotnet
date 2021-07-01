@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.SmallLong;
 
-      public override Type DecodesType() => typeof(long);
+      public override Type DecodesType => typeof(long);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
