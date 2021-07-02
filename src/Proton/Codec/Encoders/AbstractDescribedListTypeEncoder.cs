@@ -22,6 +22,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public abstract class AbstractDescribedListTypeEncoder<T> : AbstractDescribedTypeEncoder
    {
+      public override Type EncodesType => typeof(T);
+
       /// <summary>
       /// Determine the list type the given value can be encoded to based on the number of
       /// bytes that would be needed to hold the encoded form of the resulting list entries.
@@ -33,7 +35,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       /// </remarks>
       /// <param name="value">The value that is encoded as a list type</param>
       /// <returns>The encoding code to use to write the list body</returns>
-      protected EncodingCodes GetListEncoding(T value)
+      protected virtual EncodingCodes GetListEncoding(T value)
       {
          return EncodingCodes.List32;
       }
@@ -70,7 +72,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          this.WriteType(buffer, state, (T)value);
       }
 
-      public void WriteType(IProtonBuffer buffer, IEncoderState state, T value)
+      public virtual void WriteType(IProtonBuffer buffer, IEncoderState state, T value)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));

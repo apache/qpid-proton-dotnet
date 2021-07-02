@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       /// </remarks>
       /// <param name="value">The value that is encoded as a map type</param>
       /// <returns>The encoding code to use to write the map body</returns>
-      protected EncodingCodes GetMapEncoding(M value)
+      protected virtual EncodingCodes GetMapEncoding(M value)
       {
          return EncodingCodes.Map32;
       }
@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          this.WriteType(buffer, state, (M)value);
       }
 
-      public void WriteType(IProtonBuffer buffer, IEncoderState state, M value)
+      public virtual void WriteType(IProtonBuffer buffer, IEncoderState state, M value)
       {
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
