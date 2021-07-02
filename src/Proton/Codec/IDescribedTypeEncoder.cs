@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <summary>
       /// Returns an AMQP unsigned int numeric code that describes the type to be encoded
       /// </summary>
-      uint? DescriptorCode { get; }
+      ulong DescriptorCode { get; }
 
    }
 }

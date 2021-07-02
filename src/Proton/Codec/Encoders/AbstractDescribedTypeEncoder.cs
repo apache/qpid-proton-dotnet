@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       #region Described Type Encoder API
 
       public abstract Symbol DescriptorSymbol { get; }
-      public abstract uint? DescriptorCode { get; }
+      public abstract ulong DescriptorCode { get; }
       public abstract Type EncodesType { get; }
 
       public abstract void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value);
