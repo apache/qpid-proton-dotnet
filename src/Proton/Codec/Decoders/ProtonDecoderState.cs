@@ -74,7 +74,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       private string InternalDecode(IProtonBuffer buffer, int length)
       {
          byte[] byteArray = new byte[length];
-         buffer.GetBytes(buffer.ReadOffset, byteArray);
+
+         buffer.CopyInto(buffer.ReadOffset, byteArray, 0, length);
+         buffer.SkipBytes(length);
 
          return System.Text.Encoding.UTF8.GetString(byteArray);
       }

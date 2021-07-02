@@ -36,11 +36,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
                               "of data available (%d)", length, buffer.ReadableBytes));
          }
 
-         // TODO: Could ask buffer for copy of region
+         IProtonBuffer payload = buffer.Copy(buffer.ReadOffset, length);
 
-         IProtonBuffer payload = ProtonByteBufferAllocator.INSTANCE.Allocate(length, length);
-
-         buffer.ReadBytes(payload);
+         buffer.SkipBytes(length);
 
          return payload;
       }

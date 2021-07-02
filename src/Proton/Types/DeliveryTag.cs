@@ -50,15 +50,8 @@ namespace Apache.Qpid.Proton.Types
             throw new ArgumentNullException("Cannot create a tag with null bytes");
          }
 
-         if (tagBytes.HasArray && tagBytes.ArrayOffset == 0)
-         {
-            this.tagBytes = tagBytes.Array;
-         }
-         else
-         {
-            this.tagBytes = new byte[tagBytes.ReadableBytes];
-            tagBytes.GetBytes(tagBytes.ReadOffset, this.tagBytes);
-         }
+         this.tagBytes = new byte[tagBytes.ReadableBytes];
+         tagBytes.CopyInto(tagBytes.ReadOffset, this.tagBytes, 0, tagBytes.ReadableBytes);
 
          this.tagView = tagBytes;
       }

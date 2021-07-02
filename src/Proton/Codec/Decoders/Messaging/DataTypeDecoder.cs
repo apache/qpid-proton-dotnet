@@ -62,9 +62,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          int position = buffer.ReadOffset;
          IProtonBuffer data = ProtonByteBufferAllocator.INSTANCE.Allocate(size, size);
 
-         buffer.GetBytes(position, data.Array, data.ArrayOffset, size);
+         buffer.CopyInto(position, data, 0, size);
+         buffer.SkipBytes(size);
+
+         // The Data buffer should be readable for the full span which we ensure here.
          data.WriteOffset = size;
-         buffer.ReadOffset = position + size;
 
          return new Data(data);
       }

@@ -33,7 +33,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          byte[] guidBytes = new byte[BYTES];
 
-         buffer.ReadBytes(guidBytes);
+         buffer.CopyInto(buffer.ReadOffset, guidBytes, 0, BYTES);
+         buffer.SkipBytes(BYTES);
 
          return new Guid(guidBytes);
       }
@@ -58,7 +59,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       public static Guid ReadUuid(IProtonBuffer buffer)
       {
          byte[] guidBytes = new byte[BYTES];
-         buffer.ReadBytes(guidBytes);
+
+         buffer.CopyInto(buffer.ReadOffset, guidBytes, 0, BYTES);
+         buffer.SkipBytes(BYTES);
 
          return new Guid(guidBytes);
       }
