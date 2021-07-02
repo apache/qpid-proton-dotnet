@@ -23,11 +23,17 @@ namespace Apache.Qpid.Proton.Types
    {
       public static readonly int Bytes = 4;
 
-      private readonly uint bits;
+      private uint bits;
 
       public Decimal32(uint bits)
       {
          this.bits = bits;
+      }
+
+      public uint Bits
+      {
+         get => bits;
+         set => bits = value;
       }
 
       public int CompareTo(object value)

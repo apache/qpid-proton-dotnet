@@ -288,7 +288,6 @@ namespace Apache.Qpid.Proton.Codec
       /// Allows registration of the given AMQP type encoder into this encoder to customize the
       /// writing of the Type managed by the encoder.
       /// </summary>
-      /// <typeparam name="V">The type that the given encoder handles</typeparam>
       /// <param name="encoder">The encoder type instance to register with this encoder</param>
       /// <returns>This encoder instance</returns>
       IEncoder RegisterDescribedTypeEncoder(IDescribedTypeEncoder encoder);
@@ -296,18 +295,16 @@ namespace Apache.Qpid.Proton.Codec
       /// <summary>
       /// Lookup a Type encoder using an instance of the type to be encoded.
       /// </summary>
-      /// <typeparam name="V">The Type that the encoder manages</typeparam>
       /// <param name="value">an instance of the type whose encoder is being looked up</param>
       /// <returns></returns>
-      ITypeEncoder LookupTypeEncoder<V>(Object value);
+      ITypeEncoder LookupTypeEncoder(Object value);
 
       /// <summary>
       /// Lookup a Type encoder using Type value of the type to be encoded.
       /// </summary>
-      /// <typeparam name="V">The Type that the encoder manages</typeparam>
       /// <param name="value">a Type instance for the type whose encoder is being looked up</param>
       /// <returns></returns>
-      ITypeEncoder LookupTypeEncoder<V>(Type typeClass);
+      ITypeEncoder LookupTypeEncoder(Type typeClass);
 
    }
 }

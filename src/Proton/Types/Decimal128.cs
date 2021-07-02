@@ -23,13 +23,25 @@ namespace Apache.Qpid.Proton.Types
    {
       public static readonly int Bytes = 16;
 
-      private readonly ulong lsb;
-      private readonly ulong msb;
+      private ulong lsb;
+      private ulong msb;
 
       public Decimal128(ulong lsb, ulong msb)
       {
          this.lsb = lsb;
          this.msb = msb;
+      }
+
+      public ulong MostSignificantBits
+      {
+         get => msb;
+         set => msb = value;
+      }
+
+      public ulong LeastSignificantBits
+      {
+         get => lsb;
+         set => lsb = value;
       }
 
       public int CompareTo(object value)

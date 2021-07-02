@@ -183,12 +183,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          return this;
       }
 
-      public ITypeEncoder LookupTypeEncoder<V>(Object value)
+      public ITypeEncoder LookupTypeEncoder(Object value)
       {
          return null;
       }
 
-      public ITypeEncoder LookupTypeEncoder<V>(Type typeClass)
+      public ITypeEncoder LookupTypeEncoder(Type typeClass)
       {
          return null;
       }

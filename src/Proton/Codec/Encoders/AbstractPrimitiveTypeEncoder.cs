@@ -22,15 +22,49 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public abstract class AbstractPrimitiveTypeEncoder : IPrimitiveTypeEncoder
    {
+      #region Abstract API that cannot be generically implemented here
+
       public abstract Type EncodesType { get; }
-      public abstract bool IsArrayType { get; }
 
       public abstract void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values);
+
       public abstract void WriteType(IProtonBuffer buffer, IEncoderState state, object value);
 
-      public void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      #endregion
+
+      public bool IsArrayType => false;
+
+      public virtual void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
-         // Write the Array Type encoding code, we don't optimize here.
+         WriteAsArray32(buffer, state, values);
+      }
+
+      protected void WriteAsArray8(IProtonBuffer buffer, IEncoderState state, object[] values)
+      {
+         // Reserve the capacity for the Array preamble
+         buffer.EnsureWritable(sizeof(byte) * 3);
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Array8));
+
+         int startIndex = buffer.WriteOffset;
+
+         // Reserve space for the size and write the count of list elements.
+         buffer.WriteUnsignedByte(0);
+         buffer.WriteUnsignedByte((byte)values.Length);
+
+         // Write the array elements after writing the array length
+         WriteRawArray(buffer, state, values);
+
+         // Move back and write the size
+         int endIndex = buffer.WriteOffset;
+         long writeSize = endIndex - startIndex - sizeof(byte);
+
+         buffer.SetUnsignedByte(startIndex, (byte)writeSize);
+      }
+
+      protected void WriteAsArray32(IProtonBuffer buffer, IEncoderState state, object[] values)
+      {
+         // Reserve the capacity for the Array preamble
+         buffer.EnsureWritable(sizeof(byte) + sizeof(uint) + sizeof(uint));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
 
          int startIndex = buffer.WriteOffset;
@@ -43,7 +77,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          WriteRawArray(buffer, state, values);
 
          // Move back and write the size
-         long writeSize = buffer.WriteOffset - startIndex - sizeof(int);
+         int endIndex = buffer.WriteOffset;
+         long writeSize = endIndex - startIndex - sizeof(int);
 
          if (writeSize > Int32.MaxValue)
          {

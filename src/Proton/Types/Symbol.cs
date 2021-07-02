@@ -166,6 +166,7 @@ namespace Apache.Qpid.Proton.Types
       /// <param name="buffer">The buffer to write the Symbol bytes to</param>
       public void WriteTo(IProtonBuffer buffer)
       {
+         buffer.EnsureWritable(Length);
          underlying.CopyInto(underlying.ReadOffset, buffer, buffer.WriteOffset, underlying.ReadableBytes);
       }
 
