@@ -18,19 +18,19 @@
 using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
-using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Security;
 
-namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
+namespace Apache.Qpid.Proton.Codec.Encoders.Security
 {
-   public sealed class RejectedTypeEncoder : AbstractDescribedListTypeEncoder<Rejected>
+   public sealed class SaslOutcomeTypeEncoder : AbstractDescribedListTypeEncoder<SaslOutcome>
    {
-      public override Symbol DescriptorSymbol => Rejected.DescriptorSymbol;
+      public override Symbol DescriptorSymbol => SaslOutcome.DescriptorSymbol;
 
-      public override ulong DescriptorCode => Rejected.DescriptorCode;
+      public override ulong DescriptorCode => SaslOutcome.DescriptorCode;
 
-      protected override EncodingCodes GetListEncoding(Rejected value)
+      protected override EncodingCodes GetListEncoding(SaslOutcome value)
       {
-         if (value.Error != null)
+         if (value.AdditionalData != null && value.AdditionalData.ReadableBytes >= 255)
          {
             return EncodingCodes.List32;
          }
@@ -40,30 +40,35 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          }
       }
 
-      protected override int GetElementCount(Rejected value)
+      protected override int GetElementCount(SaslOutcome outcome)
       {
-         if (value.Error != null)
+         if (outcome.AdditionalData != null)
          {
-            return 1;
+            return 2;
          }
          else
          {
-            return 0;
+            return 1;
          }
       }
 
-      protected override void WriteElement(Rejected source, int index, IProtonBuffer buffer, IEncoderState state)
+      protected override int GetMinElementCount()
       {
-         // When encoding ensure that values that were never set are omitted and a simple
-         // NULL entry is written in the slot instead (don't write defaults).
+         return 1;
+      }
 
+      protected override void WriteElement(SaslOutcome outcome, int index, IProtonBuffer buffer, IEncoderState state)
+      {
          switch (index)
          {
             case 0:
-               state.Encoder.WriteObject(buffer, state, source.Error);
-               break;
+                state.Encoder.WriteUnsignedByte(buffer, state, (byte)outcome.Code);
+                break;
+            case 1:
+                state.Encoder.WriteBinary(buffer, state, outcome.AdditionalData);
+                break;
             default:
-               throw new ArgumentOutOfRangeException("Unknown Rejected value index: " + index);
+               throw new ArgumentOutOfRangeException("Unknown SaslOutcome value index: " + index);
          }
       }
    }

@@ -18,19 +18,19 @@
 using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
-using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Security;
 
-namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
+namespace Apache.Qpid.Proton.Codec.Encoders.Security
 {
-   public sealed class RejectedTypeEncoder : AbstractDescribedListTypeEncoder<Rejected>
+   public sealed class SaslResponseTypeEncoder : AbstractDescribedListTypeEncoder<SaslResponse>
    {
-      public override Symbol DescriptorSymbol => Rejected.DescriptorSymbol;
+      public override Symbol DescriptorSymbol => SaslResponse.DescriptorSymbol;
 
-      public override ulong DescriptorCode => Rejected.DescriptorCode;
+      public override ulong DescriptorCode => SaslResponse.DescriptorCode;
 
-      protected override EncodingCodes GetListEncoding(Rejected value)
+      protected override EncodingCodes GetListEncoding(SaslResponse value)
       {
-         if (value.Error != null)
+         if (value.Response.ReadableBytes >= 255)
          {
             return EncodingCodes.List32;
          }
@@ -40,30 +40,25 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          }
       }
 
-      protected override int GetElementCount(Rejected value)
+      protected override int GetElementCount(SaslResponse response)
       {
-         if (value.Error != null)
-         {
-            return 1;
-         }
-         else
-         {
-            return 0;
-         }
+         return 1;
       }
 
-      protected override void WriteElement(Rejected source, int index, IProtonBuffer buffer, IEncoderState state)
+      protected override int GetMinElementCount()
       {
-         // When encoding ensure that values that were never set are omitted and a simple
-         // NULL entry is written in the slot instead (don't write defaults).
+         return 1;
+      }
 
+      protected override void WriteElement(SaslResponse response, int index, IProtonBuffer buffer, IEncoderState state)
+      {
          switch (index)
          {
             case 0:
-               state.Encoder.WriteObject(buffer, state, source.Error);
+               state.Encoder.WriteBinary(buffer, state, response.Response);
                break;
             default:
-               throw new ArgumentOutOfRangeException("Unknown Rejected value index: " + index);
+               throw new ArgumentOutOfRangeException("Unknown SaslResponse value index: " + index);
          }
       }
    }

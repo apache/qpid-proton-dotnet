@@ -15,35 +15,38 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
+using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
-using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Security;
 
-namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
+namespace Apache.Qpid.Proton.Codec.Encoders.Security
 {
-   public sealed class MessageAnnotationsTypeEncoder : AbstractDescribedMapTypeEncoder<string, object, MessageAnnotations>
+   public sealed class SaslMechanismsTypeEncoder : AbstractDescribedListTypeEncoder<SaslMechanisms>
    {
-      public override Symbol DescriptorSymbol => MessageAnnotations.DescriptorSymbol;
+      public override Symbol DescriptorSymbol => SaslMechanisms.DescriptorSymbol;
 
-      public override ulong DescriptorCode => MessageAnnotations.DescriptorCode;
+      public override ulong DescriptorCode => SaslMechanisms.DescriptorCode;
 
-      protected override int GetMapEntries(MessageAnnotations value)
+      protected override int GetElementCount(SaslMechanisms init)
       {
-         return value?.Value?.Count ?? 0;
+         return 1;
       }
 
-      protected override bool HasMap(MessageAnnotations value)
+      protected override int GetMinElementCount()
       {
-         return value?.Value != null;
+         return 1;
       }
 
-      protected override void WriteMapEntries(IProtonBuffer buffer, IEncoderState state, MessageAnnotations value)
+      protected override void WriteElement(SaslMechanisms mechanisms, int index, IProtonBuffer buffer, IEncoderState state)
       {
-         foreach (KeyValuePair<Symbol, object> entry in value.Value)
+         switch (index)
          {
-            state.Encoder.WriteSymbol(buffer, state, entry.Key);
-            state.Encoder.WriteObject(buffer, state, entry.Value);
+            case 0:
+               state.Encoder.WriteArray(buffer, state, mechanisms.Mechanisms);
+               break;
+            default:
+               throw new ArgumentOutOfRangeException("Unknown SaslMechanisms value index: " + index);
          }
       }
    }
