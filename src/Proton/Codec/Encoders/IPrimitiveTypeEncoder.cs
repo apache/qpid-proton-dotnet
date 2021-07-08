@@ -20,7 +20,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
    /// <summary>
    /// Interface for an type encoders that handle primitive types
    /// </summary>
-   public interface IPrimitiveTypeEncoder : ITypeEncoder
+   public interface IPrimitiveTypeEncoder<T> : ITypeEncoder
    {
    }
 }

@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Timestamp types
    /// </summary>
-   public sealed class TimestampTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class TimestampTypeEncoder : AbstractPrimitiveTypeEncoder<long>
    {
-      public override Type EncodesType => typeof(ulong); // TODO need a date here
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(ulong) + sizeof(byte));

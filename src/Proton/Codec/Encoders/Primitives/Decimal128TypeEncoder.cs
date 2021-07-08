@@ -24,10 +24,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Decimal128 types
    /// </summary>
-   public sealed class Decimal128TypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class Decimal128TypeEncoder : AbstractPrimitiveTypeEncoder<Decimal128>
    {
-      public override Type EncodesType => typeof(Decimal128);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          Decimal128 decimal128 = (Decimal128)value;

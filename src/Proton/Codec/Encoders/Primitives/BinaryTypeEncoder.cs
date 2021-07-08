@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Binary types
    /// </summary>
-   public sealed class BinaryTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class BinaryTypeEncoder : AbstractPrimitiveTypeEncoder<IProtonBuffer>
    {
-      public override Type EncodesType => typeof(IProtonBuffer);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          IProtonBuffer binary = (IProtonBuffer)value;

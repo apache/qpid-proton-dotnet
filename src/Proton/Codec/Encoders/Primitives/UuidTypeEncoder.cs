@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Uuid types
    /// </summary>
-   public sealed class UuidTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class UuidTypeEncoder : AbstractPrimitiveTypeEncoder<Guid>
    {
-      public override Type EncodesType => typeof(Guid);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          Guid guid = (Guid)value;

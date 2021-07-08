@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Interface for an type encoders that handle primitive types
    /// </summary>
-   public sealed class ArrayTypeEncoder : IPrimitiveTypeEncoder
+   public sealed class ArrayTypeEncoder : IPrimitiveTypeEncoder<Array>
    {
       public Type EncodesType => typeof(Array);
 

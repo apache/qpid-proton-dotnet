@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Float types
    /// </summary>
-   public sealed class FloatTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class FloatTypeEncoder : AbstractPrimitiveTypeEncoder<float>
    {
-      public override Type EncodesType => typeof(float);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(float) + sizeof(byte));

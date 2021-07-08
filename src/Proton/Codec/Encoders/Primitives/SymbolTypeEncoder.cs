@@ -24,10 +24,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Symbol types
    /// </summary>
-   public sealed class SymbolTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class SymbolTypeEncoder : AbstractPrimitiveTypeEncoder<Symbol>
    {
-      public override Type EncodesType => typeof(Symbol);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          Symbol symbol = (Symbol)value;

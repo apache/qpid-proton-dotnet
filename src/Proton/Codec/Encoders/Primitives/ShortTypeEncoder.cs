@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Short types
    /// </summary>
-   public sealed class ShortTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class ShortTypeEncoder : AbstractPrimitiveTypeEncoder<short>
    {
-      public override Type EncodesType => typeof(short);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(short) + sizeof(byte));

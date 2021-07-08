@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Byte types
    /// </summary>
-   public sealed class ByteTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class ByteTypeEncoder : AbstractPrimitiveTypeEncoder<sbyte>
    {
-      public override Type EncodesType => typeof(sbyte);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(byte));

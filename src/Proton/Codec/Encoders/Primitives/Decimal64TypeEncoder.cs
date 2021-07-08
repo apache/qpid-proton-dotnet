@@ -24,10 +24,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Decimal64 types
    /// </summary>
-   public sealed class Decimal64TypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class Decimal64TypeEncoder : AbstractPrimitiveTypeEncoder<Decimal64>
    {
-      public override Type EncodesType => typeof(Decimal64);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          Decimal64 decimal64 = (Decimal64)value;

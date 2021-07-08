@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Boolean types
    /// </summary>
-   public sealed class BooleanTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class BooleanTypeEncoder : AbstractPrimitiveTypeEncoder<bool>
    {
-      public override Type EncodesType => typeof(bool);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte));

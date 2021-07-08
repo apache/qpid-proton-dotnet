@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;

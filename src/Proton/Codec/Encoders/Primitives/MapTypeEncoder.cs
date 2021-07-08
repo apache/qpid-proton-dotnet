@@ -24,10 +24,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Map types
    /// </summary>
-   public sealed class MapTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class MapTypeEncoder : AbstractPrimitiveTypeEncoder<IDictionary>
    {
-      public override Type EncodesType => typeof(IDictionary);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte));

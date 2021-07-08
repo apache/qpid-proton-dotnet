@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing UnsignedInteger types
    /// </summary>
-   public sealed class UnsignedIntegerTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class UnsignedIntegerTypeEncoder : AbstractPrimitiveTypeEncoder<uint>
    {
-      public override Type EncodesType => typeof(uint);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          uint target = (uint)value;

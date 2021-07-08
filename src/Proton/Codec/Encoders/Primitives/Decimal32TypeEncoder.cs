@@ -24,10 +24,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Decimal32 types
    /// </summary>
-   public sealed class Decimal32TypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class Decimal32TypeEncoder : AbstractPrimitiveTypeEncoder<Decimal32>
    {
-      public override Type EncodesType => typeof(Decimal32);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          Decimal32 Decimal32 = (Decimal32)value;

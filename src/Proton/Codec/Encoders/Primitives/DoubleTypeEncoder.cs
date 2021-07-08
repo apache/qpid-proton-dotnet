@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Double types
    /// </summary>
-   public sealed class DoubleTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class DoubleTypeEncoder : AbstractPrimitiveTypeEncoder<double>
    {
-      public override Type EncodesType => typeof(Double);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(double) + sizeof(byte));

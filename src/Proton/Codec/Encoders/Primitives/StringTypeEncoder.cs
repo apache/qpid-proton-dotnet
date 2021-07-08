@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing String types
    /// </summary>
-   public sealed class StringTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class StringTypeEncoder : AbstractPrimitiveTypeEncoder<string>
    {
-      public override Type EncodesType => typeof(String);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          string target = (string)value;

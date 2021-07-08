@@ -20,11 +20,11 @@ using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Encoders
 {
-   public abstract class AbstractPrimitiveTypeEncoder : IPrimitiveTypeEncoder
+   public abstract class AbstractPrimitiveTypeEncoder<T> : IPrimitiveTypeEncoder<T>
    {
-      #region Abstract API that cannot be generically implemented here
+      public Type EncodesType => typeof(T);
 
-      public abstract Type EncodesType { get; }
+      #region Abstract API that cannot be generically implemented here
 
       public abstract void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values);
 

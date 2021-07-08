@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing UnsignedShort types
    /// </summary>
-   public sealed class UnsignedShortTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class UnsignedShortTypeEncoder : AbstractPrimitiveTypeEncoder<ushort>
    {
-      public override Type EncodesType => typeof(ushort);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(ushort));

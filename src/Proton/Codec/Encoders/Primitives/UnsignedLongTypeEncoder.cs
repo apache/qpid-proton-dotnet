@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing UnsignedLong types
    /// </summary>
-   public sealed class UnsignedLongTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class UnsignedLongTypeEncoder : AbstractPrimitiveTypeEncoder<ulong>
    {
-      public override Type EncodesType => typeof(ulong);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          ulong target = (ulong)value;

@@ -24,10 +24,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing List types
    /// </summary>
-   public sealed class ListTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class ListTypeEncoder : AbstractPrimitiveTypeEncoder<IList>
    {
-      public override Type EncodesType => typeof(IList);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          IList list = (IList)value;

@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Null types
    /// </summary>
-   public sealed class NullTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class NullTypeEncoder : AbstractPrimitiveTypeEncoder<object>
    {
-      public override Type EncodesType => typeof(void);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte));

@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Long types
    /// </summary>
-   public sealed class LongTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class LongTypeEncoder : AbstractPrimitiveTypeEncoder<long>
    {
-      public override Type EncodesType => typeof(long);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(long) + sizeof(byte));

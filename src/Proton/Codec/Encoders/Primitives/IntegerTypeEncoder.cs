@@ -23,10 +23,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Integer types
    /// </summary>
-   public sealed class IntegerTypeEncoder : AbstractPrimitiveTypeEncoder
+   public sealed class IntegerTypeEncoder : AbstractPrimitiveTypeEncoder<int>
    {
-      public override Type EncodesType => typeof(int);
-
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(int) + sizeof(byte));
