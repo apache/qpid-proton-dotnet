@@ -267,6 +267,25 @@ namespace Apache.Qpid.Proton.Codec
       void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IDictionary<K, V> value);
 
       /// <summary>
+      /// Writes the AMQP Map encoding for the given value to the given buffer.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the value encoding to</param>
+      /// <param name="state">An encoder state instance to use when encoding</param>
+      /// <param name="value">The value to be written</param>
+      /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
+      void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IReadOnlyDictionary<K, V> value);
+
+      /// <summary>
+      /// Writes the contents of the given IDeliveryTag value into the provided proton buffer
+      /// instance as an AMQP Binary type.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the value encoding to</param>
+      /// <param name="state">An encoder state instance to use when encoding</param>
+      /// <param name="value">The delivery tag to encode as an AMQP Binary</param>
+      /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
+      void WriteDeliveryTag(IProtonBuffer buffer, IEncoderState state, IDeliveryTag value);
+
+      /// <summary>
       /// Writes the AMQP Described Type encoding for the given value to the given buffer.
       /// </summary>
       /// <param name="buffer">The buffer to write the value encoding to</param>

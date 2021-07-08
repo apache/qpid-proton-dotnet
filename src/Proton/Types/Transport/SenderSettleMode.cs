@@ -19,7 +19,7 @@ using System;
 
 namespace Apache.Qpid.Proton.Types.Transport
 {
-   public enum SenderSettleMode
+   public enum SenderSettleMode : byte
    {
       Unsettled,
       Settled,

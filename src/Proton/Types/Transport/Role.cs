@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Codec;
+
 namespace Apache.Qpid.Proton.Types.Transport
 {
    /// <summary>
@@ -29,6 +31,11 @@ namespace Apache.Qpid.Proton.Types.Transport
 
    public static class RoleExtension
    {
+      public static EncodingCodes ToBooleanEncoding(this Role role)
+      {
+         return role == Role.Sender ? EncodingCodes.BooleanFalse : EncodingCodes.BooleanTrue;
+      }
+
       public static bool IsSender(this Role role)
       {
          return role == Role.Sender;

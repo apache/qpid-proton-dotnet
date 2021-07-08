@@ -197,7 +197,17 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       }
 
+      public void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IReadOnlyDictionary<K, V> value)
+      {
+
+      }
+
       public void WriteDescribedType(IProtonBuffer buffer, IEncoderState state, IDescribedType value)
+      {
+
+      }
+
+      public void WriteDeliveryTag(IProtonBuffer buffer, IEncoderState state, IDeliveryTag value)
       {
 
       }

@@ -19,7 +19,7 @@ using System;
 
 namespace Apache.Qpid.Proton.Types.Transport
 {
-   public enum ReceiverSettleMode
+   public enum ReceiverSettleMode : byte
    {
       First,
       Second
@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
    public static class ReceiverSettleModeExtension
    {
-      public static byte ByteValue(this ReceiverSettleMode mode)
+      public static byte ToByteValue(this ReceiverSettleMode mode)
       {
          return (byte)mode;
       }
