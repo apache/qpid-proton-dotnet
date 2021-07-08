@@ -22,6 +22,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public abstract class AbstractDescribedMapTypeEncoder<K, V, M> : AbstractDescribedTypeEncoder
    {
+      public override Type EncodesType => typeof(M);
+
       /// <summary>
       /// Determine the map type the given value can be encoded to based on the number of
       /// bytes that would be needed to hold the encoded form of the resulting map entries.

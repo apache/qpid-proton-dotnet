@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec.Encoders
 {
-   public sealed class UnknownDescripbedTypeEncoder : ITypeEncoder
+   public sealed class UnknownDescribedTypeEncoder : ITypeEncoder
    {
       public Type EncodesType => typeof(IDescribedType);
 

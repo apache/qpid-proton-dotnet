@@ -195,6 +195,15 @@ namespace Apache.Qpid.Proton.Codec
       void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, long value);
 
       /// <summary>
+      /// Writes the AMQP Timestamp encoding for the given value to the given buffer.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the value encoding to</param>
+      /// <param name="state">An encoder state instance to use when encoding</param>
+      /// <param name="value">The value to be written</param>
+      /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
+      void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, ulong value);
+
+      /// <summary>
       /// Writes the AMQP UUID encoding for the given value to the given buffer.
       /// </summary>
       /// <param name="buffer">The buffer to write the value encoding to</param>

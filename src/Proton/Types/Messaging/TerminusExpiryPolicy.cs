@@ -29,9 +29,26 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
    public static class TerminusExpiryPolicyExtension
    {
-      public static uint UintValue(this TerminusExpiryPolicy mode)
+      private static readonly Symbol LinkDetach = Symbol.Lookup("link-detach");
+      private static readonly Symbol SessionEnd = Symbol.Lookup("session-end");
+      private static readonly Symbol ConnectionClose = Symbol.Lookup("connection-close");
+      private static readonly Symbol Never = Symbol.Lookup("never");
+
+      public static Symbol ToSymbol(this TerminusExpiryPolicy mode)
       {
-         return (uint)mode;
+         switch (mode)
+         {
+            case TerminusExpiryPolicy.LinkDetach:
+               return LinkDetach;
+            case TerminusExpiryPolicy.SessionEnd:
+               return SessionEnd;
+            case TerminusExpiryPolicy.ConnectionClose:
+               return ConnectionClose;
+            case TerminusExpiryPolicy.Never:
+               return Never;
+            default:
+               throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + mode);
+         }
       }
 
       public static TerminusExpiryPolicy ValueOf(Symbol policy)

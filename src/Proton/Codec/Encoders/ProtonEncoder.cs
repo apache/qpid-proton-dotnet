@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
+using Apache.Qpid.Proton.Codec.Encoders.Primitives;
 
 namespace Apache.Qpid.Proton.Codec.Encoders
 {
@@ -27,7 +28,35 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       // The encoders for primitives are fixed and cannot be altered by users who want
       // to register custom encoders, these encoders are stateless so they can be safely
       // made static to reduce overhead of creating and destroying this type.
-      // TODO - Create static type encoders
+      // The encoders for primitives are fixed and cannot be altered by users who want
+      // to register custom encoders, these encoders are stateless so they can be safely
+      // made static to reduce overhead of creating and destroying this type.
+      private static readonly ArrayTypeEncoder arrayEncoder = new ArrayTypeEncoder();
+      private static readonly BinaryTypeEncoder binaryEncoder = new BinaryTypeEncoder();
+      private static readonly BooleanTypeEncoder booleanEncoder = new BooleanTypeEncoder();
+      private static readonly ByteTypeEncoder sbyteEncoder = new ByteTypeEncoder();
+      private static readonly CharacterTypeEncoder charEncoder = new CharacterTypeEncoder();
+      private static readonly Decimal32TypeEncoder decimal32Encoder = new Decimal32TypeEncoder();
+      private static readonly Decimal64TypeEncoder decimal64Encoder = new Decimal64TypeEncoder();
+      private static readonly Decimal128TypeEncoder decimal128Encoder = new Decimal128TypeEncoder();
+      private static readonly DoubleTypeEncoder doubleEncoder = new DoubleTypeEncoder();
+      private static readonly FloatTypeEncoder floatEncoder = new FloatTypeEncoder();
+      private static readonly IntegerTypeEncoder integerEncoder = new IntegerTypeEncoder();
+      private static readonly ListTypeEncoder listEncoder = new ListTypeEncoder();
+      private static readonly LongTypeEncoder longEncoder = new LongTypeEncoder();
+      private static readonly MapTypeEncoder mapEncoder = new MapTypeEncoder();
+      private static readonly NullTypeEncoder nullEncoder = new NullTypeEncoder();
+      private static readonly ShortTypeEncoder shortEncoder = new ShortTypeEncoder();
+      private static readonly StringTypeEncoder stringEncoder = new StringTypeEncoder();
+      private static readonly SymbolTypeEncoder symbolEncoder = new SymbolTypeEncoder();
+      private static readonly TimestampTypeEncoder timestampEncoder = new TimestampTypeEncoder();
+      private static readonly UnknownDescribedTypeEncoder unknownTypeEncoder = new UnknownDescribedTypeEncoder();
+      private static readonly UuidTypeEncoder uuidEncoder = new UuidTypeEncoder();
+      private static readonly UnsignedByteTypeEncoder byteEncoder = new UnsignedByteTypeEncoder();
+      private static readonly UnsignedShortTypeEncoder ushortEncoder = new UnsignedShortTypeEncoder();
+      private static readonly UnsignedIntegerTypeEncoder uintEncoder = new UnsignedIntegerTypeEncoder();
+      private static readonly UnsignedLongTypeEncoder ulongEncoder = new UnsignedLongTypeEncoder();
+      private static readonly DeliveryTagTypeEncoder deliveryTagEncoder = new DeliveryTagTypeEncoder();
 
       private ProtonEncoderState cachedEncoderState;
 
@@ -124,6 +153,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       }
 
       public void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, long value)
+      {
+
+      }
+
+      public void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, ulong value)
       {
 
       }

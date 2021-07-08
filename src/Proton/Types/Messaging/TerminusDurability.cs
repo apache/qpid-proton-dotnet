@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
    public static class TerminusDurabilityExtension
    {
-      public static uint UintValue(this TerminusDurability mode)
+      public static uint ToUInt32(this TerminusDurability mode)
       {
          return (uint)mode;
       }
