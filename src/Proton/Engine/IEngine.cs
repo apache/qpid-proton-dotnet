@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
 
@@ -59,6 +60,21 @@ namespace Apache.Qpid.Proton.Engine
       /// Provides the current engine operating state.
       /// </summary>
       EngineState EngineState { get; }
+
+      /// <summary>
+      /// Provides access to the configuration object associated with this engine.
+      /// </summary>
+      IEngineConfiguration Configuration { get; }
+
+      /// <summary>
+      /// Provides access to the engine pipeline instance associated with this engine.
+      /// </summary>
+      IEnginePipeline Pipeline { get; }
+
+      /// <summary>
+      /// Provides access to the SASL driver that is assigned to this engine.
+      /// </summary>
+      IEngineSaslDriver SaslDriver { get; }
 
       /// <summary>
       /// Gets the Connection instance that is associated with this Engine instance.
@@ -118,6 +134,98 @@ namespace Apache.Qpid.Proton.Engine
       /// <exception cref="EngineNotWritableException">If the engine is not currently accepting input</exception>
       /// <exception cref="EngineStateException">If the engine state is already failed or shutdown</exception>
       IEngine Ingest(IProtonBuffer input);
+
+      /// <summary>
+      /// Prompt the engine to perform idle-timeout/heartbeat handling, and return an absolute
+      /// deadline in milliseconds that tick must again be called by/at, based on the provided
+      /// current time in milliseconds, to ensure the periodic work is carried out as necessary.
+      /// It is an error to call this method if the connection has not been opened.
+      /// <para/>
+      /// A returned deadline of 0 indicates there is no periodic work necessitating tick be called,
+      /// e.g. because neither peer has defined an idle-timeout value.
+      /// <para/>
+      /// The provided milliseconds time values should be derived from a monotonic source such as
+      /// a system tick counter to prevent wall clock changes leading to erroneous behavior. Note
+      /// that for some monotonic time sources deadline could be a different sign than the originally
+      /// given value, and so (if non-zero) the returned deadline should have the current time
+      /// originally provided subtracted from it in order to establish a relative time delay to the
+      /// next deadline.
+      /// </summary>
+      /// <param name="current">The current system tick count</param>
+      /// <returns>the absolute deadline in milliseconds to next call tick by/at, or 0 if there is none</returns>
+      /// <exception cref="InvalidOperationException">If the engine has already been set to auto tick</exception>
+      /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
+      long Tick(long current);
+
+      /// <summary>
+      /// Allows the engine to manage idle timeout processing by providing it the single threaded
+      /// task scheduler where all transport work is done which ensures singled threaded access
+      /// while removing the need for the client library or server application to manage calls to
+      /// the tick processing methods.
+      /// </summary>
+      /// <param name="scheduler">The single threaded scheduler where are engine work is queued</param>
+      /// <returns>This engine instance</returns>
+      /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
+      IEngine TickAuto(TaskScheduler scheduler);
+
+      /// <summary>
+      /// Sets a Action instance that will be notified when data from the engine is ready to
+      /// be written to some output sink (socket etc). In the event of an error writing the data
+      /// the handler should throw an error or if performed asynchronously the Engine should be
+      /// marked failed via a call to the engine failed API.
+      /// </summary>
+      /// <remarks>
+      /// This method allows for a handler to be registered that doesn't not need to invoke an
+      /// output complete handler when done writing but does assume that any writes are complete
+      /// once the handler returns.  If the provided handler does any sort of queuing of writes or
+      /// otherwise does not immediately complete this could lead to out of memory or other errors
+      /// as the engine will not be able to apply any write backpressure,
+      /// </remarks>
+      /// <param name="handler">The delegate that will be invoked when engine output is available</param>
+      /// <returns>This engine instance</returns>
+      /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
+      IEngine OutputHandler(Action<IProtonBuffer> handler)
+      {
+         this.OutputHandler((buffer, action) =>
+         {
+            handler.Invoke(buffer);
+            if (action != null)
+            {
+               action.Invoke();
+            }
+         });
+
+         return this;
+      }
+
+      /// <summary>
+      /// Sets a Action instance that will be notified when data from the engine is ready to
+      /// be written to some output sink (socket etc).  The Action value provided to the handler
+      /// (if non-null) should be invoked once the I/O operation has completely successfully. In
+      /// the event of an error writing the data the handler should throw an error or if performed
+      /// asynchronously the Engine should be marked failed via a call to the engine failed API.
+      /// </summary>
+      /// <param name="handler">The delegate that will be invoked when engine output is available</param>
+      /// <returns>This engine instance</returns>
+      /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
+      IEngine OutputHandler(Action<IProtonBuffer, Action> handler);
+
+      /// <summary>
+      /// Sets a handler instance that will be notified when the engine encounters a fatal error.
+      /// </summary>
+      /// <param name="handler">The handler that will be invoked on an engine error state</param>
+      /// <returns>This engine instance</returns>
+      /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
+      IEngine ErrorHandler(Action<IEngine> handler);
+
+      /// <summary>
+      /// Sets a handler instance that will be notified when the engine is shut down via a call to
+      /// the engine shutdown method.
+      /// </summary>
+      /// <param name="handler">The handler that will be signalled on engine shutdown</param>
+      /// <returns>This engine instance</returns>
+      /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
+      IEngine ShutdownHandler(Action<IEngine> handler);
 
    }
 }
