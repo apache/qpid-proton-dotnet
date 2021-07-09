@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
@@ -60,7 +61,35 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       private ProtonEncoderState cachedEncoderState;
 
-      private readonly IDictionary<Type, ITypeEncoder> typeEncoders = new Dictionary<Type, ITypeEncoder>();
+      private readonly IDictionary<Type, ITypeEncoder> typeEncoders = new Dictionary<Type, ITypeEncoder>()
+      {
+         [arrayEncoder.EncodesType] = arrayEncoder,
+         [binaryEncoder.EncodesType] = binaryEncoder,
+         [booleanEncoder.EncodesType] = booleanEncoder,
+         [sbyteEncoder.EncodesType] = sbyteEncoder,
+         [charEncoder.EncodesType] = charEncoder,
+         [decimal32Encoder.EncodesType] = decimal32Encoder,
+         [decimal64Encoder.EncodesType] = decimal64Encoder,
+         [decimal128Encoder.EncodesType] = decimal128Encoder,
+         [doubleEncoder.EncodesType] = doubleEncoder,
+         [floatEncoder.EncodesType] = floatEncoder,
+         [integerEncoder.EncodesType] = integerEncoder,
+         [listEncoder.EncodesType] = listEncoder,
+         [longEncoder.EncodesType] = longEncoder,
+         [mapEncoder.EncodesType] = mapEncoder,
+         [nullEncoder.EncodesType] = nullEncoder,
+         [shortEncoder.EncodesType] = shortEncoder,
+         [stringEncoder.EncodesType] = stringEncoder,
+         [symbolEncoder.EncodesType] = symbolEncoder,
+         [timestampEncoder.EncodesType] = timestampEncoder,
+         [unknownTypeEncoder.EncodesType] = unknownTypeEncoder,
+         [uuidEncoder.EncodesType] = uuidEncoder,
+         [byteEncoder.EncodesType] = byteEncoder,
+         [ushortEncoder.EncodesType] = ushortEncoder,
+         [uintEncoder.EncodesType] = uintEncoder,
+         [ulongEncoder.EncodesType] = ulongEncoder,
+         [deliveryTagEncoder.EncodesType] = deliveryTagEncoder
+      };
 
       public IEncoderState NewEncoderState()
       {
@@ -74,167 +103,273 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteNull(IProtonBuffer buffer, IEncoderState state)
       {
-
+         nullEncoder.WriteType(buffer, state, null);
       }
 
       public void WriteBoolean(IProtonBuffer buffer, IEncoderState state, bool value)
       {
-
+         booleanEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteUnsignedByte(IProtonBuffer buffer, IEncoderState state, byte value)
       {
-
+         byteEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteUnsignedShort(IProtonBuffer buffer, IEncoderState state, ushort value)
       {
-
+         ushortEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteUnsignedInteger(IProtonBuffer buffer, IEncoderState state, uint value)
       {
-
+         uintEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteUnsignedLong(IProtonBuffer buffer, IEncoderState state, ulong value)
       {
-
+         ulongEncoder.WriteType(buffer, state, value);
       }
 
-      public void WriteByte(IProtonBuffer buffer, IEncoderState state, byte value)
+      public void WriteByte(IProtonBuffer buffer, IEncoderState state, sbyte value)
       {
-
+         sbyteEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteShort(IProtonBuffer buffer, IEncoderState state, short value)
       {
-
+         shortEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteInteger(IProtonBuffer buffer, IEncoderState state, int value)
       {
-
+         integerEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteLong(IProtonBuffer buffer, IEncoderState state, long value)
       {
-
+         longEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteFloat(IProtonBuffer buffer, IEncoderState state, float value)
       {
-
+         floatEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteDouble(IProtonBuffer buffer, IEncoderState state, double value)
       {
-
+         doubleEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteDecimal32(IProtonBuffer buffer, IEncoderState state, Decimal32 value)
       {
-
+         decimal32Encoder.WriteType(buffer, state, value);
       }
 
       public void WriteDecimal64(IProtonBuffer buffer, IEncoderState state, Decimal64 value)
       {
-
+         decimal64Encoder.WriteType(buffer, state, value);
       }
 
       public void WriteDecimal128(IProtonBuffer buffer, IEncoderState state, Decimal128 value)
       {
-
+         decimal128Encoder.WriteType(buffer, state, value);
       }
 
       public void WriteCharacter(IProtonBuffer buffer, IEncoderState state, char value)
       {
-
+         charEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, long value)
       {
-
+         timestampEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, ulong value)
       {
-
+         timestampEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteGuid(IProtonBuffer buffer, IEncoderState state, Guid value)
       {
-
+         uuidEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, IProtonBuffer value)
       {
-
+         binaryEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteString(IProtonBuffer buffer, IEncoderState state, String value)
       {
-
+         stringEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteSymbol(IProtonBuffer buffer, IEncoderState state, Symbol value)
       {
-
+         symbolEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteSymbol(IProtonBuffer buffer, IEncoderState state, String value)
       {
+         symbolEncoder.WriteType(buffer, state, value);
+      }
 
+      public void WriteList(IProtonBuffer buffer, IEncoderState state, IList value)
+      {
+         listEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteList<T>(IProtonBuffer buffer, IEncoderState state, IList<T> value)
       {
+         listEncoder.WriteType(buffer, state, value);
+      }
 
+      public void WriteMap(IProtonBuffer buffer, IEncoderState state, IDictionary value)
+      {
+         mapEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IDictionary<K, V> value)
       {
-
+         mapEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IReadOnlyDictionary<K, V> value)
       {
-
+         mapEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteDescribedType(IProtonBuffer buffer, IEncoderState state, IDescribedType value)
       {
-
+         unknownTypeEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteDeliveryTag(IProtonBuffer buffer, IEncoderState state, IDeliveryTag value)
       {
-
+         deliveryTagEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteObject(IProtonBuffer buffer, IEncoderState state, Object value)
       {
+         if (value != null)
+         {
+            ITypeEncoder encoder = typeEncoders[value.GetType()];
 
+            if (encoder == null)
+            {
+               WriteUnregisteredType(buffer, state, value);
+            }
+            else
+            {
+               encoder.WriteType(buffer, state, value);
+            }
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Null);
+         }
       }
 
-      public void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value)
+      private void WriteUnregisteredType(IProtonBuffer buffer, IEncoderState state, object value)
       {
+         if (value.GetType().IsArray)
+         {
+            WriteArray(buffer, state, value as Array);
+         }
+         else if (value is IList)
+         {
+            WriteList(buffer, state, (IList)value);
+         }
+         else if (value is IDictionary)
+         {
+            WriteMap(buffer, state, (IDictionary)value);
+         }
+         else if (value is IDescribedType)
+         {
+            WriteDescribedType(buffer, state, (IDescribedType)value);
+         }
+         else
+         {
+            throw new ArgumentException(
+                "Do not know how to write Objects of class " + value.GetType().Name);
+         }
+      }
 
+      public void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
+      {
+         arrayEncoder.WriteType(buffer, state, value);
       }
 
       public IEncoder RegisterDescribedTypeEncoder(IDescribedTypeEncoder encoder)
       {
+         typeEncoders[encoder.EncodesType] = encoder;
          return this;
       }
 
       public ITypeEncoder LookupTypeEncoder(Object value)
       {
-         return null;
+         if (value == null)
+         {
+            return nullEncoder;
+         }
+         else
+         {
+            return LookupTypeEncoder(value.GetType());
+         }
       }
 
       public ITypeEncoder LookupTypeEncoder(Type typeClass)
       {
-         return null;
+         ITypeEncoder encoder = typeEncoders[typeClass];
+
+         if (encoder == null)
+         {
+            encoder = DeduceTypeEncoder(typeClass, null);
+         }
+
+         return encoder;
+      }
+
+      private ITypeEncoder DeduceTypeEncoder(Type typeClass, Object instance)
+      {
+         ITypeEncoder encoder = typeEncoders[typeClass];
+
+         if (typeClass.IsArray)
+         {
+            encoder = arrayEncoder;
+         }
+         else
+         {
+            if (typeClass.IsAssignableTo(typeof(IList)))
+            {
+               encoder = listEncoder;
+            }
+            else if (typeClass.IsAssignableTo(typeof(IDictionary)))
+            {
+               encoder = mapEncoder;
+            }
+            else if (typeClass.IsAssignableTo(typeof(IDescribedType)))
+            {
+               // For instances of a specific DescribedType that we don't know about the
+               // generic described type encoder will work.  We don't use that though for
+               // class lookups as we don't want to allow arrays of polymorphic types.
+               if (encoder == null && instance != null)
+               {
+                  if (encoder == null)
+                  {
+                     return unknownTypeEncoder;
+                  }
+               }
+            }
+         }
+
+         // Ensure that next time we find the encoder immediately and don't need to
+         // go through this process again.
+         typeEncoders[typeClass] = encoder;
+
+         return encoder;
       }
    }
 }

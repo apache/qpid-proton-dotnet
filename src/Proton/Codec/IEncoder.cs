@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
@@ -102,7 +103,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">An encoder state instance to use when encoding</param>
       /// <param name="value">The value to be written</param>
       /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
-      void WriteByte(IProtonBuffer buffer, IEncoderState state, byte value);
+      void WriteByte(IProtonBuffer buffer, IEncoderState state, sbyte value);
 
       /// <summary>
       /// Writes the AMQP short encoding for the given value to the given buffer.
@@ -255,7 +256,25 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">An encoder state instance to use when encoding</param>
       /// <param name="value">The value to be written</param>
       /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
+      void WriteList(IProtonBuffer buffer, IEncoderState state, IList value);
+
+      /// <summary>
+      /// Writes the AMQP List encoding for the given value to the given buffer.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the value encoding to</param>
+      /// <param name="state">An encoder state instance to use when encoding</param>
+      /// <param name="value">The value to be written</param>
+      /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
       void WriteList<T>(IProtonBuffer buffer, IEncoderState state, IList<T> value);
+
+      /// <summary>
+      /// Writes the AMQP Map encoding for the given value to the given buffer.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the value encoding to</param>
+      /// <param name="state">An encoder state instance to use when encoding</param>
+      /// <param name="value">The value to be written</param>
+      /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
+      void WriteMap(IProtonBuffer buffer, IEncoderState state, IDictionary value);
 
       /// <summary>
       /// Writes the AMQP Map encoding for the given value to the given buffer.
@@ -310,7 +329,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">An encoder state instance to use when encoding</param>
       /// <param name="value">The value to be written</param>
       /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
-      void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value);
+      void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value);
 
       /// <summary>
       /// Allows registration of the given AMQP type encoder into this encoder to customize the

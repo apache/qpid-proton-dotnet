@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// <summary>
    /// Type encoder that handles writing Timestamp types
    /// </summary>
-   public sealed class TimestampTypeEncoder : AbstractPrimitiveTypeEncoder<long>
+   public sealed class TimestampTypeEncoder : AbstractPrimitiveTypeEncoder<DateTime>
    {
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
