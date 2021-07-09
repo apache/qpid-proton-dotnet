@@ -214,5 +214,37 @@ namespace Apache.Qpid.Proton.Buffer
 
          return this;
       }
+
+      /// <summary>
+      /// Discards the read bytes, and moves the buffer contents to the beginning of the buffer.
+      /// </summary>
+      /// <returns>this buffer instance</returns>
+      IProtonBuffer Compact();
+
+      /// <summary>
+      /// Returns the number of component buffers in this buffer. If this is not a composite
+      /// buffer instance then the count will always be one. For a composite buffer this will
+      /// be the count of the current number of component buffers contained within.
+      /// </summary>
+      uint ComponentCount { get; }
+
+      /// <summary>
+      /// Returns the number of component buffers in this buffer that are readable and would
+      /// be provided to calls to the for each readable buffer API. If this is not a composite
+      /// buffer instance then the count will be at most one. For a composite buffer this will
+      /// be the count of the current number of component buffers contained within that are
+      /// readable.
+      /// </summary>
+      uint ReadableComponentCount { get; }
+
+      /// <summary>
+      /// Returns the number of component buffers in this buffer that are writable and would
+      /// be provided to calls to the for each writable buffer API. If this is not a composite
+      /// buffer instance then the count will be at most one. For a composite buffer this will
+      /// be the count of the current number of component buffers contained within that are
+      /// writable.
+      /// </summary>
+      uint WritableComponentCount { get; }
+
    }
 }

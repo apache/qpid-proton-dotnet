@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Text;
 
 namespace Apache.Qpid.Proton.Buffer
 {

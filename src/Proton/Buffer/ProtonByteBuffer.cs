@@ -27,6 +27,17 @@ namespace Apache.Qpid.Proton.Buffer
       public int ReadOffset { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
       public int WriteOffset { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
+      public uint ComponentCount => 1;
+
+      public uint ReadableComponentCount => throw new NotImplementedException();
+
+      public uint WritableComponentCount => throw new NotImplementedException();
+
+      public IProtonBuffer Compact()
+      {
+         throw new NotImplementedException();
+      }
+
       public int CompareTo(object obj)
       {
          throw new NotImplementedException();
