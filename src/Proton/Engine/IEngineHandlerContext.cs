@@ -110,7 +110,7 @@ namespace Apache.Qpid.Proton.Engine
       void FireWrite(HeaderEnvelope envelope);
 
       /// <summary>
-      /// Fires a write of the given proton buffer into the engine pipline for processing
+      /// Fires a write of the given proton buffer into the engine pipeline for processing
       /// and provides an action delegate which should be invoked when the IO has written
       /// the bytes fully.
       /// </summary>
