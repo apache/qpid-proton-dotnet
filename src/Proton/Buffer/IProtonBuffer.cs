@@ -20,6 +20,26 @@ using System.Text;
 
 namespace Apache.Qpid.Proton.Buffer
 {
+   /// <summary>
+   /// Process the given component from the buffer at the given index value. The provided
+   /// readable component is only considered valid during the call after which any changes
+   /// to the source buffer would invalidate it.
+   /// </summary>
+   /// <param name="index">an index that provides a view of which component access count</param>
+   /// <param name="component">A readable component from the buffer</param>
+   /// <returns>true to continue iteration and false to stop any further processing.</returns>
+   public delegate bool ReadableComponentProcessor(in int index, in IReadableComponent component);
+
+   /// <summary>
+   /// Process the given component from the buffer at the given index value. The provided
+   /// writable component is only considered valid during the call after which any changes
+   /// to the source buffer would invalidate it.
+   /// </summary>
+   /// <param name="index">an index that provides a view of which component access count</param>
+   /// <param name="component">A writable component from the buffer</param>
+   /// <returns>true to continue iteration and false to stop any further processing.</returns>
+   public delegate bool WritableComponentProcessor(in int index, in IWritableComponent component);
+
    public interface IProtonBuffer : IEquatable<IProtonBuffer>, IComparable, IComparable<IProtonBuffer>, IProtonBufferAccessors
    {
       /// <summary>
@@ -208,6 +228,34 @@ namespace Apache.Qpid.Proton.Buffer
       /// writable.
       /// </summary>
       uint WritableComponentCount { get; }
+
+      /// <summary>
+      /// Invokes the provided delegate for each readable component in this buffer
+      /// and increments the provided index value for each invocation. The total
+      /// number of buffers processed is returned to the caller.
+      /// <para/>
+      /// The delegate can stop processing at any time by returning false in which
+      /// case this method will stop and return a negative value to indicate that
+      /// processing stopped early and did not traverse all available components.
+      /// </summary>
+      /// <param name="index">a starting index which is increment after each call</param>
+      /// <param name="processor">The delegate that will receive the components</param>
+      /// <returns>The number of components processed or negative if stopped early.</returns>
+      uint ForEachReadableComponent(in int index, in ReadableComponentProcessor processor);
+
+      /// <summary>
+      /// Invokes the provided delegate for each writable component in this buffer
+      /// and increments the provided index value for each invocation. The total
+      /// number of buffers processed is returned to the caller.
+      /// <para/>
+      /// The delegate can stop processing at any time by returning false in which
+      /// case this method will stop and return a negative value to indicate that
+      /// processing stopped early and did not traverse all available components.
+      /// </summary>
+      /// <param name="index">a starting index which is increment after each call</param>
+      /// <param name="processor">The delegate that will receive the components</param>
+      /// <returns>The number of components processed or negative if stopped early.</returns>
+      uint ForEachWritableComponent(in int index, in WritableComponentProcessor processor);
 
    }
 }
