@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Engine
    /// <summary>
    /// Frame object that carries an AMQP Performative.
    /// </summary>
-   public class OutgoingAmqpEnvelope : PerformativeEnvelope<IPerformative>
+   public sealed class OutgoingAmqpEnvelope : PerformativeEnvelope<IPerformative>
    {
       public static readonly byte AmqpFrameType = (byte)0;
 

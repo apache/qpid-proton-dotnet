@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Engine
    /// <summary>
    /// Frame object that carries an AMQP Performative.
    /// </summary>
-   public class SaslEnvelope : PerformativeEnvelope<ISaslPerformative>
+   public sealed class SaslEnvelope : PerformativeEnvelope<ISaslPerformative>
    {
       public static readonly byte SaslFrameType = (byte)1;
 

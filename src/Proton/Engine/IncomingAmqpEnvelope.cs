@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <typeparam name="T">The type of context that will be provided to the invocation</typeparam>
       /// <param name="handler">The handle to invoke an event on.</param>
       /// <param name="context">The context to pass to the event invocation</param>
-      public void Invoke<T>(IPerformativeHandler<T> handler, T context)
+      public virtual void Invoke<T>(IPerformativeHandler<T> handler, T context)
       {
          Body.Invoke(handler, Payload, Channel, context);
       }
