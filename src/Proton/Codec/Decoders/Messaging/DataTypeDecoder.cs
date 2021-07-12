@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
                                       "amount of data available (" + buffer.ReadableBytes + ")");
          }
 
-         int position = buffer.ReadOffset;
+         long position = buffer.ReadOffset;
          IProtonBuffer data = ProtonByteBufferAllocator.INSTANCE.Allocate(size, size);
 
          buffer.CopyInto(position, data, 0, size);

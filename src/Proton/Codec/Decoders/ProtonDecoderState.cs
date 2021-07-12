@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
          else
          {
-            int originalPosition = buffer.ReadOffset;
+            long originalPosition = buffer.ReadOffset;
 
             try
             {

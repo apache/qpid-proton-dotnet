@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       /// <param name="initialCapacity">The initial capacity to use when creating the buffer</param>
       /// <returns>A new buffer instance that has the given initial capacity</returns>
-      IProtonBuffer OutputBuffer(int initialCapacity);
+      IProtonBuffer OutputBuffer(long initialCapacity);
 
       /// <summary>
       /// Create a new output IProtonBuffer instance with the given initial capacity and the
@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="initialCapacity">The initial capacity to use when creating the buffer</param>
       /// <param name="maxCapacity">The maximum capacity limit for the newly created buffer</param>
       /// <returns>A new buffer instance that has the given initial capacity limits</returns>
-      IProtonBuffer OutputBuffer(int initialCapacity, int maxCapacity);
+      IProtonBuffer OutputBuffer(long initialCapacity, long maxCapacity);
 
       /// <summary>
       /// Create a new IProtonBuffer instance with default initial capacity.  The buffer
@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       /// <param name="initialCapacity">The initial capacity to use when creating the buffer</param>
       /// <returns>A new buffer instance that has the given initial capacity</returns>
-      IProtonBuffer Allocate(int initialCapacity);
+      IProtonBuffer Allocate(long initialCapacity);
 
       /// <summary>
       /// Create a new IProtonBuffer instance with the given initial capacity and the
@@ -88,7 +88,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="initialCapacity">The initial capacity to use when creating the buffer</param>
       /// <param name="maxCapacity">The maximum capacity limit for the newly created buffer</param>
       /// <returns>A new buffer instance that has the given initial capacity limits</returns>
-      IProtonBuffer Allocate(int initialCapacity, int maxCapacity);
+      IProtonBuffer Allocate(long initialCapacity, long maxCapacity);
 
       /// <summary>
       /// Create a new IProtonBuffer that wraps the given byte array.

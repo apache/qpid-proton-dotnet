@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Buffer
    public sealed class ProtonBufferInputStream : Stream
    {
       private readonly IProtonBuffer buffer;
-      private readonly int initialReadIndex;
+      private readonly long initialReadIndex;
 
       private bool closed;
 
@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Buffer
          this.initialReadIndex = buffer.ReadOffset;
       }
 
-      public int BytesRead => buffer.ReadOffset - initialReadIndex;
+      public long BytesRead => buffer.ReadOffset - initialReadIndex;
 
       public override bool CanRead => true;
 
@@ -102,8 +102,7 @@ namespace Apache.Qpid.Proton.Buffer
                break;
          }
 
-         // TODO: Buffer index and length tracking may need to use long
-         if ((int) newReadOffset > buffer.WriteOffset)
+         if (newReadOffset > buffer.WriteOffset)
          {
             throw new ArgumentOutOfRangeException("Cannot seek beyond readable portion of the wrapped buffer");
          }
@@ -113,7 +112,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
          else
          {
-            buffer.ReadOffset = (int) newReadOffset;
+            buffer.ReadOffset = newReadOffset;
          }
 
          return initialReadIndex - buffer.ReadOffset;

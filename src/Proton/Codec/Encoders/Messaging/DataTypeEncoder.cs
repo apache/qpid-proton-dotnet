@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
 
-         int startIndex = buffer.WriteOffset;
+         long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the count of list elements.
          buffer.WriteInt(0);
@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          WriteRawArray(buffer, state, values);
 
          // Move back and write the size
-         int endIndex = buffer.WriteOffset;
+         long endIndex = buffer.WriteOffset;
          long writeSize = endIndex - startIndex - sizeof(int);
 
          if (writeSize > Int32.MaxValue)
@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          foreach (object value in values)
          {
             IProtonBuffer binary = (IProtonBuffer)value;
-            buffer.WriteInt(binary.ReadableBytes);
+            buffer.WriteInt((int) binary.ReadableBytes);
             buffer.WriteBytes(binary);
          }
       }

@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// to allow more buffer writes. The remaining amount of writable bytes at any given
       /// time is the buffer capacity minus the write offset.
       /// </summary>
-      int Capacity { get; }
+      long Capacity { get; }
 
       /// <summary>
       /// Requests that the buffer ensure that there is enough allocated internal capacity
@@ -39,53 +39,47 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="amount">the number of bytes that should be available fro writing</param>
       /// <returns>This buffer instance.</returns>
       /// <exception cref="ArgumentOutOfRangeException">If the requested amount exceeds capacity restrictions</exception>
-      IProtonBuffer EnsureWritable(int amount);
+      IProtonBuffer EnsureWritable(long amount);
 
       /// <summary>
       /// Returns true if the current read offset is less than the current write offset meaning
       /// there are bytes available for reading.
       /// </summary>
-      bool Readable => WriteOffset - ReadOffset > 0;
+      bool Readable { get; }
 
       /// <summary>
       /// Returns the number of bytes that can currently be read from this buffer.
       /// </summary>
-      int ReadableBytes => WriteOffset - ReadOffset;
+      long ReadableBytes { get; }
 
       /// <summary>
       /// Returns true if write offset is less than the current buffer capacity limit.
       /// </summary>
-      bool Writable => Capacity - WriteOffset > 0;
+      bool Writable { get; }
 
       /// <summary>
       /// Returns the number of bytes that can currently be written from this buffer.
       /// </summary>
-      int WritableBytes => Capacity - WriteOffset;
+      long WritableBytes { get; }
 
       /// <summary>
       /// Gets or sets the current read offset in this buffer.  If the read offset is set to
       /// a value larger than the current write offset an exception is thrown.
       /// </summary>
-      int ReadOffset { get; set; }
+      long ReadOffset { get; set; }
 
       /// <summary>
       /// Gets or sets the current write offset in this buffer.  If the write offset is set to
       /// a value less than the current read offset or larger than the current buffer capcity
       /// an exception is thrown.
       /// </summary>
-      int WriteOffset { get; set; }
+      long WriteOffset { get; set; }
 
       /// <summary>
       /// Resets the read and write offset values to zero.
       /// </summary>
       /// <returns>This buffer instance.</returns>
-      IProtonBuffer Reset()
-      {
-         ReadOffset = 0;
-         WriteOffset = 0;
-
-         return this;
-      }
+      IProtonBuffer Reset();
 
       /// <summary>
       /// Copies the given number of bytes from this buffer into the target byte buffer starting
@@ -102,7 +96,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <exception cref="IndexOutOfRangeException"></exception>
       /// <exception cref="ArgumentOutOfRangeException"></exception>
       /// <exception cref="ArgumentNullException"></exception>
-      IProtonBuffer CopyInto(int srcPos, byte[] dest, int destPos, int length);
+      IProtonBuffer CopyInto(long srcPos, byte[] dest, int destPos, int length);
 
       /// <summary>
       /// Copies the given number of bytes from this buffer into the target byte buffer starting
@@ -120,7 +114,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <exception cref="IndexOutOfRangeException"></exception>
       /// <exception cref="ArgumentOutOfRangeException"></exception>
       /// <exception cref="ArgumentNullException"></exception>
-      IProtonBuffer CopyInto(int srcPos, IProtonBuffer dest, int destPos, int length);
+      IProtonBuffer CopyInto(long srcPos, IProtonBuffer dest, long destPos, long length);
 
       /// <summary>
       /// Returns a copy of this buffer's readable bytes. Modifying the content of the
@@ -129,10 +123,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// length of the copy meaning that the entire copied region is read for reading.
       /// </summary>
       /// <returns>A new buffer with a copy of the readable bytes in this buffer</returns>
-      IProtonBuffer Copy()
-      {
-         return Copy(ReadOffset, ReadableBytes);
-      }
+      IProtonBuffer Copy();
 
       /// <summary>
       /// Returns a copy of this buffer's readable bytes. Modifying the content of the
@@ -145,7 +136,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">The read offset where the copy begins</param>
       /// <param name="length">The number of bytes to copy</param>
       /// <returns>A new buffer with a copy of the readable bytes in the specified region</returns>
-      IProtonBuffer Copy(int index, int length);
+      IProtonBuffer Copy(long index, long length);
 
       /// <summary>
       /// Coverts the readable bytes in this buffer into a string value using the Encoding value
@@ -163,12 +154,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="amount">The number of bytes to skip</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the amount is negative or larger than readable size</exception>
-      IProtonBuffer SkipBytes(int amount)
-      {
-         ReadOffset = ReadOffset + amount;
-
-         return this;
-      }
+      IProtonBuffer SkipBytes(long amount);
 
       /// <summary>
       /// Writes the contents of the given byte array into this buffer and advances the
@@ -177,19 +163,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="source">The byte buffer to be written into this buffer</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If there are not enough writable bytes</exception>
-      IProtonBuffer WriteBytes(byte[] source)
-      {
-         int size = source.Length;
-         int offset = WriteOffset;
-         WriteOffset = offset + size;
-
-         for (int i = 0; i < size; i++)
-         {
-            SetUnsignedByte(offset + i, source[i]);
-         }
-
-         return this;
-      }
+      IProtonBuffer WriteBytes(byte[] source);
 
       /// <summary>
       /// Transfers the bytes from the source buffer to this buffer starting at the current
@@ -202,18 +176,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="length">The number of bytes to write into this buffer</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If there are not enough writable bytes</exception>
-      IProtonBuffer WriteBytes(IProtonBuffer source)
-      {
-         int size = source.ReadableBytes;
-         int offset = WriteOffset;
-
-         WriteOffset = offset + size;
-
-         source.CopyInto(source.ReadOffset, this, offset, size);
-         source.SkipBytes(size);
-
-         return this;
-      }
+      IProtonBuffer WriteBytes(IProtonBuffer source);
 
       /// <summary>
       /// Discards the read bytes, and moves the buffer contents to the beginning of the buffer.

@@ -70,11 +70,11 @@ namespace Apache.Qpid.Proton.Utilities
          StringBuilder str = new StringBuilder();
          str.Append("\"");
 
-         int byteToRead = buffer.ReadableBytes;
-         int size = 0;
+         long byteToRead = buffer.ReadableBytes;
+         long size = 0;
          bool truncated = false;
 
-         for (int i = 0; i < byteToRead; ++i)
+         for (long i = 0; i < byteToRead; ++i)
          {
             sbyte c = buffer.GetByte(i);
 

@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       private void WriteValue(IProtonBuffer buffer, IEncoderState state, IList value)
       {
-         int startIndex = buffer.WriteOffset;
+         long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the element count
          buffer.EnsureWritable(sizeof(int) + sizeof(int));
@@ -80,8 +80,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          }
 
          // Move back and write the size
-         int endIndex = buffer.WriteOffset;
-         buffer.SetInt(startIndex, endIndex - startIndex - sizeof(int));
+         long endIndex = buffer.WriteOffset;
+         buffer.SetInt(startIndex, (int)(endIndex - startIndex - sizeof(int)));
       }
    }
 }

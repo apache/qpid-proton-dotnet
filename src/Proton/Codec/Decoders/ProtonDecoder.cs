@@ -762,7 +762,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          if (encodingCode == EncodingCodes.DescribedTypeIndicator)
          {
-            int readPos = buffer.ReadOffset;
+            long readPos = buffer.ReadOffset;
             try
             {
                ulong result = ReadUnsignedLong(buffer, state) ?? Byte.MaxValue;
@@ -792,7 +792,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       private ITypeDecoder SlowReadNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
       {
          Object descriptor;
-         int readPos = buffer.ReadOffset;
+         long readPos = buffer.ReadOffset;
 
          try
          {
@@ -815,7 +815,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public ITypeDecoder PeekNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
       {
-         int offset = buffer.ReadOffset;
+         long offset = buffer.ReadOffset;
          try
          {
             return ReadNextTypeDecoder(buffer, state);

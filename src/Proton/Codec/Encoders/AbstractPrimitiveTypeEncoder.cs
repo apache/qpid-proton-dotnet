@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          buffer.EnsureWritable(sizeof(byte) * 3);
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Array8));
 
-         int startIndex = buffer.WriteOffset;
+         long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the count of list elements.
          buffer.WriteUnsignedByte(0);
@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          WriteRawArray(buffer, state, values);
 
          // Move back and write the size
-         int endIndex = buffer.WriteOffset;
+         long endIndex = buffer.WriteOffset;
          long writeSize = endIndex - startIndex - sizeof(byte);
 
          buffer.SetUnsignedByte(startIndex, (byte)writeSize);
@@ -67,7 +67,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          buffer.EnsureWritable(sizeof(byte) + sizeof(uint) + sizeof(uint));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
 
-         int startIndex = buffer.WriteOffset;
+         long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the count of list elements.
          buffer.WriteInt(0);
@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          WriteRawArray(buffer, state, values);
 
          // Move back and write the size
-         int endIndex = buffer.WriteOffset;
+         long endIndex = buffer.WriteOffset;
          long writeSize = endIndex - startIndex - sizeof(int);
 
          if (writeSize > Int32.MaxValue)

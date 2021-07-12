@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Types
          }
 
          this.tagBytes = new byte[tagBytes.ReadableBytes];
-         tagBytes.CopyInto(tagBytes.ReadOffset, this.tagBytes, 0, tagBytes.ReadableBytes);
+         tagBytes.CopyInto(tagBytes.ReadOffset, this.tagBytes, 0, (int) tagBytes.ReadableBytes);
 
          this.tagView = tagBytes;
       }

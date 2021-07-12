@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="i"></param>
       /// <returns>The unsigned byte value that is present at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      byte this[int i]
+      byte this[long i]
       {
          get => GetUnsignedByte(i);
          set => SetUnsignedByte(i, value);
@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the boolean value of the byte at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      bool GetBool(int index);
+      bool GetBool(long index);
 
       /// <summary>
       /// Reads a single signed byte from the given index and returns it.
@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the byte value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      sbyte GetByte(int index);
+      sbyte GetByte(long index);
 
       /// <summary>
       /// Reads a single unsigned byte from the given index and returns it.
@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the byte value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      byte GetUnsignedByte(int index);
+      byte GetUnsignedByte(long index);
 
       /// <summary>
       /// Reads a single 2 byte char from the given index and returns it.
@@ -70,7 +70,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the char value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      char GetChar(int index);
+      char GetChar(long index);
 
       /// <summary>
       /// Reads a single 2 byte short from the given index and returns it.
@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the short value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      short GetShort(int index);
+      short GetShort(long index);
 
       /// <summary>
       /// Reads a single 2 byte unsigned short from the given index and returns it.
@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the short value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      ushort GetUnsignedShort(int index);
+      ushort GetUnsignedShort(long index);
 
       /// <summary>
       /// Reads a single 4 byte int from the given index and returns it.
@@ -94,7 +94,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the int value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      int GetInt(int index);
+      int GetInt(long index);
 
       /// <summary>
       /// Reads a single 4 byte unsigned int from the given index and returns it.
@@ -102,7 +102,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the int value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      uint GetUnsignedInt(int index);
+      uint GetUnsignedInt(long index);
 
       /// <summary>
       /// Reads a single 8 byte long from the given index and returns it.
@@ -110,7 +110,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the long value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      long GetLong(int index);
+      long GetLong(long index);
 
       /// <summary>
       /// Reads a single 8 byte unsigned long from the given index and returns it.
@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the long value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      ulong GetUnsignedLong(int index);
+      ulong GetUnsignedLong(long index);
 
       /// <summary>
       /// Reads a single 4 byte float from the given index and returns it.
@@ -126,7 +126,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the float value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      float GetFloat(int index);
+      float GetFloat(long index);
 
       /// <summary>
       /// Reads a single 8 byte double from the given index and returns it.
@@ -134,7 +134,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the double value at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      double GetDouble(int index);
+      double GetDouble(long index);
 
       /// <summary>
       /// Write the given byte value at the given location in the buffer backing store without
@@ -144,7 +144,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetByte(int index, sbyte value);
+      IProtonBuffer SetByte(long index, sbyte value);
 
       /// <summary>
       /// Write the given unsigned byte value at the given location in the buffer backing store without
@@ -154,7 +154,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetUnsignedByte(int index, byte value);
+      IProtonBuffer SetUnsignedByte(long index, byte value);
 
       /// <summary>
       /// Write the given boolean value at the given location in the buffer backing store without
@@ -164,7 +164,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetBoolean(int index, bool value);
+      IProtonBuffer SetBoolean(long index, bool value);
 
       /// <summary>
       /// Write the given 2 byte char value at the given location in the buffer backing store without
@@ -174,7 +174,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetChar(int index, char value);
+      IProtonBuffer SetChar(long index, char value);
 
       /// <summary>
       /// Write the given 2 byte short value at the given location in the buffer backing store without
@@ -184,7 +184,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetShort(int index, short value);
+      IProtonBuffer SetShort(long index, short value);
 
       /// <summary>
       /// Write the given 2 byte unsigned short value at the given location in the buffer backing store
@@ -194,7 +194,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetUnsignedShort(int index, ushort value);
+      IProtonBuffer SetUnsignedShort(long index, ushort value);
 
       /// <summary>
       /// Write the given 4 byte int value at the given location in the buffer backing store without
@@ -204,7 +204,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetInt(int index, int value);
+      IProtonBuffer SetInt(long index, int value);
 
       /// <summary>
       /// Write the given 4 byte unsigned int value at the given location in the buffer backing store
@@ -214,7 +214,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetUnsignedInt(int index, uint value);
+      IProtonBuffer SetUnsignedInt(long index, uint value);
 
       /// <summary>
       /// Write the given 8 byte long value at the given location in the buffer backing store without
@@ -224,7 +224,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetLong(int index, long value);
+      IProtonBuffer SetLong(long index, long value);
 
       /// <summary>
       /// Write the given 8 byte unsigned long value at the given location in the buffer backing store
@@ -234,7 +234,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetUnsignedLong(int index, ulong value);
+      IProtonBuffer SetUnsignedLong(long index, ulong value);
 
       /// <summary>
       /// Write the given 4 byte float value at the given location in the buffer backing store without
@@ -244,7 +244,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetFloat(int index, float value);
+      IProtonBuffer SetFloat(long index, float value);
 
       /// <summary>
       /// Write the given 8 byte double value at the given location in the buffer backing store without
@@ -254,7 +254,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to be written at the specified index</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      IProtonBuffer SetDouble(int index, double value);
+      IProtonBuffer SetDouble(long index, double value);
 
       /// <summary>
       /// Read a signed byte from the buffer and advance the read offset.

@@ -26,12 +26,12 @@ namespace Apache.Qpid.Proton.Buffer
    {
       public static readonly ProtonByteBufferAllocator INSTANCE = new ProtonByteBufferAllocator();
 
-      public IProtonBuffer OutputBuffer(int initialCapacity)
+      public IProtonBuffer OutputBuffer(long initialCapacity)
       {
          return OutputBuffer(initialCapacity, Int32.MaxValue);
       }
 
-      public IProtonBuffer OutputBuffer(int initialCapacity, int maxCapacity)
+      public IProtonBuffer OutputBuffer(long initialCapacity, long maxCapacity)
       {
          return null; // TODO
       }
@@ -41,12 +41,12 @@ namespace Apache.Qpid.Proton.Buffer
          return null; // TODO
       }
 
-      public IProtonBuffer Allocate(int initialCapacity)
+      public IProtonBuffer Allocate(long initialCapacity)
       {
          return Allocate(initialCapacity, Int32.MaxValue);
       }
 
-      public IProtonBuffer Allocate(int initialCapacity, int maxCapacity)
+      public IProtonBuffer Allocate(long initialCapacity, long maxCapacity)
       {
          return null; // TODO
       }

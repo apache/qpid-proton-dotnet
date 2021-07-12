@@ -130,7 +130,7 @@ namespace Apache.Qpid.Proton.Types
             {
                if (copyOnCreate)
                {
-                  int symbolSize = value.ReadableBytes;
+                  long symbolSize = value.ReadableBytes;
                   IProtonBuffer copy = ProtonByteBufferAllocator.INSTANCE.Allocate(symbolSize, symbolSize);
                   value.CopyInto(value.ReadOffset, copy, 0, symbolSize);
                   copy.WriteOffset = symbolSize;
@@ -157,7 +157,7 @@ namespace Apache.Qpid.Proton.Types
       /// </summary>
       public int Length
       {
-         get { return underlying.ReadableBytes; }
+         get { return (int) underlying.ReadableBytes; }
       }
 
       /// <summary>

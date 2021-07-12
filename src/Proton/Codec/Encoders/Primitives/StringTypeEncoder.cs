@@ -50,13 +50,13 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
             // Reserve space for the size
             buffer.WriteInt(0);
 
-            int stringStart = buffer.WriteOffset;
+            long stringStart = buffer.WriteOffset;
 
             // Write the full string value
             state.EncodeUtf8(buffer, value);
 
             // Move back and write the string size
-            buffer.SetInt(stringStart - sizeof(int), buffer.WriteOffset - stringStart);
+            buffer.SetInt(stringStart - sizeof(int), (int)(buffer.WriteOffset - stringStart));
          }
       }
 
@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Str8));
          buffer.WriteByte(0);
 
-         int startIndex = buffer.WriteOffset;
+         long startIndex = buffer.WriteOffset;
 
          // Write the full string value
          state.EncodeUtf8(buffer, value);
@@ -81,13 +81,13 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
          buffer.WriteInt(0);
 
-         int startIndex = buffer.WriteOffset;
+         long startIndex = buffer.WriteOffset;
 
          // Write the full string value
          state.EncodeUtf8(buffer, value);
 
          // Move back and write the size into the size slot
-         buffer.SetInt(startIndex - sizeof(int), buffer.WriteOffset - startIndex);
+         buffer.SetInt(startIndex - sizeof(int), (int)(buffer.WriteOffset - startIndex));
       }
    }
 }
