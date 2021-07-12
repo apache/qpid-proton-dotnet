@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Types.Transport
    /// processing.
    /// </summary>
    /// <typeparam name="E">The context that is provided for the event handler</typeparam>
-   public interface HeaderHandler<E>
+   public interface IHeaderHandler<E>
    {
       /// <summary>
       /// Handles AMQP Header events

@@ -351,7 +351,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       /// <typeparam name="T">The type of the context that is provided to this visit</typeparam>
       /// <param name="handler">The handler instance that will process the event</param>
       /// <param name="context">The context to provide to the event call</param>
-      public void invoke<T>(HeaderHandler<T> handler, T context)
+      public void Invoke<T>(IHeaderHandler<T> handler, T context)
       {
          if (IsSaslHeader())
          {
