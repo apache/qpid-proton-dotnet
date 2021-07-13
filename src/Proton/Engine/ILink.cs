@@ -137,12 +137,23 @@ namespace Apache.Qpid.Proton.Engine
       Source Source { get; set; }
 
       /// <summary>
+      /// Gets the Source value that was assigned by the remote end of the link.
+      /// </summary>
+      Source RemoteSource { get; }
+
+      /// <summary>
       /// Gets the local Target terminus value as a generic terminus instance
       /// which the user can then interrogate to determine if it is a Target
       /// or a Coordinator instance.  When set the value must be one of Target
       /// or Coordinator.
       /// </summary>
-      ITerminus TargetTerminus { get; set; }
+      ITerminus Terminus { get; set; }
+
+      /// <summary>
+      /// Get the remote set Terminus either Target or Coordinator that is set
+      /// once the remote sends its attach frame.
+      /// </summary>
+      ITerminus RemoteTerminus { get; }
 
       /// <summary>
       /// Attempt to access the local target terminus value as a Coordinator
@@ -243,7 +254,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// Sets a Action delegate for when the parent Session or Connection of this link
       /// is locally closed.
-      /// <para/
+      /// <para/>
       /// Typically used by clients for logging or other state update event processing.
       /// Clients should not perform any blocking calls within this context.  It is an error
       /// for the handler to throw an exception and the outcome of doing so is undefined.
