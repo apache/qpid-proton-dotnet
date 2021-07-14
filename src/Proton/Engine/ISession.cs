@@ -17,8 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Engine.Exceptions;
 
 namespace Apache.Qpid.Proton.Engine
 {

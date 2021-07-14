@@ -16,8 +16,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
 using Apache.Qpid.Proton.Types.Transport;
