@@ -186,6 +186,17 @@ namespace Apache.Qpid.Proton.Buffer
       IProtonBuffer WriteBytes(byte[] source);
 
       /// <summary>
+      /// Writes the contents of the given byte array into this buffer and advances the
+      /// write offset by the number of bytes written.
+      /// </summary>
+      /// <param name="source">The byte buffer to be written into this buffer</param>
+      /// <param name="offset">The offset into the source buffer to start the write</param>
+      /// <param name="length">The number of bytes from the source buffer to write into this buffer</param>
+      /// <returns>this buffer instance</returns>
+      /// <exception cref="IndexOutOfRangeException">If there are not enough writable bytes</exception>
+      IProtonBuffer WriteBytes(byte[] source, int offset, int length);
+
+      /// <summary>
       /// Transfers the bytes from the source buffer to this buffer starting at the current
       /// write offset and continues until the source buffer becomes unreadable.  The write
       /// index of this buffer is increased by the number of bytes read from the source.

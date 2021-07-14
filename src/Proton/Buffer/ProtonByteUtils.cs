@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System;
+
 namespace Apache.Qpid.Proton.Buffer
 {
    /// <summary>
@@ -134,6 +136,20 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="value">The value to write into the array</param>
       /// <param name="destination">The destination where the value should be written</param>
       /// <param name="offset">the offset into the destination to start writing</param>
+      /// <returns></returns>
+      public static byte[] WriteBoolean(bool value, byte[] destination, int offset)
+      {
+         destination[offset] = (byte)(value ? 1 : 0);
+
+         return destination;
+      }
+
+      /// <summary>
+      /// Writes the given value into the provided byte array at the target offset.
+      /// </summary>
+      /// <param name="value">The value to write into the array</param>
+      /// <param name="destination">The destination where the value should be written</param>
+      /// <param name="offset">the offset into the destination to start writing</param>
       /// <returns>The byte array passed where the value was written</returns>
       public static byte[] WriteShort(short value, byte[] destination, int offset)
       {
@@ -218,6 +234,30 @@ namespace Apache.Qpid.Proton.Buffer
       }
 
       /// <summary>
+      /// Writes the given value into the provided byte array at the target offset.
+      /// </summary>
+      /// <param name="value">The value to write into the array</param>
+      /// <param name="destination">The destination where the value should be written</param>
+      /// <param name="offset">the offset into the destination to start writing</param>
+      /// <returns>The byte array passed where the value was written</returns>
+      public static byte[] WriteFloat(float value, byte[] destination, int offset)
+      {
+         return WriteUnsignedInt((uint)BitConverter.SingleToInt32Bits(value), destination, offset);
+      }
+
+      /// <summary>
+      /// Writes the given value into the provided byte array at the target offset.
+      /// </summary>
+      /// <param name="value">The value to write into the array</param>
+      /// <param name="destination">The destination where the value should be written</param>
+      /// <param name="offset">the offset into the destination to start writing</param>
+      /// <returns>The byte array passed where the value was written</returns>
+      public static byte[] WriteDouble(double value, byte[] destination, int offset)
+      {
+         return WriteUnsignedLong((ulong)BitConverter.DoubleToInt64Bits(value), destination, offset);
+      }
+
+      /// <summary>
       /// Reads the value from the given array and returns it
       /// </summary>
       /// <param name="array">The array where the value should be read</param>
@@ -237,6 +277,17 @@ namespace Apache.Qpid.Proton.Buffer
       public static byte ReadUnsignedByte(byte[] array, int offset)
       {
          return array[offset];
+      }
+
+      /// <summary>
+      /// Reads the value from the given array and returns it
+      /// </summary>
+      /// <param name="array">The array where the value should be read</param>
+      /// <param name="offset">The offset into the array where the value is read from</param>
+      /// <returns>The value read from the given array</returns>
+      public static bool ReadBoolean(byte[] array, int offset)
+      {
+         return array[offset] == 0 ? false : true;
       }
 
       /// <summary>
@@ -325,6 +376,28 @@ namespace Apache.Qpid.Proton.Buffer
                         (long)(array[offset++] & 0xFF) << 16 |
                         (long)(array[offset++] & 0xFF) << 8 |
                         (long)(array[offset++] & 0xFF) << 0);
+      }
+
+      /// <summary>
+      /// Reads the value from the given array and returns it
+      /// </summary>
+      /// <param name="array">The array where the value should be read</param>
+      /// <param name="offset">The offset into the array where the value is read from</param>
+      /// <returns>The value read from the given array</returns>
+      public static float ReadFloat(byte[] array, int offset)
+      {
+         return BitConverter.Int32BitsToSingle(ReadInt(array, offset));
+      }
+
+      /// <summary>
+      /// Reads the value from the given array and returns it
+      /// </summary>
+      /// <param name="array">The array where the value should be read</param>
+      /// <param name="offset">The offset into the array where the value is read from</param>
+      /// <returns>The value read from the given array</returns>
+      public static double ReadDouble(byte[] array, int offset)
+      {
+         return BitConverter.Int64BitsToDouble(ReadLong(array, offset));
       }
    }
 }
