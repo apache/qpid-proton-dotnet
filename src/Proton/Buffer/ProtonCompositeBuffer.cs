@@ -91,12 +91,12 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
-      public int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor)
+      public int ForEachReadableComponent(in int index, in Func<int, IReadableComponent, bool> processor)
       {
          throw new NotImplementedException();
       }
 
-      public int ForEachWritableComponent(in int index, in WritableComponentProcessor processor)
+      public int ForEachWritableComponent(in int index, in Func<int, IWritableComponent, bool> processor)
       {
          throw new NotImplementedException();
       }

@@ -33,12 +33,12 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer OutputBuffer(long initialCapacity, long maxCapacity)
       {
-         return null; // TODO
+         return new ProtonByteBuffer(initialCapacity, maxCapacity);
       }
 
       public IProtonBuffer Allocate()
       {
-         return null; // TODO
+         return new ProtonByteBuffer();
       }
 
       public IProtonBuffer Allocate(long initialCapacity)
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Allocate(long initialCapacity, long maxCapacity)
       {
-         return null; // TODO
+         return new ProtonByteBuffer(initialCapacity, maxCapacity);
       }
 
       public IProtonBuffer Wrap(byte[] buffer)
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Wrap(byte[] buffer, int offset, int length)
       {
-         return null; // TODO
+         throw new NotSupportedException();
       }
    }
 }

@@ -20,26 +20,6 @@ using System.Text;
 
 namespace Apache.Qpid.Proton.Buffer
 {
-   /// <summary>
-   /// Process the given component from the buffer at the given index value. The provided
-   /// readable component is only considered valid during the call after which any changes
-   /// to the source buffer would invalidate it.
-   /// </summary>
-   /// <param name="index">an index that provides a view of which component access count</param>
-   /// <param name="component">A readable component from the buffer</param>
-   /// <returns>true to continue iteration and false to stop any further processing.</returns>
-   public delegate bool ReadableComponentProcessor(in int index, in IReadableComponent component);
-
-   /// <summary>
-   /// Process the given component from the buffer at the given index value. The provided
-   /// writable component is only considered valid during the call after which any changes
-   /// to the source buffer would invalidate it.
-   /// </summary>
-   /// <param name="index">an index that provides a view of which component access count</param>
-   /// <param name="component">A writable component from the buffer</param>
-   /// <returns>true to continue iteration and false to stop any further processing.</returns>
-   public delegate bool WritableComponentProcessor(in int index, in IWritableComponent component);
-
    public interface IProtonBuffer : IEquatable<IProtonBuffer>, IComparable, IComparable<IProtonBuffer>, IProtonBufferAccessors
    {
       /// <summary>
@@ -252,7 +232,9 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">a starting index which is increment after each call</param>
       /// <param name="processor">The delegate that will receive the components</param>
       /// <returns>The number of components processed or negative if stopped early.</returns>
-      int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor);
+      // int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor);
+
+      int ForEachReadableComponent(in int index, in Func<int, IReadableComponent, bool> processor);
 
       /// <summary>
       /// Invokes the provided delegate for each writable component in this buffer
@@ -266,7 +248,9 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">a starting index which is increment after each call</param>
       /// <param name="processor">The delegate that will receive the components</param>
       /// <returns>The number of components processed or negative if stopped early.</returns>
-      int ForEachWritableComponent(in int index, in WritableComponentProcessor processor);
+      // int ForEachWritableComponent(in int index, in WritableComponentProcessor processor);
+
+      int ForEachWritableComponent(in int index, in Func<int, IWritableComponent, bool> processor);
 
    }
 }

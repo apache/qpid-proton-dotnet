@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// and limited only by the size of a byte array in max capacity.
       /// </summary>
       /// <param name="initialCapacity">The initial capacity of this buffer</param>
-      public ProtonByteBuffer(int initialCapacity) : this(initialCapacity, DefaultMaximumCapacity)
+      public ProtonByteBuffer(long initialCapacity) : this(initialCapacity, DefaultMaximumCapacity)
       {
       }
 
@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// and limited to a max capacity of the given amount.
       /// </summary>
       /// <param name="initialCapacity">The initial capacity of this buffer</param>
-      public ProtonByteBuffer(int initialCapacity, int maxCapacity) : base()
+      public ProtonByteBuffer(long initialCapacity, long maxCapacity) : base()
       {
          if (initialCapacity < 0)
          {
@@ -90,6 +90,7 @@ namespace Apache.Qpid.Proton.Buffer
       public ProtonByteBuffer(byte[] backingArray) : this(backingArray.Length, backingArray.Length)
       {
          this.array = backingArray;
+         this.writeOffset = backingArray.LongLength;
       }
 
       #region Buffer State and Management APIs
@@ -234,13 +235,13 @@ namespace Apache.Qpid.Proton.Buffer
 
       public long WritableArrayLength => WritableBytes;
 
-      public int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor)
+      public int ForEachReadableComponent(in int index, in Func<int, IReadableComponent, bool> processor)
       {
-         CheckGet(writeOffset, Math.Max(1, ReadableBytes));
+         CheckGet(readOffset, Math.Max(1, ReadableBytes));
          return processor.Invoke(index, this) ? 1 : -1;
       }
 
-      public int ForEachWritableComponent(in int index, in WritableComponentProcessor processor)
+      public int ForEachWritableComponent(in int index, in Func<int, IWritableComponent, bool> processor)
       {
          CheckSet(writeOffset, Math.Max(1, WritableBytes));
          return processor.Invoke(index, this) ? 1 : -1;
