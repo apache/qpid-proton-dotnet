@@ -278,6 +278,13 @@ namespace Apache.Qpid.Proton.Buffer
       bool ReadBoolean();
 
       /// <summary>
+      /// Reads the two bytes from the buffer and returns the char value.
+      /// </summary>
+      /// <returns>the char value at the given index</returns>
+      /// <exception cref="IndexOutOfRangeException">If there are not enough readable bytes</exception>
+      char ReadChar();
+
+      /// <summary>
       /// Reads the next two bytes from the buffer and returns the short value.
       /// </summary>
       /// <returns>the short value at the given index</returns>

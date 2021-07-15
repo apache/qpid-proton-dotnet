@@ -43,14 +43,14 @@ namespace Apache.Qpid.Proton.Buffer
       /// throws an invalid operation exception to indicate that there is no writable
       /// byte array.
       /// </summary>
-      int WritableArrayOffset { get; }
+      long WritableArrayOffset { get; }
 
       /// <summary>
       /// Access the usable length of the writable backing array if one exists otherwise
       /// throws an invalid operation exception to indicate that there is no writable
       /// byte array.
       /// </summary>
-      int WritableArrayLength { get; }
+      long WritableArrayLength { get; }
 
    }
 }

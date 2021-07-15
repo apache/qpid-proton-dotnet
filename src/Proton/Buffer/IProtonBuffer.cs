@@ -116,7 +116,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <exception cref="IndexOutOfRangeException"></exception>
       /// <exception cref="ArgumentOutOfRangeException"></exception>
       /// <exception cref="ArgumentNullException"></exception>
-      IProtonBuffer CopyInto(long srcPos, byte[] dest, int destPos, int length);
+      IProtonBuffer CopyInto(long srcPos, byte[] dest, long destPos, long length);
 
       /// <summary>
       /// Copies the given number of bytes from this buffer into the target byte buffer starting
@@ -194,7 +194,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="length">The number of bytes from the source buffer to write into this buffer</param>
       /// <returns>this buffer instance</returns>
       /// <exception cref="IndexOutOfRangeException">If there are not enough writable bytes</exception>
-      IProtonBuffer WriteBytes(byte[] source, int offset, int length);
+      IProtonBuffer WriteBytes(byte[] source, long offset, long length);
 
       /// <summary>
       /// Transfers the bytes from the source buffer to this buffer starting at the current
@@ -252,7 +252,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">a starting index which is increment after each call</param>
       /// <param name="processor">The delegate that will receive the components</param>
       /// <returns>The number of components processed or negative if stopped early.</returns>
-      uint ForEachReadableComponent(in int index, in ReadableComponentProcessor processor);
+      int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor);
 
       /// <summary>
       /// Invokes the provided delegate for each writable component in this buffer
@@ -266,7 +266,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">a starting index which is increment after each call</param>
       /// <param name="processor">The delegate that will receive the components</param>
       /// <returns>The number of components processed or negative if stopped early.</returns>
-      uint ForEachWritableComponent(in int index, in WritableComponentProcessor processor);
+      int ForEachWritableComponent(in int index, in WritableComponentProcessor processor);
 
    }
 }

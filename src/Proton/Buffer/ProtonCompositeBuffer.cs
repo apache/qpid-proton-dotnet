@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
-      public IProtonBuffer CopyInto(long srcPos, byte[] dest, int destPos, int length)
+      public IProtonBuffer CopyInto(long srcPos, byte[] dest, long destPos, long length)
       {
          throw new NotImplementedException();
       }
@@ -91,12 +91,12 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
-      public uint ForEachReadableComponent(in int index, in ReadableComponentProcessor processor)
+      public int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor)
       {
          throw new NotImplementedException();
       }
 
-      public uint ForEachWritableComponent(in int index, in WritableComponentProcessor processor)
+      public int ForEachWritableComponent(in int index, in WritableComponentProcessor processor)
       {
          throw new NotImplementedException();
       }
@@ -167,6 +167,11 @@ namespace Apache.Qpid.Proton.Buffer
       }
 
       public sbyte ReadByte()
+      {
+         throw new NotImplementedException();
+      }
+
+      public char ReadChar()
       {
          throw new NotImplementedException();
       }
@@ -306,7 +311,7 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
-      public IProtonBuffer WriteBytes(byte[] source, int offset, int length)
+      public IProtonBuffer WriteBytes(byte[] source, long offset, long length)
       {
          throw new NotImplementedException();
       }

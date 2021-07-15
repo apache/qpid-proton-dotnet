@@ -151,6 +151,18 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="destination">The destination where the value should be written</param>
       /// <param name="offset">the offset into the destination to start writing</param>
       /// <returns>The byte array passed where the value was written</returns>
+      public static byte[] WriteChar(char value, byte[] destination, int offset)
+      {
+         return WriteUnsignedShort((ushort)value, destination, offset);
+      }
+
+      /// <summary>
+      /// Writes the given value into the provided byte array at the target offset.
+      /// </summary>
+      /// <param name="value">The value to write into the array</param>
+      /// <param name="destination">The destination where the value should be written</param>
+      /// <param name="offset">the offset into the destination to start writing</param>
+      /// <returns>The byte array passed where the value was written</returns>
       public static byte[] WriteShort(short value, byte[] destination, int offset)
       {
          return WriteUnsignedShort((ushort)value, destination, offset);
@@ -296,10 +308,22 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="array">The array where the value should be read</param>
       /// <param name="offset">The offset into the array where the value is read from</param>
       /// <returns>The value read from the given array</returns>
+      public static char ReadChar(byte[] array, int offset)
+      {
+         return (char)((array[offset++] & 0xFF) << 8 |
+                       (array[offset++] & 0xFF) << 0);
+      }
+
+      /// <summary>
+      /// Reads the value from the given array and returns it
+      /// </summary>
+      /// <param name="array">The array where the value should be read</param>
+      /// <param name="offset">The offset into the array where the value is read from</param>
+      /// <returns>The value read from the given array</returns>
       public static short ReadShort(byte[] array, int offset)
       {
          return (short)((array[offset++] & 0xFF) << 8 |
-                         (array[offset++] & 0xFF) << 0);
+                        (array[offset++] & 0xFF) << 0);
       }
 
       /// <summary>
@@ -311,7 +335,7 @@ namespace Apache.Qpid.Proton.Buffer
       public static ushort ReadUnsignedShort(byte[] array, int offset)
       {
          return (ushort)((array[offset++] & 0xFF) << 8 |
-                          (array[offset++] & 0xFF) << 0);
+                         (array[offset++] & 0xFF) << 0);
       }
 
       /// <summary>
