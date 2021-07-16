@@ -114,6 +114,44 @@ namespace Apache.Qpid.Proton.Buffer
       #region Tests for altering a buffer's capacity
 
       [Test]
+      public void TestFillEmptyBuffer()
+      {
+         IProtonBuffer buffer = AllocateBuffer(10, 10);
+         buffer.Fill(1);
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            Assert.AreEqual(1, buffer.GetByte(i));
+         }
+      }
+
+      [Test]
+      public void TestFillBufferWithNonDefaultOffsets()
+      {
+         IProtonBuffer buffer = AllocateBuffer(10, 10);
+         buffer.Fill(1);
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            Assert.AreEqual(1, buffer.GetByte(i));
+         }
+
+         buffer.WriteOffset = 8;
+         buffer.ReadOffset = 3;
+
+         buffer.Fill(2);
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            Assert.AreEqual(2, buffer.GetByte(i));
+         }
+      }
+
+      #endregion
+
+      #region Tests for altering a buffer's capacity
+
+      [Test]
       public void TestCapacityEnforceMaxCapacity()
       {
          Assume.That(CanBufferCapacityBeChanged());
@@ -1734,6 +1772,353 @@ namespace Apache.Qpid.Proton.Buffer
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
          catch (ArgumentOutOfRangeException) { }
+      }
+
+      #endregion
+
+      #region Miscellaneous buffer access stress tests
+
+      [Test]
+      public void TestRandomUnsignedByteAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (int i = 0; i < buffer.Capacity; i++)
+         {
+            byte value = (byte)random.Next();
+            buffer.SetUnsignedByte(i, value);
+         }
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity; i++)
+         {
+            byte value = (byte)random.Next();
+            Assert.AreEqual(value, buffer.GetUnsignedByte(i));
+         }
+      }
+
+      [Test]
+      public void TestRandomShortAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (int i = 0; i < buffer.Capacity - 1; i += 2)
+         {
+            short value = (short)random.Next();
+            buffer.SetShort(i, value);
+         }
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity - 1; i += 2)
+         {
+            short value = (short)random.Next();
+            Assert.AreEqual(value, buffer.GetShort(i));
+         }
+      }
+
+      [Test]
+      public void TestRandomIntAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (int i = 0; i < buffer.Capacity - 3; i += 4)
+         {
+            int value = random.Next();
+            buffer.SetInt(i, value);
+         }
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity - 3; i += 4)
+         {
+            int value = random.Next();
+            Assert.AreEqual(value, buffer.GetInt(i));
+         }
+      }
+
+      [Test]
+      public void TestRandomLongAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (int i = 0; i < buffer.Capacity - 7; i += 8)
+         {
+            long value = random.Next();
+            buffer.SetLong(i, value);
+         }
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity - 7; i += 8)
+         {
+            long value = random.Next();
+            Assert.AreEqual(value, buffer.GetLong(i));
+         }
+      }
+
+      [Test]
+      public void TestRandomFloatAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (int i = 0; i < buffer.Capacity - 7; i += 8)
+         {
+            float value = random.Next();
+            buffer.SetFloat(i, value);
+         }
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity - 7; i += 8)
+         {
+            float expected = random.Next();
+            float actual = buffer.GetFloat(i);
+            Assert.AreEqual(expected, actual, 0.01);
+         }
+      }
+
+      [Test]
+      public void TestRandomDoubleAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (int i = 0; i < buffer.Capacity - 7; i += 8)
+         {
+            double value = random.NextDouble();
+            buffer.SetDouble(i, value);
+         }
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity - 7; i += 8)
+         {
+            double expected = random.NextDouble();
+            double actual = buffer.GetDouble(i);
+            Assert.AreEqual(expected, actual, 0.01);
+         }
+      }
+
+      [Test]
+      public void TestSequentialByteAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         buffer.WriteOffset = 0;
+         for (int i = 0; i < buffer.Capacity; i++)
+         {
+            sbyte value = (sbyte)random.Next();
+            Assert.AreEqual(i, buffer.WriteOffset);
+            Assert.IsTrue(buffer.Writable);
+            buffer.WriteByte(value);
+         }
+
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Writable);
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity; i++)
+         {
+            sbyte value = (sbyte)random.Next();
+            Assert.AreEqual(i, buffer.ReadOffset);
+            Assert.IsTrue(buffer.Readable);
+            Assert.AreEqual(value, buffer.ReadByte());
+         }
+
+         Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Readable);
+         Assert.IsFalse(buffer.Writable);
+      }
+
+      [Test]
+      public void TestSequentialShortAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         buffer.WriteOffset = 0;
+         for (int i = 0; i < buffer.Capacity; i += 2)
+         {
+            short value = (short)random.Next();
+            Assert.AreEqual(i, buffer.WriteOffset);
+            Assert.IsTrue(buffer.Writable);
+            buffer.WriteShort(value);
+         }
+
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Writable);
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity; i += 2)
+         {
+            short value = (short)random.Next();
+            Assert.AreEqual(i, buffer.ReadOffset);
+            Assert.IsTrue(buffer.Readable);
+            Assert.AreEqual(value, buffer.ReadShort());
+         }
+
+         Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Readable);
+         Assert.IsFalse(buffer.Writable);
+      }
+
+      [Test]
+      public void TestSequentialIntAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         buffer.WriteOffset = 0;
+         for (int i = 0; i < buffer.Capacity; i += 4)
+         {
+            int value = random.Next();
+            Assert.AreEqual(i, buffer.WriteOffset);
+            Assert.IsTrue(buffer.Writable);
+            buffer.WriteInt(value);
+         }
+
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Writable);
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity; i += 4)
+         {
+            int value = random.Next();
+            Assert.AreEqual(i, buffer.ReadOffset);
+            Assert.IsTrue(buffer.Readable);
+            Assert.AreEqual(value, buffer.ReadInt());
+         }
+
+         Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Readable);
+         Assert.IsFalse(buffer.Writable);
+      }
+
+      [Test]
+      public void TestSequentialLongAccess()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         buffer.WriteOffset = 0;
+         for (int i = 0; i < buffer.Capacity; i += 8)
+         {
+            long value = BitConverter.DoubleToInt64Bits(random.NextDouble());
+            Assert.AreEqual(i, buffer.WriteOffset);
+            Assert.IsTrue(buffer.Writable);
+            buffer.WriteLong(value);
+         }
+
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Writable);
+
+         random = new Random(seed);
+
+         for (int i = 0; i < buffer.Capacity; i += 8)
+         {
+            long value = BitConverter.DoubleToInt64Bits(random.NextDouble());
+            Assert.AreEqual(i, buffer.ReadOffset);
+            Assert.IsTrue(buffer.Readable);
+            Assert.AreEqual(value, buffer.ReadLong());
+         }
+
+         Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+         Assert.IsFalse(buffer.Readable);
+         Assert.IsFalse(buffer.Writable);
+      }
+
+      [Test]
+      public void TestByteArrayTransfer()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         byte[] value = new byte[BlockSize * 2];
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(value);
+            buffer.WriteOffset = i;
+            buffer.WriteBytes(value, random.Next(BlockSize), BlockSize);
+         }
+
+         random = new Random(seed);
+
+         byte[] expectedValue = new byte[BlockSize * 2];
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValue);
+            int valueOffset = random.Next(BlockSize);
+            buffer.CopyInto(i, value, valueOffset, BlockSize);
+            for (int j = valueOffset; j < valueOffset + BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue[j], value[j]);
+            }
+         }
+      }
+
+      [Test]
+      public void TestRandomByteArrayTransfer1()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         byte[] value = new byte[BlockSize];
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(value);
+            buffer.WriteOffset = i;
+            buffer.WriteBytes(value);
+         }
+
+         random = new Random(seed);
+
+         byte[] expectedValueContent = new byte[BlockSize];
+         IProtonBuffer expectedValue = new ProtonByteBuffer(expectedValueContent);
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValueContent);
+            buffer.CopyInto(i, value, 0, value.LongLength);
+            for (int j = 0; j < BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue.GetUnsignedByte(j), value[j]);
+            }
+         }
+      }
+
+      [Test]
+      public void TestRandomByteArrayTransfer2()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         byte[] value = new byte[BlockSize * 2];
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(value);
+            buffer.WriteOffset = i;
+            buffer.WriteBytes(value, random.Next(BlockSize), BlockSize);
+         }
+
+         random = new Random(seed);
+
+         byte[] expectedValueContent = new byte[BlockSize * 2];
+         IProtonBuffer expectedValue = new ProtonByteBuffer(expectedValueContent);
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValueContent);
+            int valueOffset = random.Next(BlockSize);
+            buffer.CopyInto(i, value, valueOffset, BlockSize);
+            for (int j = valueOffset; j < valueOffset + BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue.GetUnsignedByte(j), value[j]);
+            }
+         }
       }
 
       #endregion

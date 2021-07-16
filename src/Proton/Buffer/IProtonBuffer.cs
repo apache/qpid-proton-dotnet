@@ -31,6 +31,15 @@ namespace Apache.Qpid.Proton.Buffer
       long Capacity { get; }
 
       /// <summary>
+      /// Fill the buffer with the given byte value. This method does not respect the read offset
+      /// nor the write offset but instead fills the entire backing buffer memory with the given
+      /// value.
+      /// </summary>
+      /// <param name="value">The byte value to assign each byte in the backing store</param>
+      /// <returns>This buffer instance.</returns>
+      IProtonBuffer Fill(byte value);
+
+      /// <summary>
       /// Requests that the buffer ensure that there is enough allocated internal capacity
       /// such that the given number of bytes can be written without requiring additional
       /// allocations and that this amount does not exceed any total capacity restrictions

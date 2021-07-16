@@ -179,6 +179,15 @@ namespace Apache.Qpid.Proton.Buffer
          return this;
       }
 
+      public IProtonBuffer Fill(byte value)
+      {
+         if (Capacity > 0)
+         {
+            Array.Fill<byte>(array, value);
+         }
+         return this;
+      }
+
       #endregion
 
       #region Buffer Copy API implementation

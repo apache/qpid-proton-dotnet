@@ -46,6 +46,11 @@ namespace Apache.Qpid.Proton.Buffer
 
       public uint WritableComponentCount => throw new NotImplementedException();
 
+      public IProtonBuffer Fill(byte value)
+      {
+         throw new NotImplementedException();
+      }
+
       public IProtonBuffer Compact()
       {
          throw new NotImplementedException();
