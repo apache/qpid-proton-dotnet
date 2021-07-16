@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index"></param>
       /// <returns>the boolean value of the byte at the given index</returns>
       /// <exception cref="IndexOutOfRangeException">If the index is negative or larger than buffer capacity</exception>
-      bool GetBool(long index);
+      bool GetBoolean(long index);
 
       /// <summary>
       /// Reads a single signed byte from the given index and returns it.

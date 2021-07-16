@@ -101,7 +101,7 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
-      public bool GetBool(long index)
+      public bool GetBoolean(long index)
       {
          throw new NotImplementedException();
       }

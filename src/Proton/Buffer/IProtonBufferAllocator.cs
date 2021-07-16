@@ -100,19 +100,5 @@ namespace Apache.Qpid.Proton.Buffer
       /// <returns>A new buffer instance that wraps the given byte array</returns>
       IProtonBuffer Wrap(byte[] array);
 
-      /// <summary>
-      /// Create a new IProtonBuffer that wraps the given byte array using the provided
-      /// offset and length values to confine the view of that array.  The maximum capacity
-      /// of the buffer should be that of the length value provided.
-      ///
-      /// The capacity and maximum capacity for the resulting ProtonBuffer should equal
-      /// to the length value provided and the offset should return the value given.
-      /// </summary>
-      /// <param name="array">The byte array that will be wrapped</param>
-      /// <param name="offset">The offset into the array where the buffer begins</param>
-      /// <param name="length">The number of bytes that can be operated on by the buffer</param>
-      /// <returns>A new buffer instance that wraps the given byte array</returns>
-      IProtonBuffer Wrap(byte[] array, int offset, int length);
-
    }
 }

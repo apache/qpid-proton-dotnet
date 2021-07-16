@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Text;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Buffer
@@ -94,7 +95,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(0, buffer.ReadableBytes);
          Assert.AreEqual(10, buffer.Capacity);
 
-         // Writes to capacity work, but exceeding that should fail.
+         // Writes to capacity work, but exceeding that should Assert.Fail.
          for (sbyte i = 0; i < 10; ++i)
          {
             buffer.WriteByte(i);
@@ -142,7 +143,1597 @@ namespace Apache.Qpid.Proton.Buffer
          IProtonBuffer buffer = AllocateBuffer(3, 13);
          Assert.AreEqual(3, buffer.Capacity);
          buffer.EnsureWritable(4);
-         Assert.AreEqual(13, buffer.Capacity);
+         Assert.AreEqual(4, buffer.Capacity);
+      }
+
+      #endregion
+
+      #region Tests for altering buffer properties
+
+      [Test]
+      public void TestSetReadOffsetWithNegative()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         try
+         {
+            buffer.ReadOffset = -1;
+            Assert.Fail("Should not accept negative values");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetReadOffsetGreaterThanCapacity()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         try
+         {
+            buffer.ReadOffset = buffer.Capacity + buffer.Capacity;
+            Assert.Fail("Should not accept values bigger than capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestWriteOffsetWithNegative()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         try
+         {
+            buffer.WriteOffset = -1;
+            Assert.Fail("Should not accept negative values");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestWriteOffsetGreaterThanCapacity()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         try
+         {
+            buffer.WriteOffset = buffer.Capacity + buffer.Capacity;
+            Assert.Fail("Should not accept values bigger than capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestIsReadable()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         Assert.IsFalse(buffer.Readable);
+         Assert.IsTrue(buffer.Writable);
+         buffer.WriteBoolean(false);
+         Assert.IsTrue(buffer.Readable);
+      }
+
+      [Test]
+      public void TestIsReadableWithAmount()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         Assert.IsFalse(buffer.ReadableBytes > 0);
+         buffer.WriteBoolean(false);
+         Assert.IsTrue(buffer.ReadableBytes == 1);
+      }
+
+      [Test]
+      public void TestIsWriteable()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         Assert.IsTrue(buffer.Writable);
+         buffer.WriteOffset = buffer.Capacity;
+         Assert.IsFalse(buffer.Writable);
+      }
+
+      [Test]
+      public void TestIsWriteableWithAmount()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         Assert.IsTrue(buffer.Writable);
+         buffer.WriteOffset = buffer.Capacity - 1;
+         Assert.IsTrue(buffer.WritableBytes == 1);
+      }
+
+      [Test]
+      public void TestClear()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(0, buffer.WriteOffset);
+         buffer.WriteOffset = 20;
+         buffer.ReadOffset = 10;
+         Assert.AreEqual(10, buffer.ReadOffset);
+         Assert.AreEqual(20, buffer.WriteOffset);
+         buffer.Reset();
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(0, buffer.WriteOffset);
+      }
+
+      [Test]
+      public void TestSkipBytes()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         buffer.WriteOffset = buffer.Capacity / 2;
+         Assert.AreEqual(0, buffer.ReadOffset);
+         buffer.SkipBytes(buffer.Capacity / 2);
+         Assert.AreEqual(buffer.Capacity / 2, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestSkipBytesBeyondReadable()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         buffer.WriteOffset = buffer.Capacity / 2;
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         try
+         {
+            buffer.SkipBytes(buffer.ReadableBytes + 50);
+            Assert.Fail("Should not be able to skip beyond write index");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      #endregion
+
+      #region Tests for altering buffer capacity
+
+      [Test]
+      public void TestIncreaseCapacity()
+      {
+         Assume.That(CanBufferCapacityBeChanged());
+
+         byte[] source = new byte[100];
+
+         IProtonBuffer buffer = AllocateBuffer(100).WriteBytes(source);
+         Assert.AreEqual(100, buffer.Capacity);
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(100, buffer.WriteOffset);
+
+         buffer.EnsureWritable(200);
+         Assert.AreEqual(300, buffer.Capacity);
+
+         buffer.EnsureWritable(200);
+         Assert.AreEqual(300, buffer.Capacity);
+
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(100, buffer.WriteOffset);
+      }
+
+      #endregion
+
+      #region Write Bytes to proton buffer tests
+
+      [Test]
+      public void TestWriteBytes()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteBytes(payload);
+
+         Assert.AreEqual(payload.LongLength, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         for (int i = 0; i < payload.LongLength; ++i)
+         {
+            Assert.AreEqual(payload[i], buffer.ReadUnsignedByte());
+         }
+
+         Assert.AreEqual(payload.LongLength, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestWriteBytesWithEmptyArray()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteBytes(new byte[0]);
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestWriteBytesNPEWhenNullGiven()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         try
+         {
+            buffer.WriteBytes((byte[])null);
+            Assert.Fail();
+         }
+         catch (ArgumentNullException) { }
+
+         try
+         {
+            buffer.WriteBytes((byte[])null, 0, 0);
+            Assert.Fail();
+         }
+         catch (ArgumentNullException) { }
+      }
+
+      [Test]
+      public void TestWriteBytesWithLength()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteBytes(payload, 0, payload.LongLength);
+
+         Assert.AreEqual(payload.LongLength, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         for (int i = 0; i < payload.LongLength; ++i)
+         {
+            Assert.AreEqual(payload[i], buffer.ReadByte());
+         }
+
+         Assert.AreEqual(payload.LongLength, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestWriteBytesWithLengthToBig()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         try
+         {
+            buffer.WriteBytes(payload, 0, payload.LongLength + 1);
+            Assert.Fail("Should not write when length given is to large.");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestWriteBytesWithNegativeLength()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         try
+         {
+            buffer.WriteBytes(payload, 0, -1);
+            Assert.Fail("Should not write when length given is negative.");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestWriteBytesWithLengthAndOffset()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteBytes(payload, 0, payload.LongLength);
+
+         Assert.AreEqual(payload.LongLength, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         for (int i = 0; i < payload.LongLength; ++i)
+         {
+            Assert.AreEqual(payload[i], buffer.ReadByte());
+         }
+
+         Assert.AreEqual(payload.LongLength, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestWriteBytesWithLengthAndOffsetIncorrect()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4, 5 };
+
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         try
+         {
+            buffer.WriteBytes(payload, 0, payload.LongLength + 1);
+            Assert.Fail("Should not write when length given is to large.");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.WriteBytes(payload, -1, payload.LongLength);
+            Assert.Fail("Should not write when offset given is negative.");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.WriteBytes(payload, 0, -1);
+            Assert.Fail("Should not write when length given is negative.");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.WriteBytes(payload, payload.LongLength + 1, 1);
+            Assert.Fail("Should not write when offset given is to large.");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestWriteBytesFromProtonBuffer()
+      {
+         IProtonBuffer source = new ProtonByteBuffer(new byte[] { 0, 1, 2, 3, 4, 5 });
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteBytes(source);
+
+         Assert.AreEqual(0, source.ReadableBytes);
+         Assert.AreEqual(source.WriteOffset, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         for (int i = 0; i < source.ReadableBytes; ++i)
+         {
+            Assert.AreEqual(source.GetByte(i), buffer.ReadByte());
+         }
+
+         Assert.AreEqual(source.ReadableBytes, buffer.ReadOffset);
+      }
+
+      #endregion
+
+      #region  Write Primitives Tests
+
+      [Test]
+      public void TestWriteByte()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteByte((sbyte)56);
+
+         Assert.AreEqual(1, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(56, buffer.ReadByte());
+
+         Assert.AreEqual(1, buffer.WriteOffset);
+         Assert.AreEqual(1, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteUnsignedByte()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteUnsignedByte((byte)56);
+
+         Assert.AreEqual(1, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(56, buffer.ReadUnsignedByte());
+
+         Assert.AreEqual(1, buffer.WriteOffset);
+         Assert.AreEqual(1, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteBoolean()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteBoolean(true);
+         buffer.WriteBoolean(false);
+
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(true, buffer.ReadBoolean());
+
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(1, buffer.ReadOffset);
+
+         Assert.AreEqual(1, buffer.ReadableBytes);
+         Assert.AreEqual(false, buffer.ReadBoolean());
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(2, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestWriteShort()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteShort((short)42);
+
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(42, buffer.ReadShort());
+
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(2, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteUnsignedShort()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteUnsignedShort((ushort)42);
+
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(42, buffer.ReadUnsignedShort());
+
+         Assert.AreEqual(2, buffer.WriteOffset);
+         Assert.AreEqual(2, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteInt()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteInt(72);
+
+         Assert.AreEqual(4, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(72, buffer.ReadInt());
+
+         Assert.AreEqual(4, buffer.WriteOffset);
+         Assert.AreEqual(4, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteUnsignedInt()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteUnsignedInt(72u);
+
+         Assert.AreEqual(4, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(72u, buffer.ReadUnsignedInt());
+
+         Assert.AreEqual(4, buffer.WriteOffset);
+         Assert.AreEqual(4, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteLong()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteLong(500L);
+
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(500L, buffer.ReadLong());
+
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(8, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteUnsignedLong()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteUnsignedLong(500ul);
+
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(500ul, buffer.ReadUnsignedLong());
+
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(8, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteFloat()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteFloat(35.5f);
+
+         Assert.AreEqual(4, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(35.5f, buffer.ReadFloat(), 0.4f);
+
+         Assert.AreEqual(4, buffer.WriteOffset);
+         Assert.AreEqual(4, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      [Test]
+      public void TestWriteDouble()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.WriteDouble(1.66);
+
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(1.66, buffer.ReadDouble(), 0.1);
+
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(8, buffer.ReadOffset);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+      }
+
+      #endregion
+
+      #region Tests for read operations
+
+      [Test]
+      public void TestReadByte()
+      {
+         byte[] source = new byte[] { 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; ++i)
+         {
+            Assert.AreEqual(source[i], buffer.ReadByte());
+         }
+
+         try
+         {
+            buffer.ReadByte();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestReadBoolean()
+      {
+         byte[] source = new byte[] { 0, 1, 0, 1, 0, 1 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; ++i)
+         {
+            if ((i % 2) == 0)
+            {
+               Assert.IsFalse(buffer.ReadBoolean());
+            }
+            else
+            {
+               Assert.IsTrue(buffer.ReadBoolean());
+            }
+         }
+
+         try
+         {
+            buffer.ReadBoolean();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestReadShort()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         buffer.WriteShort((short)2);
+         buffer.WriteShort((short)20);
+         buffer.WriteShort((short)200);
+         buffer.WriteShort((short)256);
+         buffer.WriteShort((short)512);
+         buffer.WriteShort((short)1025);
+         buffer.WriteShort((short)32767);
+         buffer.WriteShort((short)-1);
+         buffer.WriteShort((short)-8757);
+
+         Assert.AreEqual(2, buffer.ReadShort());
+         Assert.AreEqual(20, buffer.ReadShort());
+         Assert.AreEqual(200, buffer.ReadShort());
+         Assert.AreEqual(256, buffer.ReadShort());
+         Assert.AreEqual(512, buffer.ReadShort());
+         Assert.AreEqual(1025, buffer.ReadShort());
+         Assert.AreEqual(32767, buffer.ReadShort());
+         Assert.AreEqual(-1, buffer.ReadShort());
+         Assert.AreEqual(-8757, buffer.ReadShort());
+
+         try
+         {
+            buffer.ReadShort();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestReadInt()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         buffer.WriteInt((short)2);
+         buffer.WriteInt((short)20);
+         buffer.WriteInt((short)200);
+         buffer.WriteInt((short)256);
+         buffer.WriteInt((short)512);
+         buffer.WriteInt((short)1025);
+         buffer.WriteInt((short)32767);
+         buffer.WriteInt((short)-1);
+         buffer.WriteInt((short)-8757);
+
+         Assert.AreEqual(2, buffer.ReadInt());
+         Assert.AreEqual(20, buffer.ReadInt());
+         Assert.AreEqual(200, buffer.ReadInt());
+         Assert.AreEqual(256, buffer.ReadInt());
+         Assert.AreEqual(512, buffer.ReadInt());
+         Assert.AreEqual(1025, buffer.ReadInt());
+         Assert.AreEqual(32767, buffer.ReadInt());
+         Assert.AreEqual(-1, buffer.ReadInt());
+         Assert.AreEqual(-8757, buffer.ReadInt());
+
+         try
+         {
+            buffer.ReadInt();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestReadLong()
+      {
+         // This is not a capacity increase handling test so allocate with enough capacity for this test.
+         IProtonBuffer buffer = AllocateBuffer(DefaultCapacity * 2);
+
+         buffer.WriteLong((short)2);
+         buffer.WriteLong((short)20);
+         buffer.WriteLong((short)200);
+         buffer.WriteLong((short)256);
+         buffer.WriteLong((short)512);
+         buffer.WriteLong((short)1025);
+         buffer.WriteLong((short)32767);
+         buffer.WriteLong((short)-1);
+         buffer.WriteLong((short)-8757);
+
+         Assert.AreEqual(2, buffer.ReadLong());
+         Assert.AreEqual(20, buffer.ReadLong());
+         Assert.AreEqual(200, buffer.ReadLong());
+         Assert.AreEqual(256, buffer.ReadLong());
+         Assert.AreEqual(512, buffer.ReadLong());
+         Assert.AreEqual(1025, buffer.ReadLong());
+         Assert.AreEqual(32767, buffer.ReadLong());
+         Assert.AreEqual(-1, buffer.ReadLong());
+         Assert.AreEqual(-8757, buffer.ReadLong());
+
+         try
+         {
+            buffer.ReadLong();
+            Assert.Fail("Should not be able to read beyond current readable bytes");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestReadFloat()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         buffer.WriteFloat(1.111f);
+         buffer.WriteFloat(2.222f);
+         buffer.WriteFloat(3.333f);
+
+         Assert.AreEqual(1.111f, buffer.ReadFloat(), 0.111f);
+         Assert.AreEqual(2.222f, buffer.ReadFloat(), 0.222f);
+         Assert.AreEqual(3.333f, buffer.ReadFloat(), 0.333f);
+
+         try
+         {
+            buffer.ReadFloat();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestReadDouble()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+
+         buffer.WriteDouble(1.111);
+         buffer.WriteDouble(2.222);
+         buffer.WriteDouble(3.333);
+
+         Assert.AreEqual(1.111, buffer.ReadDouble(), 0.111);
+         Assert.AreEqual(2.222, buffer.ReadDouble(), 0.222);
+         Assert.AreEqual(3.333, buffer.ReadDouble(), 0.333);
+
+         try
+         {
+            buffer.ReadDouble();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      #endregion
+
+      #region  Tests for get operations
+
+      [Test]
+      public void TestGetByte()
+      {
+         byte[] source = new byte[] { 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; ++i)
+         {
+            Assert.AreEqual((sbyte)source[i], buffer.GetByte(i));
+         }
+
+         try
+         {
+            buffer.ReadUnsignedByte();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetUnsignedByte()
+      {
+         byte[] source = new byte[] { 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; ++i)
+         {
+            Assert.AreEqual(source[i], buffer.GetUnsignedByte(i));
+         }
+
+         try
+         {
+            buffer.ReadUnsignedByte();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetBoolean()
+      {
+         byte[] source = new byte[] { 0, 1, 0, 1, 0, 1 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; ++i)
+         {
+            if ((i % 2) == 0)
+            {
+               Assert.IsFalse(buffer.GetBoolean(i));
+            }
+            else
+            {
+               Assert.IsTrue(buffer.GetBoolean(i));
+            }
+         }
+
+         try
+         {
+            buffer.ReadBoolean();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetShort()
+      {
+         byte[] source = new byte[] { 0, 0, 0, 1, 0, 2, 0, 3, 0, 4 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; i += 2)
+         {
+            Assert.AreEqual(source[i + 1], buffer.GetShort(i));
+         }
+
+         try
+         {
+            buffer.ReadShort();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetUnsignedShort()
+      {
+         byte[] source = new byte[] { 0, 0, 0, 1, 0, 2, 0, 3, 0, 4 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; i += 2)
+         {
+            Assert.AreEqual(source[i + 1], buffer.GetUnsignedShort(i));
+         }
+
+         try
+         {
+            buffer.ReadUnsignedShort();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetInt()
+      {
+         byte[] source = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; i += 4)
+         {
+            Assert.AreEqual(source[i + 3], buffer.GetInt(i));
+         }
+
+         try
+         {
+            buffer.ReadInt();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetUnsignedInt()
+      {
+         byte[] source = new byte[] { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; i += 4)
+         {
+            Assert.AreEqual(source[i + 3], buffer.GetUnsignedInt(i));
+         }
+
+         try
+         {
+            buffer.ReadUnsignedInt();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetLong()
+      {
+         byte[] source = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0,
+                                      0, 0, 0, 0, 0, 0, 0, 1,
+                                      0, 0, 0, 0, 0, 0, 0, 2,
+                                      0, 0, 0, 0, 0, 0, 0, 3,
+                                      0, 0, 0, 0, 0, 0, 0, 4 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; i += 8)
+         {
+            Assert.AreEqual(source[i + 7], buffer.GetLong(i));
+         }
+
+         try
+         {
+            buffer.ReadLong();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetFloat()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         buffer.WriteInt(BitConverter.SingleToInt32Bits(1.1f));
+         buffer.WriteInt(BitConverter.SingleToInt32Bits(2.2f));
+         buffer.WriteInt(BitConverter.SingleToInt32Bits(42.3f));
+
+         Assert.AreEqual(sizeof(int) * 3, buffer.ReadableBytes);
+
+         Assert.AreEqual(1.1f, buffer.GetFloat(0), 0.1);
+         Assert.AreEqual(2.2f, buffer.GetFloat(4), 0.1);
+         Assert.AreEqual(42.3f, buffer.GetFloat(8), 0.1);
+
+         try
+         {
+            buffer.ReadFloat();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      [Test]
+      public void TestGetDouble()
+      {
+         IProtonBuffer buffer = AllocateDefaultBuffer();
+         buffer.WriteLong(BitConverter.DoubleToInt64Bits(1.1));
+         buffer.WriteLong(BitConverter.DoubleToInt64Bits(2.2));
+         buffer.WriteLong(BitConverter.DoubleToInt64Bits(42.3));
+
+         Assert.AreEqual(sizeof(long) * 3, buffer.ReadableBytes);
+
+         Assert.AreEqual(1.1, buffer.GetDouble(0), 0.1);
+         Assert.AreEqual(2.2, buffer.GetDouble(8), 0.1);
+         Assert.AreEqual(42.3, buffer.GetDouble(16), 0.1);
+
+         try
+         {
+            buffer.ReadDouble();
+         }
+         catch (ArgumentOutOfRangeException)
+         {
+            Assert.Fail("Should be able to read from the buffer");
+         }
+      }
+
+      #endregion
+
+      #region Tests for Copy operations
+
+      [Test]
+      public void TestCopyEmptyBuffer()
+      {
+         IProtonBuffer buffer = AllocateBuffer(10);
+         IProtonBuffer copy = buffer.Copy();
+
+         Assert.AreEqual(buffer.ReadableBytes, copy.ReadableBytes);
+         Assert.AreEqual(buffer, copy);
+
+         copy.EnsureWritable(10);
+         copy.WriteByte(1);
+
+         buffer.WriteOffset = 1;
+
+         Assert.AreNotEqual(buffer, copy);
+      }
+
+      [Test]
+      public void TestCopyBuffer()
+      {
+         IProtonBuffer buffer = AllocateBuffer(10);
+
+         buffer.WriteByte(1);
+         buffer.WriteByte(2);
+         buffer.WriteByte(3);
+         buffer.WriteByte(4);
+         buffer.WriteByte(5);
+
+         IProtonBuffer copy = buffer.Copy();
+
+         Assert.AreEqual(buffer.ReadableBytes, copy.ReadableBytes);
+
+         for (int i = 0; i < 5; ++i)
+         {
+            Assert.AreEqual(buffer.GetByte(i), copy.GetByte(i));
+         }
+      }
+
+      [Test]
+      public void TestCopy()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         for (long i = 0; i < buffer.Capacity; i++)
+         {
+            byte value = (byte)random.Next();
+            buffer.SetUnsignedByte(i, value);
+         }
+
+         long readerIndex = LargeCapacity / 3;
+         long writerIndex = LargeCapacity * 2 / 3;
+
+         buffer.WriteOffset = writerIndex;
+         buffer.ReadOffset = readerIndex;
+
+         // Make sure all properties are copied.
+         IProtonBuffer copy = buffer.Copy();
+         Assert.AreEqual(0, copy.ReadOffset);
+         Assert.AreEqual(buffer.ReadableBytes, copy.WriteOffset);
+         Assert.AreEqual(buffer.ReadableBytes, copy.Capacity);
+         for (int i = 0; i < copy.Capacity; i++)
+         {
+            Assert.AreEqual(buffer.GetByte(i + readerIndex), copy.GetByte(i));
+         }
+
+         // Make sure the buffer content is independent from each other.
+         buffer.SetByte(readerIndex, (sbyte)(buffer.GetByte(readerIndex) + 1));
+         Assert.IsTrue(buffer.GetByte(readerIndex) != copy.GetByte(0));
+         copy.SetByte(1, (sbyte)(copy.GetByte(1) + 1));
+         Assert.IsTrue(buffer.GetByte(readerIndex + 1) != copy.GetByte(1));
+      }
+
+      [Test]
+      public void TestSequentialRandomFilledBufferIndexedCopy()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         byte[] value = new byte[BlockSize];
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(value);
+            buffer.WriteOffset = i;
+            buffer.WriteBytes(value);
+         }
+
+         buffer.WriteOffset = buffer.Capacity - 1;
+
+         random = new Random(seed);
+
+         byte[] expectedValueContent = new byte[BlockSize];
+         IProtonBuffer expectedValue = new ProtonByteBuffer(expectedValueContent);
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValueContent);
+            IProtonBuffer copy = buffer.Copy(i, BlockSize);
+            for (int j = 0; j < BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue.GetByte(j), copy.GetByte(j));
+            }
+         }
+      }
+
+      #endregion
+
+      #region Tests for string conversion
+
+      [Test]
+      public void TestToStringFromUTF8()
+      {
+         String sourceString = "Test-String-1";
+         Encoding encoding = new UTF8Encoding();
+         byte[] utf8 = encoding.GetBytes(sourceString);
+
+         IProtonBuffer buffer = WrapBuffer(utf8);
+
+         String decoded = buffer.ToString(encoding);
+
+         Assert.AreEqual(sourceString, decoded);
+      }
+
+      #endregion
+
+      #region Tests for equality and comparison
+
+      [Test]
+      public void TestEqualsSelf()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer = WrapBuffer(payload);
+         Assert.IsTrue(buffer.Equals(buffer));
+      }
+
+      [Test]
+      public void TestEqualsWithSameContents()
+      {
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload);
+         IProtonBuffer buffer2 = WrapBuffer(payload);
+
+         Assert.IsTrue(buffer1.Equals(buffer2));
+         Assert.IsTrue(buffer2.Equals(buffer1));
+      }
+
+      [Test]
+      public void TestEqualsWithSameContentDifferenceArrays()
+      {
+         byte[] payload1 = new byte[] { 0, 1, 2, 3, 4 };
+         byte[] payload2 = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+
+         Assert.IsTrue(buffer1.Equals(buffer2));
+         Assert.IsTrue(buffer2.Equals(buffer1));
+      }
+
+      [Test]
+      public void TestEqualsWithDiffereingContent()
+      {
+         byte[] payload1 = new byte[] { 1, 2, 3, 4, 5 };
+         byte[] payload2 = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+
+         Assert.IsFalse(buffer1.Equals(buffer2));
+         Assert.IsFalse(buffer2.Equals(buffer1));
+      }
+
+      [Test]
+      public void TestEqualsWithDifferingReadableBytes()
+      {
+         byte[] payload1 = new byte[] { 0, 1, 2, 3, 4 };
+         byte[] payload2 = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+
+         buffer1.ReadUnsignedByte();
+
+         Assert.IsFalse(buffer1.Equals(buffer2));
+         Assert.IsFalse(buffer2.Equals(buffer1));
+      }
+
+      [Test]
+      public void TestHashCode()
+      {
+         byte[] payload1 = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         Assert.AreNotEqual(0, buffer1.GetHashCode());
+
+         byte[] payload2 = new byte[] { 5, 6, 7, 8, 9 };
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+         Assert.AreNotEqual(0, buffer1.GetHashCode());
+
+         IProtonBuffer buffer3 = WrapBuffer(payload1);
+
+         Assert.AreNotEqual(buffer1.GetHashCode(), buffer2.GetHashCode());
+         Assert.AreEqual(buffer1.GetHashCode(), buffer3.GetHashCode());
+      }
+
+      [Test]
+      public void TestCompareToSameContents()
+      {
+         byte[] payload1 = new byte[] { 0, 1, 2, 3, 4 };
+         byte[] payload2 = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+
+         Assert.AreEqual(0, buffer1.CompareTo(buffer1));
+         Assert.AreEqual(0, buffer1.CompareTo(buffer2));
+         Assert.AreEqual(0, buffer2.CompareTo(buffer1));
+      }
+
+      [Test]
+      public void TestCompareToSameContentsButInOffsetBuffers()
+      {
+         byte[] payload1 = new byte[] { 0, 1, 2, 3, 4 };
+         byte[] payload2 = new byte[] { 9, 9, 9, 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+
+         buffer2.ReadOffset = 3;
+
+         Assert.AreEqual(0, buffer1.CompareTo(buffer1));
+         Assert.AreEqual(0, buffer1.CompareTo(buffer2));
+         Assert.AreEqual(0, buffer2.CompareTo(buffer1));
+      }
+
+      [Test]
+      public void TestCompareToDifferentContents()
+      {
+         byte[] payload1 = new byte[] { 1, 2, 3, 4, 5 };
+         byte[] payload2 = new byte[] { 0, 1, 2, 3, 4 };
+         IProtonBuffer buffer1 = WrapBuffer(payload1);
+         IProtonBuffer buffer2 = WrapBuffer(payload2);
+
+         Assert.AreEqual(1, buffer1.CompareTo(buffer2));
+         Assert.AreEqual(-1, buffer2.CompareTo(buffer1));
+      }
+
+      [Test]
+      public void TestComparableInterfaceNotViolatedWithLongWrites()
+      {
+         IProtonBuffer buffer1 = AllocateBuffer(LargeCapacity);
+         IProtonBuffer buffer2 = AllocateBuffer(LargeCapacity);
+
+         buffer1.WriteOffset = buffer1.ReadOffset;
+         buffer1.WriteLong(0);
+
+         buffer2.WriteOffset = buffer2.ReadOffset;
+         buffer2.WriteLong(0xF0000000L);
+
+         Assert.IsTrue(buffer1.CompareTo(buffer2) < 0);
+         Assert.IsTrue(buffer2.CompareTo(buffer1) > 0);
+      }
+
+      [Test]
+      public void TestCompareToContract()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         try
+         {
+            buffer.CompareTo(null);
+            Assert.Fail();
+         }
+         catch (NullReferenceException)
+         {
+            // Expected
+         }
+
+         // Fill the random stuff
+         byte[] value = new byte[32];
+         random.NextBytes(value);
+         // Prevent overflow / underflow
+         if (value[0] == 0)
+         {
+            value[0]++;
+         }
+         else if (value[0] == 255)
+         {
+            value[0]--;
+         }
+
+         buffer.Reset();
+         buffer.WriteBytes(value);
+
+         Assert.AreEqual(0, buffer.CompareTo(new ProtonByteBuffer(value)));
+
+         value[0]++;
+         Assert.IsTrue(buffer.CompareTo(new ProtonByteBuffer(value)) < 0);
+         value[0] -= 2;
+         Assert.IsTrue(buffer.CompareTo(new ProtonByteBuffer(value)) > 0);
+         value[0]++;
+
+         IProtonBuffer compared = new ProtonByteBuffer();
+         compared.WriteBytes(value, 0, 31);
+
+         Assert.IsTrue(buffer.CompareTo(compared) > 0);
+      }
+
+      #endregion
+
+      #region Test for set by index
+
+      [Test]
+      public void TestSetByteAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(5, 5);
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            buffer.SetByte(i, (sbyte)i);
+         }
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            Assert.AreEqual(i, buffer.GetByte(i));
+         }
+
+         try
+         {
+            buffer.SetByte(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetByte(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetBooleanAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(5, 5);
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            if ((i % 2) == 0)
+            {
+               buffer.SetBoolean(i, false);
+            }
+            else
+            {
+               buffer.SetBoolean(i, true);
+            }
+         }
+
+         for (int i = 0; i < buffer.Capacity; ++i)
+         {
+            if ((i % 2) == 0)
+            {
+               Assert.IsFalse(buffer.GetBoolean(i));
+            }
+            else
+            {
+               Assert.IsTrue(buffer.GetBoolean(i));
+            }
+         }
+
+         try
+         {
+            buffer.SetBoolean(-1, true);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetBoolean(buffer.Capacity, false);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetShortAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(10, 10);
+
+         for (short i = 0; i < buffer.Capacity / 2; i += 2)
+         {
+            buffer.SetShort(i, i);
+         }
+
+         for (short i = 0; i < buffer.Capacity / 2; i += 2)
+         {
+            Assert.AreEqual(i, buffer.GetShort(i));
+         }
+
+         try
+         {
+            buffer.SetShort(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetShort(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetIntAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(20, 20);
+
+         for (int i = 0; i < buffer.Capacity / 4; i += 4)
+         {
+            buffer.SetInt(i, i);
+         }
+
+         for (int i = 0; i < buffer.Capacity / 4; i += 4)
+         {
+            Assert.AreEqual(i, buffer.GetInt(i));
+         }
+
+         try
+         {
+            buffer.SetInt(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetInt(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetLongAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(40, 40);
+
+         for (long i = 0; i < buffer.Capacity / 8; i += 8)
+         {
+            buffer.SetLong(i, i);
+         }
+
+         for (long i = 0; i < buffer.Capacity / 8; i += 8)
+         {
+            Assert.AreEqual(i, buffer.GetLong((int)i));
+         }
+
+         try
+         {
+            buffer.SetLong(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetLong(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetFloatAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8, 8);
+
+         buffer.SetFloat(0, 1.5f);
+         buffer.SetFloat(4, 45.2f);
+
+         Assert.AreEqual(1.5f, buffer.GetFloat(0), 0.1);
+         Assert.AreEqual(45.2f, buffer.GetFloat(4), 0.1);
+
+         try
+         {
+            buffer.SetFloat(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetFloat(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetDoubleAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(16, 16);
+
+         buffer.SetDouble(0, 1.5);
+         buffer.SetDouble(8, 45.2);
+
+         Assert.AreEqual(1.5, buffer.GetDouble(0), 0.1);
+         Assert.AreEqual(45.2, buffer.GetDouble(8), 0.1);
+
+         try
+         {
+            buffer.SetDouble(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetDouble(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+      }
+
+      [Test]
+      public void TestSetCharAtIndex()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8, 8);
+
+         buffer.SetChar(0, (char)65);
+         buffer.SetChar(4, (char)66);
+
+         Assert.AreEqual('A', buffer.GetChar(0));
+         Assert.AreEqual('B', buffer.GetChar(4));
+
+         try
+         {
+            buffer.SetDouble(-1, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
+
+         try
+         {
+            buffer.SetDouble(buffer.Capacity, 0);
+            Assert.Fail("should throw an ArgumentOutOfRangeException");
+         }
+         catch (ArgumentOutOfRangeException) { }
       }
 
       #endregion
@@ -159,33 +1750,33 @@ namespace Apache.Qpid.Proton.Buffer
       }
 
       /// <summary>
-      /// ProtonBuffer allocated with defaults for capacity and max-capacity.
+      /// IProtonBuffer allocated with defaults for capacity and max-capacity.
       /// </summary>
-      /// <returns>ProtonBuffer allocated with defaults for capacity and max-capacity.</returns>
+      /// <returns>IProtonBuffer allocated with defaults for capacity and max-capacity.</returns>
       protected virtual IProtonBuffer AllocateDefaultBuffer()
       {
          return AllocateBuffer(DefaultCapacity);
       }
 
       /// <summary>
-      /// ProtonBuffer allocated with the default max capacity but with the given initial cpacity.
+      /// IProtonBuffer allocated with the default max capacity but with the given initial cpacity.
       /// </summary>
       /// <param name="initialCapacity"></param>
-      /// <returns>ProtonBuffer allocated with an initial capacity and a default max-capacity.</returns>
+      /// <returns>IProtonBuffer allocated with an initial capacity and a default max-capacity.</returns>
       protected abstract IProtonBuffer AllocateBuffer(int initialCapacity);
 
       /// <summary>
-      /// ProtonBuffer allocated with the given max capacity but with the given initial cpacity.
+      /// IProtonBuffer allocated with the given max capacity but with the given initial cpacity.
       /// </summary>
       /// <param name="initialCapacity"></param>
-      /// <returns>ProtonBuffer allocated with an initial capacity and a default max-capacity.</returns>
+      /// <returns>IProtonBuffer allocated with an initial capacity and a default max-capacity.</returns>
       protected abstract IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity);
 
       /// <summary>
-      /// ProtonBuffer that wraps the given buffer.
+      /// IProtonBuffer that wraps the given buffer.
       /// </summary>
       /// <param name="array"></param>
-      /// <returns>ProtonBuffer that wraps the given buffer.</returns>
+      /// <returns>IProtonBuffer that wraps the given buffer.</returns>
       protected abstract IProtonBuffer WrapBuffer(byte[] array);
 
       #endregion

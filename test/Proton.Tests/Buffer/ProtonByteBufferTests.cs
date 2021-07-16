@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Text;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Buffer
@@ -207,37 +208,21 @@ namespace Apache.Qpid.Proton.Buffer
       #region Tests for buffer Copy operations
 
       [Test]
-      public void testCopyEmptyBufferCopiesBackingArray()
+      public void TestCopyEmptyBufferCopiesBackingArray()
       {
          IProtonBuffer buffer = new ProtonByteBuffer(10);
          IProtonBuffer copy = buffer.Copy();
 
          Assert.AreEqual(buffer.ReadableBytes, copy.ReadableBytes);
 
-         byte[] first = null;
-         byte[] second = null;
+         copy.EnsureWritable(1);
+         copy.WriteByte(1);
 
-         buffer.ForEachWritableComponent(0, (idx, comp) =>
-         {
-            first = comp.WritableArray;
-
-            return true;
-         });
-
-         copy.ForEachWritableComponent(0, (idx, comp) =>
-         {
-            second = comp.WritableArray;
-
-            return true;
-         });
-
-         Assert.IsNotNull(first);
-         Assert.IsNotNull(second);
-         Assert.AreNotSame(first.GetHashCode(), second.GetHashCode());
+         Assert.AreNotEqual(buffer.GetByte(0), copy.GetByte(0));
       }
 
       [Test]
-      public void testCopyBufferResultsInMatchingBackingArrays()
+      public void TestCopyBufferResultsInMatchingBackingArrays()
       {
          IProtonBuffer buffer = new ProtonByteBuffer(10);
 
@@ -247,7 +232,8 @@ namespace Apache.Qpid.Proton.Buffer
          buffer.WriteByte(4);
          buffer.WriteByte(5);
 
-         IProtonBuffer copy = buffer.Copy();
+         // Make it writable without resizing so we can check the backing arrays.
+         IProtonBuffer copy = buffer.Copy().Reset();
 
          byte[] first = null;
          byte[] second = null;
@@ -278,6 +264,29 @@ namespace Apache.Qpid.Proton.Buffer
 
       #endregion
 
+      #region Tests for string conversion
+
+      [Test]
+      public void TestToStringUTF8FromProtonBuffer()
+      {
+         string sourceString = "Test-String-1";
+         Encoding utf8 = new UTF8Encoding();
+
+         IProtonBuffer buffer = AllocateBuffer(sourceString.Length);
+
+         byte[] utf8Bytes = utf8.GetBytes(sourceString);
+
+         buffer.WriteBytes(utf8Bytes);
+
+         String decoded = buffer.ToString(utf8);
+
+         Assert.AreEqual(sourceString, decoded);
+      }
+
+      #endregion
+
+      #region Abstract test class method implementations
+
       protected override IProtonBuffer AllocateBuffer(int initialCapacity)
       {
          return ProtonByteBufferAllocator.INSTANCE.Allocate(initialCapacity);
@@ -292,5 +301,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          return ProtonByteBufferAllocator.INSTANCE.Wrap(array);
       }
+
+      #endregion
    }
 }

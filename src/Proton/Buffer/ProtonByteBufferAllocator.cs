@@ -53,12 +53,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Wrap(byte[] buffer)
       {
-         return Wrap(buffer, 0, buffer.Length);
-      }
-
-      public IProtonBuffer Wrap(byte[] buffer, int offset, int length)
-      {
-         throw new NotSupportedException();
+         return new ProtonByteBuffer(buffer);
       }
    }
 }
