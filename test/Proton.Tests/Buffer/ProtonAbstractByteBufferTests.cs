@@ -2121,6 +2121,121 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
+      [Test]
+      public void TestRandomProtonBufferTransfer1()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+         byte[] valueContent = new byte[BlockSize];
+         IProtonBuffer value = new ProtonByteBuffer(BlockSize, BlockSize);
+
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(valueContent);
+            value.Reset();
+            value.WriteBytes(valueContent);
+            buffer.WriteOffset = i;
+            buffer.WriteBytes(value);
+            Assert.AreEqual(BlockSize, value.ReadOffset);
+            Assert.AreEqual(BlockSize, value.WriteOffset);
+         }
+
+         random = new Random(seed);
+
+         byte[] expectedValueContent = new byte[BlockSize];
+         IProtonBuffer expectedValue = new ProtonByteBuffer(expectedValueContent);
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValueContent);
+            value.Reset();
+            buffer.CopyInto(i, value, 0, BlockSize);
+            value.WriteOffset = BlockSize;
+            Assert.AreEqual(0, value.ReadOffset);
+            Assert.AreEqual(BlockSize, value.WriteOffset);
+            for (int j = 0; j < BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue.GetByte(j), value.GetByte(j));
+            }
+         }
+      }
+
+      [Test]
+      public void TestSequentialByteArrayTransfer1()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         byte[] value = new byte[BlockSize];
+         buffer.WriteOffset = 0;
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(value);
+            Assert.AreEqual(0, buffer.ReadOffset);
+            Assert.AreEqual(i, buffer.WriteOffset);
+            buffer.WriteBytes(value);
+         }
+
+         random = new Random(seed);
+
+         byte[] expectedValue = new byte[BlockSize];
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValue);
+            Assert.AreEqual(i, buffer.ReadOffset);
+            Assert.AreEqual(LargeCapacity, buffer.WriteOffset);
+            buffer.CopyInto(i, value, 0, value.LongLength);
+            buffer.ReadOffset += BlockSize;
+            for (int j = 0; j < BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue[j], value[j]);
+            }
+         }
+      }
+
+      [Test]
+      public void TestSequentialProtonBufferTransfer1()
+      {
+         IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
+
+         int SIZE = BlockSize * 2;
+         byte[] valueContent = new byte[SIZE];
+         IProtonBuffer value = new ProtonByteBuffer(SIZE, SIZE);
+
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(valueContent);
+            value.Reset().WriteBytes(valueContent);
+            Assert.AreEqual(0, buffer.ReadOffset);
+            Assert.AreEqual(i, buffer.WriteOffset);
+            int randomOffset = random.Next(BlockSize);
+            value.ReadOffset = randomOffset;
+            value.WriteOffset = value.ReadOffset + BlockSize;
+            buffer.WriteBytes(value);
+            Assert.AreEqual(randomOffset + BlockSize, value.ReadOffset);
+            Assert.AreEqual(randomOffset + BlockSize, value.WriteOffset);
+         }
+
+         random = new Random(seed);
+         value.ReadOffset = 0;
+         value.WriteOffset = valueContent.LongLength;
+         byte[] expectedValueContent = new byte[BlockSize * 2];
+         IProtonBuffer expectedValue = new ProtonByteBuffer(expectedValueContent);
+
+         for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
+         {
+            random.NextBytes(expectedValueContent);
+            int valueOffset = random.Next(BlockSize);
+            Assert.AreEqual(i, buffer.ReadOffset);
+            Assert.AreEqual(LargeCapacity, buffer.WriteOffset);
+            buffer.CopyInto(i, value, valueOffset, BlockSize);
+            for (int j = valueOffset; j < valueOffset + BlockSize; j++)
+            {
+               Assert.AreEqual(expectedValue.GetByte(j), value.GetByte(j));
+            }
+            Assert.AreEqual(0, value.ReadOffset);
+            Assert.AreEqual(valueContent.LongLength, value.WriteOffset);
+            buffer.ReadOffset += BlockSize;
+         }
+      }
+
       #endregion
 
       #region Tests need to define these allocation methods
