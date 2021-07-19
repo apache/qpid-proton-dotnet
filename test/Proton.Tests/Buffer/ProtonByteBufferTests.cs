@@ -289,17 +289,17 @@ namespace Apache.Qpid.Proton.Buffer
 
       protected override IProtonBuffer AllocateBuffer(int initialCapacity)
       {
-         return ProtonByteBufferAllocator.INSTANCE.Allocate(initialCapacity);
+         return ProtonByteBufferAllocator.Instance.Allocate(initialCapacity);
       }
 
       protected override IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
       {
-         return ProtonByteBufferAllocator.INSTANCE.Allocate(initialCapacity, maxCapacity);
+         return ProtonByteBufferAllocator.Instance.Allocate(initialCapacity, maxCapacity);
       }
 
       protected override IProtonBuffer WrapBuffer(byte[] array)
       {
-         return ProtonByteBufferAllocator.INSTANCE.Wrap(array);
+         return ProtonByteBufferAllocator.Instance.Wrap(array);
       }
 
       #endregion

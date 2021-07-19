@@ -118,10 +118,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return new ProtonDecoderState(this);
       }
 
-      public IDecoderState CachedDecoderState()
-      {
-         return cachedDecoderState ??= new ProtonDecoderState(this);
-      }
+      public IDecoderState CachedDecoderState => cachedDecoderState ??= new ProtonDecoderState(this);
 
       public bool? ReadBoolean(IProtonBuffer buffer, IDecoderState state)
       {
@@ -698,7 +695,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          object result = ReadObject(buffer, state);
 
-         if (result.GetType().IsAssignableTo(typeof(T)))
+         if (result == null)
+         {
+            throw SignalUnexpectedType(typeof(T));
+         }
+         else if (result.GetType().IsAssignableTo(typeof(T)))
          {
             return (T)result;
          }
@@ -804,8 +805,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             descriptor = ReadObject(buffer, state);
          }
 
-         ITypeDecoder typeDecoder = describedTypeDecoders[descriptor];
-         if (typeDecoder == null)
+         IDescribedTypeDecoder typeDecoder = null;
+         if (!describedTypeDecoders.TryGetValue(descriptor, out typeDecoder))
          {
             typeDecoder = HandleUnknownDescribedType(descriptor);
          }
@@ -831,7 +832,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          IDescribedTypeDecoder describedTypeDecoder = decoder;
 
          // Cache AMQP type decoders in the quick lookup array.
-         if (decoder.DescriptorCode.CompareTo(amqpTypeDecoders.Length) < 0)
+         if (decoder.DescriptorCode.CompareTo((ulong)amqpTypeDecoders.Length) < 0)
          {
             amqpTypeDecoders[decoder.DescriptorCode] = decoder;
          }
@@ -854,16 +855,22 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
+      private InvalidCastException SignalUnexpectedType(in Type type)
+      {
+         return new InvalidCastException(
+            "Unexpected null decoding, Expected " + type.Name + ".");
+      }
+
       private InvalidCastException SignalUnexpectedType(in object val, in Type type)
       {
          return new InvalidCastException(
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");
       }
 
-      private ITypeDecoder HandleUnknownDescribedType(in Object descriptor)
+      private IDescribedTypeDecoder HandleUnknownDescribedType(in Object descriptor)
       {
-         ITypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
-         describedTypeDecoders.Add(descriptor, (UnknownDescribedTypeDecoder)typeDecoder);
+         UnknownDescribedTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
+         describedTypeDecoders.Add(descriptor, typeDecoder);
 
          return typeDecoder;
       }

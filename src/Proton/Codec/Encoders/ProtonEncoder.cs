@@ -255,15 +255,15 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value != null)
          {
-            ITypeEncoder encoder = typeEncoders[value.GetType()];
+            ITypeEncoder encoder = null;
 
-            if (encoder == null)
+            if (typeEncoders.TryGetValue(value.GetType(), out encoder))
             {
-               WriteUnregisteredType(buffer, state, value);
+               encoder.WriteType(buffer, state, value);
             }
             else
             {
-               encoder.WriteType(buffer, state, value);
+               WriteUnregisteredType(buffer, state, value);
             }
          }
          else

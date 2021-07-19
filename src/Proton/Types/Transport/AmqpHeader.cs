@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public AmqpHeader(byte[] headerBytes)
       {
-         SetBuffer(ProtonByteBufferAllocator.INSTANCE.Wrap(headerBytes), true);
+         SetBuffer(ProtonByteBufferAllocator.Instance.Wrap(headerBytes), true);
       }
 
       public AmqpHeader(IProtonBuffer buffer)

@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          try
          {
-            return ProtonByteBufferAllocator.INSTANCE.Wrap(
+            return ProtonByteBufferAllocator.Instance.Wrap(
                ProtonStreamReadUtils.ReadBytes(stream, ReadSize(stream, state)));
          }
          catch (IOException ex)

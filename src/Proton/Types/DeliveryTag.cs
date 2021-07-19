@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Types
          {
             if (tagView == null)
             {
-               tagView = ProtonByteBufferAllocator.INSTANCE.Wrap(tagBytes);
+               tagView = ProtonByteBufferAllocator.Instance.Wrap(tagBytes);
             }
 
             tagView.ReadOffset = 0;

@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Buffer
    /// </summary>
    public class ProtonByteBufferAllocator : IProtonBufferAllocator
    {
-      public static readonly ProtonByteBufferAllocator INSTANCE = new ProtonByteBufferAllocator();
+      public static readonly ProtonByteBufferAllocator Instance = new ProtonByteBufferAllocator();
 
       public IProtonBuffer OutputBuffer(long initialCapacity)
       {

@@ -73,7 +73,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
             throw new DecodeException("Error while reading Symbol payload bytes", ex);
          }
 
-         return Symbol.Lookup(ProtonByteBufferAllocator.INSTANCE.Wrap(symbolBytes));
+         return Symbol.Lookup(ProtonByteBufferAllocator.Instance.Wrap(symbolBytes));
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

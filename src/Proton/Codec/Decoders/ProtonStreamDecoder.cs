@@ -861,7 +861,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          IStreamDescribedTypeDecoder describedTypeDecoder = decoder;
 
          // Cache AMQP type decoders in the quick lookup array.
-         if (decoder.DescriptorCode.CompareTo(amqpTypeDecoders.Length) < 0)
+         if (decoder.DescriptorCode.CompareTo((ulong)amqpTypeDecoders.Length) < 0)
          {
             amqpTypeDecoders[decoder.DescriptorCode] = decoder;
          }

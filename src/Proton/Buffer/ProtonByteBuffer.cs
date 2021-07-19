@@ -890,9 +890,9 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
-      private ArgumentOutOfRangeException OutOfBounds(long index)
+      private Exception OutOfBounds(long index)
       {
-         return new ArgumentOutOfRangeException(
+         return new IndexOutOfRangeException(
                "Index " + index + " is out of bounds: [read 0 to " + writeOffset + ", write 0 to " + array.Length + "].");
       }
 

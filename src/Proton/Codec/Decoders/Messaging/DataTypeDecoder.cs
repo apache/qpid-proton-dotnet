@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          }
 
          long position = buffer.ReadOffset;
-         IProtonBuffer data = ProtonByteBufferAllocator.INSTANCE.Allocate(size, size);
+         IProtonBuffer data = ProtonByteBufferAllocator.Instance.Allocate(size, size);
 
          buffer.CopyInto(position, data, 0, size);
          buffer.SkipBytes(size);
@@ -114,7 +114,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
                throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
          }
 
-         return new Data(ProtonByteBufferAllocator.INSTANCE.Wrap(ProtonStreamReadUtils.ReadBytes(stream, size)));
+         return new Data(ProtonByteBufferAllocator.Instance.Wrap(ProtonStreamReadUtils.ReadBytes(stream, size)));
       }
 
       public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)

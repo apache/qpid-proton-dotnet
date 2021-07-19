@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.WriteByte(10);
             Assert.Fail("Should not be able to write more than the max capacity bytes");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -106,7 +106,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.WriteByte(10);
             Assert.Fail("Should not be able to write more than the max capacity bytes");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       #endregion
@@ -197,7 +197,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadOffset = -1;
             Assert.Fail("Should not accept negative values");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -209,7 +209,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadOffset = buffer.Capacity + buffer.Capacity;
             Assert.Fail("Should not accept values bigger than capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -221,7 +221,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.WriteOffset = -1;
             Assert.Fail("Should not accept negative values");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -233,7 +233,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.WriteOffset = buffer.Capacity + buffer.Capacity;
             Assert.Fail("Should not accept values bigger than capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -310,7 +310,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SkipBytes(buffer.ReadableBytes + 50);
             Assert.Fail("Should not be able to skip beyond write index");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       #endregion
@@ -805,7 +805,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadByte();
             Assert.Fail("Should not be able to read beyond current capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -833,7 +833,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadBoolean();
             Assert.Fail("Should not be able to read beyond current capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -866,7 +866,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadShort();
             Assert.Fail("Should not be able to read beyond current capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -899,7 +899,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadInt();
             Assert.Fail("Should not be able to read beyond current capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -933,7 +933,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadLong();
             Assert.Fail("Should not be able to read beyond current readable bytes");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -954,7 +954,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadFloat();
             Assert.Fail("Should not be able to read beyond current capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -975,7 +975,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadDouble();
             Assert.Fail("Should not be able to read beyond current capacity");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       #endregion
@@ -999,7 +999,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadUnsignedByte();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1022,7 +1022,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadUnsignedByte();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1052,7 +1052,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadBoolean();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1075,7 +1075,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadShort();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1098,7 +1098,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadUnsignedShort();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1121,7 +1121,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadInt();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1144,7 +1144,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadUnsignedInt();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1171,7 +1171,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadLong();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1195,7 +1195,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadFloat();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1219,7 +1219,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             buffer.ReadDouble();
          }
-         catch (ArgumentOutOfRangeException)
+         catch (IndexOutOfRangeException)
          {
             Assert.Fail("Should be able to read from the buffer");
          }
@@ -1552,14 +1552,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetByte(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetByte(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1596,14 +1596,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetBoolean(-1, true);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetBoolean(buffer.Capacity, false);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1626,14 +1626,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetShort(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetShort(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1656,14 +1656,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetInt(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetInt(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1686,14 +1686,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetLong(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetLong(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1712,14 +1712,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetFloat(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetFloat(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1738,14 +1738,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetDouble(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetDouble(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       [Test]
@@ -1764,14 +1764,14 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.SetDouble(-1, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.SetDouble(buffer.Capacity, 0);
             Assert.Fail("should throw an ArgumentOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       #endregion

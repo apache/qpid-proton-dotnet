@@ -15,32 +15,27 @@
  * limitations under the License.
  */
 
-using NUnit.Framework;
+using Apache.Qpid.Proton.Types;
 
-namespace Apache.Qpid.Proton.Types
+namespace Apache.Qpid.Proton.Codec.Utilities
 {
-   public class DeliveryTagTests
+   public class NoLocalType : IDescribedType
    {
-      [Test]
-      public void TestCreateFromDefault()
-      {
-         DeliveryTag tag = new DeliveryTag();
+      public static readonly NoLocalType Instance = new NoLocalType();
 
-         //Assert.NotNull(tag.TagBuffer);
-         Assert.NotNull(tag.TagBytes);
-         Assert.AreEqual(0, tag.TagBytes.Length);
-         Assert.AreEqual(0, tag.TagBuffer.ReadableBytes);
+      public static readonly ulong DescriptorCode = 0x0000468C00000003UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("apache.org:no-local-filter:list");
+
+      public NoLocalType() : base()
+      {
+         NoLocal = "NoLocalFilter{}";
       }
 
-      [Test]
-      public void TestCreateWithArray()
-      {
-         DeliveryTag tag = new DeliveryTag(new byte[] {0, 1, 2, 3});
+      public string NoLocal { get; set; }
 
-         // Assert.NotNull(tag.TagBuffer);
-         Assert.NotNull(tag.TagBytes);
-         Assert.AreEqual(4, tag.TagBytes.Length);
-         Assert.AreEqual(4, tag.TagBuffer.ReadableBytes);
-      }
+      public object Descriptor => DescriptorCode;
+
+      public object Described => NoLocal;
+
    }
 }

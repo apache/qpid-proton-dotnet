@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Types
 
             if (!stringsToSymbols.TryGetValue(value, out symbol))
             {
-               symbol = Lookup(ProtonByteBufferAllocator.INSTANCE.Wrap(Encoding.ASCII.GetBytes(value)));
+               symbol = Lookup(ProtonByteBufferAllocator.Instance.Wrap(Encoding.ASCII.GetBytes(value)));
 
                if (symbol.Length <= MAX_CACHED_SYMBOL_SIZE)
                {
@@ -131,7 +131,7 @@ namespace Apache.Qpid.Proton.Types
                if (copyOnCreate)
                {
                   long symbolSize = value.ReadableBytes;
-                  IProtonBuffer copy = ProtonByteBufferAllocator.INSTANCE.Allocate(symbolSize, symbolSize);
+                  IProtonBuffer copy = ProtonByteBufferAllocator.Instance.Allocate(symbolSize, symbolSize);
                   value.CopyInto(value.ReadOffset, copy, 0, symbolSize);
                   copy.WriteOffset = symbolSize;
                   value = copy;

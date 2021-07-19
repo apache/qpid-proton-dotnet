@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Codec
       /// use this decoder instance.
       /// </summary>
       /// <returns>A cached decoder state object that can be used by single threaded readerss</returns>
-      IDecoderState CachedDecoderState();
+      IDecoderState CachedDecoderState { get; }
 
       /// <summary>
       /// Reads the encoded value from the given byte buffer and returns it.  If the next value in
