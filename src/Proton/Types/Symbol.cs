@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Types
 
       private Symbol()
       {
-         underlying = null; // TODO: Buffer allocator for empty buffer
+         underlying = ProtonByteBufferAllocator.Instance.Allocate(0, 0);
          symbolString = "";
          hashCode = 32;
       }

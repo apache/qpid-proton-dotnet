@@ -51,12 +51,12 @@ namespace Apache.Qpid.Proton.Buffer
 
       public override bool CanWrite => false;
 
-      public override long Length => buffer.WriteOffset - initialReadIndex;
+      public override long Length => buffer.ReadableBytes;
 
       public override long Position
       {
-         get => initialReadIndex - buffer.ReadOffset;
-         set => buffer.ReadOffset = initialReadIndex + (int)value; // TODO Buffer should maybe use longs for length and pos
+         get => buffer.ReadOffset - initialReadIndex;
+         set => buffer.ReadOffset = initialReadIndex + value;
       }
 
       public override void Close()
@@ -76,19 +76,31 @@ namespace Apache.Qpid.Proton.Buffer
          return -1;
       }
 
-      public override int Read(byte[] buffer, int offset, int count)
+      public override int Read(byte[] destination, int offset, int count)
       {
          CheckClosed();
-         throw new NotImplementedException();
+
+         if (offset < 0 || count < 0)
+         {
+            throw new ArgumentOutOfRangeException("offset and count must be non-negative");
+         }
+
+         int available = buffer.ReadableBytes > Int32.MaxValue ? Int32.MaxValue : (int)buffer.ReadableBytes;
+         int toRead = Math.Min(available, count);
+
+         buffer.CopyInto(buffer.ReadOffset, destination, offset, toRead);
+         buffer.ReadOffset += toRead;
+
+         return toRead;
       }
 
       public override long Seek(long offset, SeekOrigin origin)
       {
          CheckClosed();
 
+         long current = buffer.ReadOffset;
          long newReadOffset = 0;
 
-         // TODO: Check more constraints ?
          switch (origin)
          {
             case SeekOrigin.Begin:
@@ -115,7 +127,7 @@ namespace Apache.Qpid.Proton.Buffer
             buffer.ReadOffset = newReadOffset;
          }
 
-         return initialReadIndex - buffer.ReadOffset;
+         return buffer.ReadOffset;
       }
 
       public override void SetLength(long value)

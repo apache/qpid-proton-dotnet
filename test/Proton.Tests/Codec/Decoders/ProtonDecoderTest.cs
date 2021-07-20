@@ -16,12 +16,11 @@
  */
 
 using System;
-using System.IO;
-using System.Collections.Generic;
 using NUnit.Framework;
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Codec.Utilities;
 using Apache.Qpid.Proton.Types;
+using Apache.Qpid.Proton.Codec.Decoders;
+using Apache.Qpid.Proton.Codec;
 
 namespace Apache.Qpid.Proton.Codec
 {
@@ -242,54 +241,55 @@ namespace Apache.Qpid.Proton.Codec
          Assert.AreEqual(32, decoder.ReadUnsignedInteger(buffer, decoderState, 32));
       }
 
-   //    [Test]
-   //    public void testReadStringWithCustomStringDecoder()
-   //    {
-   //       IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+      [Test]
+      public void testReadStringWithCustomStringDecoder()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
 
-   //       buffer.writeByte(EncodingCodes.STR32);
-   //       buffer.writeInt(16);
-   //       buffer.writeBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
+         buffer.WriteInt(16);
+         buffer.WriteBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
 
-   //       ((ProtonDecoderState)decoderState).setStringDecoder(new UTF8Decoder() {
+         ((ProtonDecoderState)decoderState).Utf8Decoder = new DummyUtf8Decoder();
 
-   //          @Override
-   //          public String decodeUTF8(ProtonBuffer buffer, int utf8length)
-   //       {
-   //          return "string-decoder";
-   //       }
-   //    });
+         Assert.IsNotNull(((ProtonDecoderState)decoderState).Utf8Decoder);
 
-   //      Assert.IsNotNull(((ProtonDecoderState) decoderState).getStringDecoder());
+         String result = decoder.ReadString(buffer, decoderState);
 
-   //      String result = decoder.readString(buffer, decoderState);
+         Assert.AreEqual("string-decoder", result);
+         Assert.IsFalse(buffer.Readable);
+      }
 
-   //    Assert.AreEqual("string-decoder", result);
-   //      Assert.IsFalse(buffer.isReadable());
-   //  }
+      [Test]
+      public void testStringReadFromCustomDecoderThrowsDecodeExceptionOnError()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
 
-   // [Test]
-   // public void testStringReadFromCustomDecoderThrowsDecodeExceptionOnError()
-   // {
-   //    IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
+         buffer.WriteInt(16);
+         buffer.WriteBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
 
-   //    buffer.writeByte(EncodingCodes.STR32);
-   //    buffer.writeInt(16);
-   //    buffer.writeBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
+         ((ProtonDecoderState)decoderState).Utf8Decoder = new FailingUtf8Decoder();
 
-   //    ((ProtonDecoderState)decoderState).setStringDecoder(new UTF8Decoder() {
+         Assert.IsNotNull(((ProtonDecoderState)decoderState).Utf8Decoder);
+         Assert.Throws(typeof(DecodeException), () => decoder.ReadString(buffer, decoderState));
+      }
+   }
 
-   //          @Override
-   //          public String decodeUTF8(ProtonBuffer buffer, int utf8length)
-   //    {
-   //       throw new IndexOutOfBoundsException();
-   //    }
-   // });
+   internal class DummyUtf8Decoder : IUtf8Decoder
+   {
+      public string DecodeUTF8(IProtonBuffer buffer, int utf8length)
+      {
+         return "string-decoder";
+      }
+   }
 
-   //      Assert.IsNotNull(((ProtonDecoderState) decoderState).getStringDecoder());
-   //      Assert,Throws(typeof(DecodeException), () => decoder.readString(buffer, decoderState));
-   //  }
-
+   internal class FailingUtf8Decoder : IUtf8Decoder
+   {
+      public string DecodeUTF8(IProtonBuffer buffer, int utf8length)
+      {
+         throw new IndexOutOfRangeException();
+      }
    }
 }
 

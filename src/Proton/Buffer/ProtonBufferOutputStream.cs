@@ -55,6 +55,8 @@ namespace Apache.Qpid.Proton.Buffer
          set => throw new NotImplementedException();
       }
 
+      public long BytesWritten => buffer.WriteOffset - initialWriteIndex;
+
       public override void Flush()
       {
       }
