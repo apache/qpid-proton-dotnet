@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 {
-   public sealed class DecleteOnCloseTypeEncoder : AbstractDescribedListTypeEncoder<DeleteOnClose>
+   public sealed class DeleteOnCloseTypeEncoder : AbstractDescribedListTypeEncoder<DeleteOnClose>
    {
       private static readonly int EncodingSize = 4;
 

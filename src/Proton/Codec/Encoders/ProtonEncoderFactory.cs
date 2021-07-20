@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Codec.Encoders.Messaging;
+using Apache.Qpid.Proton.Codec.Encoders.Security;
+using Apache.Qpid.Proton.Codec.Encoders.Transactions;
+using Apache.Qpid.Proton.Codec.Encoders.Transport;
+
 namespace Apache.Qpid.Proton.Codec.Encoders
 {
    /// <summary>
@@ -24,12 +29,82 @@ namespace Apache.Qpid.Proton.Codec.Encoders
    {
       public static ProtonEncoder Create()
       {
-         return new ProtonEncoder(); // TODO
+         ProtonEncoder encoder = new ProtonEncoder();
+
+         AddMessagingTypeEncoders(encoder);
+         AddTransactionTypeEncoders(encoder);
+         AddTransportTypeEncoders(encoder);
+
+         return encoder;
       }
 
       public static ProtonEncoder CreateSasl()
       {
-         return new ProtonEncoder(); // TODO
+         return AddSaslTypeEncoders(new ProtonEncoder());
+      }
+
+      private static ProtonEncoder AddMessagingTypeEncoders(ProtonEncoder encoder)
+      {
+         encoder.RegisterDescribedTypeEncoder(new AcceptedTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new AmqpSequenceTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new AmqpValueTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new ApplicationPropertiesTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DataTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeleteOnCloseTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeleteOnNoLinksOrMessagesTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeleteOnNoLinksTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeleteOnNoMessagesTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeliveryAnnotationsTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new FooterTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new HeaderTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new MessageAnnotationsTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new ModifiedTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new PropertiesTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new ReceivedTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new RejectedTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new ReleasedTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new SourceTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new TargetTypeEncoder());
+
+         return encoder;
+      }
+
+      private static ProtonEncoder AddTransactionTypeEncoders(ProtonEncoder encoder)
+      {
+         encoder.RegisterDescribedTypeEncoder(new CoordinatorTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeclaredTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DeclareTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DischargeTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new TransactionalStateTypeEncoder());
+
+         return encoder;
+      }
+
+      private static ProtonEncoder AddTransportTypeEncoders(ProtonEncoder encoder)
+      {
+         encoder.RegisterDescribedTypeEncoder(new AttachTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new BeginTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new CloseTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DetachTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new DispositionTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new EndTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new ErrorConditionTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new FlowTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new OpenTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new TransferTypeEncoder());
+
+         return encoder;
+      }
+
+      private static ProtonEncoder AddSaslTypeEncoders(ProtonEncoder encoder)
+      {
+         encoder.RegisterDescribedTypeEncoder(new SaslChallengeTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new SaslInitTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new SaslMechanismsTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new SaslOutcomeTypeEncoder());
+         encoder.RegisterDescribedTypeEncoder(new SaslResponseTypeEncoder());
+
+         return encoder;
       }
    }
 }
