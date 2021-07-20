@@ -74,12 +74,40 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       }
 
       [Test]
+      public void TestWriteBooleanPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, true);
+         encoder.WriteObject(buffer, encoderState, false);
+
+         Assert.AreEqual(2, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.BooleanTrue));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), ((byte)EncodingCodes.BooleanFalse));
+      }
+
+      [Test]
       public void TestWriteUnsignedBytePrimitive()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
 
          encoder.WriteUnsignedByte(buffer, encoderState, (byte)0);
          encoder.WriteUnsignedByte(buffer, encoderState, (byte)255);
+
+         Assert.AreEqual(4, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.UByte));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), ((byte)EncodingCodes.UByte));
+         Assert.AreEqual(buffer.GetUnsignedByte(3), (byte)255);
+      }
+
+      [Test]
+      public void TestWriteUnsignedBytePrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, (byte)0);
+         encoder.WriteObject(buffer, encoderState, (byte)255);
 
          Assert.AreEqual(4, buffer.ReadableBytes);
          Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.UByte));
@@ -106,6 +134,23 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       }
 
       [Test]
+      public void TestWriteUnsignedShortPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, (ushort)0);
+         encoder.WriteObject(buffer, encoderState, (ushort)65535);
+
+         Assert.AreEqual(6, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.UShort));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(3), ((byte)EncodingCodes.UShort));
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+      }
+
+      [Test]
       public void TestWriteUnsignedIntegerPrimitive()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -113,6 +158,26 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          encoder.WriteUnsignedInteger(buffer, encoderState, 0);
          encoder.WriteUnsignedInteger(buffer, encoderState, 255);
          encoder.WriteUnsignedInteger(buffer, encoderState, uint.MaxValue);
+
+         Assert.AreEqual(8, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.UInt0));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), ((byte)EncodingCodes.SmallUInt));
+         Assert.AreEqual(buffer.GetUnsignedByte(2), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(3), ((byte)EncodingCodes.UInt));
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(7), (byte)255);
+      }
+
+      [Test]
+      public void TestWriteUnsignedIntegerPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, 0u);
+         encoder.WriteObject(buffer, encoderState, 255u);
+         encoder.WriteObject(buffer, encoderState, uint.MaxValue);
 
          Assert.AreEqual(8, buffer.ReadableBytes);
          Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.UInt0));
@@ -150,12 +215,51 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       }
 
       [Test]
+      public void TestWriteUnsignedLongPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, 0ul);
+         encoder.WriteObject(buffer, encoderState, 255ul);
+         encoder.WriteObject(buffer, encoderState, ulong.MaxValue);
+
+         Assert.AreEqual(12, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.ULong0));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), ((byte)EncodingCodes.SmallULong));
+         Assert.AreEqual(buffer.GetUnsignedByte(2), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(3), ((byte)EncodingCodes.ULong));
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(7), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(8), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(9), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(10), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(11), (byte)255);
+      }
+
+      [Test]
       public void TestWriteBytePrimitive()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
 
          encoder.WriteByte(buffer, encoderState, 0);
          encoder.WriteByte(buffer, encoderState, -1);
+
+         Assert.AreEqual(4, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.Byte));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), ((byte)EncodingCodes.Byte));
+         Assert.AreEqual(buffer.GetUnsignedByte(3), (byte)255);
+      }
+
+      [Test]
+      public void TestWriteBytePrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, (sbyte)0);
+         encoder.WriteObject(buffer, encoderState, (sbyte)-1);
 
          Assert.AreEqual(4, buffer.ReadableBytes);
          Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.Byte));
@@ -182,6 +286,23 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       }
 
       [Test]
+      public void TestWriteShortPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, (short)0);
+         encoder.WriteObject(buffer, encoderState, (short)-1);
+
+         Assert.AreEqual(6, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.Short));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(3), ((byte)EncodingCodes.Short));
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+      }
+
+      [Test]
       public void TestWriteIntegerPrimitive()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -196,6 +317,68 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          Assert.AreEqual(buffer.GetUnsignedByte(3), (byte)127);
          Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
          Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+      }
+
+      [Test]
+      public void TestWriteIntegerPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, 0);
+         encoder.WriteObject(buffer, encoderState, int.MaxValue);
+
+         Assert.AreEqual(7, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.SmallInt));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), ((byte)EncodingCodes.Int));
+         Assert.AreEqual(buffer.GetUnsignedByte(3), (byte)127);
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+      }
+
+      [Test]
+      public void TestWriteLongPrimitive()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteLong(buffer, encoderState, 0L);
+         encoder.WriteLong(buffer, encoderState, long.MaxValue);
+
+         Assert.AreEqual(11, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.SmallLong));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), ((byte)EncodingCodes.Long));
+         Assert.AreEqual(buffer.GetUnsignedByte(3), (byte)127);
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+      }
+
+      [Test]
+      public void TestWriteLongPrimitiveAsObject()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         encoder.WriteObject(buffer, encoderState, 0L);
+         encoder.WriteObject(buffer, encoderState, long.MaxValue);
+
+         Assert.AreEqual(11, buffer.ReadableBytes);
+         Assert.AreEqual(buffer.GetUnsignedByte(0), ((byte)EncodingCodes.SmallLong));
+         Assert.AreEqual(buffer.GetUnsignedByte(1), 0);
+         Assert.AreEqual(buffer.GetUnsignedByte(2), ((byte)EncodingCodes.Long));
+         Assert.AreEqual(buffer.GetUnsignedByte(3), (byte)127);
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(4), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(5), (byte)255);
+         Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
          Assert.AreEqual(buffer.GetUnsignedByte(6), (byte)255);
       }
    }
