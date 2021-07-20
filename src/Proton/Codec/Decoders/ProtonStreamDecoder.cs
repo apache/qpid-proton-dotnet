@@ -119,10 +119,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return new ProtonStreamDecoderState(this);
       }
 
-      public IStreamDecoderState CachedDecoderState()
-      {
-         return cachedDecoderState ??= new ProtonStreamDecoderState(this);
-      }
+      public IStreamDecoderState CachedDecoderState => cachedDecoderState ??= new ProtonStreamDecoderState(this);
 
       public bool? ReadBoolean(Stream stream, IStreamDecoderState state)
       {
@@ -699,7 +696,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          object result = ReadObject(stream, state);
 
-         if (result.GetType().IsAssignableTo(typeof(T)))
+         if (result == null)
+         {
+            throw SignalUnexpectedType(typeof(T));
+         }
+         else if (result.GetType().IsAssignableTo(typeof(T)))
          {
             return (T)result;
          }
@@ -820,8 +821,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                throw new DecodeException("Expected Descriptor type but found encoding: " + encodingCode);
          }
 
-         IStreamTypeDecoder streamTypeDecoder = describedTypeDecoders[descriptor];
-         if (streamTypeDecoder == null)
+         IStreamDescribedTypeDecoder streamTypeDecoder = null;
+         if (!describedTypeDecoders.TryGetValue(descriptor, out streamTypeDecoder))
          {
             streamTypeDecoder = HandleUnknownDescribedType(descriptor);
          }
@@ -876,12 +877,24 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          try
          {
-            return (EncodingCodes)stream.ReadByte();
+            int result = stream.ReadByte();
+
+            if (result >= 0) {
+                return (EncodingCodes) result;
+            } else {
+                throw new DecodeEOFException("Cannot read more type information from stream that has reached its end.");
+            }
          }
          catch (IndexOutOfRangeException error)
          {
             throw new DecodeEOFException("Read of new type failed because stream exhausted.", error);
          }
+      }
+
+      private InvalidCastException SignalUnexpectedType(in Type type)
+      {
+         return new InvalidCastException(
+            "Unexpected null decoding, Expected " + type.Name + ".");
       }
 
       private InvalidCastException SignalUnexpectedType(in object val, in Type type)
@@ -890,9 +903,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");
       }
 
-      private IStreamTypeDecoder HandleUnknownDescribedType(in Object descriptor)
+      private IStreamDescribedTypeDecoder HandleUnknownDescribedType(in Object descriptor)
       {
-         IStreamTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
+         IStreamDescribedTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
          describedTypeDecoders.Add(descriptor, (UnknownDescribedTypeDecoder)typeDecoder);
 
          return typeDecoder;
