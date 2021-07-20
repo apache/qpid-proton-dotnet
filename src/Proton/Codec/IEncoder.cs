@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Codec
       /// encoder state should be used with this encoder and only by a single thread at a time.
       /// </summary>
       /// <returns>A cached encoder state instance that can be used by single thread writers</returns>
-      IEncoderState CachedEncoderState();
+      IEncoderState CachedEncoderState { get; }
 
       /// <summary>
       /// Write the indicated AMQP null type encoding into the buffer instance.

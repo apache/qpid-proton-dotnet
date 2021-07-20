@@ -20,7 +20,6 @@ using NUnit.Framework;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Codec.Decoders;
-using Apache.Qpid.Proton.Codec;
 
 namespace Apache.Qpid.Proton.Codec
 {

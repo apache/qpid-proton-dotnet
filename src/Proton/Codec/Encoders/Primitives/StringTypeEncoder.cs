@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          state.EncodeUtf8(buffer, value);
 
          // Move back and write the size into the size slot
-         buffer.SetUnsignedByte(startIndex - sizeof(int), (byte)(buffer.WriteOffset - startIndex));
+         buffer.SetUnsignedByte(startIndex - sizeof(byte), (byte)(buffer.WriteOffset - startIndex));
       }
 
       private static void WriteString(IProtonBuffer buffer, IEncoderState state, string value)

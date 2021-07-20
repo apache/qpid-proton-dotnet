@@ -96,10 +96,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          return new ProtonEncoderState(this);
       }
 
-      public IEncoderState CachedEncoderState()
-      {
-         return cachedEncoderState ??= new ProtonEncoderState(this);
-      }
+      public IEncoderState CachedEncoderState => cachedEncoderState ??= new ProtonEncoderState(this);
 
       public void WriteNull(IProtonBuffer buffer, IEncoderState state)
       {

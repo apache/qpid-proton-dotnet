@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(short) + sizeof(byte));
-         buffer.WriteUnsignedShort(((byte)EncodingCodes.Short));
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Short));
          buffer.WriteShort((short)value);
       }
 
@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(short) * values.Length));
          // Write the array elements after writing the array length
-         buffer.WriteUnsignedShort(((byte)EncodingCodes.Short));
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Short));
          foreach (object value in values)
          {
             buffer.WriteShort((short)(value));
