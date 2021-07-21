@@ -30,8 +30,9 @@ namespace Apache.Qpid.Proton.Engine
       /// if no data is mapped to the key.
       /// </summary>
       /// <param name="key">The key to search for in the attachments</param>
-      /// <returns>A user set attachment for this given key or null</returns>
-      object Get(string key);
+      /// <param name="value">The value that result if the key exists</param>
+      /// <returns>True if the value was in the attachments and retrieved</returns>
+      bool TryGet(in string key, out object value);
 
       /// <summary>
       /// Gets the user attached value that is associated with the given key, or null
@@ -42,7 +43,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <param name="defaultValue">The default to return if the key is not present</param>
       /// <returns>A user set attachment for this given key or return the default</returns>
       /// <exception cref="InvalidCastException">If the attachment cannot be converted</exception>
-      T Get<T>(string key, T defaultValue);
+      T Get<T>(in string key, in T defaultValue);
 
       /// <summary>
       /// Maps a given object to the given key in this Attachments instance.
@@ -50,14 +51,14 @@ namespace Apache.Qpid.Proton.Engine
       /// <param name="key">The key used to add or replace a value</param>
       /// <param name="value">The value to store with the given key</param>
       /// <returns>This Attachments instance</returns>
-      IAttachments Set(string key, object value);
+      IAttachments Set(in string key, in object value);
 
       /// <summary>
       /// Returns if the given key has a value mapped to it in this Attachments instance.
       /// </summary>
       /// <param name="key">The key to search in the attachments</param>
       /// <returns>true if the key is present or false if not.</returns>
-      bool Contains(string key);
+      bool Contains(in string key);
 
       /// <summary>
       /// Removes all attachments from this instance.
