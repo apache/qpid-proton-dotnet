@@ -124,6 +124,7 @@ namespace Apache.Qpid.Proton.Buffer
          outStream.Write((byte)255);
          outStream.Write((char)128);
          outStream.Write(long.MaxValue);
+         outStream.Write(ulong.MaxValue);
          outStream.Write(3.14f);
          outStream.Write(3.14);
 
@@ -148,11 +149,12 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(128, inStream.ReadChar());
          Assert.AreEqual(13, stream.BytesRead);
          Assert.AreEqual(long.MaxValue, inStream.ReadInt64());
-         Assert.AreEqual(21, stream.BytesRead);
+         Assert.AreEqual(ulong.MaxValue, inStream.ReadUInt64());
+         Assert.AreEqual(29, stream.BytesRead);
          Assert.AreEqual(3.14f, inStream.ReadSingle(), 0.01f);
-         Assert.AreEqual(25, stream.BytesRead);
-         Assert.AreEqual(3.14, inStream.ReadDouble(), 0.01);
          Assert.AreEqual(33, stream.BytesRead);
+         Assert.AreEqual(3.14, inStream.ReadDouble(), 0.01);
+         Assert.AreEqual(41, stream.BytesRead);
 
          stream.Close();
       }

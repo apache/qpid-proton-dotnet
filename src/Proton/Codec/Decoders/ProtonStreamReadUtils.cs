@@ -41,6 +41,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             {
                return EmptyArray;
             }
+            else if (stream.Length < length)
+            {
+               throw new DecodeException(string.Format(
+                   "Failed to read requested number of bytes %d: instead only %d bytes are ready.", length, stream.Length));
+            }
             else
             {
                byte[] payload = new byte[length];
@@ -270,7 +275,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          try
          {
-            stream.Seek(amount, SeekOrigin.Current);
+            long position = stream.Position;
+            long newPosition = stream.Seek(amount, SeekOrigin.Current);
+
+            if (newPosition - position != amount)
+            {
+               throw new DecodeException("Stream was not able to skip the requested amount of bytes: " + amount);
+            }
          }
          catch (IOException ex)
          {

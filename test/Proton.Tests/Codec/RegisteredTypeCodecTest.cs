@@ -25,13 +25,13 @@ namespace Apache.Qpid.Proton.Codec
    [TestFixture]
    public class RegisteredTypeCodecTest : CodecTestSupport
    {
-      // TODO [Test]
+      [Test]
       public void TestEncodeDecodeRegisteredType()
       {
          DoTestEncodeDecodeRegisteredType(false);
       }
 
-      // TODO [Test]
+      // TODO: [Test]
       public void TestEncodeDecodeRegisteredTypeFromStream()
       {
          DoTestEncodeDecodeRegisteredType(true);
