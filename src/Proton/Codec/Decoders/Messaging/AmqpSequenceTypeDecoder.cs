@@ -17,11 +17,11 @@
 
 using System;
 using System.IO;
-using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
+using System.Collections;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
       {
          ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
          IListTypeDecoder valueDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-         IList<object> result = (IList<object>)valueDecoder.ReadValue(buffer, state);
+         IList result = (IList)valueDecoder.ReadValue(buffer, state);
 
          return new AmqpSequence(result);
       }
@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
       {
          ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
          IListTypeDecoder valueDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-         List<object>[] elements = (List<object>[])valueDecoder.ReadArrayElements(buffer, state, count);
+         IList[] elements = (IList[])valueDecoder.ReadArrayElements(buffer, state, count);
 
          AmqpSequence[] array = new AmqpSequence[count];
          for (int i = 0; i < count; ++i)
@@ -70,7 +70,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
       {
          IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
          IListTypeDecoder valueDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-         IList<object> result = (IList<object>)valueDecoder.ReadValue(stream, state);
+         IList result = (IList)valueDecoder.ReadValue(stream, state);
 
          return new AmqpSequence(result);
       }
@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
       {
          IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
          IListTypeDecoder valueDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-         List<object>[] elements = (List<object>[])valueDecoder.ReadArrayElements(stream, state, count);
+         IList[] elements = (IList[])valueDecoder.ReadArrayElements(stream, state, count);
 
          AmqpSequence[] array = new AmqpSequence[count];
          for (int i = 0; i < count; ++i)

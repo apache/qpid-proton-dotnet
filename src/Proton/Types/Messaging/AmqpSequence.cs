@@ -15,24 +15,25 @@
  * limitations under the License.
  */
 
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class AmqpSequence : IBodySection<IList<object>>
+   public sealed class AmqpSequence : IBodySection<IList>
    {
       public static readonly ulong DescriptorCode = 0x0000000000000076UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:amqp-sequence:list");
 
       public SectionType Type => SectionType.AmqpSequence;
 
-      public IList<object> Value { get; set; }
+      public IList Value { get; set; }
 
       public AmqpSequence() : base()
       {
       }
 
-      public AmqpSequence(IList<object> list) : base()
+      public AmqpSequence(IList list) : base()
       {
          Value = list;
       }
@@ -41,11 +42,16 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
          if (other.Value != null)
          {
-            Value = new List<object>(other.Value);
+            Value = new ArrayList(other.Value);
          }
       }
 
       public object Clone()
+      {
+         return Copy();
+      }
+
+      public AmqpSequence Copy()
       {
          return new AmqpSequence(this);
       }
