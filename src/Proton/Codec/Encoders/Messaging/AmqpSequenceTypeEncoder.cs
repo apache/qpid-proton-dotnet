@@ -33,6 +33,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
+         buffer.EnsureWritable(sizeof(byte) + sizeof(int) + sizeof(int));
+
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
 
@@ -58,6 +60,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
 
@@ -75,6 +78,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
+         buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + sizeof(byte));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
          buffer.WriteUnsignedByte((byte)AmqpSequence.DescriptorCode);

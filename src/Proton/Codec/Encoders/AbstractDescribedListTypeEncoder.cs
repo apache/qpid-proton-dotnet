@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public virtual void WriteType(IProtonBuffer buffer, IEncoderState state, T value)
       {
-         buffer.EnsureWritable(sizeof(byte) + sizeof(byte));
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
 
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
@@ -87,6 +87,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
             throw new EncodeException("Incomplete Type cannot be encoded");
          }
 
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte(((byte)encodingCode));
 
          switch (encodingCode)
@@ -105,7 +106,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the count of list elements.
-         buffer.EnsureWritable(sizeof(byte) + sizeof(byte));
+         buffer.EnsureWritable(sizeof(short));
          buffer.WriteUnsignedByte((byte)0);
          buffer.WriteUnsignedByte((byte)elementCount);
 
@@ -126,7 +127,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the count of list elements.
-         buffer.EnsureWritable(sizeof(int) + sizeof(int));
+         buffer.EnsureWritable(sizeof(long));
          buffer.WriteInt(0);
          buffer.WriteInt(elementCount);
 
@@ -144,7 +145,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
-         buffer.EnsureWritable(sizeof(int) + sizeof(int) + sizeof(byte) + sizeof(byte));
+         buffer.EnsureWritable(sizeof(long) + sizeof(short));
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
 
@@ -153,8 +154,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          // Reserve space for the size and write the count of list elements.
          buffer.WriteInt(0);
          buffer.WriteInt(values.Length);
-
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
+
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
 
          WriteRawArray(buffer, state, values);
@@ -172,7 +173,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
-         buffer.EnsureWritable(sizeof(int) + sizeof(int) + sizeof(byte) + sizeof(byte));
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.List32));
 
          for (int i = 0; i < values.Length; ++i)
@@ -182,6 +183,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
             long elementStartIndex = buffer.WriteOffset;
 
             // Reserve space for the size and write the count of list elements.
+            buffer.EnsureWritable(sizeof(long));
             buffer.WriteInt(0);
             buffer.WriteInt(count);
 

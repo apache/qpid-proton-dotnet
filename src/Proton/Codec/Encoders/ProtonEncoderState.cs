@@ -61,6 +61,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
          byte[] encoded = utf8.GetBytes(value);
 
+         buffer.EnsureWritable(encoded.LongLength);
          buffer.WriteBytes(encoded);
       }
    }
