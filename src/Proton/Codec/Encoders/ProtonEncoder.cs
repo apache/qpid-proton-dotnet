@@ -193,6 +193,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          uuidEncoder.WriteType(buffer, state, value);
       }
 
+      public void WriteBinary(IProtonBuffer buffer, IEncoderState state, byte[] value)
+      {
+         binaryEncoder.WriteType(buffer, state, value);
+      }
+
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, IProtonBuffer value)
       {
          binaryEncoder.WriteType(buffer, state, value);

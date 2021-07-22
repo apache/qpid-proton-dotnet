@@ -76,9 +76,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          {
             ProtonStreamReadUtils.SkipBytes(stream, ReadSize(stream, state));
          }
+         catch (ArgumentOutOfRangeException ex)
+         {
+            throw new DecodeException("Error while skipping Binary payload bytes", ex);
+         }
          catch (IOException ex)
          {
-            throw new DecodeException("Error while reading Binary payload bytes", ex);
+            throw new DecodeException("Error while skipping Binary payload bytes", ex);
          }
       }
 

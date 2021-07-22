@@ -220,6 +220,15 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">An encoder state instance to use when encoding</param>
       /// <param name="value">The value to be written</param>
       /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
+      void WriteBinary(IProtonBuffer buffer, IEncoderState state, byte[] value);
+
+      /// <summary>
+      /// Writes the AMQP Binary encoding for the given value to the given buffer.
+      /// </summary>
+      /// <param name="buffer">The buffer to write the value encoding to</param>
+      /// <param name="state">An encoder state instance to use when encoding</param>
+      /// <param name="value">The value to be written</param>
+      /// <exception cref="EncodeException">If an error occurs during the encode operation</exception>
       void WriteBinary(IProtonBuffer buffer, IEncoderState state, IProtonBuffer value);
 
       /// <summary>

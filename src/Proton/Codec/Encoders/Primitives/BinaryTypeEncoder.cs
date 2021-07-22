@@ -44,6 +44,24 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteBytes(binary);
       }
 
+      public void WriteType(IProtonBuffer buffer, IEncoderState state, byte[] value)
+      {
+         if (value.Length > byte.MaxValue)
+         {
+            buffer.EnsureWritable(sizeof(byte) + sizeof(uint) + value.Length);
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.VBin32));
+            buffer.WriteUnsignedInt((uint)value.Length);
+         }
+         else
+         {
+            buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + value.Length);
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.VBin8));
+            buffer.WriteUnsignedByte((byte)value.Length);
+         }
+
+         buffer.WriteBytes(value);
+      }
+
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
       {
          IProtonBuffer[] buffers = (IProtonBuffer[])values;
