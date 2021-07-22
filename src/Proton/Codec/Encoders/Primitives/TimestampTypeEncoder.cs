@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedLong((ulong)value);
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(ulong) * values.Length));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Timestamp));

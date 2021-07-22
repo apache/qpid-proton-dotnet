@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
@@ -31,7 +32,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedInt((uint)((char)value & 0xFFFF));
       }
 
-      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          if (values.Length < 63)
          {
@@ -43,7 +44,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          }
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(uint) * values.Length));
          // Write the array elements after writing the array length

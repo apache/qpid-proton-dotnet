@@ -46,12 +46,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          tag.WriteTo(buffer);
       }
 
-      public void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value)
+      public void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
       {
          throw new NotImplementedException("Cannot encode delivery tags to arrays");
       }
 
-      public void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          throw new NotImplementedException("Cannot encode delivery tags to arrays");
       }

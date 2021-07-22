@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Utilities
 
       public override Type EncodesType => typeof(NoLocalType);
 
-      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value)
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
       {
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
@@ -56,7 +56,7 @@ namespace Apache.Qpid.Proton.Codec.Utilities
          buffer.SetInt(startIndex, (int)writeSize);
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Codec.Utilities
 
          for (int i = 0; i < values.Length; ++i)
          {
-            NoLocalType value = (NoLocalType)values[i];
+            NoLocalType value = (NoLocalType)values.GetValue(i);
             elements[i] = value.Described;
          }
 

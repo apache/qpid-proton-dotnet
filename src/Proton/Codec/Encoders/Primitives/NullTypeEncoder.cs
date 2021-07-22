@@ -31,12 +31,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedByte((byte)EncodingCodes.Null);
       }
 
-      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
         throw new InvalidOperationException("Cannot write an array of nulls");
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
         throw new InvalidOperationException("Cannot write an array of nulls");
       }

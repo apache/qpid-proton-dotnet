@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override Type EncodesType => typeof(AmqpSequence);
 
-      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(int) + sizeof(int));
 
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          buffer.SetInt(startIndex, (int)writeSize);
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
          for (int i = 0; i < values.Length; ++i)
          {
-            AmqpSequence sequence = (AmqpSequence)values[i];
+            AmqpSequence sequence = (AmqpSequence)values.GetValue(i);
             elements[i] = (IList)sequence.Value;
          }
 

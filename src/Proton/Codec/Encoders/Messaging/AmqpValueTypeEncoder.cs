@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override Type EncodesType => typeof(AmqpValue);
 
-      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
@@ -56,7 +56,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          buffer.SetInt(startIndex, (int)writeSize);
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
@@ -65,11 +65,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
          for (int i = 0; i < values.Length; ++i)
          {
-            AmqpSequence sequence = (AmqpSequence)values[i];
+            AmqpSequence sequence = (AmqpSequence)values.GetValue(i);
             elements[i] = (IList)sequence.Value;
          }
 
-         ITypeEncoder entryEncoder = state.Encoder.LookupTypeEncoder(values[0].GetType());
+         ITypeEncoder entryEncoder = state.Encoder.LookupTypeEncoder(values.GetValue(0).GetType());
          entryEncoder.WriteRawArray(buffer, state, elements);
       }
 

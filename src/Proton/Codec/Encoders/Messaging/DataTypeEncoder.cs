@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override Type EncodesType => typeof(Data);
 
-      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          buffer.SetInt(startIndex, (int)writeSize);
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);

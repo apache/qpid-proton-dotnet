@@ -31,8 +31,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       public abstract ulong DescriptorCode { get; }
       public abstract Type EncodesType { get; }
 
-      public abstract void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value);
-      public abstract void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values);
+      public abstract void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value);
+      public abstract void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values);
       public abstract void WriteType(IProtonBuffer buffer, IEncoderState state, object value);
 
       #endregion

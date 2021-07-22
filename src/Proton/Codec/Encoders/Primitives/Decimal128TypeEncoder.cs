@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 
@@ -35,7 +36,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedLong(decimal128.LeastSignificantBits);
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          Decimal128[] buffers = (Decimal128[])values;
 

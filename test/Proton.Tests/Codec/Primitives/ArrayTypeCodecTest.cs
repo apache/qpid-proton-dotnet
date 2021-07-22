@@ -15,33 +15,30 @@
  * limitations under the License.
  */
 
-using System;
+using System.IO;
+using NUnit.Framework;
 using Apache.Qpid.Proton.Buffer;
+using System;
+using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 
-namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
+namespace Apache.Qpid.Proton.Codec.Primitives
 {
-   /// <summary>
-   /// Interface for an type encoders that handle primitive types
-   /// </summary>
-   public sealed class ArrayTypeEncoder : IPrimitiveTypeEncoder<Array>
+   [TestFixture]
+   public class ArrayTypeCodecTest : CodecTestSupport
    {
-      public Type EncodesType => typeof(Array);
-
-      public bool IsArrayType => true;
-
-      public void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
+      [Test]
+      public void TestNetArrayTypes()
       {
-         throw new NotImplementedException();
-      }
+         Array array = new int[1];
+         Array multiDarray = new int[2][];
 
-      public void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
-      {
-         throw new NotImplementedException();
-      }
+         Assert.IsNotNull(array);
+         Assert.IsNotNull(multiDarray);
+         Assert.AreEqual(1, array.Length);
+         Assert.AreEqual(2, multiDarray.Length);
 
-      public void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
-      {
-         throw new NotImplementedException();
+         Assert.AreEqual(0, multiDarray.GetLowerBound(0));
+         Assert.AreEqual(1, multiDarray.GetUpperBound(0));
       }
    }
 }

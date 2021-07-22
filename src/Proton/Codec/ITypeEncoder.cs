@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="buffer">The buffer where the encoded bytes are to be written</param>
       /// <param name="state">The encoder state to use when writing the bytes</param>
       /// <param name="value">The array value to be encoded</param>
-      void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value);
+      void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value);
 
       /// <summary>
       /// Encodes only the individual elements of the given array into the provided buffer
@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="buffer">The buffer where the encoded bytes are to be written</param>
       /// <param name="state">The encoder state to use when writing the bytes</param>
       /// <param name="value">The array value to be encoded</param>
-      void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values);
+      void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values);
 
    }
 }

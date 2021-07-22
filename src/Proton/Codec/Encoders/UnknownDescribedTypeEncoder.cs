@@ -36,12 +36,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          state.Encoder.WriteObject(buffer, state, theType.Described);
       }
 
-      public void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] value)
+      public void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
       {
          throw new NotImplementedException("Unable to write unknown types as arrays");
       }
 
-      public void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          throw new NotImplementedException("Unable to write unknown types as arrays");
       }

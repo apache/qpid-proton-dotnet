@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteBytes(guid.ToByteArray());
       }
 
-      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + ((sizeof(ulong) + sizeof(ulong) * values.Length)));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Uuid));

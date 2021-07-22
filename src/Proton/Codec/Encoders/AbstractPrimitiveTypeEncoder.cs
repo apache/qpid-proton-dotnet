@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       #region Abstract API that cannot be generically implemented here
 
-      public abstract void WriteRawArray(IProtonBuffer buffer, IEncoderState state, object[] values);
+      public abstract void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values);
 
       public abstract void WriteType(IProtonBuffer buffer, IEncoderState state, object value);
 
@@ -34,12 +34,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public bool IsArrayType => false;
 
-      public virtual void WriteArray(IProtonBuffer buffer, IEncoderState state, object[] values)
+      public virtual void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          WriteAsArray32(buffer, state, values);
       }
 
-      protected void WriteAsArray8(IProtonBuffer buffer, IEncoderState state, object[] values)
+      protected void WriteAsArray8(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          // Reserve the capacity for the Array preamble
          buffer.EnsureWritable(sizeof(byte) * 3);
@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          buffer.SetUnsignedByte(startIndex, (byte)writeSize);
       }
 
-      protected void WriteAsArray32(IProtonBuffer buffer, IEncoderState state, object[] values)
+      protected void WriteAsArray32(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          // Reserve the capacity for the Array preamble
          buffer.EnsureWritable(sizeof(byte) + sizeof(uint) + sizeof(uint));
