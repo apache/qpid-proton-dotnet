@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Buffer
       public override int ReadByte()
       {
          CheckClosed();
-         if (buffer.Readable)
+         if (buffer.IsReadable)
          {
             return buffer.ReadUnsignedByte();
          }

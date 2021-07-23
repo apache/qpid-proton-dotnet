@@ -39,12 +39,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         buffer.SkipBytes(sizeof(byte));
+         buffer.SkipBytes(sizeof(sbyte));
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         ProtonStreamReadUtils.SkipBytes(stream, sizeof(byte));
+         ProtonStreamReadUtils.SkipBytes(stream, sizeof(sbyte));
       }
    }
 }

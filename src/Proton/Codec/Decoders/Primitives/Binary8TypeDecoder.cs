@@ -26,12 +26,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override int ReadSize(IProtonBuffer buffer, IDecoderState state)
       {
-         return buffer.ReadUnsignedByte() & 0xFF;
+         return buffer.ReadUnsignedByte();
       }
 
       public override int ReadSize(Stream stream, IStreamDecoderState state)
       {
-         return ProtonStreamReadUtils.ReadUnsignedByte(stream) & 0xFF;
+         return ProtonStreamReadUtils.ReadUnsignedByte(stream);
       }
    }
 }

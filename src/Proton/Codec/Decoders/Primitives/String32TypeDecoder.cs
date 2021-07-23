@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       protected override int ReadSize(Stream stream, IStreamDecoderState state)
       {
-         return ProtonStreamReadUtils.ReadInt(stream) & 0xFF;
+         return ProtonStreamReadUtils.ReadInt(stream);
       }
    }
 }

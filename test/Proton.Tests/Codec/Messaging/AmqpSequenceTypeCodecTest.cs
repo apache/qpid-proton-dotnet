@@ -89,13 +89,13 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          Assert.AreEqual(value.Value, decoded.Value);
       }
 
-      // TODO: [Test]
+      [Test]
       public void TestEncodeDecodeArrayOfAmqpSequence()
       {
          DoTestEncodeDecodeArrayOfAmqpSequence(false);
       }
 
-      // TODO: [Test]
+      [Test]
       public void TestEncodeDecodeArrayOfAmqpSequenceFromStream()
       {
          DoTestEncodeDecodeArrayOfAmqpSequence(true);
@@ -340,13 +340,13 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          }
       }
 
-      // TODO: [Test]
+      [Test]
       public void TestEncodeDecodeArray()
       {
          DoTestEncodeDecodeArray(false);
       }
 
-      // TODO: [Test]
+      [Test]
       public void TestEncodeDecodeArrayFromStream()
       {
          DoTestEncodeDecodeArray(true);

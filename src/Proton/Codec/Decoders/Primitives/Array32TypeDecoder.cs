@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
 
@@ -27,22 +26,22 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       protected override int ReadCount(IProtonBuffer buffer, IDecoderState state)
       {
-         return buffer.ReadByte() & 0xFF;
+         return buffer.ReadInt();
       }
 
       protected override int ReadCount(Stream stream, IStreamDecoderState state)
       {
-         return ProtonStreamReadUtils.ReadByte(stream) & 0xFF;
+         return ProtonStreamReadUtils.ReadInt(stream);
       }
 
       protected override int ReadSize(IProtonBuffer buffer, IDecoderState state)
       {
-         return buffer.ReadByte() & 0xFF;
+         return buffer.ReadInt();
       }
 
       protected override int ReadSize(Stream stream, IStreamDecoderState state)
       {
-         return ProtonStreamReadUtils.ReadByte(stream) & 0xFF;
+         return ProtonStreamReadUtils.ReadInt(stream);
       }
    }
 }

@@ -110,11 +110,11 @@ namespace Apache.Qpid.Proton.Buffer
 
       public long Capacity => array.Length;
 
-      public bool Readable => ReadOffset < WriteOffset;
+      public bool IsReadable => ReadOffset < WriteOffset;
 
       public long ReadableBytes => WriteOffset - ReadOffset;
 
-      public bool Writable => WriteOffset < Capacity;
+      public bool IsWritable => WriteOffset < Capacity;
 
       public long WritableBytes => Capacity - WriteOffset;
 
@@ -140,9 +140,9 @@ namespace Apache.Qpid.Proton.Buffer
 
       public uint ComponentCount => 1;
 
-      public uint ReadableComponentCount => Readable ? 1u : 0u;
+      public uint ReadableComponentCount => IsReadable ? 1u : 0u;
 
-      public uint WritableComponentCount => Writable ? 1u : 0u;
+      public uint WritableComponentCount => IsWritable ? 1u : 0u;
 
       public IProtonBuffer EnsureWritable(long amount)
       {
@@ -765,7 +765,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public string ToString(Encoding encoding)
       {
-         if (!Readable)
+         if (!IsReadable)
          {
             return "";
          }

@@ -324,9 +324,9 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public ITypeEncoder LookupTypeEncoder(Type typeClass)
       {
-         ITypeEncoder encoder = typeEncoders[typeClass];
+         ITypeEncoder encoder = null;
 
-         if (encoder == null)
+         if (!typeEncoders.TryGetValue(typeClass, out encoder))
          {
             encoder = DeduceTypeEncoder(typeClass, null);
          }
@@ -336,7 +336,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       private ITypeEncoder DeduceTypeEncoder(Type typeClass, Object instance)
       {
-         ITypeEncoder encoder = typeEncoders[typeClass];
+         ITypeEncoder encoder = null;
 
          if (typeClass.IsArray)
          {

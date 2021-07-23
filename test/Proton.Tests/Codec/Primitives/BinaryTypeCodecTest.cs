@@ -421,13 +421,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.AreEqual(2, buffer.ReadOffset);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestZeroSizedArrayOfBinaryObjects()
       {
          TestZeroSizedArrayOfBinaryObjects(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestZeroSizedArrayOfBinaryObjectsFromStream()
       {
          TestZeroSizedArrayOfBinaryObjects(true);

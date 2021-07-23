@@ -240,10 +240,10 @@ namespace Apache.Qpid.Proton.Buffer
       public void TestIsReadable()
       {
          IProtonBuffer buffer = AllocateDefaultBuffer();
-         Assert.IsFalse(buffer.Readable);
-         Assert.IsTrue(buffer.Writable);
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.IsTrue(buffer.IsWritable);
          buffer.WriteBoolean(false);
-         Assert.IsTrue(buffer.Readable);
+         Assert.IsTrue(buffer.IsReadable);
       }
 
       [Test]
@@ -259,16 +259,16 @@ namespace Apache.Qpid.Proton.Buffer
       public void TestIsWriteable()
       {
          IProtonBuffer buffer = AllocateDefaultBuffer();
-         Assert.IsTrue(buffer.Writable);
+         Assert.IsTrue(buffer.IsWritable);
          buffer.WriteOffset = buffer.Capacity;
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsWritable);
       }
 
       [Test]
       public void TestIsWriteableWithAmount()
       {
          IProtonBuffer buffer = AllocateDefaultBuffer();
-         Assert.IsTrue(buffer.Writable);
+         Assert.IsTrue(buffer.IsWritable);
          buffer.WriteOffset = buffer.Capacity - 1;
          Assert.IsTrue(buffer.WritableBytes == 1);
       }
@@ -1910,13 +1910,13 @@ namespace Apache.Qpid.Proton.Buffer
          {
             sbyte value = (sbyte)random.Next();
             Assert.AreEqual(i, buffer.WriteOffset);
-            Assert.IsTrue(buffer.Writable);
+            Assert.IsTrue(buffer.IsWritable);
             buffer.WriteByte(value);
          }
 
          Assert.AreEqual(0, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsWritable);
 
          random = new Random(seed);
 
@@ -1924,14 +1924,14 @@ namespace Apache.Qpid.Proton.Buffer
          {
             sbyte value = (sbyte)random.Next();
             Assert.AreEqual(i, buffer.ReadOffset);
-            Assert.IsTrue(buffer.Readable);
+            Assert.IsTrue(buffer.IsReadable);
             Assert.AreEqual(value, buffer.ReadByte());
          }
 
          Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Readable);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.IsFalse(buffer.IsWritable);
       }
 
       [Test]
@@ -1944,13 +1944,13 @@ namespace Apache.Qpid.Proton.Buffer
          {
             short value = (short)random.Next();
             Assert.AreEqual(i, buffer.WriteOffset);
-            Assert.IsTrue(buffer.Writable);
+            Assert.IsTrue(buffer.IsWritable);
             buffer.WriteShort(value);
          }
 
          Assert.AreEqual(0, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsWritable);
 
          random = new Random(seed);
 
@@ -1958,14 +1958,14 @@ namespace Apache.Qpid.Proton.Buffer
          {
             short value = (short)random.Next();
             Assert.AreEqual(i, buffer.ReadOffset);
-            Assert.IsTrue(buffer.Readable);
+            Assert.IsTrue(buffer.IsReadable);
             Assert.AreEqual(value, buffer.ReadShort());
          }
 
          Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Readable);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.IsFalse(buffer.IsWritable);
       }
 
       [Test]
@@ -1978,13 +1978,13 @@ namespace Apache.Qpid.Proton.Buffer
          {
             int value = random.Next();
             Assert.AreEqual(i, buffer.WriteOffset);
-            Assert.IsTrue(buffer.Writable);
+            Assert.IsTrue(buffer.IsWritable);
             buffer.WriteInt(value);
          }
 
          Assert.AreEqual(0, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsWritable);
 
          random = new Random(seed);
 
@@ -1992,14 +1992,14 @@ namespace Apache.Qpid.Proton.Buffer
          {
             int value = random.Next();
             Assert.AreEqual(i, buffer.ReadOffset);
-            Assert.IsTrue(buffer.Readable);
+            Assert.IsTrue(buffer.IsReadable);
             Assert.AreEqual(value, buffer.ReadInt());
          }
 
          Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Readable);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.IsFalse(buffer.IsWritable);
       }
 
       [Test]
@@ -2012,13 +2012,13 @@ namespace Apache.Qpid.Proton.Buffer
          {
             long value = BitConverter.DoubleToInt64Bits(random.NextDouble());
             Assert.AreEqual(i, buffer.WriteOffset);
-            Assert.IsTrue(buffer.Writable);
+            Assert.IsTrue(buffer.IsWritable);
             buffer.WriteLong(value);
          }
 
          Assert.AreEqual(0, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsWritable);
 
          random = new Random(seed);
 
@@ -2026,14 +2026,14 @@ namespace Apache.Qpid.Proton.Buffer
          {
             long value = BitConverter.DoubleToInt64Bits(random.NextDouble());
             Assert.AreEqual(i, buffer.ReadOffset);
-            Assert.IsTrue(buffer.Readable);
+            Assert.IsTrue(buffer.IsReadable);
             Assert.AreEqual(value, buffer.ReadLong());
          }
 
          Assert.AreEqual(buffer.Capacity, buffer.ReadOffset);
          Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
-         Assert.IsFalse(buffer.Readable);
-         Assert.IsFalse(buffer.Writable);
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.IsFalse(buffer.IsWritable);
       }
 
       [Test]

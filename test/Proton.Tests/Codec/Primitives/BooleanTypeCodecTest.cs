@@ -190,49 +190,49 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          }
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanTrueArray32()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array32, EncodingCodes.BooleanTrue, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanTrueArray32FromStream()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array32, EncodingCodes.BooleanTrue, true);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanFalseArray32()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array32, EncodingCodes.BooleanFalse, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanFalseArray32FromStream()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array32, EncodingCodes.BooleanFalse, true);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanTrueArray8()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array8, EncodingCodes.BooleanTrue, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanTrueArray8FromStream()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array8, EncodingCodes.BooleanTrue, true);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanFalseArray8()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array8, EncodingCodes.BooleanFalse, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeBooleanFalseArray8FromStream()
       {
          TestDecodeBooleanEncodedBytesWithTypeDecoder(EncodingCodes.Array8, EncodingCodes.BooleanFalse, true);

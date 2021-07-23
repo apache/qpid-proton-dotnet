@@ -283,13 +283,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          }
       }
 
-      // TODO [Test]
+      [Test]
       public void TestZeroSizedArrayOfObjects()
       {
          TestZeroSizedArrayOfObjects(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestZeroSizedArrayOfObjectsFS()
       {
          TestZeroSizedArrayOfObjects(true);

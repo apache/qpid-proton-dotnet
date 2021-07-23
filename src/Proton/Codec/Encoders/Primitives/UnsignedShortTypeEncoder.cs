@@ -32,6 +32,23 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteUnsignedShort((ushort)value);
       }
 
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
+      {
+         if (values.GetType().GetElementType() != typeof(ushort))
+         {
+            throw new EncodeException("Unsigned Short encoder given array of incorrect type:" + values.GetType());
+         }
+
+         if (values.Length < 127)
+         {
+            WriteAsArray8(buffer, state, values);
+         }
+         else
+         {
+            WriteAsArray32(buffer, state, values);
+         }
+      }
+
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(ushort) * values.Length));

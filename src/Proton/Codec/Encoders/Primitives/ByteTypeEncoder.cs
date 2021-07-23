@@ -34,6 +34,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
+         if (values.GetType().GetElementType() != typeof(sbyte))
+         {
+            throw new EncodeException("Signed Byte encoder given array of incorrect type:" + values.GetType());
+         }
+
          if (values.Length < 254)
          {
             WriteAsArray8(buffer, state, values);
@@ -46,7 +51,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
-         buffer.EnsureWritable(sizeof(byte) + (sizeof(byte) * values.Length));
+         buffer.EnsureWritable(sizeof(byte) + values.Length);
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Byte));
          foreach (sbyte value in values)
          {

@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public override bool CanSeek => false;
 
-      public override bool CanWrite => buffer.Writable;
+      public override bool CanWrite => buffer.IsWritable;
 
       public override long Length => buffer.WritableBytes;
 

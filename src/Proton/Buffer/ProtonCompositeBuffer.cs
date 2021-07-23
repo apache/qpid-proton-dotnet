@@ -29,11 +29,11 @@ namespace Apache.Qpid.Proton.Buffer
    {
       public long Capacity => throw new NotImplementedException();
 
-      public bool Readable => throw new NotImplementedException();
+      public bool IsReadable => throw new NotImplementedException();
 
       public long ReadableBytes => throw new NotImplementedException();
 
-      public bool Writable => throw new NotImplementedException();
+      public bool IsWritable => throw new NotImplementedException();
 
       public long WritableBytes => throw new NotImplementedException();
 

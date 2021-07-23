@@ -46,7 +46,24 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
                 size, buffer.ReadableBytes));
          }
 
-         throw new NotImplementedException();
+         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+
+         if (decoder is IPrimitiveArrayTypeDecoder)
+         {
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)decoder;
+
+            object[] array = new object[count];
+            for (int i = 0; i < count; i++)
+            {
+               array[i] = arrayDecoder.ReadValue(buffer, state);
+            }
+
+            return array;
+         }
+         else
+         {
+            return decoder.ReadArrayElements(buffer, state, count);
+         }
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
@@ -54,7 +71,24 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          int size = ReadSize(stream, state);
          int count = ReadCount(stream, state);
 
-         throw new NotImplementedException();
+         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
+
+         if (decoder is IPrimitiveArrayTypeDecoder)
+         {
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)decoder;
+
+            object[] array = new object[count];
+            for (int i = 0; i < count; i++)
+            {
+               array[i] = arrayDecoder.ReadValue(stream, state);
+            }
+
+            return array;
+         }
+         else
+         {
+            return decoder.ReadArrayElements(stream, state, count);
+         }
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

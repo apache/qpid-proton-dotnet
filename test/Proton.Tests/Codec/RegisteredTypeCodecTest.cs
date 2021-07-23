@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec
          DoTestEncodeDecodeRegisteredType(false);
       }
 
-      // TODO: [Test]
+      [Test]
       public void TestEncodeDecodeRegisteredTypeFromStream()
       {
          DoTestEncodeDecodeRegisteredType(true);

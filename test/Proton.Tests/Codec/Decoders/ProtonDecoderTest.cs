@@ -136,7 +136,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          catch (InvalidCastException) { }
       }
 
-      // TODO: Implement array codec [Test]
+      [Test]
       public void TestReadMultipleRequestsWrongTypeForArrayEncoding()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -255,7 +255,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          String result = decoder.ReadString(buffer, decoderState);
 
          Assert.AreEqual("string-decoder", result);
-         Assert.IsFalse(buffer.Readable);
+         Assert.IsFalse(buffer.IsReadable);
       }
 
       [Test]

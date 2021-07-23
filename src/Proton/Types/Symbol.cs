@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Types
          {
             return null;
          }
-         else if (!value.Readable)
+         else if (!value.IsReadable)
          {
             return EMPTY_SYMBOL;
          }
@@ -172,7 +172,7 @@ namespace Apache.Qpid.Proton.Types
 
       public override string ToString()
       {
-         if (symbolString == null && underlying.Readable)
+         if (symbolString == null && underlying.IsReadable)
          {
             symbolString = underlying.ToString(Encoding.ASCII);
             if (symbolString.Length <= MAX_CACHED_SYMBOL_SIZE)

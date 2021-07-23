@@ -181,10 +181,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// <exception cref="DecodeException">If the value cannot be read from the stream</exception>
       public static int ReadInt(Stream stream)
       {
-         return (int)((ReadUnsignedByte(stream) & 0xFF) << 24 |
-                      (ReadUnsignedByte(stream) & 0xFF) << 16 |
-                      (ReadUnsignedByte(stream) & 0xFF) << 8 |
-                      (ReadUnsignedByte(stream) & 0xFF) << 0);
+         return (int)(ReadUnsignedByte(stream) & 0xFF) << 24 |
+                (int)(ReadUnsignedByte(stream) & 0xFF) << 16 |
+                (int)(ReadUnsignedByte(stream) & 0xFF) << 8 |
+                (int)(ReadUnsignedByte(stream) & 0xFF) << 0;
       }
 
       /// <summary>
@@ -196,10 +196,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// <exception cref="DecodeException">If the value cannot be read from the stream</exception>
       public static uint ReadUnsignedInt(Stream stream)
       {
-         return (uint)((ReadUnsignedByte(stream) & 0xFF) << 24 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 16 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 8 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 0);
+         return (uint)(ReadUnsignedByte(stream) & 0xFF) << 24 |
+                (uint)(ReadUnsignedByte(stream) & 0xFF) << 16 |
+                (uint)(ReadUnsignedByte(stream) & 0xFF) << 8 |
+                (uint)(ReadUnsignedByte(stream) & 0xFF) << 0;
       }
 
       /// <summary>
@@ -211,14 +211,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// <exception cref="DecodeException">If the value cannot be read from the stream</exception>
       public static long ReadLong(Stream stream)
       {
-         return (long)((ReadUnsignedByte(stream) & 0xFF) << 56 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 48 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 40 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 32 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 24 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 16 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 8 |
-                       (ReadUnsignedByte(stream) & 0xFF) << 0);
+         return (long)(ReadUnsignedByte(stream) & 0xFF) << 56 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 48 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 40 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 32 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 24 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 16 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 8 |
+                (long)(ReadUnsignedByte(stream) & 0xFF) << 0;
       }
 
       /// <summary>
@@ -230,14 +230,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// <exception cref="DecodeException">If the value cannot be read from the stream</exception>
       public static ulong ReadUnsignedLong(Stream stream)
       {
-         return (ulong)((ReadUnsignedByte(stream) & 0xFF) << 56 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 48 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 40 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 32 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 24 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 16 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 8 |
-                        (ReadUnsignedByte(stream) & 0xFF) << 0);
+         return (ulong)(ReadUnsignedByte(stream) & 0xFF) << 56 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 48 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 40 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 32 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 24 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 16 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 8 |
+                (ulong)(ReadUnsignedByte(stream) & 0xFF) << 0;
       }
 
       /// <summary>

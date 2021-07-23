@@ -48,6 +48,23 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          }
       }
 
+      public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
+      {
+         if (values.GetType().GetElementType() != typeof(uint))
+         {
+            throw new EncodeException("Unsigned Integer encoder given array of incorrect type:" + values.GetType());
+         }
+
+         if (values.Length < 64)
+         {
+            WriteAsArray8(buffer, state, values);
+         }
+         else
+         {
+            WriteAsArray32(buffer, state, values);
+         }
+      }
+
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(uint) * values.Length));

@@ -28,13 +28,13 @@ namespace Apache.Qpid.Proton.Codec
    [TestFixture]
    public class UnknownDescribedTypeCodecTest : CodecTestSupport
    {
-      // TODO [Test]
+      [Test]
       public void TestDecodeUnknownDescribedType()
       {
          DoTestDecodeUnknownDescribedType(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeUnknownDescribedTypeFromStream()
       {
          DoTestDecodeUnknownDescribedType(true);
