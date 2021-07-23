@@ -34,6 +34,7 @@ namespace Apache.Qpid.Proton.Codec.Utilities
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
       {
          // Write the Array Type encoding code, we don't optimize here.
+         buffer.EnsureWritable(sizeof(long) + sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
 
          long startIndex = buffer.WriteOffset;
@@ -58,7 +59,9 @@ namespace Apache.Qpid.Proton.Codec.Utilities
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
+
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
 
          Object[] elements = new Object[values.Length];
@@ -75,7 +78,9 @@ namespace Apache.Qpid.Proton.Codec.Utilities
 
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
+
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
          state.Encoder.WriteString(buffer, state, (string)(((NoLocalType)value).Described));
       }

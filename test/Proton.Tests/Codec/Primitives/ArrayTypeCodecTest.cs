@@ -284,13 +284,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.AreEqual(lists, decoded);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestEncodeAndDecodeArrayOfMapsUsingReadMultiple()
       {
          TestEncodeAndDecodeArrayOfMapsUsingReadMultiple(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestEncodeAndDecodeArrayOfMapsUsingReadMultipleFromStream()
       {
          TestEncodeAndDecodeArrayOfMapsUsingReadMultiple(true);

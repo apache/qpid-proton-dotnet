@@ -232,13 +232,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.AreEqual(expected, value);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfSignedBytes()
       {
          TestArrayOfSignedBytes(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfSignedBytesFS()
       {
          TestArrayOfSignedBytes(true);
@@ -273,8 +273,9 @@ namespace Apache.Qpid.Proton.Codec.Primitives
 
          Assert.IsNotNull(result);
          Assert.IsTrue(result.GetType().IsArray);
+         Assert.AreEqual(typeof(sbyte), result.GetType().GetElementType());
 
-         byte[] array = (byte[])result;
+         sbyte[] array = (sbyte[])result;
          Assert.AreEqual(size, array.Length);
 
          for (int i = 0; i < size; ++i)

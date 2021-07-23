@@ -720,7 +720,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
          else if (val.GetType().IsArray)
          {
-            if (typeof(T).IsAssignableFrom(val.GetType()))
+            if (typeof(T).IsAssignableFrom(val.GetType().GetElementType()))
             {
                return (T[])val;
             }

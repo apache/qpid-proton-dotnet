@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          // Reserve space for the size and write the element count
          buffer.EnsureWritable(sizeof(int) + sizeof(int));
          buffer.WriteInt(0);
-         buffer.WriteInt(value.Count);
+         buffer.WriteInt(value.Count * 2); // Map encoding count includes both key and value
 
          // Write the list elements and then compute total size written.
          foreach (DictionaryEntry entry in value)

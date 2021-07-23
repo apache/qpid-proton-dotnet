@@ -622,13 +622,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          }
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfBooleanObjects()
       {
          TestArrayOfBooleanObjects(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfBooleanObjectsFS()
       {
          TestArrayOfBooleanObjects(true);
@@ -661,6 +661,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
 
          Assert.IsNotNull(result);
          Assert.IsTrue(result.GetType().IsArray);
+         Assert.AreEqual(typeof(bool), result.GetType().GetElementType());
 
          bool[] array = (bool[])result;
          Assert.AreEqual(size, array.Length);
@@ -671,13 +672,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          }
       }
 
-      // TODO [Test]
+      [Test]
       public void TestZeroSizedArrayOfBooleanObjects()
       {
          TestZeroSizedArrayOfBooleanObjects(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestZeroSizedArrayOfBooleanObjectsFS()
       {
          TestZeroSizedArrayOfBooleanObjects(true);
@@ -709,25 +710,25 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.AreEqual(source.Length, array.Length);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeSmallBooleanArray()
       {
          DoTestDecodeBooleanArrayType(SmallArraySize, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeLargeBooleanArray()
       {
          DoTestDecodeBooleanArrayType(LargeArraySize, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeSmallBooleanArrayFS()
       {
          DoTestDecodeBooleanArrayType(SmallArraySize, true);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeLargeBooleanArrayFS()
       {
          DoTestDecodeBooleanArrayType(LargeArraySize, true);
@@ -766,93 +767,6 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          {
             Assert.AreEqual(source[i], array[i]);
          }
-      }
-
-      //TODO [Test]
-      public void TestArrayOfPrimitiveBooleanObjects()
-      {
-         TestArrayOfPrimitiveBooleanObjects(false);
-      }
-
-      //TODO [Test]
-      public void TestArrayOfPrimitiveBooleanObjectsFS()
-      {
-         TestArrayOfPrimitiveBooleanObjects(true);
-      }
-
-      private void TestArrayOfPrimitiveBooleanObjects(bool fromStream)
-      {
-         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
-         Stream stream = new ProtonBufferInputStream(buffer);
-
-         const int size = 10;
-
-         bool[] source = new bool[size];
-         for (int i = 0; i < size; ++i)
-         {
-            source[i] = i % 2 == 0;
-         }
-
-         encoder.WriteArray(buffer, encoderState, source);
-
-         object result;
-         if (fromStream)
-         {
-            result = streamDecoder.ReadObject(stream, streamDecoderState);
-         }
-         else
-         {
-            result = decoder.ReadObject(buffer, decoderState);
-         }
-
-         Assert.IsNotNull(result);
-         Assert.IsTrue(result.GetType().IsArray);
-
-         bool[] array = (bool[])result;
-         Assert.AreEqual(size, array.Length);
-
-         for (int i = 0; i < size; ++i)
-         {
-            Assert.AreEqual(source[i], array[i]);
-         }
-      }
-
-      // TODO [Test]
-      public void TestZeroSizedArrayOfPrimitiveBooleanObjects()
-      {
-         TestZeroSizedArrayOfPrimitiveBooleanObjects(false);
-      }
-
-      // TODO [Test]
-      public void TestZeroSizedArrayOfPrimitiveBooleanObjectsFS()
-      {
-         TestZeroSizedArrayOfPrimitiveBooleanObjects(true);
-      }
-
-      private void TestZeroSizedArrayOfPrimitiveBooleanObjects(bool fromStream)
-      {
-         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
-         Stream stream = new ProtonBufferInputStream(buffer);
-
-         bool[] source = new bool[0];
-
-         encoder.WriteArray(buffer, encoderState, source);
-
-         object result;
-         if (fromStream)
-         {
-            result = streamDecoder.ReadObject(stream, streamDecoderState);
-         }
-         else
-         {
-            result = decoder.ReadObject(buffer, decoderState);
-         }
-
-         Assert.IsNotNull(result);
-         Assert.IsTrue(result.GetType().IsArray);
-
-         bool[] array = (bool[])result;
-         Assert.AreEqual(source.Length, array.Length);
       }
 
       // TODO [Test]
