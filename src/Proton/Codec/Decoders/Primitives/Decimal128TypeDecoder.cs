@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 {
    public sealed class Decimal128TypeDecoder : AbstractPrimitiveTypeDecoder
    {
-      public override EncodingCodes EncodingCode => EncodingCodes.Decimal64;
+      public override EncodingCodes EncodingCode => EncodingCodes.Decimal128;
 
       public override Type DecodesType => typeof(Decimal128);
 
@@ -35,6 +35,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
+
          return new Decimal128(ProtonStreamReadUtils.ReadUnsignedLong(stream), ProtonStreamReadUtils.ReadUnsignedLong(stream));
       }
 

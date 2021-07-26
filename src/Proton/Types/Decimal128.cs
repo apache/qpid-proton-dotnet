@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Types
       private ulong lsb;
       private ulong msb;
 
-      public Decimal128(ulong lsb, ulong msb)
+      public Decimal128(ulong msb, ulong lsb)
       {
          this.lsb = lsb;
          this.msb = msb;
