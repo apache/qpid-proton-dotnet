@@ -459,13 +459,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.AreEqual(source.Length, array.Length);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfBinaryObjects()
       {
          TestArrayOfBinaryObjects(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfBinaryObjectsFromStream()
       {
          TestArrayOfBinaryObjects(true);

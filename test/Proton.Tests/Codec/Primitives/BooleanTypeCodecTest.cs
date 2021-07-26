@@ -769,13 +769,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          }
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfArraysOfPrimitiveBooleanObjects()
       {
          TestArrayOfArraysOfPrimitiveBooleanObjects(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestArrayOfArraysOfPrimitiveBooleanObjectsFS()
       {
          TestArrayOfArraysOfPrimitiveBooleanObjects(true);
@@ -814,7 +814,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.IsNotNull(result);
          Assert.IsTrue(result.GetType().IsArray);
 
-         bool[][] resultArray = (bool[][])result;
+         object[] resultArray = (object[])result;
 
          Assert.IsNotNull(resultArray);
          Assert.AreEqual(2, resultArray.Length);
@@ -822,10 +822,10 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.IsTrue(resultArray.GetValue(0).GetType().IsArray);
          Assert.IsTrue(resultArray.GetValue(1).GetType().IsArray);
 
-         for (int i = 0; i < resultArray.Length; ++i)
+         for (int i = 0; i < size; ++i)
          {
-            bool[] nested = (bool[])resultArray.GetValue(i);
-            Assert.AreEqual(source[i][0], nested);
+            Assert.AreEqual(source[0][i], ((bool[])resultArray[0])[i]);
+            Assert.AreEqual(source[1][i], ((bool[])resultArray[1])[i]);
          }
       }
 

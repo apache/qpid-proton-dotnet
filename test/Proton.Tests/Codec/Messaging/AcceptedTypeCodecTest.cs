@@ -368,13 +368,13 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          Assert.IsFalse(modified.DeliveryFailed);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestEncodeDecodeArray()
       {
          TestEncodeDecodeArray(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestEncodeDecodeArrayFromStream()
       {
          TestEncodeDecodeArray(true);

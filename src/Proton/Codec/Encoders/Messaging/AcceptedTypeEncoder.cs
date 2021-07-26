@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 {
    public sealed class AcceptedTypeEncoder : AbstractDescribedListTypeEncoder<Accepted>
    {
-      private static readonly int EncodingSize = 4;
+      private static readonly int EncodingSize = sizeof(uint);
 
       public override Symbol DescriptorSymbol => Accepted.DescriptorSymbol;
 
