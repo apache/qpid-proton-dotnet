@@ -63,7 +63,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       private static void WriteSmallString(IProtonBuffer buffer, IEncoderState state, string value)
       {
-         buffer.EnsureWritable(sizeof(byte) + sizeof(byte));
+         buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + value.Length);
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Str8));
          buffer.WriteByte(0);
 
@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       private static void WriteString(IProtonBuffer buffer, IEncoderState state, string value)
       {
-         buffer.EnsureWritable(sizeof(byte) + sizeof(int));
+         buffer.EnsureWritable(sizeof(byte) + sizeof(int) + value.Length);
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
          buffer.WriteInt(0);
 

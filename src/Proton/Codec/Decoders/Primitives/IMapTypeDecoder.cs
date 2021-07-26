@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
 
@@ -25,6 +26,32 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public interface IMapTypeDecoder : IPrimitiveTypeDecoder
    {
+      /// <summary>
+      /// Attempts to read and decode an AMQP Map from the given incoming byte
+      /// buffer. The decoder applies type restrictions to the incoming Map
+      /// based on the types given in the methods generic parameters. The resulting
+      /// IDictionary is created using the type parameters provided to this method.
+      /// </summary>
+      /// <typeparam name="K">The type restriction for the keys of the Map</typeparam>
+      /// <typeparam name="V">The type restriction for the values of the Map</typeparam>
+      /// <param name="buffer">The buffer where the Map should be read from</param>
+      /// <param name="state">The decoder state that provides support</param>
+      /// <returns>An IDictionary that was created using the type parameters</returns>
+      IDictionary<K, V> ReadMap<K, V>(IProtonBuffer buffer, IDecoderState state);
+
+      /// <summary>
+      /// Attempts to read and decode an AMQP Map from the given incoming byte
+      /// stream. The decoder applies type restrictions to the incoming Map
+      /// based on the types given in the methods generic parameters. The resulting
+      /// IDictionary is created using the type parameters provided to this method.
+      /// </summary>
+      /// <typeparam name="K">The type restriction for the keys of the Map</typeparam>
+      /// <typeparam name="V">The type restriction for the values of the Map</typeparam>
+      /// <param name="stream">The stream where the Map should be read from</param>
+      /// <param name="state">The decoder state that provides support</param>
+      /// <returns>An IDictionary that was created using the type parameters</returns>
+      IDictionary<K, V> ReadMap<K, V>(Stream stream, IStreamDecoderState state);
+
       /// <summary>
       /// Reads the encoded size value for the encoded map payload and returns it. The
       /// read is destructive and the type decoder read methods cannot be called after this

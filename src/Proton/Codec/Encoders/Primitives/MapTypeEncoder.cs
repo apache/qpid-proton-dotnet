@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          long startIndex = buffer.WriteOffset;
 
          // Reserve space for the size and write the element count
-         buffer.EnsureWritable(sizeof(int) + sizeof(int));
+         buffer.EnsureWritable(sizeof(long));
          buffer.WriteInt(0);
          buffer.WriteInt(value.Count * 2); // Map encoding count includes both key and value
 

@@ -650,9 +650,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          switch (encodingCode)
          {
             case EncodingCodes.Map8:
-               return (IDictionary<K, V>)map8Decoder.ReadValue(buffer, state);
+               return map8Decoder.ReadMap<K, V>(buffer, state);
             case EncodingCodes.Map32:
-               return (IDictionary<K, V>)map32Decoder.ReadValue(buffer, state);
+               return map32Decoder.ReadMap<K, V>(buffer, state);
             case EncodingCodes.Null:
                return null;
             default:

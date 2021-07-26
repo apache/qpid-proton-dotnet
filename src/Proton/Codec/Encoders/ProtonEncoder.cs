@@ -352,6 +352,10 @@ namespace Apache.Qpid.Proton.Codec.Encoders
             {
                encoder = mapEncoder;
             }
+            else if (typeClass.IsAssignableTo(typeof(IProtonBuffer)))
+            {
+               encoder = binaryEncoder;
+            }
             else if (typeClass.IsAssignableTo(typeof(IDescribedType)))
             {
                // For instances of a specific DescribedType that we don't know about the

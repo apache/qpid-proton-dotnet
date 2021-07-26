@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override Type DecodesType => typeof(IDictionary);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      public IDictionary<K, V> ReadMap<K, V>(IProtonBuffer buffer, IDecoderState state)
       {
          int size = ReadSize(buffer, state);
 
@@ -52,11 +52,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          }
 
          // Count include both key and value so we must include that in the loop
-         IDictionary<object, object> map = new Dictionary<object, object>(count);
+         IDictionary<K, V> map = new Dictionary<K, V>(count);
          for (int i = 0; i < count / 2; i++)
          {
-            object key = state.Decoder.ReadObject(buffer, state);
-            object value = state.Decoder.ReadObject(buffer, state);
+            K key = state.Decoder.ReadObject<K>(buffer, state);
+            V value = state.Decoder.ReadObject<V>(buffer, state);
 
             map.Add(key, value);
          }
@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          return map;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      public IDictionary<K, V> ReadMap<K, V>(Stream stream, IStreamDecoderState state)
       {
          ReadSize(stream, state);
          int count = ReadCount(stream, state);
@@ -76,16 +76,26 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          }
 
          // Count include both key and value so we must include that in the loop
-         IDictionary<object, object> map = new Dictionary<object, object>(count);
+         IDictionary<K, V> map = new Dictionary<K, V>(count);
          for (int i = 0; i < count / 2; i++)
          {
-            object key = state.Decoder.ReadObject(stream, state);
-            object value = state.Decoder.ReadObject(stream, state);
+            K key = state.Decoder.ReadObject<K>(stream, state);
+            V value = state.Decoder.ReadObject<V>(stream, state);
 
             map.Add(key, value);
          }
 
          return map;
+      }
+
+      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      {
+         return ReadMap<object, object>(buffer, state);
+      }
+
+      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      {
+         return ReadMap<object, object>(stream, state);
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

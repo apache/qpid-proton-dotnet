@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Codec
    /// the end of available input before fully decoding the value it is currently
    /// working with.
    /// </summary>
-   public class DecodeEOFException : Exception
+   public class DecodeEOFException : DecodeException
    {
       /// <summary>
       /// Creates a default DecodeEOFException.

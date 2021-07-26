@@ -42,7 +42,16 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
             buffer.WriteUnsignedByte((byte)binary.ReadableBytes);
          }
 
-         buffer.WriteBytes(binary);
+         long readOffset = binary.ReadOffset;
+
+         try
+         {
+            buffer.WriteBytes(binary);
+         }
+         finally
+         {
+            binary.ReadOffset = readOffset;
+         }
       }
 
       public void WriteType(IProtonBuffer buffer, IEncoderState state, byte[] value)
