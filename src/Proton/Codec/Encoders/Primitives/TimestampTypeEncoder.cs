@@ -34,13 +34,27 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteLong(new DateTimeOffset(dateTime).ToUnixTimeMilliseconds());
       }
 
+      public void WriteType(IProtonBuffer buffer, IEncoderState state, long value)
+      {
+         buffer.EnsureWritable(sizeof(ulong) + sizeof(byte));
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Timestamp));
+         buffer.WriteLong(value);
+      }
+
+      public void WriteType(IProtonBuffer buffer, IEncoderState state, ulong value)
+      {
+         buffer.EnsureWritable(sizeof(ulong) + sizeof(byte));
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Timestamp));
+         buffer.WriteUnsignedLong(value);
+      }
+
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(ulong) * values.Length));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Timestamp));
-         foreach (long value in values)
+         foreach (DateTime value in values)
          {
-            buffer.WriteUnsignedLong((ulong)value);
+            buffer.WriteLong(new DateTimeOffset(value).ToUnixTimeMilliseconds());
          }
       }
    }

@@ -238,7 +238,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="state">A decoder state instance to use when decoding</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      int? ReadInt(IProtonBuffer buffer, IDecoderState state);
+      int? ReadInteger(IProtonBuffer buffer, IDecoderState state);
 
       /// <summary>
       /// Reads the encoded value from the given byte buffer and returns it or the default if the
@@ -251,7 +251,7 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="defaultValue">The default value to return for null encodings</param>
       /// <returns>The decoded object or null if the encoding was null.</returns>
       /// <exception cref="DecodeException">If an error occurs during the decode operation</exception>
-      int ReadInt(IProtonBuffer buffer, IDecoderState state, int defaultValue);
+      int ReadInteger(IProtonBuffer buffer, IDecoderState state, int defaultValue);
 
       /// <summary>
       /// Reads the encoded value from the given byte buffer and returns it.  If the next value in

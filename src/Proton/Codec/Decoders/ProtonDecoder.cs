@@ -353,7 +353,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public int? ReadInt(IProtonBuffer buffer, IDecoderState state)
+      public int? ReadInteger(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
@@ -370,7 +370,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public int ReadInt(IProtonBuffer buffer, IDecoderState state, int defaultValue)
+      public int ReadInteger(IProtonBuffer buffer, IDecoderState state, int defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 

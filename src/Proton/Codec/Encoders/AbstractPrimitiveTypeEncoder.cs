@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public abstract class AbstractPrimitiveTypeEncoder<T> : IPrimitiveTypeEncoder<T>
    {
-      public Type EncodesType => typeof(T);
+      public virtual Type EncodesType => typeof(T);
 
       #region Abstract API that cannot be generically implemented here
 

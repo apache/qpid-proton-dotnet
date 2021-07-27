@@ -25,6 +25,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    /// </summary>
    public sealed class NullTypeEncoder : AbstractPrimitiveTypeEncoder<object>
    {
+      public override Type EncodesType => typeof(void);
+
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte));
@@ -33,12 +35,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
-        throw new InvalidOperationException("Cannot write an array of nulls");
+         throw new InvalidOperationException("Cannot write an array of nulls");
       }
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
-        throw new InvalidOperationException("Cannot write an array of nulls");
+         throw new InvalidOperationException("Cannot write an array of nulls");
       }
    }
 }
