@@ -27,9 +27,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    {
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
+         DateTime dateTime = (DateTime)value;
+
          buffer.EnsureWritable(sizeof(ulong) + sizeof(byte));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Timestamp));
-         buffer.WriteUnsignedLong((ulong)value);
+         buffer.WriteLong(new DateTimeOffset(dateTime).ToUnixTimeMilliseconds());
       }
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)

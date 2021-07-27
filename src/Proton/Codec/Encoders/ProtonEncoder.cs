@@ -160,17 +160,38 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteDecimal32(IProtonBuffer buffer, IEncoderState state, Decimal32 value)
       {
-         decimal32Encoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            decimal32Encoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteDecimal64(IProtonBuffer buffer, IEncoderState state, Decimal64 value)
       {
-         decimal64Encoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            decimal64Encoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteDecimal128(IProtonBuffer buffer, IEncoderState state, Decimal128 value)
       {
-         decimal128Encoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            decimal128Encoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteCharacter(IProtonBuffer buffer, IEncoderState state, char value)
@@ -190,7 +211,14 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteGuid(IProtonBuffer buffer, IEncoderState state, Guid value)
       {
-         uuidEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            uuidEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, byte[] value)
@@ -200,57 +228,134 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, IProtonBuffer value)
       {
-         binaryEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            binaryEncoder.WriteType(buffer, state, value);
+         }
       }
 
-      public void WriteString(IProtonBuffer buffer, IEncoderState state, String value)
+      public void WriteString(IProtonBuffer buffer, IEncoderState state, string value)
       {
-         stringEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            stringEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteSymbol(IProtonBuffer buffer, IEncoderState state, Symbol value)
       {
-         symbolEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            symbolEncoder.WriteType(buffer, state, value);
+         }
       }
 
-      public void WriteSymbol(IProtonBuffer buffer, IEncoderState state, String value)
+      public void WriteSymbol(IProtonBuffer buffer, IEncoderState state, string value)
       {
-         symbolEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            symbolEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteList(IProtonBuffer buffer, IEncoderState state, IList value)
       {
-         listEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            listEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteList<T>(IProtonBuffer buffer, IEncoderState state, IList<T> value)
       {
-         listEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            listEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteMap(IProtonBuffer buffer, IEncoderState state, IDictionary value)
       {
-         mapEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            mapEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IDictionary<K, V> value)
       {
-         mapEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            mapEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteMap<K, V>(IProtonBuffer buffer, IEncoderState state, IReadOnlyDictionary<K, V> value)
       {
-         mapEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            mapEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteDescribedType(IProtonBuffer buffer, IEncoderState state, IDescribedType value)
       {
-         unknownTypeEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            unknownTypeEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteDeliveryTag(IProtonBuffer buffer, IEncoderState state, IDeliveryTag value)
       {
-         deliveryTagEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            deliveryTagEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public void WriteObject(IProtonBuffer buffer, IEncoderState state, Object value)

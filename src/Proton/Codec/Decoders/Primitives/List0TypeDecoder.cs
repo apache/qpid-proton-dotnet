@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
 
@@ -36,6 +37,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       public int ReadCount(Stream stream, IStreamDecoderState state)
       {
          return 0;
+      }
+
+      public IList<T> ReadList<T>(IProtonBuffer buffer, IDecoderState state)
+      {
+         return (IList<T>) Array.Empty<T>();
+      }
+
+      public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
+      {
+         return (IList<T>) Array.Empty<T>();
       }
 
       public int ReadSize(IProtonBuffer buffer, IDecoderState state)

@@ -25,16 +25,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.Timestamp;
 
-      public override Type DecodesType => typeof(long);
+      public override Type DecodesType => typeof(DateTime);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-         return buffer.ReadLong();
+         return DateTimeOffset.FromUnixTimeMilliseconds(buffer.ReadLong());
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         return ProtonStreamReadUtils.ReadLong(stream);
+         return DateTimeOffset.FromUnixTimeMilliseconds(ProtonStreamReadUtils.ReadLong(stream));
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

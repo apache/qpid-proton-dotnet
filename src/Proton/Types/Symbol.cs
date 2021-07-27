@@ -168,6 +168,7 @@ namespace Apache.Qpid.Proton.Types
       {
          buffer.EnsureWritable(Length);
          underlying.CopyInto(underlying.ReadOffset, buffer, buffer.WriteOffset, underlying.ReadableBytes);
+         buffer.WriteOffset += Length;
       }
 
       public override string ToString()

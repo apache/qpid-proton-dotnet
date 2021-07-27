@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override Type DecodesType => typeof(IList);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      public IList<T> ReadList<T>(IProtonBuffer buffer, IDecoderState state)
       {
          int size = ReadSize(buffer, state);
 
@@ -52,27 +52,37 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
                     "of data available (%d)", count, buffer.ReadableBytes));
          }
 
-         IList<object> list = new List<object>(count);
+         IList<T> list = new List<T>(count);
          for (int i = 0; i < count; i++)
          {
-            list.Add(state.Decoder.ReadObject(buffer, state));
+            list.Add(state.Decoder.ReadObject<T>(buffer, state));
          }
 
          return list;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
       {
          ReadSize(stream, state);
          int count = ReadCount(stream, state);
 
-         IList<object> list = new List<object>(count);
+         IList<T> list = new List<T>(count);
          for (int i = 0; i < count; i++)
          {
-            list.Add(state.Decoder.ReadObject(stream, state));
+            list.Add(state.Decoder.ReadObject<T>(stream, state));
          }
 
          return list;
+      }
+
+      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      {
+         return ReadList<object>(buffer, state);
+      }
+
+      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      {
+         return ReadList<object>(stream, state);
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

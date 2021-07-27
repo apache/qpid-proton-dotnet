@@ -611,7 +611,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public string ReadSymbolAsString(Stream stream, IStreamDecoderState state)
       {
-         return ReadSymbol(stream, state).ToString();
+         return ReadSymbol(stream, state)?.ToString();
       }
 
       public ulong? ReadTimestamp(Stream stream, IStreamDecoderState state)
@@ -661,18 +661,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      public IList<V> ReadList<V>(Stream stream, IStreamDecoderState state)
+      public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
             case EncodingCodes.List0:
-               return (IList<V>)Array.Empty<V>();
+               return (IList<T>)Array.Empty<T>();
             case EncodingCodes.List8:
-               return (IList<V>)list8Decoder.ReadValue(stream, state);
+               return (IList<T>)list8Decoder.ReadList<T>(stream, state);
             case EncodingCodes.List32:
-               return (IList<V>)list32Decoder.ReadValue(stream, state);
+               return (IList<T>)list32Decoder.ReadList<T>(stream, state);
             case EncodingCodes.Null:
                return null;
             default:
