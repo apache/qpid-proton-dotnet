@@ -21,8 +21,8 @@ namespace Apache.Qpid.Proton.Types.Messaging
 {
    public sealed class ApplicationProperties : IBodySection<IDictionary<string, object>>
    {
-      public static readonly ulong DescriptorCode = 0x0000000000000073UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:properties:list");
+      public static readonly ulong DescriptorCode = 0x0000000000000074UL;
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:application-properties:list");
 
       public SectionType Type => SectionType.ApplicationProperties;
 

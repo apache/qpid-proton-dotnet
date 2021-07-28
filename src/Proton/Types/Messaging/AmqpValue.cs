@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public AmqpValue(AmqpValue other) : this()
       {
-         if (other.Value != null)
+         if (other?.Value != null)
          {
             Value = other.Value;
          }

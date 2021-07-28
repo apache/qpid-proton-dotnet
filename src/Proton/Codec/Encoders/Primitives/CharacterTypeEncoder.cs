@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    {
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
-         buffer.EnsureWritable(sizeof(uint) + sizeof(byte));
+         buffer.EnsureWritable(sizeof(long));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Char));
          buffer.WriteUnsignedInt((uint)((char)value & 0xFFFF));
       }

@@ -31,27 +31,20 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
          if (binary.ReadableBytes > byte.MaxValue)
          {
-            buffer.EnsureWritable(sizeof(byte) + sizeof(uint) + buffer.ReadableBytes);
+            buffer.EnsureWritable(sizeof(byte) + sizeof(uint) + binary.ReadableBytes);
             buffer.WriteUnsignedByte(((byte)EncodingCodes.VBin32));
             buffer.WriteUnsignedInt((uint)binary.ReadableBytes);
          }
          else
          {
-            buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + buffer.ReadableBytes);
+            buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + binary.ReadableBytes);
             buffer.WriteUnsignedByte(((byte)EncodingCodes.VBin8));
             buffer.WriteUnsignedByte((byte)binary.ReadableBytes);
          }
 
-         long readOffset = binary.ReadOffset;
+         binary.CopyInto(binary.ReadOffset, buffer, buffer.WriteOffset, binary.ReadableBytes);
 
-         try
-         {
-            buffer.WriteBytes(binary);
-         }
-         finally
-         {
-            binary.ReadOffset = readOffset;
-         }
+         buffer.WriteOffset += binary.ReadableBytes;
       }
 
       public void WriteType(IProtonBuffer buffer, IEncoderState state, byte[] value)

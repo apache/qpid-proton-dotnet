@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          buffer.EnsureWritable(EncodingSize);
          buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
-         buffer.WriteUnsignedByte(((byte)DeleteOnClose.DescriptorCode));
+         buffer.WriteUnsignedByte(((byte)DescriptorCode));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.List0));
       }
 

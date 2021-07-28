@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
-         buffer.EnsureWritable(sizeof(byte) + (sizeof(byte) * values.Length));
+         buffer.EnsureWritable(sizeof(byte) + values.Length);
          // Write the array elements after writing the array length
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Boolean));
          foreach (object value in values)

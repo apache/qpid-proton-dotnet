@@ -34,6 +34,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          // Write the Array Type encoding code, we don't optimize here.
+         buffer.EnsureWritable(sizeof(byte) + sizeof(long));
          buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
 
          long startIndex = buffer.WriteOffset;
@@ -58,28 +59,30 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
+
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
 
-         IList[] elements = new IList[values.Length];
+         object[] elements = new object[values.Length];
 
          for (int i = 0; i < values.Length; ++i)
          {
-            AmqpSequence sequence = (AmqpSequence)values.GetValue(i);
-            elements[i] = (IList)sequence.Value;
+            elements[i] = ((AmqpValue)values.GetValue(i)).Value;
          }
 
-         ITypeEncoder entryEncoder = state.Encoder.LookupTypeEncoder(values.GetValue(0).GetType());
+         ITypeEncoder entryEncoder = state.Encoder.LookupTypeEncoder(elements.GetValue(0).GetType());
          entryEncoder.WriteRawArray(buffer, state, elements);
       }
 
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
+         buffer.EnsureWritable(sizeof(int));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
-         buffer.WriteUnsignedByte((byte)AmqpSequence.DescriptorCode);
+         buffer.WriteUnsignedByte((byte)AmqpValue.DescriptorCode);
 
-        state.Encoder.WriteObject(buffer, state, ((AmqpValue)value).Value);
+         state.Encoder.WriteObject(buffer, state, ((AmqpValue)value).Value);
       }
    }
 }

@@ -19,7 +19,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 {
    public sealed class DeleteOnNoMessages : ILifetimePolicy
    {
-      public static readonly ulong DescriptorCode = 0x000000000000002eUL;
+      public static readonly ulong DescriptorCode = 0x000000000000002dUL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:delete-on-no-messages:list");
 
       /// <summary>

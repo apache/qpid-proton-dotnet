@@ -32,6 +32,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
+         buffer.EnsureWritable(sizeof(long) + sizeof(byte));
          // Write the Array Type encoding code, we don't optimize here.
          buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
 
@@ -57,21 +58,28 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
+         buffer.EnsureWritable(sizeof(int));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
          buffer.WriteUnsignedByte((byte)Data.DescriptorCode);
-
          buffer.WriteUnsignedByte((byte)EncodingCodes.VBin32);
-         foreach (object value in values)
+
+         foreach (Data value in (Data[])values)
          {
-            IProtonBuffer binary = (IProtonBuffer)value;
+            IProtonBuffer binary = value.Value;
+            buffer.EnsureWritable(sizeof(int) + binary.ReadableBytes);
             buffer.WriteInt((int) binary.ReadableBytes);
-            buffer.WriteBytes(binary);
+
+            // Copy to buffer without changing the input read offset
+            binary.CopyInto(binary.ReadOffset, buffer, buffer.WriteOffset, binary.ReadableBytes);
+
+            buffer.WriteOffset += binary.ReadableBytes;
          }
       }
 
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
+         buffer.EnsureWritable(sizeof(int));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
          buffer.WriteUnsignedByte((byte)Data.DescriptorCode);
