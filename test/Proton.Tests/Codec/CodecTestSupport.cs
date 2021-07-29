@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Codec
       protected int seed;
 
       [SetUp]
-      public void setUp()
+      public virtual void SetUp()
       {
          decoder = ProtonDecoderFactory.Create();
          decoderState = decoder.NewDecoderState();

@@ -26,8 +26,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
 {
    public sealed class SaslOutcomeTypeDecoder : AbstractDescribedTypeDecoder
    {
-      private static readonly int MinListEntries = 0;
-      private static readonly int MaxListEntries = 3;
+      private static readonly int MinListEntries = 1;
+      private static readonly int MaxListEntries = 2;
 
       public override Symbol DescriptorSymbol => SaslOutcome.DescriptorSymbol;
 
