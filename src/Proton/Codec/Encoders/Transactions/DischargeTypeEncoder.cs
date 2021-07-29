@@ -55,11 +55,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transactions
          switch (index)
          {
             case 0:
-                state.Encoder.WriteBinary(buffer, state, discharge.TxnId);
-                break;
+               state.Encoder.WriteBinary(buffer, state, discharge.TxnId);
+               break;
             case 1:
-                buffer.WriteByte((sbyte)(discharge.Fail ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
-                break;
+               buffer.EnsureWritable(sizeof(byte));
+               buffer.WriteByte((sbyte)(discharge.Fail ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown Discharge value index: " + index);
          }

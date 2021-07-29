@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transactions
          switch (index)
          {
             case 0:
-                state.Encoder.WriteArray(buffer, state, coordinator.Capabilities);
+               state.Encoder.WriteArray(buffer, state, coordinator.Capabilities);
                break;
             default:
                throw new ArgumentOutOfRangeException("Unknown Coordinator value index: " + index);

@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
 {
    public sealed class DeclaredTypeDecoder : AbstractDescribedTypeDecoder
    {
-      private static readonly int MinRequiredListEntries = 0;
+      private static readonly int MinRequiredListEntries = 1;
       private static readonly int MaxRequiredListEntries = 1;
 
       public override Symbol DescriptorSymbol => Declared.DescriptorSymbol;
