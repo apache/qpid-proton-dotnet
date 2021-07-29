@@ -176,6 +176,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
             long mapStartIndex = buffer.WriteOffset;
 
             // Reserve space for the size and write the count of list elements.
+            buffer.EnsureWritable(sizeof(long));
             buffer.WriteInt(0);
             buffer.WriteInt(count * 2);
 

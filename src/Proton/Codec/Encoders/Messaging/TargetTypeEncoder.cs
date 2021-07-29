@@ -77,26 +77,27 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          switch (index)
          {
             case 0:
-                state.Encoder.WriteString(buffer, state, target.Address);
-                break;
+               state.Encoder.WriteString(buffer, state, target.Address);
+               break;
             case 1:
-                state.Encoder.WriteUnsignedInteger(buffer, state, target.Durable.ToUInt32());
-                break;
+               state.Encoder.WriteUnsignedInteger(buffer, state, target.Durable.ToUInt32());
+               break;
             case 2:
-                state.Encoder.WriteSymbol(buffer, state, target.ExpiryPolicy.ToSymbol());
-                break;
+               state.Encoder.WriteSymbol(buffer, state, target.ExpiryPolicy.ToSymbol());
+               break;
             case 3:
-                state.Encoder.WriteUnsignedInteger(buffer, state, target.Timeout);
-                break;
+               state.Encoder.WriteUnsignedInteger(buffer, state, target.Timeout);
+               break;
             case 4:
-                buffer.WriteUnsignedByte((byte)(target.Dynamic ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
-                break;
+               buffer.EnsureWritable(sizeof(byte));
+               buffer.WriteUnsignedByte((byte)(target.Dynamic ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
+               break;
             case 5:
-                state.Encoder.WriteMap(buffer, state, target.DynamicNodeProperties);
-                break;
+               state.Encoder.WriteMap(buffer, state, target.DynamicNodeProperties);
+               break;
             case 6:
-                state.Encoder.WriteArray(buffer, state, target.Capabilities);
-                break;
+               state.Encoder.WriteArray(buffer, state, target.Capabilities);
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown Target value index: " + index);
          }

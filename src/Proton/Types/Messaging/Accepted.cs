@@ -19,7 +19,7 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Accepted : IDeliveryState
+   public sealed class Accepted : IOutcome, IDeliveryState
    {
       public static readonly ulong DescriptorCode = 0x0000000000000024UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:accepted:list");
@@ -53,6 +53,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public override string ToString()
       {
          return "Accepted{}";
+      }
+
+      public object Clone()
+      {
+         return this;
       }
    }
 }

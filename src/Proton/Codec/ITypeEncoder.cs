@@ -32,12 +32,6 @@ namespace Apache.Qpid.Proton.Codec
       Type EncodesType { get; }
 
       /// <summary>
-      /// Returns true if the value that this encoder is going to write is an array type.
-      /// </summary>
-      /// <returns>true if the decoder instance will read an array types</returns>
-      bool IsArrayType { get; }
-
-      /// <summary>
       /// Encodes the given value into the provided buffer.
       /// </summary>
       /// <param name="buffer">The buffer where the encoded bytes are to be written</param>

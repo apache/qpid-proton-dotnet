@@ -20,7 +20,7 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Modified : IDeliveryState
+   public sealed class Modified : IOutcome, IDeliveryState
    {
       public static readonly ulong DescriptorCode = 0x0000000000000027UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:modified:list");
@@ -126,6 +126,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
                 ", undeliverableHere=" + UndeliverableHere +
                 ", messageAnnotations=" + MessageAnnotations +
                 '}';
+      }
+
+      public object Clone()
+      {
+         return this.MemberwiseClone();
       }
    }
 }

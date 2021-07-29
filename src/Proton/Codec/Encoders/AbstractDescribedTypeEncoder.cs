@@ -23,8 +23,6 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public abstract class AbstractDescribedTypeEncoder : IDescribedTypeEncoder
    {
-      public bool IsArrayType => false;
-
       #region Described Type Encoder API
 
       public abstract Symbol DescriptorSymbol { get; }

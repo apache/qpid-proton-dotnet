@@ -19,7 +19,7 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Released : IDeliveryState
+   public sealed class Released : IOutcome, IDeliveryState
    {
       public static readonly ulong DescriptorCode = 0x0000000000000026UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:released:list");
@@ -53,6 +53,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public override string ToString()
       {
          return "Released{}";
+      }
+
+      public object Clone()
+      {
+         return this.MemberwiseClone();
       }
    }
 }

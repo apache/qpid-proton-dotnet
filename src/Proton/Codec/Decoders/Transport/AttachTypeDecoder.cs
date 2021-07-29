@@ -219,7 +219,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
                }
                else
                {
-                  stream.Seek(stream.Position - 1, SeekOrigin.Current);
+                  stream.Seek(-1, SeekOrigin.Current);
                }
             }
 

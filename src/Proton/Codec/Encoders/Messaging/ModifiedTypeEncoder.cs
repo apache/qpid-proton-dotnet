@@ -68,9 +68,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          switch (index)
          {
             case 0:
+               buffer.EnsureWritable(sizeof(byte));
                buffer.WriteUnsignedByte((byte)(source.DeliveryFailed ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
                break;
             case 1:
+               buffer.EnsureWritable(sizeof(byte));
                buffer.WriteUnsignedByte((byte)(source.UndeliverableHere ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
                break;
             case 2:

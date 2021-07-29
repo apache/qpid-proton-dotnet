@@ -93,38 +93,39 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          switch (index)
          {
             case 0:
-                state.Encoder.WriteString(buffer, state, source.Address);
-                break;
+               state.Encoder.WriteString(buffer, state, source.Address);
+               break;
             case 1:
-                state.Encoder.WriteUnsignedInteger(buffer, state, source.Durable.ToUInt32());
-                break;
+               state.Encoder.WriteUnsignedInteger(buffer, state, source.Durable.ToUInt32());
+               break;
             case 2:
-                state.Encoder.WriteSymbol(buffer, state, source.ExpiryPolicy.ToSymbol());
-                break;
+               state.Encoder.WriteSymbol(buffer, state, source.ExpiryPolicy.ToSymbol());
+               break;
             case 3:
-                state.Encoder.WriteUnsignedInteger(buffer, state, source.Timeout);
-                break;
+               state.Encoder.WriteUnsignedInteger(buffer, state, source.Timeout);
+               break;
             case 4:
-                buffer.WriteUnsignedByte((byte)(source.Dynamic ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
-                break;
+               buffer.EnsureWritable(sizeof(byte));
+               buffer.WriteUnsignedByte((byte)(source.Dynamic ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
+               break;
             case 5:
-                state.Encoder.WriteMap(buffer, state, source.DynamicNodeProperties);
-                break;
+               state.Encoder.WriteMap(buffer, state, source.DynamicNodeProperties);
+               break;
             case 6:
-                state.Encoder.WriteSymbol(buffer, state, source.DistributionMode);
-                break;
+               state.Encoder.WriteSymbol(buffer, state, source.DistributionMode);
+               break;
             case 7:
-                state.Encoder.WriteMap(buffer, state, source.Filter);
-                break;
+               state.Encoder.WriteMap(buffer, state, source.Filter);
+               break;
             case 8:
-                state.Encoder.WriteObject(buffer, state, source.DefaultOutcome);
-                break;
+               state.Encoder.WriteObject(buffer, state, source.DefaultOutcome);
+               break;
             case 9:
-                state.Encoder.WriteArray(buffer, state, source.Outcomes);
-                break;
+               state.Encoder.WriteArray(buffer, state, source.Outcomes);
+               break;
             case 10:
-                state.Encoder.WriteArray(buffer, state, source.Capabilities);
-                break;
+               state.Encoder.WriteArray(buffer, state, source.Capabilities);
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown Source value index: " + index);
          }

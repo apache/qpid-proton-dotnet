@@ -63,5 +63,18 @@ namespace Apache.Qpid.Proton.Types.Transport
                 ", info=" + Info +
                 '}';
       }
+
+      public override bool Equals(object obj)
+      {
+         return obj is ErrorCondition condition &&
+                EqualityComparer<Symbol>.Default.Equals(Condition, condition.Condition) &&
+                Description == condition.Description &&
+                EqualityComparer<IReadOnlyDictionary<Symbol, object>>.Default.Equals(Info, condition.Info);
+      }
+
+      public override int GetHashCode()
+      {
+         return HashCode.Combine(Condition, Description, Info);
+      }
    }
 }

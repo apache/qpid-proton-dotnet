@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
    public sealed class ReceivedTypeDecoder : AbstractDescribedTypeDecoder
    {
-      private static readonly int RequiredReceivedListEntries = 0;
+      private static readonly int RequiredReceivedListEntries = 2;
 
       public override Symbol DescriptorSymbol => Received.DescriptorSymbol;
 
@@ -160,7 +160,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
                }
                else
                {
-                  stream.Seek(stream.Position - 1, SeekOrigin.Current);
+                  stream.Seek(-1, SeekOrigin.Current);
                }
             }
 

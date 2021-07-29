@@ -43,6 +43,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          // When encoding ensure that values that were never set are omitted and a simple
          // NULL entry is written in the slot instead (don't write defaults).
 
+         buffer.EnsureWritable(sizeof(long));
+
          switch (index)
          {
             case 0:

@@ -76,6 +76,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
                }
                else
                {
+                  buffer.EnsureWritable(sizeof(byte));
                   buffer.WriteUnsignedByte((byte)EncodingCodes.Null);
                }
                break;
@@ -86,6 +87,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
                }
                else
                {
+                  buffer.EnsureWritable(sizeof(byte));
                   buffer.WriteUnsignedByte((byte)EncodingCodes.Null);
                }
                break;
@@ -99,6 +101,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
                }
                else
                {
+                  buffer.EnsureWritable(sizeof(byte));
                   buffer.WriteUnsignedByte((byte)EncodingCodes.Null);
                }
                break;

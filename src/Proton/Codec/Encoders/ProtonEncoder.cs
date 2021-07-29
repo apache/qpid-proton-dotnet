@@ -162,6 +162,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -174,6 +175,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -186,6 +188,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -211,14 +214,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteGuid(IProtonBuffer buffer, IEncoderState state, Guid value)
       {
-         if (value == null)
-         {
-            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
-         }
-         else
-         {
-            uuidEncoder.WriteType(buffer, state, value);
-         }
+         uuidEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, byte[] value)
@@ -230,6 +226,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -242,6 +239,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -254,6 +252,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -266,11 +265,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
          {
-            symbolEncoder.WriteType(buffer, state, value);
+            symbolEncoder.WriteType(buffer, state, Symbol.Lookup(value));
          }
       }
 
@@ -278,6 +278,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -290,6 +291,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -302,6 +304,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -314,6 +317,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -326,6 +330,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -338,6 +343,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -350,6 +356,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value == null)
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
          }
          else
@@ -375,6 +382,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          }
          else
          {
+            buffer.EnsureWritable(sizeof(byte));
             buffer.WriteUnsignedByte((byte)EncodingCodes.Null);
          }
       }
@@ -406,7 +414,15 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
       {
-         arrayEncoder.WriteType(buffer, state, value);
+         if (value == null)
+         {
+            buffer.EnsureWritable(sizeof(byte));
+            buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
+         }
+         else
+         {
+            arrayEncoder.WriteType(buffer, state, value);
+         }
       }
 
       public IEncoder RegisterDescribedTypeEncoder(IDescribedTypeEncoder encoder)

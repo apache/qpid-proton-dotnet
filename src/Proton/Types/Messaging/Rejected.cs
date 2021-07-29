@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
 using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Rejected : IDeliveryState
+   public sealed class Rejected : IOutcome, IDeliveryState
    {
       public static readonly ulong DescriptorCode = 0x0000000000000025UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:rejected:list");
@@ -94,6 +93,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public override string ToString()
       {
         return "Rejected{" + "error=" + Error + "}";
+      }
+
+      public object Clone()
+      {
+         return this.MemberwiseClone();
       }
    }
 }

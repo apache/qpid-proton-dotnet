@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
 using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Received : IDeliveryState
+   public sealed class Received : IOutcome, IDeliveryState
    {
       public static readonly ulong DescriptorCode = 0x0000000000000023UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:received:list");
@@ -97,6 +96,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
                 "sectionNumber=" + SectionNumber +
                 ", sectionOffset=" + SectionOffset +
                 '}';
+      }
+
+      public object Clone()
+      {
+         return this.MemberwiseClone();
       }
    }
 }
