@@ -89,51 +89,52 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
             bool nullValue = buffer.GetByte(buffer.ReadOffset) == (byte)EncodingCodes.Null;
             if (nullValue)
             {
-               // Ensure mandatory fields are set
-               if (index < MinFlowListEntries)
+               // Ensure mandatory fields are set but account for the nextIncomingId
+               // being optional for the Flow performative.
+               if (index > 0 && index < MinFlowListEntries)
                {
                   throw new DecodeException(ErrorForMissingRequiredFields(index));
                }
 
-               buffer.ReadByte();
+               buffer.ReadOffset += 1;
                continue;
             }
 
             switch (index)
             {
-                case 0:
-                    result.NextIncomingId = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 1:
-                    result.IncomingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 2:
-                    result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 3:
-                    result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 4:
-                    result.Handle = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 5:
-                    result.DeliveryCount = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 6:
-                    result.LinkCredit = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 7:
-                    result.Available = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 8:
-                    result.Drain = state.Decoder.ReadBoolean(buffer, state) ?? false;
-                    break;
-                case 9:
-                    result.Echo = state.Decoder.ReadBoolean(buffer, state) ?? false;
-                    break;
-                case 10:
-                    result.Properties = state.Decoder.ReadMap<Symbol, object>(buffer, state);
-                    break;
+               case 0:
+                  result.NextIncomingId = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 1:
+                  result.IncomingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 2:
+                  result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 3:
+                  result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 4:
+                  result.Handle = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 5:
+                  result.DeliveryCount = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 6:
+                  result.LinkCredit = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 7:
+                  result.Available = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 8:
+                  result.Drain = state.Decoder.ReadBoolean(buffer, state) ?? false;
+                  break;
+               case 9:
+                  result.Echo = state.Decoder.ReadBoolean(buffer, state) ?? false;
+                  break;
+               case 10:
+                  result.Properties = state.Decoder.ReadMap<Symbol, object>(buffer, state);
+                  break;
             }
          }
 
@@ -196,8 +197,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
                bool nullValue = stream.ReadByte() == (byte)EncodingCodes.Null;
                if (nullValue)
                {
-                  // Ensure mandatory fields are set
-                  if (index < MinFlowListEntries)
+                  // Ensure mandatory fields are set but account for the nextIncomingId
+                  // being optional for the Flow performative.
+                  if (index > 0 && index < MinFlowListEntries)
                   {
                      throw new DecodeException(ErrorForMissingRequiredFields(index));
                   }
@@ -212,39 +214,39 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.NextIncomingId = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 1:
-                    result.IncomingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 2:
-                    result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 3:
-                    result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 4:
-                    result.Handle = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 5:
-                    result.DeliveryCount = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 6:
-                    result.LinkCredit = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 7:
-                    result.Available = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 8:
-                    result.Drain = state.Decoder.ReadBoolean(stream, state) ?? false;
-                    break;
-                case 9:
-                    result.Echo = state.Decoder.ReadBoolean(stream, state) ?? false;
-                    break;
-                case 10:
-                    result.Properties = state.Decoder.ReadMap<Symbol, object>(stream, state);
-                    break;
+               case 0:
+                  result.NextIncomingId = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 1:
+                  result.IncomingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 2:
+                  result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 3:
+                  result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 4:
+                  result.Handle = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 5:
+                  result.DeliveryCount = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 6:
+                  result.LinkCredit = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 7:
+                  result.Available = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 8:
+                  result.Drain = state.Decoder.ReadBoolean(stream, state) ?? false;
+                  break;
+               case 9:
+                  result.Echo = state.Decoder.ReadBoolean(stream, state) ?? false;
+                  break;
+               case 10:
+                  result.Properties = state.Decoder.ReadMap<Symbol, object>(stream, state);
+                  break;
             }
          }
 
@@ -256,11 +258,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          switch (present)
          {
             case 3:
-                return "The outgoing-window field cannot be omitted from the Flow";
+               return "The outgoing-window field cannot be omitted from the Flow";
             case 2:
-                return "The next-outgoing-id field cannot be omitted from the Flow";
+               return "The next-outgoing-id field cannot be omitted from the Flow";
             default:
-                return "The incoming-window field cannot be omitted from the Flow";
+               return "The incoming-window field cannot be omitted from the Flow";
          }
       }
    }

@@ -66,10 +66,52 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public override bool Equals(object obj)
       {
-         return obj is ErrorCondition condition &&
-                EqualityComparer<Symbol>.Default.Equals(Condition, condition.Condition) &&
-                Description == condition.Description &&
-                EqualityComparer<IReadOnlyDictionary<Symbol, object>>.Default.Equals(Info, condition.Info);
+         if (obj is ErrorCondition condition)
+         {
+            bool equal = true;
+
+            if (!EqualityComparer<Symbol>.Default.Equals(Condition, condition.Condition))
+            {
+               equal = false;
+            }
+
+            if (equal && Description != condition.Description)
+            {
+               equal = false;
+            }
+
+            if (equal && Info != null && condition.Info != null && Info.Count == condition.Info.Count)
+            {
+               foreach (KeyValuePair<Symbol, object> pair in Info)
+               {
+                  object value;
+
+                  if (condition.Info.TryGetValue(pair.Key, out value))
+                  {
+                     if (!EqualityComparer<object>.Default.Equals(value, pair.Value))
+                     {
+                        equal = false;
+                        break;
+                     }
+                  }
+                  else
+                  {
+                     equal = false;
+                     break;
+                  }
+               }
+            }
+            else
+            {
+               equal = equal && (Info == null && condition.Info == null);
+            }
+
+            return equal;
+         }
+         else
+         {
+            return false;
+         }
       }
 
       public override int GetHashCode()

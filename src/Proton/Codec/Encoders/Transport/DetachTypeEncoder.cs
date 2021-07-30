@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transport
 
       protected override EncodingCodes GetListEncoding(Detach value)
       {
-        return value.Error == null ? EncodingCodes.List8 : EncodingCodes.List32;
+         return value.Error == null ? EncodingCodes.List8 : EncodingCodes.List32;
       }
 
       protected override int GetElementCount(Detach begin)
@@ -47,6 +47,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transport
       {
          // When encoding ensure that values that were never set are omitted and a simple
          // NULL entry is written in the slot instead (don't write defaults).
+         buffer.EnsureWritable(sizeof(int));
 
          switch (index)
          {

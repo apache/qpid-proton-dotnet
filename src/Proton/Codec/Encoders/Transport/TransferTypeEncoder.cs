@@ -58,6 +58,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transport
       {
          // When encoding ensure that values that were never set are omitted and a simple
          // NULL entry is written in the slot instead (don't write defaults).
+         buffer.EnsureWritable(sizeof(int));
 
          switch (index)
          {

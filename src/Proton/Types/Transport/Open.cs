@@ -79,6 +79,11 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return containerId; }
          set
          {
+            if (value == null)
+            {
+               throw new NullReferenceException("the container-id field is mandatory");
+            }
+
             modified |= CONTAINER_ID;
             containerId = value;
          }
@@ -89,7 +94,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return hostname; }
          set
          {
-            modified |= HOSTNAME;
+            if (value != null)
+            {
+               modified |= HOSTNAME;
+            }
+            else
+            {
+               modified &= ~HOSTNAME;
+            }
+
             hostname = value;
          }
       }
@@ -129,7 +142,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return outgoingLocales; }
          set
          {
-            modified |= OUTGOING_LOCALES;
+            if (value != null)
+            {
+               modified |= OUTGOING_LOCALES;
+            }
+            else
+            {
+               modified &= ~OUTGOING_LOCALES;
+            }
+
             outgoingLocales = value;
          }
       }
@@ -139,7 +160,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return incomingLocales; }
          set
          {
-            modified |= INCOMING_LOCALES;
+            if (value != null)
+            {
+               modified |= INCOMING_LOCALES;
+            }
+            else
+            {
+               modified &= ~INCOMING_LOCALES;
+            }
+
             incomingLocales = value;
          }
       }
@@ -149,7 +178,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return offeredCapabilities; }
          set
          {
-            modified |= OFFERED_CAPABILITIES;
+            if (value != null)
+            {
+               modified |= OFFERED_CAPABILITIES;
+            }
+            else
+            {
+               modified &= ~OFFERED_CAPABILITIES;
+            }
+
             offeredCapabilities = value;
          }
       }
@@ -159,7 +196,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return desiredCapabilities; }
          set
          {
-            modified |= DESIRED_CAPABILITIES;
+            if (value != null)
+            {
+               modified |= DESIRED_CAPABILITIES;
+            }
+            else
+            {
+               modified &= ~DESIRED_CAPABILITIES;
+            }
+
             desiredCapabilities = value;
          }
       }
@@ -169,7 +214,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return properties; }
          set
          {
-            modified |= PROPERTIES;
+            if (value != null)
+            {
+               modified |= PROPERTIES;
+            }
+            else
+            {
+               modified &= ~PROPERTIES;
+            }
+
             properties = value;
          }
       }
