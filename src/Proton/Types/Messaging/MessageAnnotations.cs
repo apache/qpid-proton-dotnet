@@ -47,6 +47,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public object Clone()
       {
+         return Copy();
+      }
+
+      public MessageAnnotations Copy()
+      {
          return new MessageAnnotations(this);
       }
 
@@ -85,13 +90,41 @@ namespace Apache.Qpid.Proton.Types.Messaging
          {
             return false;
          }
-         else if (Value == null && other.Value == null)
+         else if (Value == null)
          {
-            return true;
+            return other.Value == null;
          }
          else
          {
-            return Value == null ? false : Value.Equals(other.Value);
+            bool equal = true;
+
+            if (other.Value != null && Value.Count == other.Value.Count)
+            {
+               foreach (KeyValuePair<Symbol, object> pair in Value)
+               {
+                  object value;
+
+                  if (other.Value.TryGetValue(pair.Key, out value))
+                  {
+                     if (!EqualityComparer<object>.Default.Equals(value, pair.Value))
+                     {
+                        equal = false;
+                        break;
+                     }
+                  }
+                  else
+                  {
+                     equal = false;
+                     break;
+                  }
+               }
+
+               return equal;
+            }
+            else
+            {
+               return false;
+            }
          }
       }
    }

@@ -726,6 +726,11 @@ namespace Apache.Qpid.Proton.Buffer
 
       public bool Equals(IProtonBuffer other)
       {
+         if (other == null)
+         {
+            return false;
+         }
+
          if (this.ReadableBytes != other.ReadableBytes)
          {
             return false;

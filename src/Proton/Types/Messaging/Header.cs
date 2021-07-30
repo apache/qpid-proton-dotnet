@@ -61,6 +61,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public object Clone()
       {
+         return Copy();
+      }
+
+      public Header Copy()
+      {
          return new Header(this);
       }
 
@@ -117,7 +122,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return durable; }
          set
          {
-            modified |= DURABLE;
+            if (value)
+            {
+               modified |= DURABLE;
+            }
+            else
+            {
+               modified &= ~DURABLE;
+            }
+
             durable = value;
          }
       }
@@ -127,7 +140,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return priority; }
          set
          {
-            modified |= PRIORITY;
+            if (value == DEFAULT_PRIORITY)
+            {
+               modified &= ~PRIORITY;
+            }
+            else
+            {
+               modified |= PRIORITY;
+            }
+
             priority = value;
          }
       }
@@ -147,7 +168,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return firstAcquirer; }
          set
          {
-            modified |= FIRST_ACQUIRER;
+            if (value)
+            {
+               modified |= FIRST_ACQUIRER;
+            }
+            else
+            {
+               modified &= ~FIRST_ACQUIRER;
+            }
+
             firstAcquirer = value;
          }
       }
@@ -157,7 +186,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return deliveryCount; }
          set
          {
-            modified |= DELIVERY_COUNT;
+            if (value == DEFAULT_DELIVERY_COUNT)
+            {
+               modified &= ~DELIVERY_COUNT;
+            }
+            else
+            {
+               modified |= DELIVERY_COUNT;
+            }
             deliveryCount = value;
          }
       }

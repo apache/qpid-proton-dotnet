@@ -32,6 +32,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
+      public Data(byte[] value) : this()
+      {
+         if (value != null)
+         {
+            Value = ProtonByteBufferAllocator.Instance.Wrap(value);
+         }
+      }
+
       public Data(IProtonBuffer value) : this()
       {
          Value = value;
@@ -46,6 +54,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
       }
 
       public object Clone()
+      {
+         return Copy();
+      }
+
+      public Data Copy()
       {
          return new Data(this);
       }
