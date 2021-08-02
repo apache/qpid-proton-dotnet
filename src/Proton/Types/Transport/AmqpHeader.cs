@@ -348,6 +348,25 @@ namespace Apache.Qpid.Proton.Types.Transport
       /// Provide this AMQP Header with a handler that will process the given AMQP header
       /// depending on the protocol type the correct handler method is invoked.
       /// </summary>
+      /// <typeparam name="TContext">The type of the context that is provided to this visit</typeparam>
+      /// <param name="handler">The handler instance that will process the event</param>
+      /// <param name="context">The context to provide to the event call</param>
+      public void Invoke<TContext>(Action<AmqpHeader, TContext> amqp, Action<AmqpHeader, TContext> sasl, TContext context)
+      {
+         if (IsSaslHeader())
+         {
+            sasl.Invoke(this, context);
+         }
+         else
+         {
+            amqp.Invoke(this, context);
+         }
+      }
+
+      /// <summary>
+      /// Provide this AMQP Header with a handler that will process the given AMQP header
+      /// depending on the protocol type the correct handler method is invoked.
+      /// </summary>
       /// <typeparam name="T">The type of the context that is provided to this visit</typeparam>
       /// <param name="handler">The handler instance that will process the event</param>
       /// <param name="context">The context to provide to the event call</param>

@@ -289,63 +289,26 @@ namespace Apache.Qpid.Proton.Types.Transactions
          Assert.Throws<ArgumentOutOfRangeException>(() => AmqpHeader.ValidateByte(9, (byte)85));
       }
 
-//       [Test]
-//       public void TestInvokeOnAMQPHeader()
-//       {
-//          AtomicBoolean amqpHeader = new AtomicBoolean();
-//          AtomicBoolean saslHeader = new AtomicBoolean();
-//          AtomicReference<String> captured = new AtomicReference<>();
+      [Test]
+      public void TestInvokeOnAMQPHeader()
+      {
+         string captured = null;
 
-//          AmqpHeader.GetAmqpHeader().invoke(new HeaderHandler<String>() {
+         AmqpHeader.GetAMQPHeader().Invoke<String>(
+            (x, context) => captured = context, (x, y) => throw new NotSupportedException(), "test");
 
-//             @Override
-//             public void handleAMQPHeader(AmqpHeader header, String context)
-//          {
-//             amqpHeader.set(true);
-//             captured.set(context);
-//          }
+         Assert.AreEqual("test", captured);
+      }
 
-//          @Override
-//                public void handleSASLHeader(AmqpHeader header, String context)
-//          {
-//             saslHeader.set(true);
-//             captured.set(context);
-//          }
-//       }, "test");
+      [Test]
+      public void TestInvokeOnSASLHeader()
+      {
+         string captured = null;
 
-// Assert.IsTrue(amqpHeader.get());
-// Assert.IsFalse(saslHeader.get());
-// Assert.AreEqual("test", captured.get());
-//     }
+         AmqpHeader.GetSASLHeader().Invoke<String>(
+            (x, y) => throw new NotSupportedException(), (x, context) => captured = context, "test");
 
-//    [Test]
-//    public void TestInvokeOnSASLHeader()
-//    {
-//       bool amqpHeader = new AtomicBoolean();
-//       AtomicBoolean saslHeader = new AtomicBoolean();
-//       AtomicReference<String> captured = new AtomicReference<>();
-
-//       AmqpHeader.GetSASLHeader().invoke(new HeaderHandler<String>() {
-
-//             @Override
-//             public void handleAMQPHeader(AmqpHeader header, String context)
-//       {
-//          amqpHeader.set(true);
-//          captured.set(context);
-//       }
-
-//       @Override
-//                public void handleSASLHeader(AmqpHeader header, String context)
-//       {
-//          saslHeader.set(true);
-//          captured.set(context);
-//       }
-//    }, "test");
-
-// Assert.IsTrue(saslHeader.get());
-// Assert.IsFalse(amqpHeader.get());
-// Asset.AreEqual("test", captured.get());
-//     }
-
+         Assert.AreEqual("test", captured);
+      }
    }
 }
