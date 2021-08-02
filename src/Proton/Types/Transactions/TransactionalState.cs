@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
@@ -26,6 +27,8 @@ namespace Apache.Qpid.Proton.Types.Transactions
       public static readonly ulong DescriptorCode = 0x0000000000000034UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:transactional-state:list");
 
+      private IProtonBuffer txnId;
+
       public TransactionalState() : base() { }
 
       public TransactionalState(TransactionalState other) : this()
@@ -36,7 +39,19 @@ namespace Apache.Qpid.Proton.Types.Transactions
 
       public DeliveryStateType Type => DeliveryStateType.Transactional;
 
-      public IProtonBuffer TxnId { get; set; }
+      public IProtonBuffer TxnId
+      {
+         get => txnId;
+         set
+         {
+            if (value == null)
+            {
+               throw new ArgumentNullException("The TXN Id is mandatory and cannot be set null");
+            }
+
+            txnId = value;
+         }
+      }
 
       public IOutcome Outcome { get; set; }
 

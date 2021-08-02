@@ -24,14 +24,28 @@ namespace Apache.Qpid.Proton.Types.Security
       public static readonly ulong DescriptorCode = 0x0000000000000040UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-mechanisms:list");
 
+      private Symbol[] mechanisms;
+
       public SaslMechanisms() { }
 
-      public SaslMechanisms(Symbol[] mechanisms) => Mechanisms = mechanisms;
+      public SaslMechanisms(Symbol[] mechanisms) => this.mechanisms = mechanisms;
 
       /// <summary>
       /// The set of SASL mechanisms that the remote supports.
       /// </summary>
-      public Symbol[] Mechanisms { get; set; }
+      public Symbol[] Mechanisms
+      {
+         get => mechanisms;
+         set
+         {
+            if (value == null)
+            {
+               throw new ArgumentNullException("Server mechanisms are required and cannot be null");
+            }
+
+            mechanisms = value;
+         }
+      }
 
       public SaslPerformativeType Type => SaslPerformativeType.Mechanisms;
 
@@ -41,6 +55,11 @@ namespace Apache.Qpid.Proton.Types.Security
       }
 
       public object Clone()
+      {
+         return new SaslMechanisms(Mechanisms);
+      }
+
+      public SaslMechanisms Copy()
       {
          return new SaslMechanisms(Mechanisms);
       }
@@ -55,7 +74,7 @@ namespace Apache.Qpid.Proton.Types.Security
          }
 
          return "SaslMechanisms{" +
-                "mechanisms=" + mechanisms == null ? "<null>" : string.Join(",", mechanisms) + '}';
+                "mechanisms=" + (mechanisms == null ? "<null>" : string.Join(",", mechanisms)) + '}';
       }
    }
 }

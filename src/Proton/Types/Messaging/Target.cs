@@ -46,6 +46,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
          return new Target(this);
       }
 
+      public Target Copy()
+      {
+         return new Target(this);
+      }
+
       public string Address { get; set; }
 
       public TerminusDurability Durable { get; set; } = TerminusDurability.None;
@@ -71,6 +76,23 @@ namespace Apache.Qpid.Proton.Types.Messaging
                 ", dynamicNodeProperties=" + DynamicNodeProperties +
                 ", capabilities=" + Capabilities +
                 '}';
+      }
+
+      public override bool Equals(object obj)
+      {
+         return obj is Target target &&
+                Address == target.Address &&
+                Durable == target.Durable &&
+                ExpiryPolicy == target.ExpiryPolicy &&
+                Timeout == target.Timeout &&
+                Dynamic == target.Dynamic &&
+                EqualityComparer<IDictionary<Symbol, object>>.Default.Equals(DynamicNodeProperties, target.DynamicNodeProperties) &&
+                EqualityComparer<Symbol[]>.Default.Equals(Capabilities, target.Capabilities);
+      }
+
+      public override int GetHashCode()
+      {
+         return HashCode.Combine(Address, Durable, ExpiryPolicy, Timeout, Dynamic, DynamicNodeProperties, Capabilities);
       }
    }
 }

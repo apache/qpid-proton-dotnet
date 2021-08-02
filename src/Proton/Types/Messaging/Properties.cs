@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Numerics;
 using Apache.Qpid.Proton.Buffer;
 
@@ -83,6 +84,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
          return new Properties(this);
       }
 
+      public Properties Copy()
+      {
+         return new Properties(this);
+      }
+
       #region Element access
 
       public object MessageId
@@ -90,8 +96,16 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return messageId; }
          set
          {
-            modified |= MESSAGE_ID;
-            messageId = value;
+            if (value == null)
+            {
+               modified &= ~MESSAGE_ID;
+            }
+            else
+            {
+               modified |= MESSAGE_ID;
+            }
+
+            messageId = ValidateIsMessageIdType(value);
          }
       }
 
@@ -100,7 +114,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return userId; }
          set
          {
-            modified |= USER_ID;
+            if (value == null)
+            {
+               modified &= ~USER_ID;
+            }
+            else
+            {
+               modified |= USER_ID;
+            }
+
             userId = value;
          }
       }
@@ -110,7 +132,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return to; }
          set
          {
-            modified |= TO;
+            if (value == null)
+            {
+               modified &= ~TO;
+            }
+            else
+            {
+               modified |= TO;
+            }
+
             to = value;
          }
       }
@@ -120,7 +150,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return subject; }
          set
          {
-            modified |= SUBJECT;
+            if (value == null)
+            {
+               modified &= ~SUBJECT;
+            }
+            else
+            {
+               modified |= SUBJECT;
+            }
+
             subject = value;
          }
       }
@@ -130,7 +168,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return replyTo; }
          set
          {
-            modified |= REPLY_TO;
+            if (value == null)
+            {
+               modified &= ~REPLY_TO;
+            }
+            else
+            {
+               modified |= REPLY_TO;
+            }
+
             replyTo = value;
          }
       }
@@ -140,8 +186,16 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return correlationId; }
          set
          {
-            modified |= CORRELATION_ID;
-            correlationId = value;
+            if (value == null)
+            {
+               modified &= ~CORRELATION_ID;
+            }
+            else
+            {
+               modified |= CORRELATION_ID;
+            }
+
+            correlationId = ValidateIsMessageIdType(value);
          }
       }
 
@@ -150,7 +204,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return contentType; }
          set
          {
-            modified |= CONTENT_TYPE;
+            if (value == null)
+            {
+               modified &= ~CONTENT_TYPE;
+            }
+            else
+            {
+               modified |= CONTENT_TYPE;
+            }
+
             contentType = value;
          }
       }
@@ -160,7 +222,15 @@ namespace Apache.Qpid.Proton.Types.Messaging
          get { return contentEncoding; }
          set
          {
-            modified |= CONTENT_ENCODING;
+            if (value == null)
+            {
+               modified &= ~CONTENT_ENCODING;
+            }
+            else
+            {
+               modified |= CONTENT_ENCODING;
+            }
+
             contentEncoding = value;
          }
       }
@@ -175,6 +245,12 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
       }
 
+      public void ClearAbsoluteExpiryTime()
+      {
+         modified &= ~ABSOLUTE_EXPIRY;
+         absoluteExpiryTime = 0;
+      }
+
       public ulong CreationTime
       {
          get { return creationTime; }
@@ -185,12 +261,26 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
       }
 
+      public void ClearCreationTime()
+      {
+         modified &= ~CREATION_TIME;
+         creationTime = 0;
+      }
+
       public string GroupId
       {
          get { return groupId; }
          set
          {
-            modified |= GROUP_ID;
+            if (value == null)
+            {
+               modified &= ~GROUP_ID;
+            }
+            else
+            {
+               modified |= GROUP_ID;
+            }
+
             groupId = value;
          }
       }
@@ -205,12 +295,26 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
       }
 
+      public void ClearGroupSequence()
+      {
+         modified &= ~GROUP_SEQUENCE;
+         groupSequence = 0u;
+      }
+
       public string ReplyToGroupId
       {
          get { return replyToGroupId; }
          set
          {
-            modified |= REPLY_TO_GROUP_ID;
+            if (value == null)
+            {
+               modified &= ~REPLY_TO_GROUP_ID;
+            }
+            else
+            {
+               modified |= REPLY_TO_GROUP_ID;
+            }
+
             replyToGroupId = value;
          }
       }
@@ -271,6 +375,22 @@ namespace Apache.Qpid.Proton.Types.Messaging
                  ", groupId='" + groupId + '\'' +
                  ", groupSequence=" + (HasGroupSequence() ? groupSequence : null) +
                  ", replyToGroupId='" + replyToGroupId + '\'' + " }";
+      }
+
+      private static object ValidateIsMessageIdType(object messageId)
+      {
+         // Allowed types of message IDs are listed here
+         if (messageId == null ||
+             messageId is string ||
+             messageId is Guid ||
+             messageId is ulong ||
+             messageId is IProtonBuffer)
+         {
+            return messageId;
+         }
+
+         throw new ArgumentException(
+             "AMQP Message ID type restriction violated, cannot assign type: " + messageId.GetType().Name);
       }
    }
 }

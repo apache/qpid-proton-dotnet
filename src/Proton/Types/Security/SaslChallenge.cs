@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Utilities;
 
@@ -25,6 +26,8 @@ namespace Apache.Qpid.Proton.Types.Security
       public static readonly ulong DescriptorCode = 0x0000000000000042UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-challenge:list");
 
+      private IProtonBuffer challenge;
+
       public SaslChallenge() { }
 
       public SaslChallenge(IProtonBuffer challenge) => Challenge = challenge;
@@ -32,7 +35,19 @@ namespace Apache.Qpid.Proton.Types.Security
       /// <summary>
       /// Reads the SASL Challenge buffer that was sent by the remote.
       /// </summary>
-      public IProtonBuffer Challenge { get; set; }
+      public IProtonBuffer Challenge
+      {
+         get => challenge;
+         set
+         {
+            if (value == null)
+            {
+               throw new ArgumentNullException("The challenge field is required and connt be null");
+            }
+
+            this.challenge = value;
+         }
+      }
 
       public SaslPerformativeType Type => SaslPerformativeType.Challenge;
 
@@ -43,7 +58,12 @@ namespace Apache.Qpid.Proton.Types.Security
 
       public object Clone()
       {
-         return new SaslChallenge(Challenge);
+         return Copy();
+      }
+
+      public SaslChallenge Copy()
+      {
+         return challenge == null ? new SaslChallenge() : new SaslChallenge(Challenge);
       }
 
       public override string ToString()

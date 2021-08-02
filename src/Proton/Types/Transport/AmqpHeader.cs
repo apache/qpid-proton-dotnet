@@ -55,12 +55,12 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public AmqpHeader(IProtonBuffer buffer)
       {
-         SetBuffer(buffer.Copy(), true);
+         SetBuffer(ProtonByteBufferAllocator.Instance.Allocate(HeaderSizeBytes, HeaderSizeBytes).WriteBytes(buffer), true);
       }
 
       public AmqpHeader(IProtonBuffer buffer, bool validate)
       {
-         SetBuffer(buffer.Copy(), validate);
+         SetBuffer(ProtonByteBufferAllocator.Instance.Allocate(HeaderSizeBytes, HeaderSizeBytes).WriteBytes(buffer), validate);
       }
 
       public static AmqpHeader GetAMQPHeader()

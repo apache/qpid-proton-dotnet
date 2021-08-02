@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       {
          this.closed = other.closed;
          this.handle = other.handle;
-         this.error = other.error;
+         this.error = other.error?.Copy();
          this.modified = other.modified;
       }
 
@@ -94,6 +94,8 @@ namespace Apache.Qpid.Proton.Types.Transport
       #endregion
 
       public object Clone() => new Detach(this);
+
+      public Detach Copy() => new Detach(this);
 
       public PerformativeType Type => PerformativeType.Detach;
 

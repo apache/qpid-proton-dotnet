@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return (byte)mode;
       }
 
-      public static ReceiverSettleMode ValueOf(byte mode)
+      public static ReceiverSettleMode Lookup(byte mode)
       {
          switch (mode)
          {

@@ -257,10 +257,9 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       #endregion
 
-      public object Clone()
-      {
-         return new Open(this);
-      }
+      public object Clone() => new Open(this);
+
+      public Open Copy() => new Open(this);
 
       public PerformativeType Type => PerformativeType.Open;
 

@@ -28,10 +28,10 @@ namespace Apache.Qpid.Proton.Types.Transactions
 
       public Declare(Declare other) : this()
       {
-         GlobalTxnId = (GlobalTxnId)(other.GlobalTxnId?.Clone());
+         GlobalTxnId = (IGlobalTxnId)(other.GlobalTxnId?.Clone());
       }
 
-      public GlobalTxnId GlobalTxnId { get; set; }
+      public IGlobalTxnId GlobalTxnId { get; set; }
 
       public object Clone()
       {

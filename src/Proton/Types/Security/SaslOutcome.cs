@@ -55,6 +55,11 @@ namespace Apache.Qpid.Proton.Types.Security
          return new SaslOutcome(Code, AdditionalData);
       }
 
+      public SaslOutcome Copy()
+      {
+         return new SaslOutcome(Code, AdditionalData);
+      }
+
       public override string ToString()
       {
          return "SaslOutcome{" +

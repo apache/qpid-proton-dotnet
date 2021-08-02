@@ -51,17 +51,17 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
       }
 
-      public static TerminusExpiryPolicy ValueOf(Symbol policy)
+      public static TerminusExpiryPolicy Lookup(Symbol policy)
       {
          if (policy == null)
          {
             return TerminusExpiryPolicy.SessionEnd;
          }
 
-         return ValueOf(policy.ToString());
+         return Lookup(policy.ToString());
       }
 
-      public static TerminusExpiryPolicy ValueOf(string policy)
+      public static TerminusExpiryPolicy Lookup(string policy)
       {
          if (policy == null)
          {

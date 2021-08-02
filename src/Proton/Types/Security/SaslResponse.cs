@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Utilities;
 
@@ -25,14 +26,28 @@ namespace Apache.Qpid.Proton.Types.Security
       public static readonly ulong DescriptorCode = 0x0000000000000043UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-response:list");
 
+      private IProtonBuffer response;
+
       public SaslResponse() { }
 
-      public SaslResponse(IProtonBuffer response) => Response = response;
+      public SaslResponse(IProtonBuffer response) => this.response = response;
 
       /// <summary>
       /// The response buffer to use for this SASL Authentication step.
       /// </summary>
-      public IProtonBuffer Response { get; set; }
+      public IProtonBuffer Response
+      {
+         get => response;
+         set
+         {
+            if (value == null)
+            {
+               throw new ArgumentNullException("The response value if mandatory and cannot be null");
+            }
+
+            this.response = value;
+         }
+      }
 
       public SaslPerformativeType Type => SaslPerformativeType.Response;
 
@@ -42,6 +57,11 @@ namespace Apache.Qpid.Proton.Types.Security
       }
 
       public object Clone()
+      {
+         return new SaslResponse(Response);
+      }
+
+      public SaslResponse Copy()
       {
          return new SaslResponse(Response);
       }

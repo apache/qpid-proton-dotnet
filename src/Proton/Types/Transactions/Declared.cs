@@ -17,27 +17,50 @@
 
 using System;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Types.Transactions
 {
-   public sealed class Declared : ICloneable
+   public sealed class Declared : IDeliveryState, IOutcome, ICloneable
    {
       public static readonly ulong DescriptorCode = 0x0000000000000033UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:Declared:list");
+
+      private IProtonBuffer txnId;
 
       public Declared() : base() { }
 
       public Declared(Declared other) : this()
       {
-         TxnId = other.TxnId?.Copy();
+         this.txnId = other.TxnId?.Copy();
       }
 
-      public IProtonBuffer TxnId { get; set; }
+      public IProtonBuffer TxnId
+      {
+         get => txnId;
+         set
+         {
+            if (value == null)
+            {
+               throw new ArgumentNullException("Transaction ID is mandatory and cannot be set to null");
+            }
+
+            txnId = value;
+         }
+      }
+
+      public DeliveryStateType Type => DeliveryStateType.Declared;
 
       public object Clone()
       {
          return new Declared(this);
+      }
+
+      public bool Equals(IDeliveryState other)
+      {
+         throw new NotImplementedException();
       }
 
       public override string ToString()

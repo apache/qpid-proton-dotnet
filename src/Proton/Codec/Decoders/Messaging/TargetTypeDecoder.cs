@@ -92,11 +92,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
                   break;
                case 1:
                   uint durability = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                  result.Durable = TerminusDurabilityExtension.ValueOf(durability);
+                  result.Durable = TerminusDurabilityExtension.Lookup(durability);
                   break;
                case 2:
                   Symbol expiryPolicy = state.Decoder.ReadSymbol(buffer, state);
-                  result.ExpiryPolicy = TerminusExpiryPolicyExtension.ValueOf(expiryPolicy);
+                  result.ExpiryPolicy = TerminusExpiryPolicyExtension.Lookup(expiryPolicy);
                   break;
                case 3:
                   result.Timeout = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
@@ -173,11 +173,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
                   break;
                case 1:
                   uint durability = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                  result.Durable = TerminusDurabilityExtension.ValueOf(durability);
+                  result.Durable = TerminusDurabilityExtension.Lookup(durability);
                   break;
                case 2:
                   Symbol expiryPolicy = state.Decoder.ReadSymbol(stream, state);
-                  result.ExpiryPolicy = TerminusExpiryPolicyExtension.ValueOf(expiryPolicy);
+                  result.ExpiryPolicy = TerminusExpiryPolicyExtension.Lookup(expiryPolicy);
                   break;
                case 3:
                   result.Timeout = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;

@@ -53,6 +53,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
          return new Source(this);
       }
 
+      public Source Copy()
+      {
+         return new Source(this);
+      }
+
       public string Address { get; set; }
 
       public TerminusDurability Durable { get; set; } = TerminusDurability.None;
@@ -90,6 +95,39 @@ namespace Apache.Qpid.Proton.Types.Messaging
                 ", outcomes=" + Outcomes +
                 ", capabilities=" + Capabilities +
                 '}';
+      }
+
+      public override bool Equals(object obj)
+      {
+         return obj is Source source &&
+                Address == source.Address &&
+                Durable == source.Durable &&
+                ExpiryPolicy == source.ExpiryPolicy &&
+                Timeout == source.Timeout &&
+                Dynamic == source.Dynamic &&
+                EqualityComparer<IDictionary<Symbol, object>>.Default.Equals(DynamicNodeProperties, source.DynamicNodeProperties) &&
+                EqualityComparer<Symbol>.Default.Equals(DistributionMode, source.DistributionMode) &&
+                EqualityComparer<IDictionary<Symbol, object>>.Default.Equals(Filter, source.Filter) &&
+                EqualityComparer<IOutcome>.Default.Equals(DefaultOutcome, source.DefaultOutcome) &&
+                EqualityComparer<Symbol[]>.Default.Equals(Outcomes, source.Outcomes) &&
+                EqualityComparer<Symbol[]>.Default.Equals(Capabilities, source.Capabilities);
+      }
+
+      public override int GetHashCode()
+      {
+         HashCode hash = new HashCode();
+         hash.Add(Address);
+         hash.Add(Durable);
+         hash.Add(ExpiryPolicy);
+         hash.Add(Timeout);
+         hash.Add(Dynamic);
+         hash.Add(DynamicNodeProperties);
+         hash.Add(DistributionMode);
+         hash.Add(Filter);
+         hash.Add(DefaultOutcome);
+         hash.Add(Outcomes);
+         hash.Add(Capabilities);
+         return hash.ToHashCode();
       }
    }
 }

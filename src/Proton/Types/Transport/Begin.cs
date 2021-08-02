@@ -180,6 +180,11 @@ namespace Apache.Qpid.Proton.Types.Transport
          return new Begin(this);
       }
 
+      public Begin Copy()
+      {
+         return new Begin(this);
+      }
+
       public PerformativeType Type => PerformativeType.Begin;
 
       public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
@@ -199,6 +204,53 @@ namespace Apache.Qpid.Proton.Types.Transport
                ", desiredCapabilities=" + (desiredCapabilities == null ? "null" : desiredCapabilities) +
                ", properties=" + properties +
                '}';
+      }
+
+      public override bool Equals(object obj)
+      {
+         return obj is Begin begin &&
+                modified == begin.modified &&
+                remoteChannel == begin.remoteChannel &&
+                nextOutgoingId == begin.nextOutgoingId &&
+                incomingWindow == begin.incomingWindow &&
+                outgoingWindow == begin.outgoingWindow &&
+                handleMax == begin.handleMax &&
+                EqualityComparer<Symbol[]>.Default.Equals(offeredCapabilities, begin.offeredCapabilities) &&
+                EqualityComparer<Symbol[]>.Default.Equals(desiredCapabilities, begin.desiredCapabilities) &&
+                EqualityComparer<IDictionary<Symbol, object>>.Default.Equals(properties, begin.properties) &&
+                RemoteChannel == begin.RemoteChannel &&
+                NextOutgoingId == begin.NextOutgoingId &&
+                IncomingWindow == begin.IncomingWindow &&
+                OutgoingWindow == begin.OutgoingWindow &&
+                HandleMax == begin.HandleMax &&
+                EqualityComparer<Symbol[]>.Default.Equals(OfferedCapabilities, begin.OfferedCapabilities) &&
+                EqualityComparer<Symbol[]>.Default.Equals(DesiredCapabilities, begin.DesiredCapabilities) &&
+                EqualityComparer<IDictionary<Symbol, object>>.Default.Equals(Properties, begin.Properties) &&
+                Type == begin.Type;
+      }
+
+      public override int GetHashCode()
+      {
+         HashCode hash = new HashCode();
+         hash.Add(modified);
+         hash.Add(remoteChannel);
+         hash.Add(nextOutgoingId);
+         hash.Add(incomingWindow);
+         hash.Add(outgoingWindow);
+         hash.Add(handleMax);
+         hash.Add(offeredCapabilities);
+         hash.Add(desiredCapabilities);
+         hash.Add(properties);
+         hash.Add(RemoteChannel);
+         hash.Add(NextOutgoingId);
+         hash.Add(IncomingWindow);
+         hash.Add(OutgoingWindow);
+         hash.Add(HandleMax);
+         hash.Add(OfferedCapabilities);
+         hash.Add(DesiredCapabilities);
+         hash.Add(Properties);
+         hash.Add(Type);
+         return hash.ToHashCode();
       }
    }
 }

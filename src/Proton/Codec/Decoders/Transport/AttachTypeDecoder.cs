@@ -110,15 +110,15 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
                   break;
                case 2:
                   bool role = state.Decoder.ReadBoolean(buffer, state) ?? false;
-                  result.Role = RoleExtension.ValueOf(role);
+                  result.Role = RoleExtension.Lookup(role);
                   break;
                case 3:
                   byte sndSettleMode = state.Decoder.ReadUnsignedByte(buffer, state) ?? 0;
-                  result.SenderSettleMode = SenderSettleModeExtension.ValueOf(sndSettleMode);
+                  result.SenderSettleMode = SenderSettleModeExtension.Lookup(sndSettleMode);
                   break;
                case 4:
                   byte rcvSettleMode = state.Decoder.ReadUnsignedByte(buffer, state) ?? 0;
-                  result.ReceiverSettleMode = ReceiverSettleModeExtension.ValueOf(rcvSettleMode);
+                  result.ReceiverSettleMode = ReceiverSettleModeExtension.Lookup(rcvSettleMode);
                   break;
                case 5:
                   result.Source = state.Decoder.ReadObject<Source>(buffer, state);
@@ -233,15 +233,15 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
                   break;
                case 2:
                   bool role = state.Decoder.ReadBoolean(stream, state) ?? false;
-                  result.Role = RoleExtension.ValueOf(role);
+                  result.Role = RoleExtension.Lookup(role);
                   break;
                case 3:
                   byte sndSettleMode = state.Decoder.ReadUnsignedByte(stream, state) ?? 0;
-                  result.SenderSettleMode = SenderSettleModeExtension.ValueOf(sndSettleMode);
+                  result.SenderSettleMode = SenderSettleModeExtension.Lookup(sndSettleMode);
                   break;
                case 4:
                   byte rcvSettleMode = state.Decoder.ReadUnsignedByte(stream, state) ?? 0;
-                  result.ReceiverSettleMode = ReceiverSettleModeExtension.ValueOf(rcvSettleMode);
+                  result.ReceiverSettleMode = ReceiverSettleModeExtension.Lookup(rcvSettleMode);
                   break;
                case 5:
                   result.Source = state.Decoder.ReadObject<Source>(stream, state);

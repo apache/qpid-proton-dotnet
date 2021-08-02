@@ -277,7 +277,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return properties; }
          set
          {
-            modified |= PROPERTIES;
+            if (value == null)
+            {
+               modified &= ~PROPERTIES;
+            }
+            else
+            {
+               modified |= PROPERTIES;
+            }
+
             properties = value;
          }
       }
@@ -314,10 +322,9 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       #endregion
 
-      public object Clone()
-      {
-         return new Flow(this);
-      }
+      public object Clone() => new Flow(this);
+
+      public Flow Copy() => new Flow(this);
 
       public PerformativeType Type => PerformativeType.Flow;
 

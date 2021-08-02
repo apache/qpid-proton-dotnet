@@ -83,7 +83,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
          }
          else if (count == 1)
          {
-            result.GlobalTxnId = (GlobalTxnId)state.Decoder.ReadObject(buffer, state);
+            result.GlobalTxnId = (IGlobalTxnId)state.Decoder.ReadObject(buffer, state);
          }
 
          return result;
@@ -137,7 +137,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
          }
          else if (count == 1)
          {
-            result.GlobalTxnId = (GlobalTxnId)state.Decoder.ReadObject(stream, state);
+            result.GlobalTxnId = (IGlobalTxnId)state.Decoder.ReadObject(stream, state);
          }
 
          return result;

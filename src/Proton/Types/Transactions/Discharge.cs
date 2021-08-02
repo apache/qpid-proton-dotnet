@@ -25,6 +25,8 @@ namespace Apache.Qpid.Proton.Types.Transactions
       public static readonly ulong DescriptorCode = 0x0000000000000032UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:discharge:list");
 
+      private IProtonBuffer txnId;
+
       public Discharge() : base() { }
 
       public Discharge(Discharge other) : this()
@@ -33,7 +35,19 @@ namespace Apache.Qpid.Proton.Types.Transactions
          Fail = other.Fail;
       }
 
-      public IProtonBuffer TxnId { get; set; }
+      public IProtonBuffer TxnId
+      {
+         get => txnId;
+         set
+         {
+            if (value == null)
+            {
+               throw new ArgumentNullException("The TXN Id value is mandatory and cannot be set to null");
+            }
+
+            txnId = value;
+         }
+      }
 
       public bool Fail { get; set; }
 

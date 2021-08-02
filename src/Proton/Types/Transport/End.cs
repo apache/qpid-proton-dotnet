@@ -28,9 +28,14 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public End() : base() { }
 
-      public End(End other) : this() => this.Error = (ErrorCondition)other.Error.Clone();
+      public End(End other) : this() => this.Error = (ErrorCondition)other.Error?.Clone();
 
       public object Clone()
+      {
+         return new End(this);
+      }
+
+      public End Copy()
       {
          return new End(this);
       }

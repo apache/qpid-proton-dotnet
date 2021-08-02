@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          return (uint)mode;
       }
 
-      public static TerminusDurability ValueOf(uint mode)
+      public static TerminusDurability Lookup(uint mode)
       {
          switch (mode)
          {

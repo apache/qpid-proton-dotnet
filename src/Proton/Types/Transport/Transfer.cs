@@ -192,7 +192,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return deliveryTag; }
          set
          {
-            modified |= DELIVERY_TAG;
+            if (value == null)
+            {
+               modified &= ~DELIVERY_TAG;
+            }
+            else
+            {
+               modified |= DELIVERY_TAG;
+            }
+
             deliveryTag = value;
          }
       }
@@ -309,10 +317,9 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       #endregion
 
-      public object Clone()
-      {
-         return new Transfer(this);
-      }
+      public object Clone() => new Transfer(this);
+
+      public Transfer Copy() => new Transfer(this);
 
       public PerformativeType Type => PerformativeType.Transfer;
 

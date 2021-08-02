@@ -153,7 +153,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return source; }
          set
          {
-            modified |= SOURCE;
+            if (value == null)
+            {
+               modified &= ~SOURCE;
+            }
+            else
+            {
+               modified |= SOURCE;
+            }
+
             source = value;
          }
       }
@@ -163,7 +171,12 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return target; }
          set
          {
-            if (value is Target || value is Coordinator)
+            if (value == null)
+            {
+               modified &= ~TARGET;
+               target = value;
+            }
+            else if (value is Target || value is Coordinator)
             {
                modified |= TARGET;
                target = value;
@@ -180,7 +193,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return unsettled; }
          set
          {
-            modified |= UNSETTLED;
+            if (value == null)
+            {
+               modified &= ~UNSETTLED;
+            }
+            else
+            {
+               modified |= UNSETTLED;
+            }
+
             unsettled = value;
          }
       }
@@ -220,7 +241,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return offeredCapabilities; }
          set
          {
-            modified |= OFFERED_CAPABILITIES;
+            if (value == null)
+            {
+               modified &= ~OFFERED_CAPABILITIES;
+            }
+            else
+            {
+               modified |= OFFERED_CAPABILITIES;
+            }
+
             offeredCapabilities = value;
          }
       }
@@ -230,7 +259,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return desiredCapabilities; }
          set
          {
-            modified |= DESIRED_CAPABILITIES;
+            if (value == null)
+            {
+               modified &= ~DESIRED_CAPABILITIES;
+            }
+            else
+            {
+               modified |= DESIRED_CAPABILITIES;
+            }
+
             desiredCapabilities = value;
          }
       }
@@ -240,7 +277,15 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return properties; }
          set
          {
-            modified |= PROPERTIES;
+            if (value == null)
+            {
+               modified &= ~PROPERTIES;
+            }
+            else
+            {
+               modified |= PROPERTIES;
+            }
+
             properties = value;
          }
       }
@@ -292,6 +337,11 @@ namespace Apache.Qpid.Proton.Types.Transport
          return new Attach(this);
       }
 
+      public Attach Copy()
+      {
+         return new Attach(this);
+      }
+
       public PerformativeType Type => PerformativeType.Attach;
 
       public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
@@ -301,21 +351,21 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public override string ToString()
       {
-        return "Attach{" +
-            "name='" + name + '\'' +
-            ", handle=" + (HasHandle() ? handle : "null") +
-            ", role=" + (HasRole() ? role : "null") +
-            ", sndSettleMode=" + (HasSenderSettleMode() ? sndSettleMode : "null") +
-            ", rcvSettleMode=" + (HasReceiverSettleMode() ? rcvSettleMode : "null") +
-            ", source=" + source +
-            ", target=" + target +
-            ", unsettled=" + unsettled +
-            ", incompleteUnsettled=" + (HasIncompleteUnsettled() ? incompleteUnsettled : "null") +
-            ", initialDeliveryCount=" + (HasInitialDeliveryCount() ? initialDeliveryCount : "null") +
-            ", maxMessageSize=" + maxMessageSize +
-            ", offeredCapabilities=" + (offeredCapabilities == null ? "null" : offeredCapabilities) +
-            ", desiredCapabilities=" + (desiredCapabilities == null ? "null" : desiredCapabilities) +
-            ", properties=" + properties + '}';
+         return "Attach{" +
+             "name='" + name + '\'' +
+             ", handle=" + (HasHandle() ? handle : "null") +
+             ", role=" + (HasRole() ? role : "null") +
+             ", sndSettleMode=" + (HasSenderSettleMode() ? sndSettleMode : "null") +
+             ", rcvSettleMode=" + (HasReceiverSettleMode() ? rcvSettleMode : "null") +
+             ", source=" + source +
+             ", target=" + target +
+             ", unsettled=" + unsettled +
+             ", incompleteUnsettled=" + (HasIncompleteUnsettled() ? incompleteUnsettled : "null") +
+             ", initialDeliveryCount=" + (HasInitialDeliveryCount() ? initialDeliveryCount : "null") +
+             ", maxMessageSize=" + maxMessageSize +
+             ", offeredCapabilities=" + (offeredCapabilities == null ? "null" : offeredCapabilities) +
+             ", desiredCapabilities=" + (desiredCapabilities == null ? "null" : desiredCapabilities) +
+             ", properties=" + properties + '}';
       }
    }
 }

@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Types.Transactions
@@ -36,6 +38,22 @@ namespace Apache.Qpid.Proton.Types.Transactions
       public object Clone()
       {
          return new Coordinator(this);
+      }
+
+      public Coordinator Copy()
+      {
+         return new Coordinator(this);
+      }
+
+      public override bool Equals(object obj)
+      {
+         return obj is Coordinator coordinator &&
+                EqualityComparer<Symbol[]>.Default.Equals(Capabilities, coordinator.Capabilities);
+      }
+
+      public override int GetHashCode()
+      {
+         return HashCode.Combine(Capabilities);
       }
 
       public override string ToString()

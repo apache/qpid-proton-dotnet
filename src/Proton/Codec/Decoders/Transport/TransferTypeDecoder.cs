@@ -120,7 +120,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
                   break;
                case 6:
                   byte rcvSettleMode = state.Decoder.ReadUnsignedByte(buffer, state) ?? 0;
-                  result.ReceiverSettleMode = ReceiverSettleModeExtension.ValueOf(rcvSettleMode);
+                  result.ReceiverSettleMode = ReceiverSettleModeExtension.Lookup(rcvSettleMode);
                   break;
                case 7:
                   result.DeliveryState = state.Decoder.ReadObject<IDeliveryState>(buffer, state);
@@ -231,7 +231,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
                   break;
                case 6:
                   byte rcvSettleMode = state.Decoder.ReadUnsignedByte(stream, state) ?? 0;
-                  result.ReceiverSettleMode = ReceiverSettleModeExtension.ValueOf(rcvSettleMode);
+                  result.ReceiverSettleMode = ReceiverSettleModeExtension.Lookup(rcvSettleMode);
                   break;
                case 7:
                   result.DeliveryState = state.Decoder.ReadObject<IDeliveryState>(stream, state);

@@ -102,7 +102,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
             switch (index)
             {
                case 0:
-                  result.Role = RoleExtension.ValueOf(state.Decoder.ReadBoolean(buffer, state) ?? false);
+                  result.Role = RoleExtension.Lookup(state.Decoder.ReadBoolean(buffer, state) ?? false);
                   break;
                case 1:
                   result.First = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
@@ -198,7 +198,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
             switch (index)
             {
                case 0:
-                  result.Role = RoleExtension.ValueOf(state.Decoder.ReadBoolean(stream, state) ?? false);
+                  result.Role = RoleExtension.Lookup(state.Decoder.ReadBoolean(stream, state) ?? false);
                   break;
                case 1:
                   result.First = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;

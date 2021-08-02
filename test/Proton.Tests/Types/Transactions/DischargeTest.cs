@@ -16,10 +16,36 @@
  */
 
 using System;
+using Apache.Qpid.Proton.Buffer;
+using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Types.Transactions
 {
-   public interface GlobalTxnId : ICloneable
+   [TestFixture]
+   public class DischargeTests
    {
+      [Test]
+      public void TestToStringOnEmptyObject()
+      {
+         Assert.IsNotNull(new Discharge().ToString());
+      }
+
+      [Test]
+      public void TestTxnId()
+      {
+         IProtonBuffer txnId = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 });
+         Discharge discharge = new Discharge();
+
+         Assert.IsNull(discharge.TxnId);
+         discharge.TxnId = txnId;
+         Assert.IsNotNull(discharge.TxnId);
+
+         try
+         {
+            discharge.TxnId = null;
+            Assert.Fail("The TXN field is mandatory and cannot be set to null");
+         }
+         catch (ArgumentNullException) { }
+      }
    }
 }
