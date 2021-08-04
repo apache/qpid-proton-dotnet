@@ -16,7 +16,7 @@
  */
 
 using System;
-using System.Text;
+using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          }
       }
 
-      internal ConstructorType ConstructorType { get; private set; }
+      internal ConstructorType ConstructorType { get; set; }
 
       public bool IsDescribed { get; init; }
 
@@ -105,7 +105,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          throw new NotImplementedException();
       }
 
-      public override int Encode(Span<byte> buffer)
+      public override int Encode(BinaryWriter writer)
       {
          // TODO:
          throw new NotImplementedException();

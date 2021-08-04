@@ -15,38 +15,31 @@
  * limitations under the License.
  */
 
-using System;
-using System.Text;
+using System.IO;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec
 {
-   public interface IElement
+   public sealed class NullElement : AtomicElement
    {
-      int Size { get; }
+      public NullElement(IElement parent, IElement prev) : base(parent, prev)
+      {
+      }
 
-      object Value { get; }
+      public override int Size => IsElementOfArray() ? 0 : 1;
 
-      DataType DataType { get; }
+      public override object Value => null;
 
-      int Encode(Span<byte> buffer);
+      public override DataType DataType => DataType.Null;
 
-      IElement Next { get; set; }
+      public override int Encode(BinaryWriter writer)
+      {
+         if (writer.IsWritable() && !IsElementOfArray())
+         {
+            writer.Write(((byte)EncodingCodes.Null));
+            return 1;
+         }
 
-      IElement Prev { get; set; }
-
-      IElement Child { get; set; }
-
-      IElement Parent { get; set; }
-
-      IElement ReplaceWith(IElement elt);
-
-      IElement AddChild(IElement element);
-
-      IElement CheckChild(IElement element);
-
-      bool CanEnter { get; }
-
-      void Render(StringBuilder sb);
-
+         return 0;
+      }
    }
 }

@@ -18,6 +18,7 @@
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 {
@@ -59,6 +60,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
       public void WriteTo(Span<byte> buffer)
       {
          underlying.CopyTo(buffer);
+      }
+
+      /// <summary>
+      /// Writes a copy of the Symbol bytes to the given BinaryWriter.
+      /// </summary>
+      /// <param name="writer">The writer to write the Symbol bytes to</param>
+      public void WriteTo(BinaryWriter writer)
+      {
+         writer.Write(underlying);
       }
 
       public override string ToString()

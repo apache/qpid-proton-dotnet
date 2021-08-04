@@ -18,6 +18,7 @@
 using System;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.IO;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec
 {
@@ -47,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       public abstract IElement CheckChild(IElement element);
 
-      public abstract int Encode(Span<byte> buffer);
+      public abstract int Encode(BinaryWriter writer);
 
       public void Render(StringBuilder sb)
       {
