@@ -23,10 +23,12 @@ using System.Diagnostics.CodeAnalysis;
 namespace Apache.Qpid.Proton.Utilities
 {
    /// <summary>
-   /// Simple Ring Queue implementation that has an enforced max size value.
+   /// A splay tree based dictionary implementation that provides fast access
+   /// to recently visited entries and offered enumeration based on the natural
+   /// ordering or comparer defined ordering of dictionary entries.
    /// </summary>
    /// <typeparam name="T">The type contained in the Queue</typeparam>
-   public class SplayedDictionary<K, V> : ICollection<KeyValuePair<K, V>>, IDictionary<K, V>, IEnumerable, IEnumerable<KeyValuePair<K, V>>
+   public class SplayedDictionary<K, V> : IDictionary, ICollection<KeyValuePair<K, V>>, IDictionary<K, V>, IEnumerable, IEnumerable<KeyValuePair<K, V>>
    {
       private IComparer<K> keyComparer = Comparer<K>.Default;
 
@@ -44,6 +46,11 @@ namespace Apache.Qpid.Proton.Utilities
       /// Tracked tree size to prevent traversals for size operations.
       /// </summary>
       protected int size;
+
+      /// <summary>
+      /// Provides a means of tracking modification during enumeration errors.
+      /// </summary>
+      protected int modCount;
 
       /// <summary>
       /// Cached collection object that provides access to the dictionary keys
@@ -78,18 +85,58 @@ namespace Apache.Qpid.Proton.Utilities
          this.keyComparer = comparer;
       }
 
+      /// <summary>
+      /// Create a new Splayed Dictionary instance that uses the give key comparer
+      /// instance to provide relative ordering of keys within the mapping.
+      /// </summary>
+      /// <param name="comparer">The IComparer instance to use to compare keys</param>
+      public SplayedDictionary(IDictionary<K, V> source)
+      {
+         if (source == null)
+         {
+            throw new ArgumentNullException("Provided source dictionary cannot be null");
+         }
+
+         foreach (KeyValuePair<K, V> entry in source)
+         {
+            Add(entry);
+         }
+      }
+
       #region Splayed Dictionary API implementations
 
       public int Count => size;
 
       public bool IsReadOnly => false;
 
+      public IComparer<K> Comparer => keyComparer;
+
+      public bool IsFixedSize => false;
+
+      public bool IsSynchronized => false;
+
+      public object SyncRoot => entryPool;
+
       public void Add(K key, V value)
       {
-         if (key is null)
-         {
-            throw new ArgumentNullException("Cannot add an entry with a null key");
-         }
+         TryAdd(key, value, false);
+      }
+
+      public void Add(KeyValuePair<K, V> item)
+      {
+         TryAdd(item.Key, item.Value, false);
+      }
+
+      public void Add(object key, object value)
+      {
+         TryAdd((K)key, (V)value, false);
+      }
+
+      private void TryAdd(K key, V value, bool allowUpdates)
+      {
+         CheckSuppliedKeyIsNotNull(key, "Cannot write to an entry with a null key");
+
+         bool entryAdded = true;
 
          if (root == null)
          {
@@ -100,7 +147,15 @@ namespace Apache.Qpid.Proton.Utilities
             root = Splay(root, key);
             if (root.KeyEquals(key))
             {
-               throw new ArgumentException("An entry with the given key already exists");
+               if (allowUpdates)
+               {
+                  root.Value = value;
+                  entryAdded = false;
+               }
+               else
+               {
+                  throw new ArgumentException("An entry with the given key already exists");
+               }
             }
             else
             {
@@ -117,19 +172,25 @@ namespace Apache.Qpid.Proton.Utilities
             }
          }
 
-         EntryAdded(root);
-         size++;
+         if (entryAdded)
+         {
+            EntryAdded(root);
+            size++;
+         }
+
+         modCount++;
       }
 
-      public void Add(KeyValuePair<K, V> item)
-      {
-         Add(item.Key, item.Value);
-      }
-
-      public void Clear()
+      public virtual void Clear()
       {
          root = null;
          size = 0;
+         modCount++;
+      }
+
+      public bool Contains(object key)
+      {
+         return ContainsKey((K)key);
       }
 
       public bool Contains(KeyValuePair<K, V> item)
@@ -160,7 +221,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public bool ContainsKey(K key)
       {
-         if (root == null)
+         if (root == null || key == null)
          {
             return false;
          }
@@ -174,7 +235,7 @@ namespace Apache.Qpid.Proton.Utilities
          return false;
       }
 
-      public void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
+      public virtual void CopyTo(KeyValuePair<K, V>[] array, int arrayIndex)
       {
          if (array == null)
          {
@@ -197,6 +258,34 @@ namespace Apache.Qpid.Proton.Utilities
          }
       }
 
+      public virtual void CopyTo(Array array, int arrayIndex)
+      {
+         if (array == null)
+         {
+            throw new ArgumentNullException("The provided array cannot be null");
+         }
+
+         if (arrayIndex < 0)
+         {
+            throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+         }
+
+         if (array.Length - arrayIndex > size)
+         {
+            throw new ArgumentException("Not enough space in array to store the dictionary entries");
+         }
+
+         for (SplayedEntry entry = FirstEntry(root); entry != null; entry = Successor(entry))
+         {
+            array.SetValue(entry.ToKeyValuePair(), arrayIndex++);
+         }
+      }
+
+      public void Remove(object key)
+      {
+         Remove((K)key);
+      }
+
       public bool Remove(K key)
       {
          bool removed = false;
@@ -210,10 +299,31 @@ namespace Apache.Qpid.Proton.Utilities
                // will now be the node matching that key.
                Delete(root);
                removed = true;
+               modCount++;
             }
          }
 
          return removed;
+      }
+
+      /// <summary>
+      /// Removes the first entry from the dictionary that contains the specified value
+      /// and returns true, if there is no entry with the given value this method returns
+      /// false.
+      /// </summary>
+      /// <param name="target">The value to search for in the entries</param>
+      /// <returns>true if an entry was removed or false if no match found</returns>
+      public bool RemoveValue(V target)
+      {
+         for (SplayedEntry e = FirstEntry(root); e != null; e = Successor(e))
+         {
+            if (e.ValueEquals(target))
+            {
+               Delete(e);
+               return true;
+            }
+         }
+         return false;
       }
 
       public bool Remove(KeyValuePair<K, V> item)
@@ -229,6 +339,7 @@ namespace Apache.Qpid.Proton.Utilities
                // will now be the node matching that key.
                Delete(root);
                removed = true;
+               modCount++;
             }
          }
 
@@ -237,10 +348,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public bool TryGetValue(K key, [MaybeNullWhen(false)] out V value)
       {
-         if (key is null)
-         {
-            throw new ArgumentNullException("Cannot get an entry with a null key");
-         }
+         CheckSuppliedKeyIsNotNull(key, "Cannot get an entry with a null key");
 
          bool result = false;
 
@@ -265,47 +373,73 @@ namespace Apache.Qpid.Proton.Utilities
          return result;
       }
 
-      IEnumerator IEnumerable.GetEnumerator()
-      {
-         throw new NotImplementedException();
-      }
-
-      public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
-      {
-         throw new NotImplementedException();
-      }
-
       public V this[K key]
       {
-         get => throw new NotImplementedException();
-         set => throw new NotImplementedException();
+         get
+         {
+            V result;
+
+            if (TryGetValue(key, out result))
+            {
+               return result;
+            }
+
+            throw new KeyNotFoundException("No entry exists for given key: " + key);
+         }
+
+         set => TryAdd(key, value, true);
       }
 
-      public ICollection<K> Keys
+      public object this[object key]
+      {
+         get => this[(K)key];
+         set => this[(K)key] = (V)value;
+      }
+
+      IEnumerator IEnumerable.GetEnumerator()
+      {
+         return this.GetEnumerator();
+      }
+
+      IDictionaryEnumerator IDictionary.GetEnumerator()
+      {
+         return (IDictionaryEnumerator)this.GetEnumerator();
+      }
+
+      public virtual IEnumerator<KeyValuePair<K, V>> GetEnumerator()
+      {
+         return new SplayedDictionaryEntryEnumerator(this);
+      }
+
+      public virtual ICollection<K> Keys
       {
          get
          {
             if (keySet == null)
             {
-               // TODO
+               keySet = new SplayedDictionaryKeys(this);
             }
 
             return keySet;
          }
       }
 
-      public ICollection<V> Values
+      public virtual ICollection<V> Values
       {
          get
          {
             if (values == null)
             {
-               // TODO
+               values = new SplayedDictionaryValues(this);
             }
 
             return values;
          }
       }
+
+      ICollection IDictionary.Keys => (ICollection)this.Keys;
+
+      ICollection IDictionary.Values => (ICollection)this.Values;
 
       #endregion
 
@@ -325,128 +459,326 @@ namespace Apache.Qpid.Proton.Utilities
 
       #region Dictionary Enumerators
 
-      private abstract class SplayedDictionaryEnumerator<TResult> : IEnumerator<TResult>
+      private abstract class SplayedDictionaryEnumerator<TResult> : IEnumerator<TResult>, IEnumerator
       {
+         protected readonly SplayedDictionary<K, V> parent;
+         protected readonly int expectedModCount;
+         protected SplayedEntry current;
+
+         public SplayedDictionaryEnumerator(SplayedDictionary<K, V> parent)
+         {
+            this.parent = parent;
+            this.expectedModCount = parent.modCount;
+            this.current = null;
+         }
+
          object IEnumerator.Current => this.Current;
 
          public abstract TResult Current { get; }
 
          public void Dispose()
          {
-            throw new NotImplementedException();
+            current = null;
          }
 
          public bool MoveNext()
          {
-            throw new NotImplementedException();
+            CheckNotModified();
+
+            if (current == null)
+            {
+               current = parent.FirstEntry(parent.root);
+            }
+            else
+            {
+               current = parent.Successor(current);
+            }
+
+            return current != null;
          }
 
          public void Reset()
          {
-            throw new NotImplementedException();
+            current = null;
+         }
+
+         protected void CheckNotModified()
+         {
+            if (expectedModCount != parent.modCount)
+            {
+               throw new InvalidOperationException("Parent Dictionary was modified during enumeration.");
+            }
          }
       }
 
       private sealed class SplayedDictionaryKeyEnumerator : SplayedDictionaryEnumerator<K>
       {
-         public override K Current => throw new NotImplementedException();
+         public SplayedDictionaryKeyEnumerator(SplayedDictionary<K, V> parent) : base(parent)
+         {
+         }
+
+         public override K Current
+         {
+            get
+            {
+               if (current != null)
+               {
+                  return current.Key;
+               }
+
+               throw new InvalidOperationException("Current position is undefined.");
+            }
+         }
       }
 
       private sealed class SplayedDictionaryValueEnumerator : SplayedDictionaryEnumerator<V>
       {
-         public override V Current => throw new NotImplementedException();
+         public SplayedDictionaryValueEnumerator(SplayedDictionary<K, V> parent) : base(parent)
+         {
+         }
+
+         public override V Current
+         {
+            get
+            {
+               if (current != null)
+               {
+                  return current.Value;
+               }
+
+               throw new InvalidOperationException("Current position is undefined.");
+            }
+         }
       }
 
-      private sealed class SplayedDictionaryEntryEnumerator : SplayedDictionaryEnumerator<KeyValuePair<K, V>>
+      private sealed class SplayedDictionaryEntryEnumerator : SplayedDictionaryEnumerator<KeyValuePair<K, V>>, IDictionaryEnumerator
       {
-         public override KeyValuePair<K, V> Current => throw new NotImplementedException();
+         public SplayedDictionaryEntryEnumerator(SplayedDictionary<K, V> parent) : base(parent)
+         {
+         }
+
+         public override KeyValuePair<K, V> Current =>
+            current?.ToKeyValuePair() ?? throw new InvalidOperationException("Current position is undefined.");
+
+         public DictionaryEntry Entry =>
+            current?.ToDictionaryEntry() ?? throw new InvalidOperationException("Current position is undefined.");
+
+         public object Key
+         {
+            get
+            {
+               if (current != null)
+               {
+                  return current.Key;
+               }
+
+               throw new InvalidOperationException("Current position is undefined.");
+            }
+         }
+
+         public object Value
+         {
+            get
+            {
+               if (current != null)
+               {
+                  return current.Value;
+               }
+
+               throw new InvalidOperationException("Current position is undefined.");
+            }
+         }
       }
 
       #endregion
 
       #region Dictionary Collection Views
 
-      private sealed class SplayedDictionaryValues : ICollection<V>
+      private sealed class SplayedDictionaryValues : ICollection<V>, ICollection
       {
-         public int Count => throw new NotImplementedException();
+         private readonly SplayedDictionary<K, V> parent;
 
-         public bool IsReadOnly => throw new NotImplementedException();
+         public SplayedDictionaryValues(SplayedDictionary<K, V> parent) : base()
+         {
+            this.parent = parent;
+         }
+
+         public int Count => parent.Count;
+
+         public bool IsReadOnly => parent.IsReadOnly;
+
+         public bool IsSynchronized => false;
+
+         public object SyncRoot => parent.entryPool;
 
          public void Add(V item)
          {
-            throw new NotImplementedException();
+            throw new NotSupportedException("Cannot add a value only entry to the parent Dictionary");
          }
 
          public void Clear()
          {
-            throw new NotImplementedException();
+            parent.Clear();
          }
 
          public bool Contains(V item)
          {
-            throw new NotImplementedException();
-         }
-
-         public void CopyTo(V[] array, int arrayIndex)
-         {
-            throw new NotImplementedException();
-         }
-
-         public IEnumerator<V> GetEnumerator()
-         {
-            throw new NotImplementedException();
+            return parent.ContainsValue(item);
          }
 
          public bool Remove(V item)
          {
-            throw new NotImplementedException();
+            return parent.RemoveValue(item);
+         }
+
+         public void CopyTo(V[] array, int arrayIndex)
+         {
+            if (array == null)
+            {
+               throw new ArgumentNullException("The provided array cannot be null");
+            }
+
+            if (arrayIndex < 0)
+            {
+               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            }
+
+            if (array.Length - arrayIndex > parent.size)
+            {
+               throw new ArgumentException("Not enough space in array to store the dictionary values");
+            }
+
+            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            {
+               array[arrayIndex++] = entry.Value;
+            }
+         }
+
+         public void CopyTo(Array array, int arrayIndex)
+         {
+            if (array == null)
+            {
+               throw new ArgumentNullException("The provided array cannot be null");
+            }
+
+            if (arrayIndex < 0)
+            {
+               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            }
+
+            if (array.Length - arrayIndex > parent.size)
+            {
+               throw new ArgumentException("Not enough space in array to store the dictionary values");
+            }
+
+            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            {
+               array.SetValue(entry.Value, arrayIndex++);
+            }
+         }
+
+         public IEnumerator<V> GetEnumerator()
+         {
+            return new SplayedDictionaryValueEnumerator(parent);
          }
 
          IEnumerator IEnumerable.GetEnumerator()
          {
-            throw new NotImplementedException();
+            return new SplayedDictionaryValueEnumerator(parent);
          }
       }
 
-      private sealed class SplayedDictionaryKeys : ICollection<K>
+      private sealed class SplayedDictionaryKeys : ICollection<K>, ICollection
       {
-         public int Count => throw new NotImplementedException();
+         private readonly SplayedDictionary<K, V> parent;
 
-         public bool IsReadOnly => throw new NotImplementedException();
+         public SplayedDictionaryKeys(SplayedDictionary<K, V> parent) : base()
+         {
+            this.parent = parent;
+         }
+
+         public int Count => parent.Count;
+
+         public bool IsReadOnly => parent.IsReadOnly;
+
+         public bool IsSynchronized => false;
+
+         public object SyncRoot => parent.entryPool;
 
          public void Add(K item)
          {
-            throw new NotImplementedException();
+            throw new NotSupportedException("Cannot add a key only entry to the parent Dictionary");
          }
 
          public void Clear()
          {
-            throw new NotImplementedException();
+            parent.Clear();
          }
 
          public bool Contains(K item)
          {
-            throw new NotImplementedException();
+            return parent.ContainsKey(item);
          }
 
          public void CopyTo(K[] array, int arrayIndex)
          {
-            throw new NotImplementedException();
+            if (array == null)
+            {
+               throw new ArgumentNullException("The provided array cannot be null");
+            }
+
+            if (arrayIndex < 0)
+            {
+               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            }
+
+            if (array.Length - arrayIndex > parent.size)
+            {
+               throw new ArgumentException("Not enough space in array to store the dictionary keys");
+            }
+
+            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            {
+               array[arrayIndex++] = entry.Key;
+            }
+         }
+
+         public void CopyTo(Array array, int arrayIndex)
+         {
+            if (array == null)
+            {
+               throw new ArgumentNullException("The provided array cannot be null");
+            }
+
+            if (arrayIndex < 0)
+            {
+               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            }
+
+            if (array.Length - arrayIndex > parent.size)
+            {
+               throw new ArgumentException("Not enough space in array to store the dictionary keys");
+            }
+
+            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            {
+               array.SetValue(entry.Key, arrayIndex++);
+            }
          }
 
          public bool Remove(K item)
          {
-            throw new NotImplementedException();
+            return parent.Remove(item);
          }
 
          public IEnumerator<K> GetEnumerator()
          {
-            throw new NotImplementedException();
+            return new SplayedDictionaryKeyEnumerator(parent);
          }
 
          IEnumerator IEnumerable.GetEnumerator()
          {
-            throw new NotImplementedException();
+            return new SplayedDictionaryKeyEnumerator(parent);
          }
       }
 
@@ -800,6 +1132,14 @@ namespace Apache.Qpid.Proton.Utilities
          return new SplayedEntry();
       }
 
+      private static void CheckSuppliedKeyIsNotNull(in K key, in string error)
+      {
+         if (key is null)
+         {
+            throw new ArgumentNullException(error);
+         }
+      }
+
       #endregion
 
       #region Splayed Dictionary Entry object which forms the tree structure.
@@ -832,7 +1172,11 @@ namespace Apache.Qpid.Proton.Utilities
 
          public K Key => key;
 
-         public V Value => value;
+         public V Value
+         {
+            get => value;
+            set => this.value = value;
+         }
 
          internal bool KeyEquals(K other) => EqualityComparer<K>.Default.Equals(other, key);
 
@@ -847,6 +1191,11 @@ namespace Apache.Qpid.Proton.Utilities
          internal KeyValuePair<K, V> ToKeyValuePair()
          {
             return new KeyValuePair<K, V>(key, value);
+         }
+
+         internal DictionaryEntry ToDictionaryEntry()
+         {
+            return new DictionaryEntry(key, value);
          }
       }
 

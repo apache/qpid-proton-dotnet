@@ -21,6 +21,7 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Utilities
 {
+   [TestFixture]
    public class RingQueueTests
    {
       protected int seed;
