@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
          Stream stream = new ProtonBufferInputStream(buffer);
 
-         IDeliveryTag tag = new ProtonDeliveryTag(new byte[] { 0, 1, 2 });
+         IDeliveryTag tag = new DeliveryTag(new byte[] { 0, 1, 2 });
 
          Random random = new Random(Environment.TickCount);
 
@@ -133,7 +133,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
          Stream stream = new ProtonBufferInputStream(buffer);
 
-         IDeliveryTag tag = new ProtonDeliveryTag(new byte[] { 0, 1, 2 });
+         IDeliveryTag tag = new DeliveryTag(new byte[] { 0, 1, 2 });
 
          Transfer input = new Transfer();
 
@@ -357,9 +357,9 @@ namespace Apache.Qpid.Proton.Codec.Security
          array[1] = new Transfer();
          array[2] = new Transfer();
 
-         IDeliveryTag tag1 = new ProtonDeliveryTag(new byte[] { 0 });
-         IDeliveryTag tag2 = new ProtonDeliveryTag(new byte[] { 1 });
-         IDeliveryTag tag3 = new ProtonDeliveryTag(new byte[] { 2 });
+         IDeliveryTag tag1 = new DeliveryTag(new byte[] { 0 });
+         IDeliveryTag tag2 = new DeliveryTag(new byte[] { 1 });
+         IDeliveryTag tag3 = new DeliveryTag(new byte[] { 2 });
 
          array[0].Handle = 0;
          array[0].DeliveryTag = tag1;

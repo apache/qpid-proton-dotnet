@@ -16,17 +16,21 @@
  */
 
 using System;
+using System.Linq;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Types
 {
+   /// <summary>
+   /// A representation of the byte value that comprises the delivery tag
+   /// that is assigned to the first transfer frame of each new delivery.
+   /// </summary>
    public sealed class DeliveryTag : IDeliveryTag
    {
       private static readonly byte[] EmptyTagArray = new byte[0];
 
+      private IProtonBuffer tagBuffer;
       private byte[] tagBytes;
-      private IProtonBuffer tagView;
-      private int hashCode;
 
       public DeliveryTag()
       {
@@ -37,89 +41,109 @@ namespace Apache.Qpid.Proton.Types
       {
          if (tagBytes == null)
          {
-            throw new ArgumentNullException("Cannot create a tag with null bytes");
+            throw new ArgumentNullException("Provided tag bytes cannot be null");
          }
 
          this.tagBytes = tagBytes;
       }
 
-      public DeliveryTag(IProtonBuffer tagBytes)
+      public DeliveryTag(IProtonBuffer tagBuffer)
       {
-         if (tagBytes == null)
+         if (tagBuffer == null)
          {
-            throw new ArgumentNullException("Cannot create a tag with null bytes");
+            throw new ArgumentNullException("Provided tag buffer cannot be null");
          }
 
-         this.tagBytes = new byte[tagBytes.ReadableBytes];
-         tagBytes.CopyInto(tagBytes.ReadOffset, this.tagBytes, 0, (int) tagBytes.ReadableBytes);
-
-         this.tagView = tagBytes;
+         this.tagBuffer = tagBuffer;
       }
 
-      public int Length => tagBytes.Length;
+      public object Clone()
+      {
+         if (tagBuffer != null)
+         {
+            return new DeliveryTag(tagBuffer.Copy());
+         }
+         else
+         {
+            byte[] tagBytesCopy = new byte[tagBytes.Length];
+            Array.Copy(tagBytes, tagBytesCopy, tagBytes.Length);
+            return new DeliveryTag(tagBytesCopy);
+         }
+      }
 
-      public byte[] TagBytes => (byte[])tagBytes.Clone();
+      public int Length => (int)(tagBytes != null ? tagBytes.Length : tagBuffer.ReadableBytes);
+
+      public byte[] TagBytes
+      {
+         get
+         {
+            if (tagBytes != null)
+            {
+               return tagBytes;
+            }
+            else
+            {
+               byte[] tagBytesCopy = new byte[tagBuffer.ReadableBytes];
+               tagBuffer.CopyInto(tagBuffer.ReadOffset, tagBytesCopy, 0, tagBytesCopy.LongLength);
+               return tagBytesCopy;
+            }
+         }
+      }
 
       public IProtonBuffer TagBuffer
       {
          get
          {
-            if (tagView == null)
+            if (tagBytes != null)
             {
-               tagView = ProtonByteBufferAllocator.Instance.Wrap(tagBytes);
+               return ProtonByteBufferAllocator.Instance.Wrap(tagBytes);
             }
-
-            tagView.ReadOffset = 0;
-            tagView.WriteOffset = tagBytes.Length;
-
-            return tagView;
-         }
-      }
-
-      public object Clone()
-      {
-         return new DeliveryTag((byte[])this.tagBytes.Clone());
-      }
-
-      public void Release()
-      {
-      }
-
-      public void WriteTo(IProtonBuffer buffer)
-      {
-         buffer.WriteBytes(tagBytes);
-      }
-
-      public override string ToString()
-      {
-         return "DeliveryTag: {" + tagBytes + "}";
-      }
-
-      public override int GetHashCode()
-      {
-         if (hashCode == 0)
-         {
-            hashCode = TagBuffer.GetHashCode();
-         }
-
-         return hashCode;
-      }
-
-      public override bool Equals(object obj)
-      {
-         if (obj is not IDeliveryTag)
-         {
-            return false;
-         }
-         else
-         {
-            return this.Equals((IDeliveryTag)obj);
+            else
+            {
+               return tagBuffer;
+            }
          }
       }
 
       public bool Equals(IDeliveryTag other)
       {
-         return Array.Equals(tagBytes, other?.TagBytes);
+         if (this == other)
+         {
+            return true;
+         }
+         else if (tagBuffer != null)
+         {
+            return tagBuffer.Equals(other.TagBuffer);
+         }
+         else
+         {
+            return tagBytes.SequenceEqual(other.TagBytes);
+         }
+      }
+
+      public void Release()
+      {
+         // Nothing to do in this implementation.
+      }
+
+      public void WriteTo(IProtonBuffer buffer)
+      {
+         buffer.EnsureWritable(Length);
+
+         if (tagBytes != null)
+         {
+            buffer.WriteBytes(tagBytes);
+         }
+         else
+         {
+            tagBuffer.CopyInto(tagBuffer.ReadableBytes, buffer, buffer.WriteOffset, tagBuffer.ReadableBytes);
+            buffer.WriteOffset += Length;
+         }
+      }
+
+      public override String ToString()
+      {
+         return "DeliveryTag: {" + TagBuffer + "}";
       }
    }
 }

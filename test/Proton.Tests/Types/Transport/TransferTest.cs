@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Types.Transactions
          transfer.Aborted = true;
          transfer.Batchable = true;
          transfer.DeliveryId = 1;
-         transfer.DeliveryTag = new ProtonDeliveryTag(new byte[] { 1 });
+         transfer.DeliveryTag = new DeliveryTag(new byte[] { 1 });
          transfer.Handle = 2;
          transfer.MessageFormat = 12;
          transfer.More = true;
@@ -114,7 +114,7 @@ namespace Apache.Qpid.Proton.Types.Transactions
          Assert.IsFalse(transfer.HasSettled());
          Assert.IsFalse(transfer.HasState());
 
-         transfer.DeliveryTag = new ProtonDeliveryTag(new byte[] { 1 });
+         transfer.DeliveryTag = new DeliveryTag(new byte[] { 1 });
          Assert.IsTrue(transfer.HasDeliveryTag());
          transfer.DeliveryTag = null;
          Assert.IsFalse(transfer.HasDeliveryTag());
@@ -133,7 +133,7 @@ namespace Apache.Qpid.Proton.Types.Transactions
          transfer.Aborted = true;
          transfer.Batchable = true;
          transfer.DeliveryId = 1;
-         transfer.DeliveryTag = new ProtonDeliveryTag(new byte[] { 1 });
+         transfer.DeliveryTag = new DeliveryTag(new byte[] { 1 });
          transfer.Handle = 2;
          transfer.MessageFormat = 12;
          transfer.More = true;
