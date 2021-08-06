@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec
 {
-   public sealed class DescribedType : IDescribedType
+   public class DescribedType : IDescribedType
    {
       public DescribedType(object descriptor, object described)
       {

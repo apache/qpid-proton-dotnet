@@ -15,27 +15,13 @@
  * limitations under the License.
  */
 
-using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
-
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public abstract class MapDescribedType : IDescribedType
+   public enum TerminusExpiryPolicy
    {
-      private readonly IDictionary fields = new Hashtable();
-
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
-
-      public object Described => Map;
-
-      public IDictionary Map => fields;
-
-      public override string ToString()
-      {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
-      }
+      LinkDetach,
+      SessionEnd,
+      ConnectionClose,
+      Never
    }
 }

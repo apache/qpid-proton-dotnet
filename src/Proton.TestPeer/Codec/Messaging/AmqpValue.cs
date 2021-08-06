@@ -15,27 +15,29 @@
  * limitations under the License.
  */
 
-using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public abstract class MapDescribedType : IDescribedType
+   public sealed class AmqpValue : IDescribedType
    {
-      private readonly IDictionary fields = new Hashtable();
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000077UL;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:amqp-value:*");
 
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
+      private object described;
 
-      public object Described => Map;
+      public AmqpValue(object described)
+      {
+         this.described = described;
+      }
 
-      public IDictionary Map => fields;
+      public object Descriptor => DESCRIPTOR_SYMBOL;
+
+      public object Described => described;
 
       public override string ToString()
       {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
+        return "AmqpValue: [ " + Described + " ]";
       }
    }
 }

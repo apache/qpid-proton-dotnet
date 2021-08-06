@@ -18,24 +18,22 @@
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public abstract class MapDescribedType : IDescribedType
+   public sealed class DeleteOnNoMessages : ListDescribedType
    {
-      private readonly IDictionary fields = new Hashtable();
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:delete-on-no-messages:list");
+      public static readonly ulong DESCRIPTOR_CODE = 0x000000000000002dUL;
 
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
-
-      public object Described => Map;
-
-      public IDictionary Map => fields;
-
-      public override string ToString()
+      public DeleteOnNoMessages() : base(0)
       {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
       }
+
+      public DeleteOnNoMessages(object described) : base(0, (IList)described)
+      {
+      }
+
+      public override object Descriptor => DESCRIPTOR_SYMBOL;
+
    }
 }

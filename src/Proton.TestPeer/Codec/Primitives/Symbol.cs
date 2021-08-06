@@ -39,10 +39,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
          hashCode = 32;
       }
 
-      private Symbol(byte[] buffer)
+      public Symbol(byte[] buffer)
       {
          underlying = buffer;
          hashCode = buffer.GetHashCode();
+      }
+
+      public Symbol(string stringView)
+      {
+         symbolString = stringView;
+         underlying = new UTF8Encoding().GetBytes(stringView);
+         hashCode = underlying.GetHashCode();
       }
 
       /// <summary>

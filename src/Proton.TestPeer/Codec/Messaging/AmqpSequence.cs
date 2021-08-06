@@ -18,24 +18,27 @@
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public abstract class MapDescribedType : IDescribedType
+   public sealed class AmqpSequence : IDescribedType
    {
-      private readonly IDictionary fields = new Hashtable();
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000076UL;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:amqp-sequence:list");
 
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
+      private IList described;
 
-      public object Described => Map;
+      public AmqpSequence(IList described) : base()
+      {
+         this.described = described;
+      }
 
-      public IDictionary Map => fields;
+      public object Descriptor => DESCRIPTOR_SYMBOL;
+
+      public object Described => described;
 
       public override string ToString()
       {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
+         return "AmqpSequence: [ " + Described + " ]";
       }
    }
 }

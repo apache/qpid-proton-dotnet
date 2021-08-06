@@ -15,27 +15,31 @@
  * limitations under the License.
  */
 
-using System.Collections;
+using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public abstract class MapDescribedType : IDescribedType
+   public sealed class MessageAnnotations : MapDescribedType
    {
-      private readonly IDictionary fields = new Hashtable();
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000072UL;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:message-annotations:map");
 
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
+      public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public object Described => Map;
-
-      public IDictionary Map => fields;
-
-      public override string ToString()
+      public void setSymbolKeyedAnnotation(string name, object value)
       {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
+         Map.Add(new Symbol(name), value);
+      }
+
+      public void setSymbolKeyedAnnotation(Symbol name, object value)
+      {
+         Map.Add(name, value);
+      }
+
+      public void setUnsignedLongKeyedAnnotation(ulong name, object value)
+      {
+         throw new NotSupportedException("UnsignedLong keys are currently reserved");
       }
    }
 }

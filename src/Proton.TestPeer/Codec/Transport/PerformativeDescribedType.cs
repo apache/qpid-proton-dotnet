@@ -15,27 +15,33 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
-   public abstract class MapDescribedType : IDescribedType
+   public abstract class PerformativeDescribedType : ListDescribedType
    {
-      private readonly IDictionary fields = new Hashtable();
+      protected PerformativeDescribedType(int numberOfFields) : base(numberOfFields)
+      {
+      }
 
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
+      protected PerformativeDescribedType(int numberOfFields, IList described) : base(numberOfFields, described)
+      {
+      }
 
-      public object Described => Map;
+      public abstract PerformativeType Type { get; }
 
-      public IDictionary Map => fields;
+      public abstract void Invoke<T>(IPerformativeHandler<T> handler, int frameSize, Span<byte> payload, int channel, T context);
+
+      public virtual object FieldValueOrSpecDefault(int index)
+      {
+         return this[index];
+      }
 
       public override string ToString()
       {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
+         return Type + " " + List;
       }
    }
 }

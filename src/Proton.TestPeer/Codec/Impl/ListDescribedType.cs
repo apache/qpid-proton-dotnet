@@ -135,19 +135,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          }
       }
 
-      protected IList GetList()
-      {
-         return fields;
-      }
+      protected IList List => fields;
 
-      protected Object[] GetFields()
-      {
-         return fields.ToArray();
-      }
+      protected Object[] Fields => fields.ToArray();
 
       public override string ToString()
       {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + GetList() + "]";
+         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + List + "]";
       }
    }
 }

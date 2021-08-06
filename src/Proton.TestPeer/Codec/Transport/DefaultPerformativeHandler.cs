@@ -15,27 +15,17 @@
  * limitations under the License.
  */
 
-using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using System;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
-   public abstract class MapDescribedType : IDescribedType
+   /// <summary>
+   /// Default Handler Interface that can be used to implement a visitor pattern of
+   /// processing the AMQP performative types as they are sent or received, the subclass
+   /// implements only the method it needs to the rest default to no-ops
+   /// </summary>
+   /// <typeparam name="T">The type of the context used in the processing</typeparam>
+   public abstract class DefaultPerformativeHandler<T>
    {
-      private readonly IDictionary fields = new Hashtable();
-
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
-
-      public object Described => Map;
-
-      public IDictionary Map => fields;
-
-      public override string ToString()
-      {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
-      }
    }
 }
