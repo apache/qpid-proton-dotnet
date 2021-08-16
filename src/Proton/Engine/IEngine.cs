@@ -33,14 +33,14 @@ namespace Apache.Qpid.Proton.Engine
       /// shutdown yet. Will return false until start is called on the engine.
       /// </summary>
       /// <returns>true if the engine is currently running.</returns>
-      bool IsRunning();
+      bool IsRunning { get; }
 
       /// <summary>
       /// Checks if the engine has been shutdown which is a terminal state
       /// after which no future engine state changes can occur.
       /// </summary>
       /// <returns></returns>
-      bool IsShutdown();
+      bool IsShutdown { get; }
 
       /// <summary>
       /// Checks if the engine has entered a failed state either by a call to the
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Engine
       /// An engine that reports failed will stop after a call to shutdown.
       /// </summary>
       /// <returns>true if the engine is in a failed state</returns>
-      bool IsFailed();
+      bool IsFailed { get; }
 
       /// <summary>
       /// Provides an Exception that has information regarding the cause of an
