@@ -18,6 +18,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transport;
 using Microsoft.Extensions.Caching.Memory;
@@ -62,122 +64,540 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          this.localOpen.MaxFrameSize = ProtonConstants.DefaultMaxAmqpFrameSize;
       }
 
-      public ConnectionState ConnectionState => localState;
-
       public override IConnection Open()
       {
-         throw new NotImplementedException();
+         if (ConnectionState == ConnectionState.Idle)
+         {
+            engine.CheckShutdownOrFailed("Cannot open a connection when Engine is shutdown or failed.");
+            localState = ConnectionState.Active;
+            try
+            {
+               SyncLocalStateWithRemote();
+            }
+            finally
+            {
+               FireLocalOpen();
+            }
+         }
+
+         return this;
       }
 
       public override IConnection Close()
       {
-         throw new NotImplementedException();
+         if (ConnectionState == ConnectionState.Active)
+         {
+            localState = ConnectionState.Closed;
+            try
+            {
+               engine.CheckFailed("Connection close called while engine .");
+               SyncLocalStateWithRemote();
+            }
+            finally
+            {
+               foreach (ProtonSession session in AllSessions())
+               {
+                  session.HandleConnectionLocallyClosed(this);
+               }
+               FireLocalClose();
+            }
+         }
+
+         return this;
       }
 
       public IConnection Negotiate()
       {
-         throw new NotImplementedException();
+         return Negotiate((header) =>
+         {
+            // TODO : LOG.trace("Negotiation completed with remote returning AMQP Header: {}", header);
+         });
       }
 
       public IConnection Negotiate(in Action<AmqpHeader> remoteAMQPHeaderHandler)
       {
-         throw new NotImplementedException();
-      }
+         if (remoteAMQPHeaderHandler == null)
+         {
+            throw new ArgumentNullException("Provided AMQP Header received handler cannot be null");
+         }
 
-      public string ContainerId { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+         CheckConnectionClosed("Cannot start header negotiation on a closed connection");
 
-      public string RemoteContainerId => throw new NotImplementedException();
+         if (remoteHeader != null)
+         {
+            remoteAMQPHeaderHandler.Invoke(remoteHeader);
+         }
+         else
+         {
+            remoteHeaderHandler = remoteAMQPHeaderHandler;
+         }
 
-      public string Hostname { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+         SyncLocalStateWithRemote();
 
-      public string RemoteHostname => throw new NotImplementedException();
-
-      public ushort ChannelMax { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-      public ushort RemoteChannelMax => throw new NotImplementedException();
-
-      public uint MaxFrameSize { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-      public ushort RemoteMaxFrameSize => throw new NotImplementedException();
-
-      public uint IdleTimeout { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-      public ushort RemoteIdleTimeout => throw new NotImplementedException();
-
-      public IEnumerator<ISession> Sessions => throw new NotImplementedException();
-
-      public override bool IsLocallyOpen => throw new NotImplementedException();
-
-      public override bool IsLocallyClosed => throw new NotImplementedException();
-
-      public override bool IsRemotelyOpen => throw new NotImplementedException();
-
-      public override bool IsRemotelyClosed => throw new NotImplementedException();
-
-      public override Symbol[] OfferedCapabilities { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public override Symbol[] DesiredCapabilities { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-      public override Symbol[] RemoteOfferedCapabilities => throw new NotImplementedException();
-
-      public override Symbol[] RemoteDesiredCapabilities => throw new NotImplementedException();
-
-      public override IDictionary<Symbol, object> Properties { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-      public override IDictionary<Symbol, object> RemoteProperties => throw new NotImplementedException();
-
-      public override bool Equals(object obj)
-      {
-         return base.Equals(obj);
-      }
-
-      public override int GetHashCode()
-      {
-         return base.GetHashCode();
-      }
-
-      public IConnection ReceiverOpenedHandler(Action<IReceiver> handler)
-      {
-         throw new NotImplementedException();
-      }
-
-      public IConnection SenderOpenedHandler(Action<ISender> handler)
-      {
-         throw new NotImplementedException();
-      }
-
-      public ISession Session()
-      {
-         throw new NotImplementedException();
-      }
-
-      public IConnection SessionOpenedHandler(Action<ISession> handler)
-      {
-         throw new NotImplementedException();
+         return this;
       }
 
       public long Tick(long current)
       {
-         throw new NotImplementedException();
+         CheckConnectionClosed("Cannot call tick on an already closed Connection");
+         return engine.Tick(current);
       }
 
       public IConnection TickAuto(in TaskScheduler scheduler)
       {
-         throw new NotImplementedException();
+         CheckConnectionClosed("Cannot call tickAuto on an already closed Connection");
+         engine.TickAuto(scheduler);
+         return this;
       }
 
-      public override string ToString()
+      public ISession Session()
       {
-         return base.ToString();
+         CheckConnectionClosed("Cannot create a Session from a Connection that is already closed");
+
+         ushort localChannel = FindFreeLocalChannel();
+         ProtonSession newSession = new ProtonSession(this, localChannel);
+         localSessions.Add(localChannel, newSession);
+
+         return newSession;
+      }
+
+      public ConnectionState ConnectionState => localState;
+
+      public ConnectionState RemoteConnectionState => remoteState;
+
+      public override bool IsLocallyOpen => ConnectionState == ConnectionState.Active;
+
+      public override bool IsLocallyClosed => ConnectionState == ConnectionState.Closed;
+
+      public override bool IsRemotelyOpen => RemoteConnectionState == ConnectionState.Active;
+
+      public override bool IsRemotelyClosed => RemoteConnectionState == ConnectionState.Closed;
+
+      public string ContainerId
+      {
+         get => localOpen.ContainerId;
+         set
+         {
+            CheckNotOpened("Cannot set Container Id on already opened Connection");
+            localOpen.ContainerId = value;
+         }
+      }
+
+      public string RemoteContainerId => remoteOpen?.ContainerId;
+
+      public string Hostname
+      {
+         get => localOpen.Hostname;
+         set
+         {
+            CheckNotOpened("Cannot set Host name on already opened Connection");
+            localOpen.Hostname = value;
+         }
+      }
+
+      public string RemoteHostname => remoteOpen?.Hostname;
+
+      public ushort ChannelMax
+      {
+         get => localOpen.ChannelMax;
+         set
+         {
+            CheckNotOpened("Cannot set Channel Max on already opened Connection");
+            localOpen.ChannelMax = value;
+         }
+      }
+
+      public ushort RemoteChannelMax => remoteOpen?.ChannelMax ?? 0;
+
+      public uint MaxFrameSize
+      {
+         get => localOpen.MaxFrameSize;
+         set
+         {
+            CheckNotOpened("Cannot set Max Frame Size on already opened Connection");
+
+            // We are specifically limiting max frame size to 2GB here as our buffers implementations
+            // cannot handle anything larger so we must protect them from larger frames.
+            if (value > int.MaxValue)
+            {
+               throw new ArgumentOutOfRangeException(string.Format(
+                   "Given max frame size value {0} larger than this implementations limit of {1}",
+                   value, int.MaxValue));
+            }
+
+            localOpen.MaxFrameSize = value;
+         }
+      }
+
+      public uint RemoteMaxFrameSize => remoteOpen?.MaxFrameSize ?? 0;
+
+      public uint IdleTimeout
+      {
+         get => localOpen.IdleTimeout;
+         set
+         {
+            CheckNotOpened("Cannot set Idle Timeout on already opened Connection");
+            localOpen.IdleTimeout = value;
+         }
+      }
+
+      public uint RemoteIdleTimeout => remoteOpen?.IdleTimeout ?? 0;
+
+      public override Symbol[] OfferedCapabilities
+      {
+         get => (Symbol[])(localOpen.OfferedCapabilities?.Clone());
+         set
+         {
+            CheckNotOpened("Cannot set offered capabilities on already opened Connection");
+            localOpen.OfferedCapabilities = (Symbol[])(value?.Clone());
+         }
+      }
+
+      public override Symbol[] RemoteOfferedCapabilities => (Symbol[])(remoteOpen?.OfferedCapabilities?.Clone());
+
+      public override Symbol[] DesiredCapabilities
+      {
+         get => (Symbol[])(localOpen.DesiredCapabilities?.Clone());
+         set
+         {
+            CheckNotOpened("Cannot set desired capabilities on already opened Connection");
+            localOpen.DesiredCapabilities = (Symbol[])(value?.Clone());
+         }
+      }
+
+      public override Symbol[] RemoteDesiredCapabilities => (Symbol[])(remoteOpen?.DesiredCapabilities?.Clone());
+
+      public override IReadOnlyDictionary<Symbol, object> Properties
+      {
+         get
+         {
+            if (localOpen.Properties != null)
+            {
+               return new Dictionary<Symbol, object>(localOpen.Properties);
+            }
+            else
+            {
+               return null;
+            }
+         }
+         set
+         {
+            CheckNotOpened("Cannot set Properties on already opened Connection");
+            if (value != null && value.Count > 0)
+            {
+               localOpen.Properties = new Dictionary<Symbol, object>(value);
+            }
+         }
+      }
+
+      public override IReadOnlyDictionary<Symbol, object> RemoteProperties
+      {
+         get
+         {
+            if (remoteOpen != null && remoteOpen.Properties != null)
+            {
+               return new Dictionary<Symbol, object>(remoteOpen.Properties);
+            }
+            else
+            {
+               return null;
+            }
+         }
+      }
+
+      public ICollection<ISession> Sessions
+      {
+         get
+         {
+            ISet<ISession> result;
+
+            if (localSessions.Count == 0 && remoteSessions.Count == 0)
+            {
+               result = new HashSet<ISession>();
+            }
+            else
+            {
+               result = new HashSet<ISession>(localSessions.Values);
+               foreach (ProtonSession session in remoteSessions.Values)
+               {
+                  result.Add(session);
+               }
+            }
+
+            return result;
+         }
+      }
+
+      public IConnection SessionOpenedHandler(Action<ISession> handler)
+      {
+         this.remoteSessionOpenEventHandler = handler;
+         return this;
+      }
+
+      public IConnection ReceiverOpenedHandler(Action<IReceiver> handler)
+      {
+         this.remoteReceiverOpenEventHandler = handler;
+         return this;
+      }
+
+      public IConnection SenderOpenedHandler(Action<ISender> handler)
+      {
+         this.remoteSenderOpenEventHandler = handler;
+         return this;
       }
 
       public IConnection TransactionManagerOpenedHandler(Action<ITransactionManager> handler)
       {
-         throw new NotImplementedException();
+         this.remoteTxnManagerOpenEventHandler = handler;
+         return this;
+      }
+
+      #region Event Handlers for AMQP Performatives
+
+      public void HandleAMQPHeader(AmqpHeader header, ProtonEngine context)
+      {
+         remoteHeader = header;
+
+         if (remoteHeaderHandler != null)
+         {
+            remoteHeaderHandler.Invoke(remoteHeader);
+            remoteHeaderHandler = null;
+         }
+
+         SyncLocalStateWithRemote();
+      }
+
+      public void HandleSASLHeader(AmqpHeader header, ProtonEngine context)
+      {
+         context.EngineFailed(new ProtocolViolationException("Received unexpected SASL Header"));
+      }
+
+      public void HandleOpen(Open open, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         if (remoteOpen != null)
+         {
+            context.EngineFailed(new ProtocolViolationException("Received second Open for Connection from remote"));
+            return;
+         }
+
+         remoteState = ConnectionState.Active;
+         remoteOpen = open;
+
+         FireRemoteOpen();
+      }
+
+      public void HandleClose(Close close, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         remoteState = ConnectionState.Closed;
+         RemoteCondition = close.Error.Copy();
+
+         foreach(ProtonSession session in AllSessions())
+         {
+            session.HandleConnectionRemotelyClosed(this);
+         }
+
+         FireRemoteClose();
+      }
+
+      #endregion
+
+      #region Internal and Private Connection APIs
+
+      internal void HandleEngineStarted(ProtonEngine protonEngine)
+      {
+         SyncLocalStateWithRemote();
+      }
+
+      internal void HandleEngineShutdown(ProtonEngine protonEngine)
+      {
+         try
+         {
+            FireEngineShutdown();
+         }
+         catch (Exception) { }
+
+         foreach (ProtonSession session in AllSessions())
+         {
+            session.HandleEngineShutdown(protonEngine);
+         }
+      }
+
+      internal void HandleEngineFailed(ProtonEngine protonEngine, Exception cause)
+      {
+         if (localOpenSent && !localCloseSent)
+         {
+            localCloseSent = true;
+
+            try
+            {
+               if (ErrorCondition == null)
+               {
+                  ErrorCondition = ErrorConditionFromFailureCause(cause);
+               }
+
+               Close forcedClose = new Close();
+               forcedClose.Error = ErrorCondition;
+
+               engine.FireWrite(forcedClose, 0);
+            }
+            catch (Exception) { }
+         }
       }
 
       internal override IConnection Self()
       {
          return this;
       }
+
+      private void CheckNotOpened(String errorMessage)
+      {
+         if (localState > ConnectionState.Idle)
+         {
+            throw new InvalidOperationException(errorMessage);
+         }
+      }
+
+      private void CheckConnectionClosed(String errorMessage)
+      {
+         if (IsLocallyClosed || IsRemotelyClosed)
+         {
+            throw new InvalidOperationException(errorMessage);
+         }
+      }
+
+      private ISet<ProtonSession> AllSessions()
+      {
+         ISet<ProtonSession> result;
+
+         if (localSessions.Count == 0 && remoteSessions.Count == 0)
+         {
+            result = new HashSet<ProtonSession>();
+         }
+         else
+         {
+            result = new HashSet<ProtonSession>(localSessions.Values);
+            foreach (ProtonSession session in remoteSessions.Values)
+            {
+               result.Add(session);
+            }
+         }
+
+         return result;
+      }
+
+      private void SyncLocalStateWithRemote()
+      {
+         if (engine.IsWritable)
+         {
+            // When the engine state changes or we have read an incoming AMQP header etc we need to check
+            // if we have pending work to send and do so
+            if (headerSent)
+            {
+               ConnectionState state = ConnectionState;
+
+               // Once an incoming header arrives we can emit our open if locally opened and also send close if
+               // that is what our state is already.
+               if (state != ConnectionState.Idle && remoteHeader != null)
+               {
+                  bool resourceSyncNeeded = false;
+
+                  if (!localOpenSent && !engine.IsShutdown)
+                  {
+                     engine.FireWrite(localOpen, 0);
+                     engine.RecomputeEffectiveFrameSizeLimits();
+                     localOpenSent = true;
+                     resourceSyncNeeded = true;
+                  }
+
+                  if (IsLocallyClosed && !localCloseSent && !engine.IsShutdown)
+                  {
+                     Close localClose = new Close();
+                     localClose.Error = ErrorCondition;
+                     engine.FireWrite(localClose, 0);
+                     localCloseSent = true;
+                     resourceSyncNeeded = false;  // Session resources can't write anything now
+                  }
+
+                  if (resourceSyncNeeded)
+                  {
+                     foreach (ProtonSession session in AllSessions())
+                     {
+                        session.TrySyncLocalStateWithRemote();
+                     }
+                  }
+               }
+            }
+            else if (remoteHeader != null || ConnectionState == ConnectionState.Active || remoteHeaderHandler != null)
+            {
+               headerSent = true;
+               engine.FireWrite(HeaderEnvelope.AMQP_HEADER_ENVELOPE);
+            }
+         }
+      }
+
+      private ErrorCondition ErrorConditionFromFailureCause(Exception cause)
+      {
+         Symbol condition;
+         string description = cause.Message;
+
+         if (cause is ProtocolViolationException error)
+         {
+            condition = error.ErrorCondition;
+         }
+         else
+         {
+            condition = AmqpError.INTERNAL_ERROR;
+         }
+
+         return new ErrorCondition(condition, description);
+      }
+
+      private ushort FindFreeLocalChannel()
+      {
+         for (ushort i = 0; i <= localOpen.ChannelMax; ++i)
+         {
+            object result;
+
+            if (!localSessions.ContainsKey(i) && !zombieSessions.TryGetValue(i, out result))
+            {
+               return i;
+            }
+         }
+
+         // We didn't find one that isn't free and also not awaiting remote begin / end
+         // so just use an overlap as it should complete in order unless the remote has
+         // completely ignored the specification and or gone of the rails.
+         for (ushort i = 0; i <= localOpen.ChannelMax; ++i)
+         {
+            if (!localSessions.ContainsKey(i))
+            {
+               return i;
+            }
+         }
+
+         throw new InvalidOperationException("no local channel available for allocation");
+      }
+
+      internal void FreeLocalChannel(ushort localChannel)
+      {
+         ProtonSession session = localSessions[localChannel];
+
+         localSessions.Remove(localChannel);
+
+         if (session.RemoteState == SessionState.Idle)
+         {
+            // The remote hasn't answered our begin yet so we need to hold onto this information
+            // and process the eventual begin that must be provided per specification.
+            zombieSessions.CreateEntry(localChannel).Value = session;
+         }
+      }
+
+      internal bool WasHeaderSent => this.headerSent;
+
+      internal bool WasLocalOpenSent => this.localOpenSent;
+
+      internal bool WasLocalCloseSent => this.localCloseSent;
+
+      #endregion
    }
 }

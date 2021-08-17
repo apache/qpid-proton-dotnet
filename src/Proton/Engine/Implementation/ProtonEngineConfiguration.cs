@@ -57,6 +57,33 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal uint InboundMaxFrameSize => effectiveMaxInboundFrameSize;
 
+      internal void RecomputeEffectiveFrameSizeLimits()
+      {
+         // Based on engine state compute what the max in and out frame size should
+         // be at this time.  Considerations to take into account are SASL state and
+         // remote values once set.
+
+         if (engine.SaslDriver.SaslState < EngineSaslState.Authenticating)
+         {
+            effectiveMaxInboundFrameSize = engine.SaslDriver.MaxFrameSize;
+            effectiveMaxOutboundFrameSize = engine.SaslDriver.MaxFrameSize;
+         }
+         else
+         {
+            uint localMaxFrameSize = engine.Connection.MaxFrameSize;
+            uint remoteMaxFrameSize = engine.Connection.RemoteMaxFrameSize;
+
+            // We limit outbound max frame size to our own set max frame size unless the remote has actually
+            // requested something smaller as opposed to just using a default like 2GB or something similarly
+            // large which we could never support in practice.
+            uint intermediateMaxOutboundFrameSize = Math.Min(localMaxFrameSize, remoteMaxFrameSize);
+
+            effectiveMaxInboundFrameSize = engine.Connection.MaxFrameSize;
+
+            effectiveMaxOutboundFrameSize = Math.Min(int.MaxValue, intermediateMaxOutboundFrameSize);
+         }
+      }
+
       #endregion
    }
 }

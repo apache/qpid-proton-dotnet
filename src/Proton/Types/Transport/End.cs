@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public PerformativeType Type => PerformativeType.End;
 
-      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
+      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, ushort channel, T context)
       {
          handler.HandleEnd(this, payload, channel, context);
       }

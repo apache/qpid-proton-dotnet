@@ -34,14 +34,15 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private readonly ProtonEnginePipeline pipeline;
       private readonly ProtonEnginePipelineProxy pipelineProxy;
       private readonly ProtonEngineConfiguration configuration;
-      // TODO
-      // private readonly AmqpPerformativeEnvelopePool<OutgoingAMQPEnvelope> framePool = AMQPPerformativeEnvelopePool.outgoingEnvelopePool();
+      private readonly AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope> framePool =
+         AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope>.OutgoingEnvelopePool();
 
       private readonly ProtonConnection connection;
 
       private IEngineSaslDriver saslDriver = new ProtonEngineNoOpSaslDriver();
 
       private EngineState state = EngineState.Idle;
+      private bool writable;
       private Exception failureCause;
       private uint inputSequence;
       private uint outputSequence;
@@ -97,6 +98,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public bool IsShutdown => state >= EngineState.Shutdown;
 
+      public bool IsWritable => writable;
+
       public Exception FailureCause => failureCause;
 
       public EngineState EngineState => state;
@@ -106,6 +109,68 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public IEnginePipeline Pipeline => pipelineProxy;
 
       public IEngineSaslDriver SaslDriver => saslDriver;
+
+      public IConnection Start()
+      {
+         CheckShutdownOrFailed("Cannot start an Engine that has already been shutdown or has failed.");
+
+         if (state == EngineState.Idle)
+         {
+            state = EngineState.Starting;
+            try
+            {
+               pipeline.FireEngineStarting();
+               state = EngineState.Started;
+               writable = true;
+               connection.HandleEngineStarted(this);
+            }
+            catch (Exception error)
+            {
+               throw EngineFailed(error);
+            }
+         }
+
+         return connection;
+      }
+
+      public IEngine Shutdown()
+      {
+         if (state < EngineState.ShuttingDown)
+         {
+            state = EngineState.Shutdown;
+            writable = false;
+
+            if (nextIdleTimeoutCheck != null)
+            {
+               // TODO : LOG.trace("Canceling scheduled Idle Timeout Check");
+               // TODO : Cancellation Token -> nextIdleTimeoutCheck.Cancel(false);
+               nextIdleTimeoutCheck = null;
+            }
+
+            try
+            {
+               pipeline.FireEngineStateChanged();
+            }
+            catch (Exception) { }
+
+            try
+            {
+               connection.HandleEngineShutdown(this);
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+               if (engineShutdownHandler != null)
+               {
+                  engineShutdownHandler.Invoke(this);
+               }
+            }
+         }
+
+         return this;
+      }
 
       public EngineStateException EngineFailed(Exception cause)
       {
@@ -127,17 +192,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          throw new NotImplementedException();
       }
 
-      public IEngine Shutdown()
-      {
-         throw new NotImplementedException();
-      }
-
       public IEngine ShutdownHandler(Action<IEngine> handler)
-      {
-         throw new NotImplementedException();
-      }
-
-      public IEngine Start()
       {
          throw new NotImplementedException();
       }
@@ -154,35 +209,34 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region Internal Engine APIs
 
-      ProtonEngine FireWrite(HeaderEnvelope frame)
+      internal ProtonEngine FireWrite(HeaderEnvelope frame)
       {
          pipeline.FireWrite(frame);
          return this;
       }
 
-      ProtonEngine FireWrite(OutgoingAmqpEnvelope frame)
+      internal ProtonEngine FireWrite(OutgoingAmqpEnvelope frame)
       {
          pipeline.FireWrite(frame);
          return this;
       }
 
-      // TODO : FramePool
-      // ProtonEngine FireWrite(IPerformative performative, int channel)
-      // {
-      //    pipeline.FireWrite(framePool.take(performative, channel, null));
-      //    return this;
-      // }
+      internal ProtonEngine FireWrite(IPerformative performative, ushort channel)
+      {
+         pipeline.FireWrite(framePool.Take(performative, channel, null));
+         return this;
+      }
 
-      // ProtonEngine FireWrite(IPerformative performative, int channel, IProtonBuffer payload)
-      // {
-      //    pipeline.FireWrite(framePool.take(performative, channel, payload));
-      //    return this;
-      // }
+      internal ProtonEngine FireWrite(IPerformative performative, ushort channel, IProtonBuffer payload)
+      {
+         pipeline.FireWrite(framePool.Take(performative, channel, payload));
+         return this;
+      }
 
-      // OutgoingAmqpEnvelope wrap(IPerformative performative, int channel, IProtonBuffer payload)
-      // {
-      //    return framePool.take(performative, channel, payload);
-      // }
+      OutgoingAmqpEnvelope Wrap(IPerformative performative, ushort channel, IProtonBuffer payload)
+      {
+         return framePool.Take(performative, channel, payload);
+      }
 
       internal void CheckEngineNotStarted(string message)
       {
@@ -233,6 +287,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             throw EngineFailed(new InvalidOperationException("No output handler configured for the Engine to use"));
          }
+      }
+
+      internal void RecomputeEffectiveFrameSizeLimits()
+      {
+         configuration.RecomputeEffectiveFrameSizeLimits();
       }
 
       #endregion

@@ -347,7 +347,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -361,7 +361,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -375,7 +375,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -389,7 +389,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -403,7 +403,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -417,7 +417,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -431,7 +431,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }
@@ -445,7 +445,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (Exception error)
          {
             engine.EngineFailed(error);
-            throw error;
+            throw;
          }
          return this;
       }

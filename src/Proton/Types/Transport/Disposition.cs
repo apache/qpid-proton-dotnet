@@ -206,7 +206,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public PerformativeType Type => PerformativeType.Disposition;
 
-      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
+      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, ushort channel, T context)
       {
          handler.HandleDisposition(this, payload, channel, context);
       }

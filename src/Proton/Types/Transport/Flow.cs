@@ -328,7 +328,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public PerformativeType Type => PerformativeType.Flow;
 
-      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
+      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, ushort channel, T context)
       {
          handler.HandleFlow(this, payload, channel, context);
       }

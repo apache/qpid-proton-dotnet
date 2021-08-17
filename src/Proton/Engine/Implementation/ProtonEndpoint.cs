@@ -56,6 +56,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public IEngine Engine => engine;
 
+      internal ProtonEngine ProtonEngine => engine;
+
       public IAttachments Attachments => attachments;
 
       public object LinkedResource
@@ -73,6 +75,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public ErrorCondition RemoteCondition
       {
          get => remoteError;
+         internal set => remoteError = value;
       }
 
       public T OpenHandler(Action<T> openHandler)
@@ -161,9 +164,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public abstract Symbol[] RemoteDesiredCapabilities { get; }
 
-      public abstract IDictionary<Symbol, object> Properties { get; set; }
+      public abstract IReadOnlyDictionary<Symbol, object> Properties { get; set; }
 
-      public abstract IDictionary<Symbol, object> RemoteProperties { get; }
+      public abstract IReadOnlyDictionary<Symbol, object> RemoteProperties { get; }
 
       #endregion
    }

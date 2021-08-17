@@ -20,13 +20,13 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Engine.Exceptions
 {
-   public sealed class FrameDecodingException : ProtocolVioltationException
+   public sealed class FrameDecodingException : ProtocolViolationException
    {
       /// <summary>
       /// Creates a default version of this exception type.
       /// </summary>
       public FrameDecodingException() : base(AmqpError.DECODE_ERROR)
-      {         
+      {
       }
 
       /// <summary>

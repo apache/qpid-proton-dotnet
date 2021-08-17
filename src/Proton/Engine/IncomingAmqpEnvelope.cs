@@ -26,11 +26,22 @@ namespace Apache.Qpid.Proton.Engine
    {
       public static readonly byte AmqpFrameType = (byte)0;
 
+      private AmqpPerformativeEnvelopePool<IncomingAmqpEnvelope> pool;
+
       /// <summary>
       /// Creates a new empty incoming performative envelope.
       /// </summary>
       internal IncomingAmqpEnvelope() : base(AmqpFrameType)
       {
+      }
+
+      /// <summary>
+      ///
+      /// </summary>
+      /// <param name="pool">The envelope pool to use when obtaining new envelopes</param>
+      internal IncomingAmqpEnvelope(AmqpPerformativeEnvelopePool<IncomingAmqpEnvelope> pool) : base(AmqpFrameType)
+      {
+         this.pool = pool;
       }
 
       /// <summary>
@@ -42,6 +53,11 @@ namespace Apache.Qpid.Proton.Engine
       public void Release()
       {
          Initialize(null, ushort.MaxValue, null);
+
+         if (pool != null)
+         {
+            pool.Release(this);
+         }
       }
 
       /// <summary>

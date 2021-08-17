@@ -103,6 +103,11 @@ namespace Apache.Qpid.Proton.Engine
       ConnectionState ConnectionState { get; }
 
       /// <summary>
+      /// Provides access to the current connection operating state on the remote end of the connection.
+      /// </summary>
+      ConnectionState RemoteConnectionState { get; }
+
+      /// <summary>
       /// Provides access to the container Id value of this connection. The value can be
       /// modified until the connection is opened after which any modification results
       /// in an exception being thrown.
@@ -164,7 +169,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// Access the remote frame size that was returned in the remote open performative.
       /// </summary>
-      ushort RemoteMaxFrameSize { get; }
+      uint RemoteMaxFrameSize { get; }
 
       /// <summary>
       /// Access the idle timeout value for this Connection.
@@ -178,7 +183,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// Access the remote idle timeout that was returned in the remote open performative.
       /// </summary>
-      ushort RemoteIdleTimeout { get; }
+      uint RemoteIdleTimeout { get; }
 
       /// <summary>
       /// Creates a new Session linked to this Connection.
@@ -190,7 +195,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Access an enumerator that provides a view of all the currently tracked by
       /// this connection meaning each is either locally or remotely opened or both.
       /// </summary>
-      IEnumerator<ISession> Sessions { get; }
+      ICollection<ISession> Sessions { get; }
 
       /// <summary>
       /// Sets an Action for when an AMQP Begin frame is received from the remote peer.

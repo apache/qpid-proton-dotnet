@@ -21,22 +21,22 @@ using Apache.Qpid.Proton.Types;
 namespace Apache.Qpid.Proton.Engine.Exceptions
 {
    /// <summary>
-   /// Exception type that indicates an IO error has occured that is likely unrecoverable.
+   /// Exception type that indicates an IO error has occurred that is likely unrecoverable.
    /// </summary>
-   public class ProtocolVioltationException : ProtonException
-   {      
+   public class ProtocolViolationException : ProtonException
+   {
       /// <summary>
       /// Creates a default version of this exception type.
       /// </summary>
-      public ProtocolVioltationException() : base()
-      {         
+      public ProtocolViolationException() : base()
+      {
       }
 
       /// <summary>
       /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
       /// <param name="message">Description of the error</param>
-      public ProtocolVioltationException(string message) : base(message)
+      public ProtocolViolationException(string message) : base(message)
       {
       }
 
@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// </summary>
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public ProtocolVioltationException(string message, Exception cause) : base(message, cause)
+      public ProtocolViolationException(string message, Exception cause) : base(message, cause)
       {
       }
 
@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// Creates a default version of this exception type with the given error condition.
       /// </summary>
       /// <param name="errorCondition">Symbol contining the error information</param>
-      public ProtocolVioltationException(Symbol errorCondition) : base()
+      public ProtocolViolationException(Symbol errorCondition) : base()
       {
          ErrorCondition = errorCondition;
       }
@@ -63,7 +63,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// </summary>
       /// <param name="errorCondition">Symbol contining the error information</param>
       /// <param name="message">Description of the error</param>
-      public ProtocolVioltationException(Symbol errorCondition, string message) : base(message)
+      public ProtocolViolationException(Symbol errorCondition, string message) : base(message)
       {
          ErrorCondition = errorCondition;
       }
@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <param name="errorCondition">Symbol contining the error information</param>
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public ProtocolVioltationException(Symbol errorCondition, string message, Exception cause) : base(message, cause)
+      public ProtocolViolationException(Symbol errorCondition, string message, Exception cause) : base(message, cause)
       {
          ErrorCondition = errorCondition;
       }

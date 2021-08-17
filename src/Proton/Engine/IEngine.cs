@@ -36,6 +36,15 @@ namespace Apache.Qpid.Proton.Engine
       bool IsRunning { get; }
 
       /// <summary>
+      /// Returns true if the engine is accepting input from the ingestion entry points.
+      /// <para>
+      /// When false any attempts to write more data into the engine will result in an
+      /// error being returned from the write operation. An engine that has not been
+      /// started or that has been failed or shutdown will report as not writable.
+      /// </summary>
+      bool IsWritable { get; }
+
+      /// <summary>
       /// Checks if the engine has been shutdown which is a terminal state
       /// after which no future engine state changes can occur.
       /// </summary>
@@ -90,9 +99,9 @@ namespace Apache.Qpid.Proton.Engine
       /// a Connection linked to the engine that was obtained from the engine cannot
       /// produce any outbound data.
       /// </summary>
-      /// <returns>This Engine instance</returns>
+      /// <returns>The Connection that is linked to the engine instance</returns>
       /// <exception cref="EngineStateException">If the engine state is already failed or shutdown</exception>
-      IEngine Start();
+      IConnection Start();
 
       /// <summary>
       /// Shutdown the engine preventing any future outbound or inbound processing.

@@ -132,7 +132,7 @@ namespace Apache.Qpid.Proton.Engine
       /// The properties value can only be modified prior to a call to open, once the endpoint
       /// has been opened locally an error will be thrown if this method is called.
       /// </summary>
-      IDictionary<Symbol, object> Properties { get; set; }
+      IReadOnlyDictionary<Symbol, object> Properties { get; set; }
 
       /// <summary>
       /// The capabilities offered by the remote when it opened its end of the endpoint.
@@ -147,7 +147,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// The properties sent by the remote when it opened its end of this endpoint.
       /// </summary>
-      IDictionary<Symbol, object> RemoteProperties { get; }
+      IReadOnlyDictionary<Symbol, object> RemoteProperties { get; }
 
       /// <summary>
       /// Sets a Action for when an this endpoint is opened locally via a call to Open.

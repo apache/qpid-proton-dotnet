@@ -263,7 +263,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public PerformativeType Type => PerformativeType.Open;
 
-      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
+      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, ushort channel, T context)
       {
          handler.HandleOpen(this, payload, channel, context);
       }

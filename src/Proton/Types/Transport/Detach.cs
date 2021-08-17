@@ -99,7 +99,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public PerformativeType Type => PerformativeType.Detach;
 
-      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, int channel, T context)
+      public void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, ushort channel, T context)
       {
          handler.HandleDetach(this, payload, channel, context);
       }

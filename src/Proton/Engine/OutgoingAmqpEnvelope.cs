@@ -27,6 +27,8 @@ namespace Apache.Qpid.Proton.Engine
    {
       public static readonly byte AmqpFrameType = (byte)0;
 
+      private AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope> pool;
+
       private Action<IPerformative> payloadToLargeHandler = DefaultPayloadToLargeHandler;
       private Action frameWriteCompleteHandler;
 
@@ -35,6 +37,14 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       internal OutgoingAmqpEnvelope() : base(AmqpFrameType)
       {
+      }
+
+      /// <summary>
+      /// Creates a new empty incoming performative envelope backed by the provided pool.
+      /// </summary>
+      internal OutgoingAmqpEnvelope(AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope> pool) : base(AmqpFrameType)
+      {
+         this.pool = pool;
       }
 
       /// <summary>
@@ -49,6 +59,11 @@ namespace Apache.Qpid.Proton.Engine
 
          payloadToLargeHandler = DefaultPayloadToLargeHandler;
          frameWriteCompleteHandler = null;
+
+         if (pool != null)
+         {
+            pool.Release(this);
+         }
       }
 
       /// <summary>

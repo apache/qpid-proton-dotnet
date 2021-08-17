@@ -20,13 +20,13 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Engine.Exceptions
 {
-   public sealed class MalformedAMQPHeaderException : ProtocolVioltationException
+   public sealed class MalformedAMQPHeaderException : ProtocolViolationException
    {
       /// <summary>
       /// Creates a default version of this exception type.
       /// </summary>
       public MalformedAMQPHeaderException() : base(AmqpError.DECODE_ERROR)
-      {         
+      {
       }
 
       /// <summary>

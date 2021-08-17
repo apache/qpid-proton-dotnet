@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonSession : ProtonEndpoint<ISession>, ISession
    {
-      public ProtonSession(ProtonEngine engine) : base(engine)
+      public ProtonSession(ProtonConnection connection, ushort channel) : base(connection.ProtonEngine)
       {
       }
 
@@ -48,9 +48,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public override Symbol[] RemoteDesiredCapabilities => throw new NotImplementedException();
 
-      public override IDictionary<Symbol, object> Properties { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+      public override IReadOnlyDictionary<Symbol, object> Properties { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-      public override IDictionary<Symbol, object> RemoteProperties => throw new NotImplementedException();
+      public override IReadOnlyDictionary<Symbol, object> RemoteProperties => throw new NotImplementedException();
 
       public IConnection Connection => throw new NotImplementedException();
 
@@ -114,9 +114,50 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          throw new NotImplementedException();
       }
 
+      #region Internal Proton Session APIs
+
       internal override ISession Self()
       {
          return this;
       }
+
+      internal void HandleConnectionLocallyClosed(ProtonConnection protonConnection)
+      {
+         // TODO allLinks().forEach(link->link.handleConnectionLocallyClosed(connection));
+      }
+
+      internal void HandleConnectionRemotelyClosed(ProtonConnection protonConnection)
+      {
+         // TODO allLinks().forEach(link->link.handleConnectionRemotelyClosed(connection));
+      }
+
+      internal void HandleEngineShutdown(ProtonEngine protonEngine)
+      {
+         throw new NotImplementedException();
+      }
+
+      internal void TrySyncLocalStateWithRemote()
+      {
+         switch (State)
+         {
+            case SessionState.Idle:
+               return;
+            case SessionState.Active:
+               // TODO CheckIfBeginShouldBeSent();
+               break;
+            case SessionState.Closed:
+               // TODO CheckIfBeginShouldBeSent();
+               // TODO CheckIfEndShouldBeSent();
+               break;
+            default:
+               throw new InvalidOperationException("Session is in unknown state and cannot proceed");
+         }
+      }
+
+      #endregion
+
+      #region Private Proton Session methods
+
+      #endregion
    }
 }
