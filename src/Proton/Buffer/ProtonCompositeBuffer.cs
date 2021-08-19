@@ -51,6 +51,11 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
+      public IProtonBuffer Append(IProtonBuffer buffer)
+      {
+         throw new NotImplementedException();
+      }
+
       public IProtonBuffer Compact()
       {
          throw new NotImplementedException();
