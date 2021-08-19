@@ -51,6 +51,11 @@ namespace Apache.Qpid.Proton.Types.Messaging
          return new Target(this);
       }
 
+      ITerminus ITerminus.Copy()
+      {
+         return new Target(this);
+      }
+
       public string Address { get; set; }
 
       public TerminusDurability Durable { get; set; } = TerminusDurability.None;

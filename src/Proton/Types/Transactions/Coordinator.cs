@@ -45,6 +45,11 @@ namespace Apache.Qpid.Proton.Types.Transactions
          return new Coordinator(this);
       }
 
+      ITerminus ITerminus.Copy()
+      {
+         return new Coordinator(this);
+      }
+
       public override bool Equals(object obj)
       {
          return obj is Coordinator coordinator &&

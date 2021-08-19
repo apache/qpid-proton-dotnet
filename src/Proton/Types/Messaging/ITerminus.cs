@@ -21,5 +21,6 @@ namespace Apache.Qpid.Proton.Types.Messaging
 {
    public interface ITerminus : ICloneable
    {
+      ITerminus Copy();
    }
 }
