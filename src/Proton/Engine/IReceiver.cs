@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="filter"></param>
       /// <returns>This receiver instance</returns>
-      ISender Settle(Predicate<IIncomingDelivery> filter);
+      IReceiver Settle(Predicate<IIncomingDelivery> filter);
 
       /// <summary>
       /// Retrieves the list of unsettled deliveries sent from this receiver. The deliveries in the
@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Only when this receiver settles on its end are the outgoing delivery instances removed from
       /// the unsettled tracking.
       /// </summary>
-      IEnumerator<IIncomingDelivery> Unsettled { get; }
+      IEnumerable<IIncomingDelivery> Unsettled { get; }
 
       /// <summary>
       /// Returns true if the receiver link is tracking any unsettled sent deliveries.

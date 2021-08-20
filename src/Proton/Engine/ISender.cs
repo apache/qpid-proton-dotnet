@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Engine
    /// <summary>
    /// AMQP Sender link resource.
    /// </summary>
-   public interface ISender : IEndpoint<ISender>
+   public interface ISender : ILink<ISender>
    {
       /// <summary>
       /// Called when the remote receiver has requested a drain of credit and
@@ -87,7 +87,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Only when this sender settles on its end are the outgoing delivery instances removed from
       /// the unsettled tracking.
       /// </summary>
-      IEnumerator<IOutgoingDelivery> Unsettled { get; }
+      IEnumerable<IOutgoingDelivery> Unsettled { get; }
 
       /// <summary>
       /// Returns true if the sender link is tracking any unsettled sent deliveries.

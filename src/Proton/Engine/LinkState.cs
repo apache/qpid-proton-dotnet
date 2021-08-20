@@ -42,4 +42,17 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       Closed
    }
+
+   public static class LinkStateExtension
+   {
+      public static bool IsClosedOrDetached(this LinkState state)
+      {
+         return state == LinkState.Closed || state == LinkState.Detached;
+      }
+
+      public static bool IsOpen(this LinkState state)
+      {
+         return state == LinkState.Active;
+      }
+   }
 }

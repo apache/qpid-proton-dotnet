@@ -233,7 +233,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return this;
       }
 
-      OutgoingAmqpEnvelope Wrap(IPerformative performative, ushort channel, IProtonBuffer payload)
+      internal OutgoingAmqpEnvelope Wrap(IPerformative performative, ushort channel, IProtonBuffer payload)
       {
          return framePool.Take(performative, channel, payload);
       }
@@ -293,6 +293,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          configuration.RecomputeEffectiveFrameSizeLimits();
       }
+
+      internal uint OutboundMaxFrameSize => configuration.OutboundMaxFrameSize;
+
+      internal uint IndboundMaxFrameSize => configuration.InboundMaxFrameSize;
 
       #endregion
    }

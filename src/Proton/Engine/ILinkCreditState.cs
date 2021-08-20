@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// Provides the current link credit value for the link.
       /// </summary>
-      int Credit { get; }
+      uint Credit { get; }
 
       /// <summary>
       /// Provides the current delivery count value for the link.

@@ -44,12 +44,12 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// Returns an enumerator of all the receivers currently tracked by this session.
       /// </summary>
-      IEnumerator<IReceiver> Receivers { get; }
+      IEnumerable<IReceiver> Receivers { get; }
 
       /// <summary>
       /// Returns an enumerator of all the senders currently tracked by this session.
       /// </summary>
-      IEnumerator<ISender> Senders { get; }
+      IEnumerable<ISender> Senders { get; }
 
       /// <summary>
       /// Create a new sender link using the provided name.
@@ -81,9 +81,9 @@ namespace Apache.Qpid.Proton.Engine
       uint IncomingCapacity { get; set; }
 
       /// <summary>
-      /// Gets the maximum number of bytes the remote session can be sent from the this session.
+      /// The remaining session incoming capacity based on how many bytes are currently pending,
       /// </summary>
-      uint RemoteIncomingCapacity { get; }
+      uint RemainingIncomingCapacity { get; }
 
       /// <summary>
       /// Sets the maximum number of bytes this session can have written write before blocking
@@ -95,9 +95,9 @@ namespace Apache.Qpid.Proton.Engine
       uint OutgoingCapacity { get; set; }
 
       /// <summary>
-      /// Gets the maximum number of bytes the remote session can be have pending.
+      /// The remaining session outgoing capacity based on how many bytes are currently pending,
       /// </summary>
-      uint RemoteOutgoingCapacity { get; }
+      uint RemainingOutgoingCapacity { get; }
 
       /// <summary>
       /// Set the handle max value for this Session which is the highest possible

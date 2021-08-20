@@ -160,7 +160,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <para/>
       /// Must be called during link setup, i.e. before calling the open method.
       /// </summary>
-      Coordinator Coordinator { get; }
+      Coordinator Coordinator { get; set; }
 
       /// <summary>
       /// Attempt to access the local target terminus value as a Target value.

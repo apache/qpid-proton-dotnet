@@ -403,6 +403,27 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region Internal and Private Connection APIs
 
+      internal bool HasReceiverOpenEventHandler => remoteReceiverOpenEventHandler != null;
+
+      internal bool HasSenderOpenEventHandler => remoteSenderOpenEventHandler != null;
+
+      internal bool HasTransactionManagerOpenHandler => remoteTxnManagerOpenEventHandler != null;
+
+      internal void FireRemoteReceiverOpened(IReceiver receiver)
+      {
+         remoteReceiverOpenEventHandler?.Invoke(receiver);
+      }
+
+      internal void FireRemoteSenderOpened(ISender sender)
+      {
+         remoteSenderOpenEventHandler?.Invoke(sender);
+      }
+
+      internal void FireRemoteTransactionManagerOpened(ITransactionManager manager)
+      {
+         remoteTxnManagerOpenEventHandler?.Invoke(manager);
+      }
+
       internal void HandleEngineStarted(ProtonEngine protonEngine)
       {
          SyncLocalStateWithRemote();

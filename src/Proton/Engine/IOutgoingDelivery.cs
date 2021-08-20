@@ -95,7 +95,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="buffer">The payload to send for this delivery.</param>
       /// <returns>This outgoing delivery instance.</returns>
-      IOutgoingDelivery WriteBytes(IFormatProvider buffer);
+      IOutgoingDelivery WriteBytes(IProtonBuffer buffer);
 
       /// <summary>
       /// Write the given bytes as a portion of the payload of this delivery, additional
@@ -211,7 +211,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="handler">A delegate that will handle this event</param>
       /// <returns>This outgoing delivery instance</returns>
-      IOutgoingDelivery DeliveryStateUpdatedHandler(Action<IIncomingDelivery> handler);
+      IOutgoingDelivery DeliveryStateUpdatedHandler(Action<IOutgoingDelivery> handler);
 
       #endregion
    }

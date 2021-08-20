@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region Endpoint API implemtations
 
-      public IEngine Engine => engine;
+      public virtual IEngine Engine => engine;
 
       internal ProtonEngine ProtonEngine => engine;
 
@@ -84,7 +84,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return Self();
       }
 
-      internal T FireRemoteOpen()
+      internal bool HasOpenHandler => remoteOpenHandler != null;
+
+      internal virtual T FireRemoteOpen()
       {
          remoteOpenHandler?.Invoke(Self());
          return Self();
@@ -95,6 +97,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          this.remoteCloseHandler = closeHandler;
          return Self();
       }
+
+      internal bool HasCloseHandler => remoteCloseHandler != null;
 
       internal T FireRemoteClose()
       {
@@ -108,6 +112,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return Self();
       }
 
+      internal bool HasLocalOpenHandler => localOpenHandler != null;
+
       internal T FireLocalOpen()
       {
          localOpenHandler?.Invoke(Self());
@@ -120,6 +126,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return Self();
       }
 
+      internal bool HasLocalCloseHandler => localCloseHandler != null;
+
       internal T FireLocalClose()
       {
          localCloseHandler?.Invoke(Self());
@@ -131,6 +139,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          this.engineShutdownHandler = shutdownHandler;
          return Self();
       }
+
+      internal bool HasEngineShutdownHandler => engineShutdownHandler != null;
 
       internal T FireEngineShutdown()
       {
