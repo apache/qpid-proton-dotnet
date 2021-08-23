@@ -40,6 +40,14 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <summary>
       /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
+      /// <param name="cause">The exception that causes this error</param>
+      public FrameEncodingException(Exception cause) : base(AmqpError.INTERNAL_ERROR, cause)
+      {
+      }
+
+      /// <summary>
+      /// Create a new instance with the given message that describes the specifics of the error.
+      /// </summary>
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
       public FrameEncodingException(string message, Exception cause) : base(AmqpError.INTERNAL_ERROR, message, cause)

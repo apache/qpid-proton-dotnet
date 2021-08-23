@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// Creates a default version of this exception type.
       /// </summary>
       public ProtonException() : base()
-      {         
+      {
       }
 
       /// <summary>
@@ -46,6 +46,14 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
       public ProtonException(string message, Exception cause) : base(message, cause)
+      {
+      }
+
+      /// <summary>
+      /// Create a new instance with the given exception that describes the specifics of the error.
+      /// </summary>
+      /// <param name="cause">The exception that causes this error</param>
+      public ProtonException(Exception cause) : base(cause.Message, cause)
       {
       }
    }

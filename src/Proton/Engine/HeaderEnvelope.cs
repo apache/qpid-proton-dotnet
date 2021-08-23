@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <typeparam name="T">The context type for the handler invocation</typeparam>
       /// <param name="handler">The header hander to invoke</param>
       /// <param name="context">The context to supply to the handler method.</param>
-      public void invoke<T>(IHeaderHandler<T> handler, T context)
+      public void Invoke<T>(IHeaderHandler<T> handler, T context)
       {
          Body.Invoke(handler, context);
       }

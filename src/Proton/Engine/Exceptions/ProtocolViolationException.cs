@@ -50,6 +50,14 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       }
 
       /// <summary>
+      /// Create a new instance with the given exception that describes the specifics of the error.
+      /// </summary>
+      /// <param name="cause">The exception that causes this error</param>
+      public ProtocolViolationException(Exception cause) : base(cause)
+      {
+      }
+
+      /// <summary>
       /// Creates a default version of this exception type with the given error condition.
       /// </summary>
       /// <param name="errorCondition">Symbol contining the error information</param>
@@ -75,6 +83,16 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
       public ProtocolViolationException(Symbol errorCondition, string message, Exception cause) : base(message, cause)
+      {
+         ErrorCondition = errorCondition;
+      }
+
+      /// <summary>
+      /// Create a new instance with the given exception that describes the specifics of the error.
+      /// </summary>
+      /// <param name="errorCondition">Symbol contining the error information</param>
+      /// <param name="cause">The exception that causes this error</param>
+      public ProtocolViolationException(Symbol errorCondition, Exception cause) : base(cause)
       {
          ErrorCondition = errorCondition;
       }

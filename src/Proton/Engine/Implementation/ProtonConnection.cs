@@ -538,7 +538,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      public void handleTransfer(Transfer transfer, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      public void HandleTransfer(Transfer transfer, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
          ProtonSession session;
 
@@ -552,7 +552,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      public void handleDisposition(Disposition disposition, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      public void HandleDisposition(Disposition disposition, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
          ProtonSession session;
 

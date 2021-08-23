@@ -31,14 +31,14 @@ namespace Apache.Qpid.Proton.Engine
       /// and will later be initialized before use.
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
-      void HandlerAdded(IEngineHandlerContext context);
+      void HandlerAdded(IEngineHandlerContext context) { }
 
       /// <summary>
       /// Called when the handler is successfully removed from the engine pipeline
       /// and will not be invoked again or ever.
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
-      void HandlerRemoved(IEngineHandlerContext context);
+      void HandlerRemoved(IEngineHandlerContext context) { }
 
       /// <summary>
       /// Called when the engine is started to allow handlers to prepare for use based
@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Engine
       /// start by throwing an exception.
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
-      void EngineStarting(IEngineHandlerContext context);
+      void EngineStarting(IEngineHandlerContext context) { }
 
       /// <summary>
       /// Called when the engine state has changed and handlers may need to update their
@@ -54,7 +54,10 @@ namespace Apache.Qpid.Proton.Engine
       /// e.g state changes from not writable to writable.
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
-      void HandleEngineStateChanged(IEngineHandlerContext context);
+      void HandleEngineStateChanged(IEngineHandlerContext context)
+      {
+         context.FireEngineStateChanged();
+      }
 
       /// <summary>
       /// Called when the engine has transitioned to a failed state and cannot process
@@ -63,7 +66,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="failure">The exception that caused the engine to fail</param>
-      void EngineFailed(IEngineHandlerContext context, EngineFailedException failure);
+      void EngineFailed(IEngineHandlerContext context, EngineFailedException failure)
+      {
+         context.FireFailed(failure);
+      }
 
       /// <summary>
       /// Handle the read of new incoming bytes from a remote sender. The handler should
@@ -72,7 +78,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="buffer">The buffer containing the incoming bytes read.</param>
-      void HandleRead(IEngineHandlerContext context, IProtonBuffer buffer);
+      void HandleRead(IEngineHandlerContext context, IProtonBuffer buffer)
+      {
+         context.FireRead(buffer);
+      }
 
       /// <summary>
       /// Handle the receipt of an incoming AMQP Header or SASL Header based on the
@@ -80,7 +89,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="envelope">The envelope that was read</param>
-      void HandleRead(IEngineHandlerContext context, HeaderEnvelope envelope);
+      void HandleRead(IEngineHandlerContext context, HeaderEnvelope envelope)
+      {
+         context.FireRead(envelope);
+      }
 
       /// <summary>
       /// Handle the receipt of an incoming SASL performative envelope based on the
@@ -88,7 +100,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="envelope">The envelope that was read</param>
-      void HandleRead(IEngineHandlerContext context, SaslEnvelope envelope);
+      void HandleRead(IEngineHandlerContext context, SaslEnvelope envelope)
+      {
+         context.FireRead(envelope);
+      }
 
       /// <summary>
       /// Handle the receipt of an incoming AMQP performative envelope based on the
@@ -96,7 +111,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="envelope">The envelope that was read</param>
-      void HandleRead(IEngineHandlerContext context, IncomingAmqpEnvelope envelope);
+      void HandleRead(IEngineHandlerContext context, IncomingAmqpEnvelope envelope)
+      {
+         context.FireRead(envelope);
+      }
 
       /// <summary>
       /// Handles write of AMQP Header either by directly writing it to the output target
@@ -104,7 +122,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="envelope">The envelope that is to be written</param>
-      void HandleWrite(IEngineHandlerContext context, HeaderEnvelope envelope);
+      void HandleWrite(IEngineHandlerContext context, HeaderEnvelope envelope)
+      {
+         context.FireWrite(envelope);
+      }
 
       /// <summary>
       /// Handles write of SASL performative either by directly writing it to the output target
@@ -112,7 +133,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="envelope">The envelope that is to be written</param>
-      void HandleWrite(IEngineHandlerContext context, SaslEnvelope envelope);
+      void HandleWrite(IEngineHandlerContext context, SaslEnvelope envelope)
+      {
+         context.FireWrite(envelope);
+      }
 
       /// <summary>
       /// Handles write of AMQP performative either by directly writing it to the output target
@@ -120,7 +144,10 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="envelope">The envelope that is to be written</param>
-      void HandleWrite(IEngineHandlerContext context, OutgoingAmqpEnvelope envelope);
+      void HandleWrite(IEngineHandlerContext context, OutgoingAmqpEnvelope envelope)
+      {
+         context.FireWrite(envelope);
+      }
 
       /// <summary>
       ///
@@ -128,7 +155,9 @@ namespace Apache.Qpid.Proton.Engine
       /// <param name="context">The handler context that is assigned to this handler</param>
       /// <param name="buffer">The buffer to be written into the IO layer</param>
       /// <param name="ioComplete">The delegate to invoke when the IO operation is complete</param>
-      void HandleWrite(IEngineHandlerContext context, IProtonBuffer buffer, Action ioComplete);
-
+      void HandleWrite(IEngineHandlerContext context, IProtonBuffer buffer, Action ioComplete)
+      {
+         context.FireWrite(buffer, ioComplete);
+      }
    }
 }
