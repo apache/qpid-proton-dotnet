@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public IReceiver Receiver => link;
 
-      public IAttachments Attachments => attachments;
+      public IAttachments Attachments => attachments != null ? attachments : attachments = new ProtonAttachments();
 
       public object LinkedResource
       {
@@ -152,7 +152,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             if (bytesRead < 0)
             {
                claimedBytes = 0;
-               link.DeliveryRead(this, -bytesRead);
+               link.DeliveryRead(this, (uint)-bytesRead);
             }
          }
 
@@ -175,7 +175,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             if (bytesRead < 0)
             {
                claimedBytes = 0;
-               link.DeliveryRead(this, -bytesRead);
+               link.DeliveryRead(this, (uint)-bytesRead);
             }
          }
 
@@ -198,7 +198,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             if (bytesRead < 0)
             {
                claimedBytes = 0;
-               link.DeliveryRead(this, -bytesRead);
+               link.DeliveryRead(this, (uint)-bytesRead);
             }
          }
 
@@ -215,7 +215,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             if (unclaimed > 0)
             {
                claimedBytes += unclaimed;
-               link.DeliveryRead(this, (int)unclaimed);
+               link.DeliveryRead(this, (uint)unclaimed);
             }
          }
 
@@ -232,23 +232,17 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return this;
       }
 
-      internal Action<IIncomingDelivery> DeliveryAbortedHandler() => deliveryAbortedEventHandler;
-
       public IIncomingDelivery DeliveryReadHandler(Action<IIncomingDelivery> handler)
       {
          this.deliveryReadEventHandler = handler;
          return this;
       }
 
-      internal Action<IIncomingDelivery> DeliveryReadHandler() => deliveryReadEventHandler;
-
       public IIncomingDelivery DeliveryStateUpdatedHandler(Action<IIncomingDelivery> handler)
       {
          this.deliveryUpdatedEventHandler = handler;
          return this;
       }
-
-      internal Action<IIncomingDelivery> DeliveryStateUpdatedHandler() => deliveryAbortedEventHandler;
 
       #endregion
 
@@ -272,7 +266,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             aggregate = null;
 
             // Ensure Session no longer records these in the window metrics
-            link.DeliveryRead(this, bytesRead);
+            link.DeliveryRead(this, (uint)bytesRead);
          }
 
          return this;
@@ -326,6 +320,18 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          return this;
       }
+
+      internal bool HasDeliveryAbortedHandler => deliveryAbortedEventHandler != null;
+
+      internal void FireDeliveryAborted() => deliveryAbortedEventHandler?.Invoke(this);
+
+      internal bool HasDeliveryReadHandler => deliveryReadEventHandler != null;
+
+      internal void FireDeliveryRead() => deliveryReadEventHandler?.Invoke(this);
+
+      internal bool HasDeliveryStateUpdatedHandler => deliveryUpdatedEventHandler != null;
+
+      internal void FireDeliveryStateUpdated() => deliveryAbortedEventHandler?.Invoke(this);
 
       #endregion
    }

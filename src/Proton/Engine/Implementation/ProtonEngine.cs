@@ -19,6 +19,7 @@ using System;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
+using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
@@ -50,8 +51,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       // Idle Timeout Check data
       private Task nextIdleTimeoutCheck;
       private TaskScheduler idleTimeoutExecutor;
-      private int lastInputSequence;
-      private int lastOutputSequence;
+      private long lastInputSequence;
+      private long lastOutputSequence;
       private long localIdleDeadline = 0;
       private long remoteIdleDeadline = 0;
 
@@ -172,39 +173,152 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return this;
       }
 
-      public EngineStateException EngineFailed(Exception cause)
+      public long Tick(long currentTime)
       {
-         throw new NotImplementedException();
-      }
+         CheckShutdownOrFailed("Cannot tick an Engine that has been shutdown or failed.");
 
-      public IEngine ErrorHandler(Action<IEngine> handler)
-      {
-         throw new NotImplementedException();
-      }
+         if (connection.ConnectionState != ConnectionState.Active)
+         {
+            throw new InvalidOperationException("Cannot tick on a Connection that is not opened or an engine that has been shut down.");
+         }
 
-      public IEngine Ingest(IProtonBuffer input)
-      {
-         throw new NotImplementedException();
-      }
+         if (idleTimeoutExecutor != null)
+         {
+            throw new InvalidOperationException("Automatic ticking previously initiated.");
+         }
 
-      public IEngine OutputHandler(Action<IProtonBuffer, Action> handler)
-      {
-         throw new NotImplementedException();
-      }
+         PerformReadCheck(currentTime);
+         PerformWriteCheck(currentTime);
 
-      public IEngine ShutdownHandler(Action<IEngine> handler)
-      {
-         throw new NotImplementedException();
-      }
-
-      public long Tick(long current)
-      {
-         throw new NotImplementedException();
+         return NextTickDeadline(localIdleDeadline, remoteIdleDeadline);
       }
 
       public IEngine TickAuto(TaskScheduler scheduler)
       {
-         throw new NotImplementedException();
+         CheckShutdownOrFailed("Cannot start auto tick on an Engine that has been shutdown or failed");
+
+         if (scheduler == null)
+         {
+            throw new ArgumentNullException("The provided Task Scheduler cannot be null");
+         }
+
+         if (connection.ConnectionState != ConnectionState.Active)
+         {
+            throw new InvalidOperationException("Cannot tick on a Connection that is not opened.");
+         }
+
+         if (idleTimeoutExecutor != null)
+         {
+            throw new InvalidOperationException("Automatic ticking previously initiated.");
+         }
+
+         // TODO - As an additional feature of this method we could allow for calling before connection is
+         //        opened such that it starts ticking either on open local and also checks as a response to
+         //        remote open which seems might be needed anyway, see notes in IdleTimeoutCheck class.
+
+         // Immediate run of the idle timeout check logic will decide afterwards when / if we should
+         // reschedule the idle timeout processing.
+         // TODO : LOG.trace("Auto Idle Timeout Check being initiated");
+         idleTimeoutExecutor = scheduler;
+         // TODO : idleTimeoutExecutor.TryExecuteTask(new IdleTimeoutCheck());
+
+         return this;
+      }
+
+      public IEngine Ingest(IProtonBuffer input)
+      {
+         CheckShutdownOrFailed("Cannot ingest data into an Engine that has been shutdown or failed");
+
+         if (!IsWritable)
+         {
+            throw new EngineNotWritableException("Engine is currently not accepting new input");
+         }
+
+         try
+         {
+            long startIndex = input.ReadOffset;
+            pipeline.FireRead(input);
+            if (input.ReadOffset != startIndex)
+            {
+               inputSequence++;
+            }
+         }
+         catch (Exception error)
+         {
+            throw EngineFailed(error);
+         }
+
+         return this;
+      }
+
+      public EngineStateException EngineFailed(Exception cause)
+      {
+         EngineStateException failure;
+
+         if (state < EngineState.ShuttingDown && state != EngineState.Failed)
+         {
+            state = EngineState.Failed;
+            failureCause = cause;
+            writable = false;
+
+            if (nextIdleTimeoutCheck != null)
+            {
+               // TODO : LOG.trace("Canceling scheduled Idle Timeout Check");
+               // TODO : nextIdleTimeoutCheck.cancel(false);
+               nextIdleTimeoutCheck = null;
+            }
+
+            failure = ProtonExceptionSupport.CreateFailedException(cause);
+
+            try
+            {
+               pipeline.FireFailed((EngineFailedException)failure);
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+               connection.HandleEngineFailed(this, cause);
+            }
+            catch (Exception)
+            {
+            }
+
+            engineFailureHandler?.Invoke(this);
+         }
+         else
+         {
+            if (IsFailed)
+            {
+               failure = ProtonExceptionSupport.CreateFailedException(cause);
+            }
+            else
+            {
+               failure = new EngineShutdownException("Engine has transitioned to shutdown state");
+            }
+         }
+
+         return failure;
+      }
+
+      public IEngine ErrorHandler(Action<IEngine> handler)
+      {
+         this.engineFailureHandler = handler;
+         return this;
+      }
+
+      public IEngine OutputHandler(Action<IProtonBuffer, Action> handler)
+      {
+         this.outputHandler = handler;
+         return this;
+      }
+
+      public IEngine ShutdownHandler(Action<IEngine> handler)
+      {
+         this.engineShutdownHandler = handler;
+         return this;
       }
 
       #region Internal Engine APIs
@@ -297,6 +411,152 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       internal uint OutboundMaxFrameSize => configuration.OutboundMaxFrameSize;
 
       internal uint IndboundMaxFrameSize => configuration.InboundMaxFrameSize;
+
+      #endregion
+
+      #region Idle timeout processing
+
+      private const long MIN_IDLE_CHECK_INTERVAL = 1000;
+      private const long MAX_IDLE_CHECK_INTERVAL = 10000;
+
+      private void PerformReadCheck(long currentTime)
+      {
+         long localIdleTimeout = connection.IdleTimeout;
+
+         if (localIdleTimeout > 0)
+         {
+            if (localIdleDeadline == 0 || lastInputSequence != inputSequence)
+            {
+               localIdleDeadline = ComputeDeadline(currentTime, localIdleTimeout);
+               lastInputSequence = inputSequence;
+            }
+            else if (localIdleDeadline - currentTime <= 0)
+            {
+               if (connection.ConnectionState != ConnectionState.Closed)
+               {
+                  ErrorCondition condition = new ErrorCondition(
+                      Symbol.Lookup("amqp:resource-limit-exceeded"), "local-idle-timeout expired");
+                  connection.ErrorCondition = condition;
+                  connection.Close();
+                  EngineFailed(new IdleTimeoutException("Remote idle timeout detected"));
+               }
+               else
+               {
+                  localIdleDeadline = ComputeDeadline(currentTime, localIdleTimeout);
+               }
+            }
+         }
+      }
+
+      private void PerformWriteCheck(long currentTime)
+      {
+         long remoteIdleTimeout = connection.RemoteIdleTimeout;
+
+         if (remoteIdleTimeout > 0 && !connection.IsLocallyClosed)
+         {
+            if (remoteIdleDeadline == 0 || lastOutputSequence != outputSequence)
+            {
+               remoteIdleDeadline = ComputeDeadline(currentTime, remoteIdleTimeout / 2);
+               lastOutputSequence = outputSequence;
+            }
+            else if (remoteIdleDeadline - currentTime <= 0)
+            {
+               remoteIdleDeadline = ComputeDeadline(currentTime, remoteIdleTimeout / 2);
+               pipeline.FireWrite(EMPTY_FRAME_BUFFER.Copy(), null);
+               lastOutputSequence++;
+            }
+         }
+      }
+
+      private long ComputeDeadline(long now, long timeout)
+      {
+         long deadline = now + timeout;
+         // We use 0 to signal not-initialized and/or no-timeout, so in the
+         // unlikely event thats to be the actual deadline, return 1 instead
+         return deadline != 0 ? deadline : 1;
+      }
+
+      private static long NextTickDeadline(long localIdleDeadline, long remoteIdleDeadline)
+      {
+         long deadline;
+
+         // If there is no locally set idle timeout then we just honor the remote idle timeout
+         // value otherwise we need to use the lesser of the next local or remote idle timeout
+         // deadline values to compute the next time a check is needed.
+         if (localIdleDeadline == 0)
+         {
+            deadline = remoteIdleDeadline;
+         }
+         else if (remoteIdleDeadline == 0)
+         {
+            deadline = localIdleDeadline;
+         }
+         else
+         {
+            if (remoteIdleDeadline - localIdleDeadline <= 0)
+            {
+               deadline = remoteIdleDeadline;
+            }
+            else
+            {
+               deadline = localIdleDeadline;
+            }
+         }
+
+         return deadline;
+      }
+
+      public void RunIdleTimeoutTask()
+      {
+         bool checkScheduled = false;
+
+         if (connection.ConnectionState == ConnectionState.Active && !IsShutdown)
+         {
+            // Using nano time since it is not related to the wall clock, which may change
+            long now = 0; // TODO Tick TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+
+            try
+            {
+               PerformReadCheck(now);
+               PerformWriteCheck(now);
+
+               long deadline = NextTickDeadline(localIdleDeadline, remoteIdleDeadline);
+
+               // Check methods will close down the engine and fire error so we need to check that engine
+               // state is active and engine is not shutdown before scheduling again.
+               if (deadline != 0 && connection.ConnectionState == ConnectionState.Active && state == EngineState.Started)
+               {
+                  // Run the next idle check at half the deadline to try and ensure we meet our
+                  // obligation of sending our heart beat on time.
+                  long delay = (deadline - now) / 2;
+
+                  // TODO - Some computation to work out a reasonable delay that still compensates for
+                  //        errors in scheduling while preventing over eagerness.
+                  delay = Math.Max(MIN_IDLE_CHECK_INTERVAL, delay);
+                  delay = Math.Min(MAX_IDLE_CHECK_INTERVAL, delay);
+
+                  checkScheduled = true;
+                  // TODO :LOG.trace("IdleTimeoutCheck rescheduling with delay: {}", delay);
+                  // TODO :nextIdleTimeoutCheck = idleTimeoutExecutor.schedule(this, delay, TimeUnit.MILLISECONDS);
+               }
+
+               // TODO - If no local timeout but remote hasn't opened we might return zero and not
+               //        schedule any ticking ?  Possible solution is to schedule after remote open
+               //        arrives if nothing set to run and remote indicates it has an idle timeout.
+
+            }
+            catch (Exception)
+            {
+               // TODO :LOG.trace("Auto Idle Timeout Check encountered error during check: ", error);
+            }
+         }
+
+         if (!checkScheduled)
+         {
+            nextIdleTimeoutCheck = null;
+            // TODO : LOG.trace("Auto Idle Timeout Check task exiting and will not be rescheduled");
+         }
+      }
 
       #endregion
    }

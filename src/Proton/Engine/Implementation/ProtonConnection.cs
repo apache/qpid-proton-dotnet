@@ -391,12 +391,179 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          remoteState = ConnectionState.Closed;
          RemoteCondition = close.Error.Copy();
 
-         foreach(ProtonSession session in AllSessions())
+         foreach (ProtonSession session in AllSessions())
          {
             session.HandleConnectionRemotelyClosed(this);
          }
 
          FireRemoteClose();
+      }
+
+      public void HandleBegin(Begin begin, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session = null;
+
+         if (channel > localOpen.ChannelMax)
+         {
+            ErrorCondition = new ErrorCondition(ConnectionError.FRAMING_ERROR, "Channel Max Exceeded for session Begin");
+            Close();
+         }
+         else if (remoteSessions.ContainsKey(channel))
+         {
+            context.EngineFailed(new ProtocolViolationException("Received second begin for Session from remote"));
+         }
+         else
+         {
+            // If there is a remote channel then this is an answer to a local open of a session, otherwise
+            // the remote is requesting a new session and we need to create one and signal that a remote
+            // session was opened.
+            if (begin.HasRemoteChannel())
+            {
+               ushort localSessionChannel = begin.RemoteChannel;
+               if (!localSessions.TryGetValue(localSessionChannel, out session))
+               {
+                  // If there is a session that was begun and ended before remote responded we
+                  // expect that this exchange refers to that session and proceed as though the
+                  // remote is going to begin and end it now (as it should).  The alternative is
+                  // that the remote is doing something not compliant with the specification and
+                  // we fail the engine to indicate this.
+                  if (zombieSessions.TryGetValue(localSessionChannel, out session))
+                  {
+                     if (session != null)
+                     {
+                        // The session will now get tracked as a remote session and the next
+                        // end will take care of normal remote session cleanup.
+                        zombieSessions.Remove(localSessionChannel);
+                     }
+                     else
+                     {
+                        // The session was reclaimed by GC and we retain the fact that it was
+                        // here so that the end that should be following doesn't result in an
+                        // engine failure.
+                        return;
+                     }
+                  }
+                  else
+                  {
+                     ErrorCondition = new ErrorCondition(AmqpError.PRECONDITION_FAILED, "No matching session found for remote channel given");
+                     Close();
+                     engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on Begin from remote: " + localSessionChannel));
+                     return;
+                  }
+               }
+            }
+            else
+            {
+               session = (ProtonSession)Session();
+            }
+
+            remoteSessions.Add(channel, session);
+
+            // Let the session handle the remote Begin now.
+            session.RemoteBegin(begin, channel);
+
+            // If the session was initiated remotely then we signal the creation to the any registered
+            // remote session event handler
+            if (session.State == SessionState.Idle)
+            {
+               remoteSessionOpenEventHandler?.Invoke(session);
+            }
+         }
+      }
+
+      public void HandleEnd(End end, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session;
+
+         if (remoteSessions.TryGetValue(channel, out session))
+         {
+            remoteSessions.Remove(channel);
+            session.RemoteEnd(end, channel);
+         }
+         else
+         {
+            // Check that we don't have a lingering session that was opened and closed locally for
+            // which the remote is finally getting round to ending but we lost the session instance
+            // due to it being cleaned up by GC,
+            if (zombieSessions.TryGetValue(channel, out session))
+            {
+               engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on End from remote: " + channel));
+            }
+            else
+            {
+               zombieSessions.Remove(channel);
+            }
+         }
+      }
+
+      public void HandleAttach(Attach attach, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session;
+
+         if (remoteSessions.TryGetValue(channel, out session))
+         {
+            session.RemoteAttach(attach, channel);
+         }
+         else
+         {
+            engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on Attach from remote: " + channel));
+         }
+      }
+
+      public void HandleDetach(Detach detach, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session;
+
+         if (remoteSessions.TryGetValue(channel, out session))
+         {
+            session.RemoteDetach(detach, channel);
+         }
+         else
+         {
+            engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on Detach from remote: " + channel));
+         }
+      }
+
+      public void HandleFlow(Flow flow, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session;
+
+         if (remoteSessions.TryGetValue(channel, out session))
+         {
+            session.RemoteFlow(flow, channel);
+         }
+         else
+         {
+            engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on Flow from remote: " + channel));
+         }
+      }
+
+      public void handleTransfer(Transfer transfer, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session;
+
+         if (remoteSessions.TryGetValue(channel, out session))
+         {
+            session.RemoteTransfer(transfer, payload, channel);
+         }
+         else
+         {
+            engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on Transfer from remote: " + channel));
+         }
+      }
+
+      public void handleDisposition(Disposition disposition, IProtonBuffer payload, ushort channel, ProtonEngine context)
+      {
+         ProtonSession session;
+
+         if (remoteSessions.TryGetValue(channel, out session))
+         {
+            session.RemoteDisposition(disposition, channel);
+         }
+         else
+         {
+            engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on Disposition from remote: " + channel));
+         }
       }
 
       #endregion

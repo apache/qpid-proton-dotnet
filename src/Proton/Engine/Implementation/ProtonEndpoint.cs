@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal ProtonEngine ProtonEngine => engine;
 
-      public IAttachments Attachments => attachments;
+      public IAttachments Attachments => attachments != null ? attachments : attachments = new ProtonAttachments();
 
       public object LinkedResource
       {

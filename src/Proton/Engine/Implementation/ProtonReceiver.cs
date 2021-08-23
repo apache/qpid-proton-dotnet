@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
 
@@ -36,9 +37,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<IReceiver> linkCreditUpdatedHandler = null;
 
       private readonly ProtonSessionIncomingWindow sessionWindow;
-      private readonly uint? currentDeliveryId;
       private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
          new SplayedDictionary<uint, ProtonIncomingDelivery>();
+
+      private uint? currentDeliveryId;
 
       private IDeliveryState defaultDeliveryState;
       private ILinkCreditState drainStateSnapshot;
@@ -171,7 +173,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (toRemove.Count > 0)
          {
-            foreach(uint deliveryId in toRemove)
+            foreach (uint deliveryId in toRemove)
             {
                unsettled.Remove(deliveryId);
             }
@@ -200,54 +202,248 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #endregion
 
-      protected override void HandleDecorateOfOutgoingFlow(Flow flow)
-      {
-         throw new NotImplementedException();
-      }
-
       protected override void HandleRemoteAttach(Attach attach)
       {
-         throw new NotImplementedException();
+         if (!attach.HasInitialDeliveryCount())
+         {
+            throw new ProtocolViolationException("Sending peer attach had no initial delivery count");
+         }
+
+         CreditState.InitializeDeliveryCount(attach.InitialDeliveryCount);
       }
 
       protected override void HandleRemoteDetach(Detach detach)
       {
-         throw new NotImplementedException();
-      }
-
-      protected override void HandleRemoteDisposition(Disposition disposition, ProtonOutgoingDelivery delivery)
-      {
-         throw new NotImplementedException();
-      }
-
-      protected override void HandleRemoteDisposition(Disposition disposition, ProtonIncomingDelivery delivery)
-      {
-         throw new NotImplementedException();
       }
 
       protected override void HandleRemoteFlow(Flow flow)
       {
-         throw new NotImplementedException();
+         ProtonLinkCreditState creditState = CreditState;
+         creditState.RemoteFlow(flow);
+
+         if (flow.Drain)
+         {
+            creditState.UpdateDeliveryCount(flow.DeliveryCount);
+            creditState.UpdateCredit(flow.LinkCredit);
+            if (creditState.Credit != 0)
+            {
+               throw new ArgumentOutOfRangeException("Receiver read flow with drain set but credit was not zero");
+            }
+            else
+            {
+               drainStateSnapshot = null;
+            }
+         }
+
+         FireLinkCreditStateUpdated();
+      }
+
+      protected override void HandleRemoteDisposition(Disposition disposition, ProtonOutgoingDelivery delivery)
+      {
+         throw new InvalidOperationException("Receiver link should never handle disposition for outgoing deliveries");
+      }
+
+      protected override void HandleRemoteDisposition(Disposition disposition, ProtonIncomingDelivery delivery)
+      {
+         bool updated = false;
+
+         if (disposition.State != null && !disposition.State.Equals(delivery.RemoteState))
+         {
+            updated = true;
+            delivery.RemoteState = disposition.State;
+         }
+
+         if (disposition.Settled && !delivery.IsRemotelySettled)
+         {
+            updated = true;
+            delivery.RemotelySettled();
+         }
+
+         if (updated)
+         {
+            FireDeliveryUpdated(delivery);
+         }
       }
 
       protected override void HandleRemoteTransfer(Transfer transfer, IProtonBuffer payload, out ProtonIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         if (currentDeliveryId != null && (!transfer.HasDeliveryId() || currentDeliveryId.Equals(transfer.DeliveryId)))
+         {
+            delivery = unsettled[(uint)currentDeliveryId];
+         }
+         else
+         {
+            VerifyNewDeliveryIdSequence(transfer, currentDeliveryId);
+
+            delivery = new ProtonIncomingDelivery(this, transfer.DeliveryId, transfer.DeliveryTag);
+            delivery.MessageFormat = transfer.MessageFormat;
+
+            unsettled.Add(transfer.DeliveryId, delivery);
+            currentDeliveryId = transfer.DeliveryId;
+         }
+
+         if (transfer.HasState())
+         {
+            delivery.RemoteState = transfer.DeliveryState;
+         }
+
+         if (transfer.Settled || transfer.Aborted)
+         {
+            delivery.RemotelySettled();
+         }
+
+         if (payload != null)
+         {
+            delivery.AppendTransferPayload(payload);
+         }
+
+         bool done = transfer.Aborted || !transfer.More;
+         if (done)
+         {
+            CreditState.DecrementCredit();
+            CreditState.IncrementDeliveryCount();
+            currentDeliveryId = null;
+
+            if (transfer.Aborted)
+            {
+               delivery.Aborted();
+            }
+            else
+            {
+               delivery.Completed();
+            }
+         }
+
+         if (transfer.Aborted)
+         {
+            FireDeliveryAborted(delivery);
+         }
+         else
+         {
+            FireDeliveryRead(delivery);
+         }
+
+         if (IsDraining && Credit == 0)
+         {
+            drainStateSnapshot = null;
+            FireLinkCreditStateUpdated();
+         }
+      }
+
+      protected override void HandleDecorateOfOutgoingFlow(Flow flow)
+      {
+         flow.LinkCredit = Credit;
+         flow.Handle = Handle;
+         if (CreditState.IsDeliveryCountInitialized)
+         {
+            flow.DeliveryCount = CreditState.DeliveryCount;
+         }
+         flow.Drain = IsDraining;
+      }
+
+      #region Internal ProtonReceiver APIs
+
+      internal bool HasDeliveryAbortedHandler => deliveryAbortedEventHandler != null;
+
+      internal bool HasDeliveryReadHandler => deliveryReadEventHandler != null;
+
+      internal bool HasDeliveryStateUpdatedHandler => deliveryUpdatedEventHandler != null;
+
+      internal bool HasLinkCreditUpdatedHandler => linkCreditUpdatedHandler != null;
+
+      internal void FireDeliveryAborted(ProtonIncomingDelivery delivery)
+      {
+         if (delivery.HasDeliveryAbortedHandler)
+         {
+            delivery.FireDeliveryAborted();
+         }
+         else
+         {
+            deliveryAbortedEventHandler?.Invoke(delivery);
+         }
+      }
+
+      internal void FireDeliveryRead(ProtonIncomingDelivery delivery)
+      {
+         if (delivery.HasDeliveryReadHandler)
+         {
+            delivery.FireDeliveryRead();
+         }
+         else
+         {
+            deliveryReadEventHandler?.Invoke(delivery);
+         }
+      }
+
+      internal void FireDeliveryUpdated(ProtonIncomingDelivery delivery)
+      {
+         if (delivery.HasDeliveryStateUpdatedHandler)
+         {
+            delivery.FireDeliveryStateUpdated();
+         }
+         else
+         {
+            deliveryUpdatedEventHandler?.Invoke(delivery);
+         }
+      }
+
+      internal void FireLinkCreditStateUpdated()
+      {
+         linkCreditUpdatedHandler?.Invoke(this);
       }
 
       internal override IReceiver Self()
       {
-         throw new NotImplementedException();
+         return this;
       }
 
-      internal void DeliveryRead(ProtonIncomingDelivery protonIncomingDelivery, long bytesRead)
+      internal void DeliveryRead(ProtonIncomingDelivery delivery, uint bytesRead)
       {
-         throw new NotImplementedException();
+         if (AreDeliveriesStillActive())
+         {
+            sessionWindow.DeliveryRead(delivery, bytesRead);
+         }
       }
 
-      internal void Disposition(ProtonIncomingDelivery protonIncomingDelivery)
+      internal void Disposition(ProtonIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         if (!delivery.IsRemotelySettled)
+         {
+            CheckLinkOperable("Cannot set a disposition for delivery");
+         }
+
+         try
+         {
+            sessionWindow.ProcessDisposition(this, delivery);
+         }
+         finally
+         {
+            if (delivery.IsSettled)
+            {
+               unsettled.Remove(delivery.DeliveryId);
+               delivery.DeliveryTag?.Release();
+            }
+         }
       }
+
+      private void VerifyNewDeliveryIdSequence(Transfer transfer, uint? currentDeliveryId)
+      {
+         if (!transfer.HasDeliveryId())
+         {
+            engine.EngineFailed(
+                new ProtocolViolationException("No delivery-id specified on first Transfer of new delivery"));
+         }
+
+         sessionWindow.ValidateNextDeliveryId(transfer.DeliveryId);
+
+         if (currentDeliveryId != null)
+         {
+            engine.EngineFailed(
+                new ProtocolViolationException("Illegal multiplex of deliveries on same link with delivery-id " +
+                                               currentDeliveryId + " and " + transfer.DeliveryId));
+         }
+      }
+
+      #endregion
    }
 }

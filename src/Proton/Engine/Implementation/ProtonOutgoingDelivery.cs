@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public ISender Sender => link;
 
-      public IAttachments Attachments => attachments;
+      public IAttachments Attachments => attachments != null ? attachments : attachments = new ProtonAttachments();
 
       public object LinkedResource
       {
