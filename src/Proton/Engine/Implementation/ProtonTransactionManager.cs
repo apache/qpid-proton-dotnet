@@ -18,6 +18,8 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Codec;
+using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
@@ -26,129 +28,373 @@ using Apache.Qpid.Proton.Types.Transport;
 namespace Apache.Qpid.Proton.Engine.Implementation
 {
    /// <summary>
-   ///
+   /// Proton transaction manager abstraction that provides the transaction services
+   /// for a Receiver link that handles the transaction Declare and Discharge commads
+   /// which control the lifetime and outcome of a running transaction.
    /// </summary>
-   public sealed class ProtonTransactionManager : ITransactionManager
+   public sealed class ProtonTransactionManager : ProtonEndpoint<ITransactionManager>, ITransactionManager
    {
-      private ProtonReceiver protonReceiver;
+      private readonly ProtonReceiver receiver;
+      private readonly IDecoder payloadDecoder;
 
-      public ProtonTransactionManager(ProtonReceiver protonReceiver)
+      private Action<ITransaction<ITransactionManager>> declareEventHandler;
+      private Action<ITransaction<ITransactionManager>> dischargeEventHandler;
+
+      private Action<ITransactionManager> parentEndpointClosedEventHandler;
+
+      private IDictionary<IProtonBuffer, ProtonManagerTransaction> transactions =
+         new Dictionary<IProtonBuffer, ProtonManagerTransaction>();
+
+      public ProtonTransactionManager(ProtonReceiver receiver) : base(receiver.ProtonEngine)
       {
-         this.protonReceiver = protonReceiver;
+         this.receiver = receiver;
+         this.payloadDecoder = CodecFactory.Decoder;
+
+         this.receiver.OpenHandler(HandleReceiverLinkOpened)
+                      .CloseHandler(HandleReceiverLinkClosed)
+                      .LocalOpenHandler(HandleReceiverLinkLocallyOpened)
+                      .LocalCloseHandler(HandleReceiverLinkLocallyClosed)
+                      .ParentEndpointClosedHandler(HandleParentEndpointClosed)
+                      .EngineShutdownHandler(HandleEngineShutdown)
+                      .DeliveryReadHandler(HandleDeliveryRead)
+                      .DeliveryStateUpdatedHandler(HandleDeliveryStateUpdate);
       }
 
-      public uint Credit => throw new NotImplementedException();
+      internal override ITransactionManager Self()
+      {
+         return this;
+      }
 
-      public Source Source { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public Coordinator Coordinator { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public Source RemoteSource { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public Coordinator RemoteCoordinator { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+      #region Transaction manager public API
 
-      public IEngine Engine => throw new NotImplementedException();
+      public IConnection Connection => receiver.Connection;
 
-      public IAttachments Attachments => throw new NotImplementedException();
+      public ISession Session => receiver.Session;
 
-      public object LinkedResource { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public ErrorCondition ErrorCondition { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+      public uint Credit => receiver.Credit;
 
-      public ErrorCondition RemoteCondition => throw new NotImplementedException();
+      public override bool IsLocallyOpen => receiver.IsLocallyOpen;
 
-      public bool IsLocallyOpen => throw new NotImplementedException();
+      public override bool IsLocallyClosed => receiver.IsLocallyClosed;
 
-      public bool IsLocallyClosed => throw new NotImplementedException();
+      public override bool IsRemotelyOpen => receiver.IsRemotelyOpen;
 
-      public bool IsRemotelyOpen => throw new NotImplementedException();
+      public override bool IsRemotelyClosed => receiver.IsRemotelyClosedOrDetached;
 
-      public bool IsRemotelyClosed => throw new NotImplementedException();
+      public override Symbol[] OfferedCapabilities
+      {
+         get => receiver.OfferedCapabilities;
+         set => receiver.OfferedCapabilities = value;
+      }
 
-      public Symbol[] OfferedCapabilities { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public Symbol[] DesiredCapabilities { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-      public IReadOnlyDictionary<Symbol, object> Properties { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+      public override Symbol[] RemoteOfferedCapabilities => receiver.RemoteOfferedCapabilities;
 
-      public Symbol[] RemoteOfferedCapabilities => throw new NotImplementedException();
+      public override Symbol[] DesiredCapabilities
+      {
+         get => receiver.DesiredCapabilities;
+         set => receiver.DesiredCapabilities = value;
+      }
 
-      public Symbol[] RemoteDesiredCapabilities => throw new NotImplementedException();
+      public override Symbol[] RemoteDesiredCapabilities => receiver.RemoteDesiredCapabilities;
 
-      public IReadOnlyDictionary<Symbol, object> RemoteProperties => throw new NotImplementedException();
+      public override IReadOnlyDictionary<Symbol, object> Properties
+      {
+         get => receiver.Properties;
+         set => receiver.Properties = value;
+      }
+
+      public override IReadOnlyDictionary<Symbol, object> RemoteProperties => receiver.RemoteProperties;
+
+      public Source Source
+      {
+         get => receiver.Source;
+         set => receiver.Source = value;
+      }
+
+      public Source RemoteSource
+      {
+         get => receiver.RemoteSource;
+      }
+
+      public Coordinator Coordinator
+      {
+         get => receiver.Coordinator;
+         set => receiver.Coordinator = value;
+      }
+
+      public Coordinator RemoteCoordinator
+      {
+         get => (Coordinator)receiver.RemoteTerminus;
+      }
 
       public ITransactionManager AddCredit(uint credit)
       {
-         throw new NotImplementedException();
+         receiver.AddCredit(credit);
+         return this;
       }
 
-      public ITransactionManager Close()
+      public override ITransactionManager Open()
       {
-         throw new NotImplementedException();
+         receiver.Open();
+         return this;
       }
 
-      public ITransactionManager CloseHandler(Action<ITransactionManager> localCloseHandler)
+      public override ITransactionManager Close()
       {
-         throw new NotImplementedException();
+         receiver.Close();
+         return this;
       }
 
       public ITransactionManager Declared(ITransaction<ITransactionManager> transaction, byte[] txnId)
       {
-         throw new NotImplementedException();
+         return Declared(transaction, ProtonByteBufferAllocator.Instance.Wrap(txnId));
       }
 
       public ITransactionManager Declared(ITransaction<ITransactionManager> transaction, IProtonBuffer txnId)
       {
-         throw new NotImplementedException();
-      }
+         ProtonManagerTransaction txn = (ProtonManagerTransaction)transaction;
 
-      public ITransactionManager DeclareFailed(ITransaction<ITransactionManager> transaction, ErrorCondition condition)
-      {
-         throw new NotImplementedException();
-      }
+         if (txn.Parent != this)
+         {
+            throw new ArgumentException("Cannot complete declaration of a transaction from another transaction manager.");
+         }
 
-      public ITransactionManager DeclareHandler(Action<ITransaction<ITransactionManager>> handler)
-      {
-         throw new NotImplementedException();
+         if (txnId == null || txnId.IsReadable)
+         {
+            throw new ArgumentException("Cannot declare a transaction without a transaction Id");
+         }
+
+         txn.State = TransactionState.Declared;
+         txn.TxnId = txnId;
+
+         // Start tracking this transaction as active.
+         transactions.Add(txnId, txn);
+
+         Declared declaration = new Declared();
+         declaration.TxnId = txnId;
+
+         txn.Declare.Disposition(declaration, true);
+
+         return this;
       }
 
       public ITransactionManager Discharged(ITransaction<ITransactionManager> transaction)
       {
-         throw new NotImplementedException();
+         ProtonManagerTransaction txn = (ProtonManagerTransaction)transaction;
+
+         if (txn.Parent != this)
+         {
+            throw new ArgumentException("Cannot complete discharge of a transaction from another transaction manager.");
+         }
+
+         // Before sending the disposition remove if from tracking in case the write fails.
+         transactions.Remove(txn.TxnId);
+
+         txn.State = TransactionState.Discharged;
+         txn.Discharge.Disposition(Accepted.Instance, true);
+
+         return this;
+      }
+
+      public ITransactionManager DeclareFailed(ITransaction<ITransactionManager> transaction, ErrorCondition condition)
+      {
+         ProtonManagerTransaction txn = (ProtonManagerTransaction)transaction;
+
+         if (txn.Parent != this)
+         {
+            throw new ArgumentException("Cannot fail a declared transaction from another transaction manager.");
+         }
+
+         Rejected rejected = new Rejected();
+         rejected.Error = condition;
+
+         txn.State = TransactionState.DelcareFailed;
+         txn.Declare.Disposition(rejected, true);
+
+         return this;
       }
 
       public ITransactionManager DischargeFailed(ITransaction<ITransactionManager> transaction, ErrorCondition condition)
       {
-         throw new NotImplementedException();
+         ProtonManagerTransaction txn = (ProtonManagerTransaction)transaction;
+
+         if (txn.Parent != this)
+         {
+            throw new ArgumentException("Cannot fail a discharge of a transaction from another transaction manager.");
+         }
+
+         transactions.Remove(txn.TxnId);
+
+         // TODO: We should be closing the link if the remote did not report that it supports the
+         //       rejected outcome although most don't regardless of what they actually do support.
+
+         Rejected rejected = new Rejected();
+         rejected.Error = condition;
+
+         txn.State = TransactionState.DischargeFailed;
+         txn.Discharge.Disposition(rejected, true);
+
+         return this;
+      }
+
+      #endregion
+
+      #region Transaction manager event handler API
+
+      public ITransactionManager DeclareHandler(Action<ITransaction<ITransactionManager>> handler)
+      {
+         declareEventHandler = handler;
+         return this;
       }
 
       public ITransactionManager DischargeHandler(Action<ITransaction<ITransactionManager>> handler)
       {
-         throw new NotImplementedException();
+         dischargeEventHandler = handler;
+         return this;
       }
 
-      public ITransactionManager EngineShutdownHandler(Action<IEngine> shutdownHandler)
+      public ITransactionManager ParentEndpointClosedHandler(Action<ITransactionManager> handler)
       {
-         throw new NotImplementedException();
+         parentEndpointClosedEventHandler = handler;
+         return this;
       }
 
-      public ITransactionManager LocalCloseHandler(Action<ITransactionManager> localCloseHandler)
+      private void FireDeclare(ProtonManagerTransaction transaction)
       {
-         throw new NotImplementedException();
+         declareEventHandler?.Invoke(transaction);
       }
 
-      public ITransactionManager LocalOpenHandler(Action<ITransactionManager> localOpenHandler)
+      private void FireDischarge(ProtonManagerTransaction transaction)
       {
-         throw new NotImplementedException();
+         dischargeEventHandler?.Invoke(transaction);
       }
 
-      public ITransactionManager Open()
+      private void FireParentEndpointClosed()
       {
-         throw new NotImplementedException();
+         parentEndpointClosedEventHandler?.Invoke(this);
       }
 
-      public ITransactionManager OpenHandler(Action<ITransactionManager> localOpenHandler)
+      #endregion
+
+      #region Handlers for events from the underlying link
+
+      private void HandleReceiverLinkLocallyOpened(IReceiver receiver)
       {
-         throw new NotImplementedException();
+         FireLocalOpen();
       }
 
-      public ITransactionController ParentEndpointClosedHandler(Action<ITransactionController> handler)
+      private void HandleReceiverLinkLocallyClosed(IReceiver receiver)
       {
-         throw new NotImplementedException();
+         FireLocalClose();
       }
+
+      private void HandleReceiverLinkOpened(IReceiver receiver)
+      {
+         FireRemoteOpen();
+      }
+
+      private void HandleReceiverLinkClosed(IReceiver receiver)
+      {
+         FireRemoteClose();
+      }
+
+      private void HandleEngineShutdown(IEngine engine)
+      {
+         FireEngineShutdown();
+      }
+
+      private void HandleParentEndpointClosed(IReceiver receiver)
+      {
+         FireParentEndpointClosed();
+      }
+
+      private void HandleDeliveryRead(IIncomingDelivery delivery)
+      {
+         if (delivery.IsAborted)
+         {
+            delivery.Settle();
+         }
+         else if (!delivery.IsPartial)
+         {
+            IProtonBuffer payload = delivery.ReadAll();
+
+            AmqpValue container = (AmqpValue)payloadDecoder.ReadObject(payload, payloadDecoder.CachedDecoderState);
+
+            if (container.Value is Declare)
+            {
+               ProtonManagerTransaction transaction = new ProtonManagerTransaction(this);
+
+               transaction.Declare = delivery;
+               transaction.State = TransactionState.Declaring;
+
+               FireDeclare(transaction);
+            }
+            else if (container.Value is Discharge)
+            {
+               Discharge discharge = (Discharge)container.Value;
+               IProtonBuffer txnId = discharge.TxnId;
+
+               ProtonManagerTransaction transaction;
+
+               if (transactions.TryGetValue(txnId, out transaction))
+               {
+                  transaction.State = TransactionState.Discharging;
+                  transaction.DischargeState = discharge.Fail ? DischargeState.Rollback : DischargeState.Commit;
+                  transaction.Discharge = delivery;
+
+                  FireDischarge(transaction);
+               }
+               else
+               {
+                  // TODO: If the remote did not indicate it supports reject we should really close the link.
+                  ErrorCondition rejection = new ErrorCondition(
+                     TransactionError.UNKNOWN_ID, "Transaction Manager is not tracking the given transaction ID.");
+                  delivery.Disposition(new Rejected(rejection), true);
+               }
+            }
+            else
+            {
+               throw new ProtocolViolationException("TXN Coordinator expects Declare and Discharge Delivery payloads only");
+            }
+         }
+      }
+
+      private void HandleDeliveryStateUpdate(IIncomingDelivery delivery)
+      {
+         // Nothing to do yet
+      }
+
+      #endregion
+
+      #region Internal Transaction Manager Transaction type
+
+      private sealed class ProtonManagerTransaction : ProtonTransaction<ITransactionManager>, ITransaction<ITransactionManager>
+      {
+         private readonly ProtonTransactionManager manager;
+
+         private IIncomingDelivery declare;
+         private IIncomingDelivery discharge;
+
+         public ProtonManagerTransaction(ProtonTransactionManager manager)
+         {
+            this.manager = manager;
+         }
+
+         public override ProtonTransactionManager Parent => manager;
+
+         public IIncomingDelivery Declare
+         {
+            get => declare;
+            set => declare = value;
+         }
+
+         public IIncomingDelivery Discharge
+         {
+            get => discharge;
+            set => discharge = value;
+         }
+      }
+
+      #endregion
    }
 }

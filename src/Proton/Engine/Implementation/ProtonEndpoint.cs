@@ -100,7 +100,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool HasCloseHandler => remoteCloseHandler != null;
 
-      internal T FireRemoteClose()
+      internal virtual T FireRemoteClose()
       {
          remoteCloseHandler?.Invoke(Self());
          return Self();
@@ -114,7 +114,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool HasLocalOpenHandler => localOpenHandler != null;
 
-      internal T FireLocalOpen()
+      internal virtual T FireLocalOpen()
       {
          localOpenHandler?.Invoke(Self());
          return Self();
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool HasLocalCloseHandler => localCloseHandler != null;
 
-      internal T FireLocalClose()
+      internal virtual T FireLocalClose()
       {
          localCloseHandler?.Invoke(Self());
          return Self();
@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool HasEngineShutdownHandler => engineShutdownHandler != null;
 
-      internal T FireEngineShutdown()
+      internal virtual T FireEngineShutdown()
       {
          engineShutdownHandler?.Invoke(engine);
          return Self();

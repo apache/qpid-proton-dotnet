@@ -636,43 +636,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          remoteState = LinkState.Active;
          HandleRemoteAttach(attach);
          TransitionToRemotelyOpenedState();
-
-         if (HasOpenHandler)
-         {
-            FireRemoteOpen();
-         }
-         else
-         {
-            if (Role == Role.Receiver)
-            {
-               if (attach.Target is Coordinator)
-               {
-                  if (session.HasTransactionManagerOpenHandler)
-                  {
-                     // TODO : session.FireRemoteTransactionManagerOpened(new ProtonTransactionManager((ProtonReceiver)this));
-                     return this;
-                  }
-                  else if (connection.HasTransactionManagerOpenHandler)
-                  {
-                     // TODO : connection.FireRemoteTransactionManagerOpened(new ProtonTransactionManager((ProtonReceiver)this));
-                     return this;
-                  }
-               }
-
-               if (session.HasReceiverOpenEventHandler)
-               {
-                  session.FireRemoteReceiverOpened((IReceiver)this);
-               }
-               else if (connection.HasReceiverOpenEventHandler)
-               {
-                  connection.FireRemoteReceiverOpened((IReceiver)this);
-               }
-               else
-               {
-                  // TODO LOG.info("Receiver opened but no event handler registered to inform: {}", this);
-               }
-            }
-         }
+         FireRemoteOpen();
 
          return this;
       }

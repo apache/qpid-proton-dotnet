@@ -392,6 +392,45 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          linkCreditUpdatedHandler?.Invoke(this);
       }
 
+      internal override IReceiver FireRemoteOpen()
+      {
+         if (HasOpenHandler)
+         {
+            base.FireRemoteOpen();
+         }
+         else
+         {
+            if (localAttach.Target is Apache.Qpid.Proton.Types.Transactions.Coordinator)
+            {
+               if (session.HasTransactionManagerOpenHandler)
+               {
+                  session.FireRemoteTransactionManagerOpened(new ProtonTransactionManager(this));
+                  return this;
+               }
+               else if (connection.HasTransactionManagerOpenHandler)
+               {
+                  connection.FireRemoteTransactionManagerOpened(new ProtonTransactionManager(this));
+                  return this;
+               }
+            }
+
+            if (session.HasSenderOpenEventHandler)
+            {
+               session.FireRemoteReceiverOpened(this);
+            }
+            else if (connection.HasSenderOpenEventHandler)
+            {
+               connection.FireRemoteReceiverOpened(this);
+            }
+            else
+            {
+               // TODO LOG.info("Receiver opened but no event handler registered to inform: {}", this);
+            }
+         }
+
+         return this;
+      }
+
       internal override IReceiver Self()
       {
          return this;

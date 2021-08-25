@@ -36,6 +36,11 @@ namespace Apache.Qpid.Proton.Engine
       IConnection Connection { get; }
 
       /// <summary>
+      /// Provides access to the session that created this transaction controller.
+      /// </summary>
+      ISession Session { get; }
+
+      /// <summary>
       /// Returns true if the transaction controller has capacity to send or buffer
       /// and transaction command to declare or discharge. If no capacity then a
       /// call to transaction controller declare or discharge would throw an exception.
@@ -61,14 +66,14 @@ namespace Apache.Qpid.Proton.Engine
       /// <para/>
       /// Must be called during link setup, i.e. before calling the open method.
       /// </summary>
-      Source RemoteSource { get; set; }
+      Source RemoteSource { get; }
 
       /// <summary>
       /// Gets the Coordinator value to assign to the remote end of this transaction coordinator link.
       /// <para/>
       /// Must be called during link setup, i.e. before calling the open method.
       /// </summary>
-      Coordinator RemoteCoordinator { get; set; }
+      Coordinator RemoteCoordinator { get; }
 
       /// <summary>
       /// Returns a enumerator over the set of Transactions that are active within this
@@ -77,7 +82,7 @@ namespace Apache.Qpid.Proton.Engine
       /// or the discharge phase. If there are no transactions active within this transaction
       /// controller this method will return an enumerator that provides no entries.
       /// </summary>
-      IEnumerator<ITransaction<ITransactionController>> Transactions { get; }
+      IEnumerable<ITransaction<ITransactionController>> Transactions { get; }
 
       /// <summary>
       /// Creates a new Transaction instances that is returned in the idle state which can be

@@ -33,6 +33,16 @@ namespace Apache.Qpid.Proton.Engine
    public interface ITransactionManager : IEndpoint<ITransactionManager>
    {
       /// <summary>
+      /// Provides access to the connection that owns this transaction manager endpoint.
+      /// </summary>
+      IConnection Connection { get; }
+
+      /// <summary>
+      /// Provides access to the session that created this transaction manager.
+      /// </summary>
+      ISession Session { get; }
+
+      /// <summary>
       /// Adds the given amount of credit for the transaction manager which allows
       /// the remote transaction controller to send declare and discharge requests to
       /// this manager. The remote transaction controller cannot send any requests
@@ -69,14 +79,14 @@ namespace Apache.Qpid.Proton.Engine
       /// <para/>
       /// Must be called during link setup, i.e. before calling the open method.
       /// </summary>
-      Source RemoteSource { get; set; }
+      Source RemoteSource { get; }
 
       /// <summary>
       /// Gets the Coordinator value to assign to the remote end of this transaction manager link.
       /// <para/>
       /// Must be called during link setup, i.e. before calling the open method.
       /// </summary>
-      Coordinator RemoteCoordinator { get; set; }
+      Coordinator RemoteCoordinator { get; }
 
       /// <summary>
       /// Respond to a previous declare request from the remote transaction controller
@@ -152,7 +162,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="handler">The delegate that will handle this event</param>
       /// <returns>This transaction manager instance</returns>
-      ITransactionController ParentEndpointClosedHandler(Action<ITransactionController> handler);
+      ITransactionManager ParentEndpointClosedHandler(Action<ITransactionManager> handler);
 
    }
 }
