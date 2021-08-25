@@ -62,13 +62,13 @@ namespace Apache.Qpid.Proton.Codec
          Assert.AreEqual(NoLocalType.Instance.Descriptor, resultTye.Descriptor);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestUnknownDescribedTypeInList()
       {
          DoTestUnknownDescribedTypeInList(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestUnknownDescribedTypeInListFromStream()
       {
          DoTestUnknownDescribedTypeInList(true);
@@ -108,13 +108,13 @@ namespace Apache.Qpid.Proton.Codec
          Assert.AreEqual(NoLocalType.Instance.Descriptor, resultTye.Descriptor);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestUnknownDescribedTypeInMap()
       {
          DoTestUnknownDescribedTypeInMap(false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestUnknownDescribedTypeInMapFromStream()
       {
          DoTestUnknownDescribedTypeInMap(true);
@@ -154,7 +154,7 @@ namespace Apache.Qpid.Proton.Codec
          Assert.AreEqual(NoLocalType.Instance.Descriptor, resultTye.Descriptor);
       }
 
-      // TODO [Test]
+      [Test]
       public void testUnknownDescribedTypeInArray()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -178,25 +178,25 @@ namespace Apache.Qpid.Proton.Codec
          catch (ArgumentException) { }
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeSmallSeriesOfUnknownDescribedTypes()
       {
          DoTestDecodeUnknownDescribedTypeSeries(SmallSize, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeLargeSeriesOfUnknownDescribedTypes()
       {
          DoTestDecodeUnknownDescribedTypeSeries(LargeSize, false);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeSmallSeriesOfUnknownDescribedTypesFromStream()
       {
          DoTestDecodeUnknownDescribedTypeSeries(SmallSize, true);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeLargeSeriesOfUnknownDescribedTypesFromStream()
       {
          DoTestDecodeUnknownDescribedTypeSeries(LargeSize, true);

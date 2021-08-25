@@ -151,6 +151,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
             }
          }
 
+         if (typeEncoder == null)
+         {
+            throw new ArgumentException("Cannot encode array of unknown type.");
+         }
+
          return typeEncoder;
       }
    }

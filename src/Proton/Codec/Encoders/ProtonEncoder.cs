@@ -439,7 +439,13 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          }
          else
          {
-            return LookupTypeEncoder(value.GetType());
+            ITypeEncoder encoder = null;
+            if (!typeEncoders.TryGetValue(value.GetType(), out encoder))
+            {
+               encoder = DeduceTypeEncoder(value.GetType(), value);
+            }
+
+            return encoder;
          }
       }
 
@@ -484,10 +490,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
                // class lookups as we don't want to allow arrays of polymorphic types.
                if (encoder == null && instance != null)
                {
-                  if (encoder == null)
-                  {
-                     return unknownTypeEncoder;
-                  }
+                  return unknownTypeEncoder;
                }
             }
          }

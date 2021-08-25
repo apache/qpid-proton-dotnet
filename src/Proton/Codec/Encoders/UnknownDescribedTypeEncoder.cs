@@ -31,6 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          IDescribedType theType = (IDescribedType)value;
 
+         buffer.EnsureWritable(sizeof(byte));
          buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
          state.Encoder.WriteObject(buffer, state, theType.Descriptor);
          state.Encoder.WriteObject(buffer, state, theType.Described);

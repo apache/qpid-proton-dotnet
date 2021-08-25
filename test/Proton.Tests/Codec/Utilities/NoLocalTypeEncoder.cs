@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.IO;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec.Encoders;
 using Apache.Qpid.Proton.Types;
