@@ -17,7 +17,7 @@
 
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class UnsignedByteElement : AtomicElement
    {
@@ -28,13 +28,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => IsElementOfArray() ? 1 : 2;
+      public override uint Size => IsElementOfArray() ? 1u : 2u;
 
       public override object Value => value;
 
       public override DataType DataType => DataType.UByte;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
          if (IsElementOfArray())
          {

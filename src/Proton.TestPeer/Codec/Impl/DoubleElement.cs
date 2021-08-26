@@ -17,7 +17,7 @@
 
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class DoubleElement : AtomicElement
    {
@@ -28,15 +28,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => IsElementOfArray() ? 8 : 9;
+      public override uint Size => IsElementOfArray() ? 8u : 9u;
 
       public override object Value => value;
 
       public override DataType DataType => DataType.Double;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
-         int size = Size;
+         uint size = Size;
 
          if (writer.MaxWritableBytes() >= size)
          {
@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          }
          else
          {
-            return 0;
+            return 0u;
          }
       }
    }

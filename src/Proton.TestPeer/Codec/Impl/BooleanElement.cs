@@ -16,9 +16,8 @@
  */
 
 using System.IO;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class BooleanElement : AtomicElement
    {
@@ -33,13 +32,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
       /// in non-array parent then there is a single byte encoding, in an array
       /// there is a 1-byte encoding but no constructor
       /// </summary>
-      public override int Size => 1;
+      public override uint Size => 1;
 
       public override object Value => value;
 
       public override DataType DataType => DataType.Bool;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
          if (writer.IsWritable())
          {

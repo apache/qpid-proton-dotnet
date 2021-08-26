@@ -16,38 +16,44 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 {
-   public class DescribedType : IDescribedType
+   public enum DeclaredField
    {
-      public DescribedType(object descriptor, object described)
+      TxnId
+   }
+
+   public sealed class Declared : ListDescribedType
+   {
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:declared:list");
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000033ul;
+
+      public Declared() : base(Enum.GetNames(typeof(DeclaredField)).Length)
       {
-         Descriptor = descriptor;
-         Described = described;
       }
 
-      public object Descriptor { get; init; }
-
-      public object Described { get; init; }
-
-      public override bool Equals(object obj)
+      public Declared(object described) : base(Enum.GetNames(typeof(DeclaredField)).Length, (IList)described)
       {
-         return obj is DescribedType type &&
-                EqualityComparer<object>.Default.Equals(Descriptor, type.Descriptor) &&
-                EqualityComparer<object>.Default.Equals(Described, type.Described);
       }
 
-      public override int GetHashCode()
+      public Declared(IList described) : base(Enum.GetNames(typeof(DeclaredField)).Length, described)
       {
-         return HashCode.Combine(Descriptor, Described);
+      }
+
+      public override object Descriptor => DESCRIPTOR_SYMBOL;
+
+      public byte[] TxnId
+      {
+         get => (byte[])List[((int)DeclaredField.TxnId)];
+         set => List[((int)DeclaredField.TxnId)] = value;
       }
 
       public override string ToString()
       {
-         return "{" + Descriptor + ": " + Described + '}';
+         return "Declared{" + "TxnId=" + TxnId + '}';
       }
    }
 }

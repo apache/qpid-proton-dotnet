@@ -17,9 +17,8 @@
 
 using System;
 using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 {
    public abstract class ListDescribedType : IDescribedType
    {

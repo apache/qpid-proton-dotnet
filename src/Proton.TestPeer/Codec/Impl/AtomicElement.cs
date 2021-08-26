@@ -17,7 +17,7 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public abstract class AtomicElement : AbstractElement
    {

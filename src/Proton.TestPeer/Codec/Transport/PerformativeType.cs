@@ -18,7 +18,7 @@
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
    /// <summary>
-   /// Enumeration of data types that are encoded and decoded using the
+   /// Enumeration of AMQP data types that are encoded and decoded using the
    /// Data Codec
    /// </summary>
    public enum PerformativeType : byte

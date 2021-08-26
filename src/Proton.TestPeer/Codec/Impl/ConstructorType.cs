@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public enum ConstructorType : byte
    {

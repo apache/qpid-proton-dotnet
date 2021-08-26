@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 

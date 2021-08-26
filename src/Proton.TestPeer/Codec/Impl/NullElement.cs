@@ -17,21 +17,21 @@
 
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class NullElement : AtomicElement
    {
-      public NullElement(IElement parent, IElement prev) : base(parent, prev)
+      internal NullElement(IElement parent, IElement prev) : base(parent, prev)
       {
       }
 
-      public override int Size => IsElementOfArray() ? 0 : 1;
+      public override uint Size => IsElementOfArray() ? 0u : 1u;
 
       public override object Value => null;
 
       public override DataType DataType => DataType.Null;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
          if (writer.IsWritable() && !IsElementOfArray())
          {

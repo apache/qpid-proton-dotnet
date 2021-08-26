@@ -18,17 +18,17 @@
 using System.IO;
 using System.Text;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public interface IElement
    {
-      int Size { get; }
+      uint Size { get; }
 
       object Value { get; }
 
       DataType DataType { get; }
 
-      int Encode(BinaryWriter writer);
+      uint Encode(BinaryWriter writer);
 
       IElement Next { get; set; }
 

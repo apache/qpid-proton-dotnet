@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
@@ -32,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public abstract PerformativeType Type { get; }
 
-      public abstract void Invoke<T>(IPerformativeHandler<T> handler, int frameSize, Span<byte> payload, int channel, T context);
+      public abstract void Invoke<T>(IPerformativeHandler<T> handler, uint frameSize, Span<byte> payload, ushort channel, T context);
 
       public virtual object FieldValueOrSpecDefault(int index)
       {

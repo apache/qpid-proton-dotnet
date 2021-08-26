@@ -18,7 +18,7 @@
 using System.IO;
 using System.Text;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class StringElement : AtomicElement
    {
@@ -29,18 +29,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => ComputeSize(new UTF8Encoding().GetBytes(value).Length);
+      public override uint Size => ComputeSize((uint)new UTF8Encoding().GetBytes(value).Length);
 
       public override object Value => value;
 
       public override DataType DataType => DataType.String;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
          byte[] bytes = new UTF8Encoding().GetBytes(value);
-         int length = bytes.Length;
+         uint length = (uint)bytes.Length;
 
-         int size = ComputeSize(length);
+         uint size = ComputeSize(length);
 
          if (writer.MaxWritableBytes() < size)
          {
@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          return size;
       }
 
-      private int ComputeSize(int length)
+      private uint ComputeSize(uint length)
       {
          if (IsElementOfArray())
          {
@@ -85,27 +85,27 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
                if (length > 255)
                {
                   parent.ConstructorType = ConstructorType.Large;
-                  return 4 + length;
+                  return 4u + length;
                }
                else
                {
-                  return 1 + length;
+                  return 1u + length;
                }
             }
             else
             {
-               return 4 + length;
+               return 4u + length;
             }
          }
          else
          {
             if (length > 255)
             {
-               return 5 + length;
+               return 5u + length;
             }
             else
             {
-               return 2 + length;
+               return 2u + length;
             }
          }
       }

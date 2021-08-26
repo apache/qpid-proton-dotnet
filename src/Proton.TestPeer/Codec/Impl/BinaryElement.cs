@@ -18,7 +18,7 @@
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class BinaryElement : AtomicElement
    {
@@ -29,15 +29,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => ComputeSize();
+      public override uint Size => ComputeSize();
 
       public override object Value => value;
 
       public override DataType DataType => DataType.Binary;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
-         int size = Size;
+         uint size = Size;
          if (writer.MaxWritableBytes() < size)
          {
             return 0;
@@ -72,9 +72,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          return size;
       }
 
-      private int ComputeSize()
+      private uint ComputeSize()
       {
-         int length = value.Length;
+         uint length = (uint)value.Length;
 
          if (IsElementOfArray())
          {

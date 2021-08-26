@@ -27,13 +27,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       void Clear();
 
-      long Count { get; }
+      uint Count { get; }
 
       void Rewind();
 
-      DataType Next();
-
-      DataType Prev();
+      DataType Next { get; }
+      DataType Prev { get; }
 
       bool Enter();
 
@@ -41,11 +40,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       DataType DataType { get; }
 
-      long EncodedSize { get; }
+      uint EncodedSize { get; }
 
-      long Encode(Span<byte> buffer);
+      uint Encode(Span<byte> buffer);
 
-      long Decode(Span<byte> buffer);
+      uint Decode(Span<byte> buffer);
 
       void PutList();
 
@@ -107,11 +106,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       void PutDescribedType(IDescribedType dt);
 
-      long GetList();
+      uint GetList();
 
-      long GetMap();
+      uint GetMap();
 
-      long GetArray();
+      uint GetArray();
 
       bool IsArrayDescribed { get; }
 

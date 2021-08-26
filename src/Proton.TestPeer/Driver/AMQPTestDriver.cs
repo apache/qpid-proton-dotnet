@@ -15,27 +15,14 @@
  * limitations under the License.
  */
 
-using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using System;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver
 {
-   public abstract class MapDescribedType : IDescribedType
+   /// <summary>
+   /// The AMQP Test driver internal frame processing a script handler class.
+   /// </summary>
+   public sealed class AMQPTestDriver
    {
-      private readonly IDictionary fields = new Hashtable();
-
-      /// <summary>
-      /// Derived class must provide the descriptor value that defines this type
-      /// </summary>
-      public abstract object Descriptor { get; }
-
-      public object Described => Map;
-
-      public IDictionary Map => fields;
-
-      public override string ToString()
-      {
-         return GetType().Name + " [descriptor=" + Descriptor + " fields=" + fields + "]";
-      }
    }
 }

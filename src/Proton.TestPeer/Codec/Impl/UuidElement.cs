@@ -18,7 +18,7 @@
 using System;
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class UuidElement : AtomicElement
    {
@@ -29,15 +29,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => IsElementOfArray() ? 16 : 17;
+      public override uint Size => IsElementOfArray() ? 16u : 17u;
 
       public override object Value { get => value; }
 
       public override DataType DataType => DataType.Uuid;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
-         int size = Size;
+         uint size = Size;
          if (writer.MaxWritableBytes() >= size)
          {
             if (size == 17)

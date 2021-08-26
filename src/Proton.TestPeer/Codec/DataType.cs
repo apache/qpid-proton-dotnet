@@ -23,6 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
    /// </summary>
    public enum DataType : byte
    {
+      None,
       Null,
       Bool,
       UByte,

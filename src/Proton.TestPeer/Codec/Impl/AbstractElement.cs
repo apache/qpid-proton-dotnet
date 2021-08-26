@@ -20,7 +20,7 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public abstract class AbstractElement : IElement
    {
@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          Prev = prev;
       }
 
-      public abstract int Size { get; }
+      public abstract uint Size { get; }
 
       public abstract object Value { get; }
 
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       public abstract IElement CheckChild(IElement element);
 
-      public abstract int Encode(BinaryWriter writer);
+      public abstract uint Encode(BinaryWriter writer);
 
       public void Render(StringBuilder sb)
       {
@@ -108,8 +108,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       public override String ToString()
       {
-         // TODO: Format String
-         return String.Format("{0}[%h]{parent=%h, prev=%h, next=%h}", this.GetType().Name,
+         return String.Format("{0}[{1:X}]{parent={2:X}, prev={3:X}, next={4:X}}", this.GetType().Name,
                               RuntimeHelpers.GetHashCode(this),
                               RuntimeHelpers.GetHashCode(Parent),
                               RuntimeHelpers.GetHashCode(Prev),

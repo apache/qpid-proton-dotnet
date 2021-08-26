@@ -17,7 +17,7 @@
 
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class ShortElement : AtomicElement
    {
@@ -28,20 +28,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => IsElementOfArray() ? 2 : 3;
+      public override uint Size => IsElementOfArray() ? 2u : 3u;
 
       public override object Value => value;
 
       public override DataType DataType => DataType.Short;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
          if (IsElementOfArray())
          {
             if (writer.MaxWritableBytes() >= 2)
             {
                writer.Write(value);
-               return 2;
+               return 2u;
             }
          }
          else
@@ -50,11 +50,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
             {
                writer.Write(((byte)EncodingCodes.Short));
                writer.Write(value);
-               return 3;
+               return 3u;
             }
          }
 
-         return 0;
+         return 0u;
       }
    }
 }

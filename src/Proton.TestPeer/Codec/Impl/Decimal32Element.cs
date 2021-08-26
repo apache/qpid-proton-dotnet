@@ -18,7 +18,7 @@
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class Decimal32Element : AtomicElement
    {
@@ -29,15 +29,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => IsElementOfArray() ? 4 : 5;
+      public override uint Size => IsElementOfArray() ? 4u : 5u;
 
       public override object Value => value;
 
       public override DataType DataType => DataType.Decimal32;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
-         int size = Size;
+         uint size = Size;
 
          if (writer.MaxWritableBytes() >= size)
          {
@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          }
          else
          {
-            return 0;
+            return 0u;
          }
       }
    }

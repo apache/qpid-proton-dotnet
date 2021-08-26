@@ -19,7 +19,7 @@ using System;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public class ArrayElement : AbstractElement
    {
@@ -56,7 +56,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       public override bool CanEnter => true;
 
-      public override int Size => ComputeSize();
+      public override uint Size => ComputeSize();
 
       public override object Value => ExtrapolateValue();
 
@@ -105,7 +105,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          throw new NotImplementedException();
       }
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
          // TODO:
          throw new NotImplementedException();
@@ -137,11 +137,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          return count;
       }
 
-      private int ComputeSize()
+      private uint ComputeSize()
       {
          ConstructorType oldConstructorType;
-         int bodySize;
-         int count = 0;
+         uint bodySize;
+         uint count = 0;
          do
          {
             bodySize = 1; // data type constructor

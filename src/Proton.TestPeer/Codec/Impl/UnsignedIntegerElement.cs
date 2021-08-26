@@ -17,7 +17,7 @@
 
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class UnsignedIntegerElement : AtomicElement
    {
@@ -28,15 +28,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          this.value = value;
       }
 
-      public override int Size => ComputeSize();
+      public override uint Size => ComputeSize();
 
       public override object Value => value;
 
       public override DataType DataType => DataType.UInt;
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
-         int size = ComputeSize();
+         uint size = ComputeSize();
 
          if (size > writer.MaxWritableBytes())
          {
@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          return size;
       }
 
-      private int ComputeSize()
+      private uint ComputeSize()
       {
          if (IsElementOfArray())
          {
@@ -104,7 +104,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          }
          else
          {
-            return 0 == value ? 1 : (1 <= value && value <= 255) ? 2 : 5;
+            return 0 == value ? 1u : (1 <= value && value <= 255) ? 2u : 5u;
          }
       }
    }

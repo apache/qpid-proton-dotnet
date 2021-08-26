@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections;
 using System.IO;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public class ListElement : AbstractElement
    {
       private IElement first;
 
-      protected ListElement(IElement parent, IElement prev) : base(parent, prev)
+      internal ListElement(IElement parent, IElement prev) : base(parent, prev)
       {
       }
 
-      public override int Size => ComputeSize();
+      public override uint Size => ComputeSize();
 
       public override object Value
       {
@@ -84,12 +83,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          return element;
       }
 
-      public override int Encode(BinaryWriter writer)
+      public override uint Encode(BinaryWriter writer)
       {
-         int encodedSize = ComputeSize();
+         uint encodedSize = ComputeSize();
 
-         int count = 0;
-         int size = 0;
+         uint count = 0;
+         uint size = 0;
          IElement elt = first;
          while (elt != null)
          {
@@ -162,10 +161,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
          return "]";
       }
 
-      private int ComputeSize()
+      private uint ComputeSize()
       {
-         int count = 0;
-         int size = 0;
+         uint count = 0;
+         uint size = 0;
          IElement elt = first;
          while (elt != null)
          {
