@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec
@@ -42,9 +43,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       uint EncodedSize { get; }
 
-      uint Encode(Span<byte> buffer);
+      uint Encode(BinaryWriter stream);
 
-      uint Decode(Span<byte> buffer);
+      uint Decode(BinaryReader stream);
 
       void PutList();
 

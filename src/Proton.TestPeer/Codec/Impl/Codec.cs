@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
@@ -135,12 +136,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return false;
       }
 
-      public uint Decode(Span<byte> buffer)
+      public uint Decode(BinaryReader reader)
       {
          throw new NotImplementedException();
       }
 
-      public uint Encode(Span<byte> buffer)
+      public uint Encode(BinaryWriter writer)
       {
          // TODO
          // IElement elt = first;
