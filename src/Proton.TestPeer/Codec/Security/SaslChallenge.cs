@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 {
@@ -60,7 +61,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
       public override string ToString()
       {
-         return "SaslChallenge{" + "challenge="; // TODO + TypeMapper.toQuotedString(getChallenge()) + '}';
+         return "SaslChallenge{" + "challenge=" + TypeMapper.ToQuotedString(Challenge) + '}';
       }
    }
 }

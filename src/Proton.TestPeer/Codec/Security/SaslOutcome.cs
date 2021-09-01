@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 {
@@ -69,7 +70,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
       {
          return "SaslOutcome{" +
                 "code=" + Code +
-                ", additionalData=" + // TODO TypeMapper.toQuotedString(getAdditionalData()) +
+                ", additionalData=" + TypeMapper.ToQuotedString(AdditionalData) +
                 '}';
       }
    }

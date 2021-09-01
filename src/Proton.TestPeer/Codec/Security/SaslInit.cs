@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 {
@@ -76,7 +77,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
       {
          return "SaslInit{" +
                 "mechanism=" + Mechanism +
-                ", initialResponse=" + // TODO TypeMapper.toQuotedString(getInitialResponse()) +
+                ", initialResponse=" + TypeMapper.ToQuotedString(InitialResponse) +
                 ", hostname='" + Hostname + '\'' + '}';
       }
    }
