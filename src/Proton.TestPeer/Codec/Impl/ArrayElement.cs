@@ -60,6 +60,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override object Value => ExtrapolateValue();
 
+      public Array ArrayValue => ExtrapolateValue();
+
       public override DataType DataType => DataType.Array;
 
       public DataType ArrayType { get; init; }
@@ -121,20 +123,23 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return "]";
       }
 
-      public long Count()
+      public uint Count
       {
-         int count = 0;
-         IElement elt = first;
-         while (elt != null)
+         get
          {
-            count++;
-            elt = elt.Next;
+            uint count = 0;
+            IElement elt = first;
+            while (elt != null)
+            {
+               count++;
+               elt = elt.Next;
+            }
+            if (IsDescribed && count != 0)
+            {
+               count--;
+            }
+            return count;
          }
-         if (IsDescribed && count != 0)
-         {
-            count--;
-         }
-         return count;
       }
 
       private uint ComputeSize()
@@ -201,11 +206,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return bodySize;
       }
 
-      private object ExtrapolateValue()
+      private object[] ExtrapolateValue()
       {
          if (IsDescribed)
          {
-            IDescribedType[] rVal = new IDescribedType[Count()];
+            IDescribedType[] rVal = new IDescribedType[Count];
             // TODO
             // object descriptor = first == null ? null : first.Value;
             // IElement element = first == null ? null : first.Next;
@@ -219,7 +224,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else if (ArrayType == DataType.Symbol)
          {
-            Symbol[] rVal = new Symbol[Count()];
+            Symbol[] rVal = new Symbol[Count];
             // TODO
             // SymbolElement element = (SymbolElement)first;
             // int i = 0;
@@ -232,7 +237,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            object[] rVal = new object[Count()];
+            object[] rVal = new object[Count];
             IElement element = first;
             int i = 0;
             while (element != null)

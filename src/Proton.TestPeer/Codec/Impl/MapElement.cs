@@ -31,7 +31,24 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override uint Size => ComputeSize();
 
-      public override object Value
+      public uint Count
+      {
+         get
+         {
+            uint count = 0;
+            IElement elt = first;
+            while (elt != null)
+            {
+               count++;
+               elt = elt.Next;
+            }
+            return count;
+         }
+      }
+
+      public override object Value => MapValue;
+
+      public IDictionary MapValue
       {
          get
          {

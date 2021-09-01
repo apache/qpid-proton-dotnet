@@ -32,6 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override object Value => value;
 
+      public short ShortValue => value;
+
       public override DataType DataType => DataType.Short;
 
       public override uint Encode(BinaryWriter writer)

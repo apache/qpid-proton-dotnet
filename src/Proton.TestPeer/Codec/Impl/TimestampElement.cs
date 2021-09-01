@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.IO;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
@@ -31,6 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       public override uint Size => IsElementOfArray() ? 8u : 9u;
 
       public override object Value => value;
+
+      public DateTime TimeValue => new DateTime(value, DateTimeKind.Utc);
 
       public override DataType DataType => DataType.Timestamp;
 

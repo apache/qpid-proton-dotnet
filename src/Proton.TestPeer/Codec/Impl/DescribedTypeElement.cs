@@ -17,6 +17,7 @@
 
 using System;
 using System.IO;
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
@@ -67,7 +68,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      public override object Value
+      public override object Value => DescribedValue;
+
+      public IDescribedType DescribedValue
       {
          get
          {

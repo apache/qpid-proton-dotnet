@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
 namespace Apache.Qpid.Proton.Test.Driver
@@ -91,6 +92,21 @@ namespace Apache.Qpid.Proton.Test.Driver
       #region Handlers for frame events
 
       internal void HandleHeader(AMQPHeader header)
+      {
+         // TODO
+      }
+
+      internal void HandleSaslPerformative(uint frameSize, SaslDescribedType sasl, ushort channel, byte[] payload)
+      {
+         // TODO
+      }
+
+      internal void HandlePerformative(uint frameSize, PerformativeDescribedType amqp, ushort channel, byte[] payload)
+      {
+         // TODO
+      }
+
+      internal void HandleHeartbeat(uint frameSize, ushort channel)
       {
          // TODO
       }

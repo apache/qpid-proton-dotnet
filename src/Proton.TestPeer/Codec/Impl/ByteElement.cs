@@ -32,6 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override object Value => value;
 
+      public sbyte SByteValue => value;
+
       public override DataType DataType => DataType.Byte;
 
       public override uint Encode(BinaryWriter writer)

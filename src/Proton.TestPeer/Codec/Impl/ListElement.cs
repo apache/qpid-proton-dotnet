@@ -30,7 +30,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override uint Size => ComputeSize();
 
-      public override object Value
+      public override object Value => ListValue;
+
+      public IList ListValue
       {
          get
          {
@@ -56,11 +58,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override bool CanEnter => true;
 
-      public int Count
+      public uint Count
       {
          get
          {
-            int count = 0;
+            uint count = 0;
             IElement element = first;
 
             while (element != null)

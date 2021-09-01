@@ -15,46 +15,16 @@
  * limitations under the License.
  */
 
+using System;
 using System.IO;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
-   public sealed class CharElement : AtomicElement
+   internal static class TypeDecoder
    {
-      private readonly char value;
-
-      public CharElement(IElement parent, IElement prev, char value) : base(parent, prev)
+      internal static uint Decode(BinaryReader reader, Codec codec)
       {
-         this.value = value;
-      }
-
-      public override uint Size => IsElementOfArray() ? 4u : 5u;
-
-      public override object Value => value;
-
-      public char CharValue => value;
-
-      public override DataType DataType => DataType.Char;
-
-      public override uint Encode(BinaryWriter writer)
-      {
-         uint size = Size;
-
-         if (size <= writer.MaxWritableBytes())
-         {
-            if (!IsElementOfArray())
-            {
-               writer.Write(((byte)EncodingCodes.Char));
-            }
-
-            writer.Write((int)value);
-
-            return size;
-         }
-         else
-         {
-            return 0u;
-         }
+         throw new NotImplementedException("Must implement this");
       }
    }
 }

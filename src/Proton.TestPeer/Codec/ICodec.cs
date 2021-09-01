@@ -33,6 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
       void Rewind();
 
       DataType Next { get; }
+
       DataType Prev { get; }
 
       bool Enter();
@@ -61,7 +62,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       void PutUnsignedByte(byte ub);
 
-      void PutByte(byte b);
+      void PutByte(sbyte b);
 
       void PutUnsignedShort(ushort us);
 
@@ -71,7 +72,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       void PutInt(int i);
 
-      void PutChar(int c);
+      void PutChar(char c);
 
       void PutUnsignedLong(ulong ul);
 
@@ -125,7 +126,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       byte GetUnsignedByte();
 
-      byte GetByte();
+      sbyte GetByte();
 
       ushort GetUnsignedShort();
 
@@ -155,7 +156,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       Guid GetUUID();
 
-      Span<byte> GetBinary();
+      Binary GetBinary();
 
       String GetString();
 
@@ -167,7 +168,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       IList GetPrimitiveList();
 
-      Object[] GetPrimitiveArray();
+      Array GetPrimitiveArray();
 
       IDescribedType GetDescribedType();
 

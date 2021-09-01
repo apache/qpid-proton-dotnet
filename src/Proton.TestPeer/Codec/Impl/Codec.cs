@@ -138,186 +138,327 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public uint Decode(BinaryReader reader)
       {
-         throw new NotImplementedException();
+        return TypeDecoder.Decode(reader, this);
       }
 
       public uint Encode(BinaryWriter writer)
       {
-         // TODO
-         // IElement elt = first;
-         // uint size = 0;
-         // while (elt != null)
-         // {
-         //    uint eltSize = elt.Size;
-         //    if (eltSize <= buffer.maxWritableBytes())
-         //    {
-         //       size += elt.Encode(buffer);
-         //    }
-         //    else
-         //    {
-         //       size += eltSize;
-         //    }
-         //    elt = elt.Next;
-         // }
-         // return size;
+         IElement elt = first;
+         uint size = 0;
+         while (elt != null)
+         {
+            uint eltSize = elt.Size;
+            if (eltSize <= writer.BaseStream.Length)
+            {
+               size += elt.Encode(writer);
+            }
+            else
+            {
+               size += eltSize;
+            }
 
-         throw new NotImplementedException();
+            elt = elt.Next;
+         }
 
+         return size;
       }
 
       public string Format()
       {
-         throw new NotImplementedException();
+         StringBuilder sb = new StringBuilder();
+         IElement element = this.first;
+         bool first = true;
+         while (element != null)
+         {
+            if (first)
+            {
+               first = false;
+            }
+            else
+            {
+               sb.Append(", ");
+            }
+            element.Render(sb);
+            element = element.Next;
+         }
+
+         return sb.ToString();
       }
 
       public void Free()
       {
-         throw new NotImplementedException();
+         first = null;
+         current = null;
       }
 
       public uint GetArray()
       {
-         throw new NotImplementedException();
+         if (current is ArrayElement)
+         {
+            return ((ArrayElement)current).Count;
+         }
+         throw new InvalidOperationException("Current value not array");
       }
 
       public DataType GetArrayType()
       {
-         throw new NotImplementedException();
+         if (current is ArrayElement)
+         {
+            return ((ArrayElement)current).DataType;
+         }
+         throw new InvalidOperationException("Current value not array");
       }
 
-      public Span<byte> GetBinary()
+      public Binary GetBinary()
       {
-         throw new NotImplementedException();
+         if (current is BinaryElement)
+         {
+            return ((BinaryElement)current).BinaryValue;
+         }
+         throw new InvalidOperationException("Current value not a Binary");
       }
 
       public bool GetBoolean()
       {
-         throw new NotImplementedException();
+         if (current is BooleanElement)
+         {
+            return ((BooleanElement)current).BooleanValue;
+         }
+         throw new InvalidOperationException("Current value not boolean");
       }
 
-      public byte GetByte()
+      public sbyte GetByte()
       {
-         throw new NotImplementedException();
+         if (current is ByteElement)
+         {
+            return ((ByteElement)current).SByteValue;
+         }
+         throw new InvalidOperationException("Current value not signed byte");
       }
 
       public int GetChar()
       {
-         throw new NotImplementedException();
+         if (current is CharElement)
+         {
+            return ((CharElement)current).CharValue;
+         }
+         throw new InvalidOperationException("Current value not character");
       }
 
       public Decimal128 GetDecimal128()
       {
-         throw new NotImplementedException();
+         if (current is Decimal128Element)
+         {
+            return ((Decimal128Element)current).DecimalValue;
+         }
+         throw new InvalidOperationException("Current value not Decimal128 value");
       }
 
       public Decimal32 GetDecimal32()
       {
-         throw new NotImplementedException();
+         if (current is Decimal32Element)
+         {
+            return ((Decimal32Element)current).DecimalValue;
+         }
+         throw new InvalidOperationException("Current value not Decimal32 value");
       }
 
       public Decimal64 GetDecimal64()
       {
-         throw new NotImplementedException();
+         if (current is Decimal64Element)
+         {
+            return ((Decimal64Element)current).DecimalValue;
+         }
+         throw new InvalidOperationException("Current value not Decimal64 value");
       }
 
       public IDescribedType GetDescribedType()
       {
-         throw new NotImplementedException();
+         if (current is DescribedTypeElement)
+         {
+            return ((DescribedTypeElement)current).DescribedValue;
+         }
+         throw new InvalidOperationException("Current value not described type");
       }
 
       public double GetDouble()
       {
-         throw new NotImplementedException();
+         if (current is DoubleElement)
+         {
+            return ((DoubleElement)current).DoubleValue;
+         }
+
+         throw new InvalidOperationException("Current value not a double");
       }
 
       public float GetFloat()
       {
-         throw new NotImplementedException();
+         if (current is FloatElement)
+         {
+            return ((FloatElement)current).FloatValue;
+         }
+
+         throw new InvalidOperationException("Current value not a float");
       }
 
       public int GetInt()
       {
-         throw new NotImplementedException();
+         if (current is IntegerElement)
+         {
+            return ((IntegerElement)current).IntegerValue;
+         }
+
+         throw new InvalidOperationException("Current value not a int");
       }
 
       public uint GetList()
       {
-         throw new NotImplementedException();
+         if (current is ListElement)
+         {
+            return ((ListElement)current).Count;
+         }
+
+         throw new InvalidOperationException("Current value not list");
       }
 
       public long GetLong()
       {
-         throw new NotImplementedException();
+         if (current is LongElement)
+         {
+            return ((LongElement)current).LongValue;
+         }
+
+         throw new InvalidOperationException("Current value not a long");
       }
 
       public uint GetMap()
       {
-         throw new NotImplementedException();
+         if (current is MapElement)
+         {
+            return ((MapElement)current).Count;
+         }
+
+         throw new InvalidOperationException("Current value not map");
       }
 
       public object GetObject()
       {
-         throw new NotImplementedException();
+         return current == null ? null : current.Value;
       }
 
-      public object[] GetPrimitiveArray()
+      public Array GetPrimitiveArray()
       {
-         throw new NotImplementedException();
+         if (current is ArrayElement)
+         {
+            return ((ArrayElement)current).ArrayValue;
+         }
+
+         throw new InvalidOperationException("Current value not array");
       }
 
       public IList GetPrimitiveList()
       {
-         throw new NotImplementedException();
+         if (current is ListElement)
+         {
+            return ((ListElement)current).ListValue;
+         }
+
+         throw new InvalidOperationException("Current value not list");
       }
 
       public IDictionary GetPrimitiveMap()
       {
-         throw new NotImplementedException();
+         if (current is MapElement)
+         {
+            return ((MapElement)current).MapValue;
+         }
+
+         throw new InvalidOperationException("Current value not map");
       }
 
       public short GetShort()
       {
-         throw new NotImplementedException();
+         if (current is ShortElement)
+         {
+            return ((ShortElement)current).ShortValue;
+         }
+
+         throw new InvalidOperationException("Current value not short");
       }
 
       public string GetString()
       {
-         throw new NotImplementedException();
+         if (current is StringElement)
+         {
+            return ((StringElement)current).StringValue;
+         }
+
+         throw new InvalidOperationException("Current value not a string");
       }
 
       public Symbol GetSymbol()
       {
-         throw new NotImplementedException();
+         if (current is SymbolElement)
+         {
+            return ((SymbolElement)current).SymbolValue;
+         }
+
+         throw new InvalidOperationException("Current value not a symbol");
       }
 
       public DateTime GetTimestamp()
       {
-         throw new NotImplementedException();
+         if (current is TimestampElement)
+         {
+            return ((TimestampElement)current).TimeValue;
+         }
+
+         throw new InvalidOperationException("Current value not a time stamp");
       }
 
       public byte GetUnsignedByte()
       {
-         throw new NotImplementedException();
+         if (current is UnsignedByteElement)
+         {
+            return ((UnsignedByteElement)current).ByteValue;
+         }
+         throw new InvalidOperationException("Current value not unsigned byte");
       }
 
       public uint GetUnsignedInteger()
       {
-         throw new NotImplementedException();
+         if (current is UnsignedIntegerElement)
+         {
+            return ((UnsignedIntegerElement)current).UIntValue;
+         }
+         throw new InvalidOperationException("Current value not unsigned integer");
       }
 
       public ulong GetUnsignedLong()
       {
-         throw new NotImplementedException();
+         if (current is UnsignedLongElement)
+         {
+            return ((UnsignedLongElement)current).ULongValue;
+         }
+         throw new InvalidOperationException("Current value not unsigned long");
       }
 
       public ushort GetUnsignedShort()
       {
-         throw new NotImplementedException();
+         if (current is UnsignedShortElement)
+         {
+            return ((UnsignedShortElement)current).UShortValue;
+         }
+         throw new InvalidOperationException("Current value not unsigned short");
       }
 
       public Guid GetUUID()
       {
-         throw new NotImplementedException();
+         if (current is UuidElement)
+         {
+            return ((UuidElement)current).GuidValue;
+         }
+         throw new InvalidOperationException("Current value not a UUID");
       }
 
       public void PutArray(bool described, DataType type)
@@ -327,42 +468,47 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public void PutBinary(Span<byte> bytes)
       {
-         throw new NotImplementedException();
+         PutElement(new BinaryElement(parent, current, new Binary(bytes.ToArray())));
       }
 
       public void PutBinary(byte[] bytes)
       {
-         throw new NotImplementedException();
+         PutElement(new BinaryElement(parent, current, new Binary(bytes)));
+      }
+
+      public void PutBinary(Binary binary)
+      {
+         PutElement(new BinaryElement(parent, current, binary));
       }
 
       public void PutBoolean(bool b)
       {
-         throw new NotImplementedException();
+         PutElement(new BooleanElement(parent, current, b));
       }
 
-      public void PutByte(byte b)
+      public void PutByte(sbyte b)
       {
-         throw new NotImplementedException();
+         PutElement(new ByteElement(parent, current, b));
       }
 
-      public void PutChar(int c)
+      public void PutChar(char c)
       {
-         throw new NotImplementedException();
-      }
-
-      public void PutDecimal128(Decimal128 d)
-      {
-         throw new NotImplementedException();
+         PutElement(new CharElement(parent, current, c));
       }
 
       public void PutDecimal32(Decimal32 d)
       {
-         throw new NotImplementedException();
+         PutElement(new Decimal32Element(parent, current, d));
       }
 
       public void PutDecimal64(Decimal64 d)
       {
-         throw new NotImplementedException();
+         PutElement(new Decimal64Element(parent, current, d));
+      }
+
+      public void PutDecimal128(Decimal128 d)
+      {
+         PutElement(new Decimal128Element(parent, current, d));
       }
 
       public void PutDescribed()
@@ -372,22 +518,26 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public void PutDescribedType(IDescribedType dt)
       {
-         throw new NotImplementedException();
+         PutElement(new DescribedTypeElement(parent, current));
+         Enter();
+         PutObject(dt.Descriptor);
+         PutObject(dt.Described);
+         Exit();
       }
 
       public void PutDouble(double d)
       {
-         throw new NotImplementedException();
+         PutElement(new DoubleElement(parent, current, d));
       }
 
       public void PutFloat(float f)
       {
-         throw new NotImplementedException();
+         PutElement(new FloatElement(parent, current, f));
       }
 
       public void PutInt(int i)
       {
-         throw new NotImplementedException();
+         PutElement(new IntegerElement(parent, current, i));
       }
 
       public void PutList()
@@ -397,7 +547,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public void PutLong(long l)
       {
-         throw new NotImplementedException();
+         PutElement(new LongElement(parent, current, l));
       }
 
       public void PutMap()
@@ -410,64 +560,192 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          PutElement(new NullElement(parent, current));
       }
 
-      public void PutObject(object o)
-      {
-         throw new NotImplementedException();
-      }
-
       public void PutPrimitiveList(IList list)
       {
-         throw new NotImplementedException();
+         PutList();
+         Enter();
+         IEnumerator enumerator = list.GetEnumerator();
+         while (enumerator.MoveNext())
+         {
+            PutObject(enumerator.Current);
+         }
+         Exit();
       }
 
       public void PutPrimitiveMap(IDictionary map)
       {
-         throw new NotImplementedException();
+         PutMap();
+         Enter();
+         IDictionaryEnumerator enumerator = map.GetEnumerator();
+         while (enumerator.MoveNext())
+         {
+            PutObject(enumerator.Key);
+            PutObject(enumerator.Value);
+         }
+         Exit();
       }
 
       public void PutShort(short s)
       {
-         throw new NotImplementedException();
+         PutElement(new ShortElement(parent, current, s));
       }
 
       public void PutString(string str)
       {
-         throw new NotImplementedException();
+         PutElement(new StringElement(parent, current, str));
       }
 
       public void PutSymbol(Symbol symbol)
       {
-         throw new NotImplementedException();
+         PutElement(new SymbolElement(parent, current, symbol));
       }
 
       public void PutTimestamp(DateTime t)
       {
-         throw new NotImplementedException();
+         PutElement(new TimestampElement(parent, current, new DateTimeOffset(t).ToUnixTimeMilliseconds()));
       }
 
       public void PutUnsignedByte(byte ub)
       {
-         throw new NotImplementedException();
+         PutElement(new UnsignedByteElement(parent, current, ub));
       }
 
       public void PutUnsignedInteger(uint ui)
       {
-         throw new NotImplementedException();
+         PutElement(new UnsignedIntegerElement(parent, current, ui));
       }
 
       public void PutUnsignedLong(ulong ul)
       {
-         throw new NotImplementedException();
+         PutElement(new UnsignedLongElement(parent, current, ul));
       }
 
       public void PutUnsignedShort(ushort us)
       {
-         throw new NotImplementedException();
+         PutElement(new UnsignedShortElement(parent, current, us));
       }
 
       public void PutUUID(Guid u)
       {
-         throw new NotImplementedException();
+         PutElement(new UuidElement(parent, current, u));
+      }
+
+      public void PutObject(object o)
+      {
+         if (o == null)
+         {
+            PutNull();
+         }
+         else if (o is bool)
+         {
+            PutBoolean((bool)o);
+         }
+         else if (o is byte)
+         {
+            PutUnsignedByte((byte)o);
+         }
+         else if (o is sbyte)
+         {
+            PutByte((sbyte)o);
+         }
+         else if (o is ushort)
+         {
+            PutUnsignedShort((ushort)o);
+         }
+         else if (o is short)
+         {
+            PutShort((short)o);
+         }
+         else if (o is uint)
+         {
+            PutUnsignedInteger((uint)o);
+         }
+         else if (o is int)
+         {
+            PutInt((int)o);
+         }
+         else if (o is char)
+         {
+            PutChar((char)o);
+         }
+         else if (o is ulong)
+         {
+            PutUnsignedLong((ulong)o);
+         }
+         else if (o is long)
+         {
+            PutLong((long)o);
+         }
+         else if (o is DateTime)
+         {
+            PutTimestamp((DateTime)o);
+         }
+         else if (o is float)
+         {
+            PutFloat((float)o);
+         }
+         else if (o is Double)
+         {
+            PutDouble((Double)o);
+         }
+         else if (o is Decimal32)
+         {
+            PutDecimal32((Decimal32)o);
+         }
+         else if (o is Decimal64)
+         {
+            PutDecimal64((Decimal64)o);
+         }
+         else if (o is Decimal128)
+         {
+            PutDecimal128((Decimal128)o);
+         }
+         else if (o is Guid)
+         {
+            PutUUID((Guid)o);
+         }
+         else if (o is Binary)
+         {
+            PutBinary((Binary)o);
+         }
+         else if (o is String)
+         {
+            PutString((String)o);
+         }
+         else if (o is Symbol)
+         {
+            PutSymbol((Symbol)o);
+         }
+         else if (o is DescribedType)
+         {
+            PutDescribedType((DescribedType)o);
+         }
+         else if (o is Symbol[])
+         {
+            PutArray(false, DataType.Symbol);
+            Enter();
+            foreach (Symbol s in (Symbol[])o)
+            {
+               PutSymbol(s);
+            }
+            Exit();
+         }
+         else if (o is Object[])
+         {
+            throw new ArgumentException("Unsupported array type");
+         }
+         else if (o is IList)
+         {
+            PutPrimitiveList((IList)o);
+         }
+         else if (o is IDictionary)
+         {
+            PutPrimitiveMap((IDictionary)o);
+         }
+         else
+         {
+            throw new ArgumentException("Unknown type " + o.GetType().Name);
+         }
       }
 
       public override string ToString()

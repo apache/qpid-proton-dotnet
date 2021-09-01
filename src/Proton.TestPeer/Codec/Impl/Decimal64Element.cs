@@ -33,6 +33,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override object Value => value;
 
+      public Decimal64 DecimalValue => value;
+
       public override DataType DataType => DataType.Decimal64;
 
       public override uint Encode(BinaryWriter writer)

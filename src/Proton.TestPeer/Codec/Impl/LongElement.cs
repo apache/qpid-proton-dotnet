@@ -32,6 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override object Value => value;
 
+      public long LongValue => value;
+
       public override DataType DataType => DataType.Long;
 
       public override uint Encode(BinaryWriter writer)
