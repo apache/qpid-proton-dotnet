@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public DataType DataType => current?.DataType ?? DataType.None;
 
-      public uint EncodedSize
+      public long EncodedSize
       {
          get
          {
@@ -136,12 +136,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return false;
       }
 
-      public uint Decode(BinaryReader reader)
+      public long Decode(BinaryReader reader)
       {
         return TypeDecoder.Decode(reader, this);
       }
 
-      public uint Encode(BinaryWriter writer)
+      public long Encode(BinaryWriter writer)
       {
          IElement elt = first;
          uint size = 0;

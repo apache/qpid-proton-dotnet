@@ -42,11 +42,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       DataType DataType { get; }
 
-      uint EncodedSize { get; }
+      long EncodedSize { get; }
 
-      uint Encode(BinaryWriter stream);
+      long Encode(BinaryWriter stream);
 
-      uint Decode(BinaryReader stream);
+      long Decode(BinaryReader stream);
 
       void PutList();
 

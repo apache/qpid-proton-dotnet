@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
       Double,
       Decimal32,
       Decimal64,
-      Decmal128,
+      Decimal128,
       Uuid,
       Binary,
       String,
