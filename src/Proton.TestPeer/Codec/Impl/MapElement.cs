@@ -29,7 +29,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
       }
 
-      public override uint Size => ComputeSize();
+      public override uint GetSize()
+      {
+         return ComputeSize();
+      }
 
       public uint Count
       {
@@ -105,11 +108,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          while (elt != null)
          {
             count++;
-            size += elt.Size;
+            size += elt.GetSize();
             elt = elt.Next;
          }
 
-         if (encodedSize > writer.MaxWritableBytes())
+         if (!writer.IsWritable())
          {
             return 0;
          }
@@ -179,7 +182,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          while (elt != null)
          {
             count++;
-            size += elt.Size;
+            size += elt.GetSize();
             elt = elt.Next;
          }
          if (IsElementOfArray())

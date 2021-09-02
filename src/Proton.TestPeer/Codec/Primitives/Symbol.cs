@@ -19,6 +19,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 {
@@ -42,14 +43,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
       public Symbol(byte[] buffer)
       {
          underlying = buffer;
-         hashCode = buffer.GetHashCode();
+         symbolString = ToString();
+         hashCode = symbolString.GetHashCode();
       }
 
       public Symbol(string stringView)
       {
          symbolString = stringView;
          underlying = new UTF8Encoding().GetBytes(stringView);
-         hashCode = underlying.GetHashCode();
+         hashCode = symbolString.GetHashCode();
       }
 
       /// <summary>
@@ -100,7 +102,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       public override bool Equals(object symbol)
       {
-         if (symbol == null || symbol.GetType() != GetType())
+         if (symbol == null || symbol is not Symbol)
          {
             return false;
          }
@@ -115,7 +117,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
             return false;
          }
 
-         return underlying.Equals(symbol.underlying);
+         return Enumerable.SequenceEqual(underlying, symbol.underlying);
       }
 
       public int CompareTo(Symbol other)

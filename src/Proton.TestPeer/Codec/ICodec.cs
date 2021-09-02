@@ -44,9 +44,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       long EncodedSize { get; }
 
-      long Encode(BinaryWriter stream);
+      long Encode(Stream stream) => Encode(new BinaryWriter(stream));
 
-      long Decode(BinaryReader stream);
+      long Encode(BinaryWriter writer);
+
+      long Decode(Stream stream) => Decode(new BinaryReader(stream));
+
+      long Decode(BinaryReader reader);
 
       void PutList();
 

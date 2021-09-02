@@ -67,7 +67,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override bool CanEnter => true;
 
-      public override uint Size => ComputeSize();
+      public override uint GetSize()
+      {
+         return ComputeSize();
+      }
 
       public override object Value => ExtrapolateValue();
 
@@ -209,10 +212,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override uint Encode(BinaryWriter writer)
       {
-         uint size = Size;
+         uint size = GetSize();
          uint count = Count;
 
-         if (writer.MaxWritableBytes() >= size)
+         if (writer.IsWritable())
          {
             if (!IsElementOfArray())
             {
@@ -413,7 +416,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             while (element != null)
             {
                count++;
-               bodySize += element.Size;
+               bodySize += element.GetSize();
                element = element.Next;
             }
          } while (oldConstructorType != ConstructorType);

@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public interface IElement
    {
-      uint Size { get; }
+      uint GetSize();
 
       object Value { get; }
 
@@ -52,14 +52,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
    internal static class BinaryWriterExtensions
    {
-      public static long MaxWritableBytes(this BinaryWriter writer)
-      {
-         return writer.BaseStream.Length - writer.BaseStream.Position;
-      }
-
       public static bool IsWritable(this BinaryWriter writer)
       {
-         return writer.BaseStream.Length != writer.BaseStream.Position;
+         return writer.BaseStream.CanWrite;
       }
    }
 }

@@ -33,8 +33,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
    public sealed class Disposition : PerformativeDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:begin:list");
-      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000011ul;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:disposition:list");
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000015ul;
 
       public Disposition() : base(Enum.GetNames(typeof(DispositionField)).Length)
       {

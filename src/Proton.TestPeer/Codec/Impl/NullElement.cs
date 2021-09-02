@@ -25,7 +25,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
       }
 
-      public override uint Size => IsElementOfArray() ? 0u : 1u;
+      public override uint GetSize()
+      {
+         return IsElementOfArray() ? 0u : 1u;
+      }
 
       public override object Value => null;
 

@@ -29,7 +29,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          this.value = value;
       }
 
-      public override uint Size => IsElementOfArray() ? 16u : 17u;
+      public override uint GetSize()
+      {
+         return IsElementOfArray() ? 16u : 17u;
+      }
 
       public override object Value { get => value; }
 
@@ -39,8 +42,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override uint Encode(BinaryWriter writer)
       {
-         uint size = Size;
-         if (writer.MaxWritableBytes() >= size)
+         uint size = GetSize();
+         if (writer.IsWritable())
          {
             if (size == 17)
             {

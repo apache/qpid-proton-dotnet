@@ -38,7 +38,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       private IElement current;
       private IElement parent;
 
-      public uint Count => first?.Size ?? 0u;
+      public uint Count => first?.GetSize() ?? 0u;
 
       public DataType DataType => current?.DataType ?? DataType.None;
 
@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             IElement element = first;
             while (element != null)
             {
-               size += element.Size;
+               size += element.GetSize();
                element = element.Next;
             }
             return size;
@@ -147,8 +147,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          uint size = 0;
          while (elt != null)
          {
-            uint eltSize = elt.Size;
-            if (eltSize <= writer.BaseStream.Length)
+            uint eltSize = elt.GetSize();
+            if (writer.BaseStream.CanWrite)
             {
                size += elt.Encode(writer);
             }

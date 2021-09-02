@@ -28,7 +28,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          this.value = value;
       }
 
-      public override uint Size => IsElementOfArray() ? 2u : 3u;
+      public override uint GetSize()
+      {
+         return IsElementOfArray() ? 2u : 3u;
+      }
 
       public override object Value => value;
 
@@ -40,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          if (IsElementOfArray())
          {
-            if (writer.MaxWritableBytes() >= 2)
+            if (writer.IsWritable())
             {
                writer.Write(value);
                return 2u;
@@ -48,7 +51,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            if (writer.MaxWritableBytes() >= 3)
+            if (writer.IsWritable())
             {
                writer.Write(((byte)EncodingCodes.Short));
                writer.Write(value);

@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
       {
          get
          {
-            int numUsedFields = 0;
+            int numUsedFields = -1;
             foreach (object element in fields)
             {
                if (element != null)

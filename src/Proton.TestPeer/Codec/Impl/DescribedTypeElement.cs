@@ -29,43 +29,40 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
       }
 
-      public override uint Size
+      public override uint GetSize()
       {
-         get
+         uint count = 0;
+         uint size = 0;
+         IElement elt = first;
+         while (elt != null)
          {
-            uint count = 0;
-            uint size = 0;
-            IElement elt = first;
-            while (elt != null)
-            {
-               count++;
-               size += elt.Size;
-               elt = elt.Next;
-            }
-
-            if (IsElementOfArray())
-            {
-               throw new ArgumentException("Cannot add described type members to an array");
-            }
-            else if (count > 2)
-            {
-               throw new ArgumentException("Too many elements in described type");
-            }
-            else if (count == 0)
-            {
-               size = 3;
-            }
-            else if (count == 1)
-            {
-               size += 2;
-            }
-            else
-            {
-               size += 1;
-            }
-
-            return size;
+            count++;
+            size += elt.GetSize();
+            elt = elt.Next;
          }
+
+         if (IsElementOfArray())
+         {
+            throw new ArgumentException("Cannot add described type members to an array");
+         }
+         else if (count > 2)
+         {
+            throw new ArgumentException("Too many elements in described type");
+         }
+         else if (count == 0)
+         {
+            size = 3;
+         }
+         else if (count == 1)
+         {
+            size += 2;
+         }
+         else
+         {
+            size += 1;
+         }
+
+         return size;
       }
 
       public override object Value => DescribedValue;
@@ -108,9 +105,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override uint Encode(BinaryWriter writer)
       {
-         uint encodedSize = Size;
+         uint encodedSize = GetSize();
 
-         if (encodedSize > writer.MaxWritableBytes())
+         if (!writer.IsWritable())
          {
             return 0;
          }

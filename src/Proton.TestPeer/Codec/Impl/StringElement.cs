@@ -29,7 +29,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          this.value = value;
       }
 
-      public override uint Size => ComputeSize((uint)new UTF8Encoding().GetBytes(value).Length);
+      public override uint GetSize()
+      {
+         return ComputeSize((uint)new UTF8Encoding().GetBytes(value).Length);
+      }
 
       public override object Value => value;
 
@@ -44,10 +47,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          uint size = ComputeSize(length);
 
-         if (writer.MaxWritableBytes() < size)
+         if (!writer.IsWritable())
          {
             return 0;
          }
+
          if (IsElementOfArray())
          {
             ArrayElement parent = (ArrayElement) Parent;

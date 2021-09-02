@@ -32,7 +32,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       /// in non-array parent then there is a single byte encoding, in an array
       /// there is a 1-byte encoding but no constructor
       /// </summary>
-      public override uint Size => 1;
+      public override uint GetSize()
+      {
+         return 1;
+      }
 
       public override object Value => value;
 

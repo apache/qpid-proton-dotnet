@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public override PerformativeType Type => PerformativeType.Open;
 
-      public override object Descriptor => throw new NotImplementedException();
+      public override object Descriptor => DESCRIPTOR_SYMBOL;
 
       public string ContainerId
       {

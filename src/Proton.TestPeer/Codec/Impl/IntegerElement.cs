@@ -28,7 +28,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          this.value = value;
       }
 
-      public override uint Size => ComputeSize();
+      public override uint GetSize()
+      {
+         return ComputeSize();
+      }
 
       public override object Value => value;
 
@@ -40,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          uint size = ComputeSize();
 
-         if (size <= writer.MaxWritableBytes())
+         if (writer.IsWritable())
          {
             switch (size)
             {

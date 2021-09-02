@@ -644,7 +644,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      private class BinaryConstructor : SmallVariableConstructor
+      private class BinaryConstructor : VariableConstructor
       {
          public override DataType DataType => DataType.Binary;
 
@@ -656,7 +656,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      private class SymbolConstructor : SmallVariableConstructor
+      private class SymbolConstructor : VariableConstructor
       {
          public override DataType DataType => DataType.Symbol;
 
@@ -668,7 +668,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      private class StringConstructor : SmallVariableConstructor
+      private class StringConstructor : VariableConstructor
       {
          public override DataType DataType => DataType.String;
 
@@ -714,7 +714,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      private class ListConstructor : SmallVariableConstructor
+      private class ListConstructor : VariableConstructor
       {
          public override DataType DataType => DataType.List;
 
@@ -731,7 +731,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      private class MapConstructor : SmallVariableConstructor
+      private class MapConstructor : VariableConstructor
       {
          public override DataType DataType => DataType.Map;
 
@@ -763,7 +763,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
                   uint size = c.Size(reader);
                   if (reader.ReadableBytes() > size)
                   {
-                     reader.ReadIndex(size + 1);
+                     reader.ReadIndex(position + size + 1);
                      c = ReadConstructor(reader);
                      return size + 2 + c.Size(reader);
                   }
@@ -810,7 +810,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
       }
 
-      private class ArrayConstructor : SmallVariableConstructor
+      private class ArrayConstructor : VariableConstructor
       {
          public override DataType DataType => DataType.Array;
 

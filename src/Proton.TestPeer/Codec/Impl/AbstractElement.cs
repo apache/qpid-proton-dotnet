@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          Prev = prev;
       }
 
-      public abstract uint Size { get; }
+      public abstract uint GetSize();
 
       public abstract object Value { get; }
 

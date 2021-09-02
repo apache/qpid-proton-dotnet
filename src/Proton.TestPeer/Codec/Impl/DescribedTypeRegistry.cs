@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          {
             try
             {
-               return (IDescribedType)Activator.CreateInstance(typeClass);
+               return (IDescribedType)Activator.CreateInstance(typeClass, described);
             }
             catch (Exception)
             {
