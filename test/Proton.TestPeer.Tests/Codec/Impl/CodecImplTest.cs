@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
+using System;
 using System.IO;
+using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using NUnit.Framework;
@@ -48,6 +50,137 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          Assert.AreEqual(open.ContainerId, described.ContainerId);
          Assert.AreEqual(open.Hostname, described.Hostname);
+      }
+
+      [Test]
+      public void TestEncodeOpen()
+      {
+         Open open = new Open();
+         open.ContainerId = "test";
+         open.Hostname = "localhost";
+
+         ICodec codec = CodecFactory.Create();
+
+         codec.PutDescribedType(open);
+         MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
+         codec.Encode(stream);
+
+         IDescribedType decoded = DecodeProtonPerformative(stream);
+         Assert.IsNotNull(decoded);
+         Assert.IsTrue(decoded is Open);
+
+         Open performative = (Open)decoded;
+         Assert.AreEqual(open.ContainerId, performative.ContainerId);
+         Assert.AreEqual(open.Hostname, performative.Hostname);
+      }
+
+      [Test]
+      public void TestDecodeBegin()
+      {
+         Begin begin = new Begin();
+         begin.HandleMax = 512;
+         begin.RemoteChannel = 1;
+
+         long expectedRead;
+         Stream encoded = EncodeProtonPerformative(begin, out expectedRead);
+
+         ICodec codec = CodecFactory.Create();
+
+         Assert.AreEqual(expectedRead, codec.Decode(encoded));
+
+         Begin described = (Begin)codec.GetDescribedType();
+         Assert.IsNotNull(described);
+         Assert.AreEqual(Begin.DESCRIPTOR_SYMBOL, described.Descriptor);
+
+         Assert.AreEqual(1, described.RemoteChannel);
+         Assert.AreEqual(512, described.HandleMax);
+      }
+
+      // TODO [Test]
+      public void TestDecodeAttach()
+      {
+         Attach attach = new Attach();
+         attach.Name = "test";
+         attach.Handle = 1;
+         attach.Role = Role.Sender;
+         attach.SenderSettleMode = SenderSettleMode.Mixed;
+         attach.ReceiverSettleMode = ReceiverSettleMode.First;
+         attach.Source = new Source();
+         attach.Target = new Target();
+
+         long expectedRead;
+         Stream encoded = EncodeProtonPerformative(attach, out expectedRead);
+
+         ICodec codec = CodecFactory.Create();
+
+         Assert.AreEqual(expectedRead, codec.Decode(encoded));
+
+         Attach described = (Attach)codec.GetDescribedType();
+         Assert.IsNotNull(described);
+         Assert.AreEqual(Attach.DESCRIPTOR_SYMBOL, described.Descriptor);
+
+         Assert.AreEqual(1, described.Handle);
+         Assert.AreEqual("test", described.Name);
+      }
+
+      // TODO [Test]
+      public void TestEncodeAttach()
+      {
+         Attach attach = new Attach();
+         attach.Name = "test";
+         attach.Handle = 1;
+         attach.Role = Role.Sender;
+         attach.SenderSettleMode = SenderSettleMode.Mixed;
+         attach.ReceiverSettleMode = ReceiverSettleMode.First;
+         attach.Source = new Source();
+         attach.Target = new Target();
+
+         ICodec codec = CodecFactory.Create();
+
+         codec.PutDescribedType(attach);
+         MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
+         codec.Encode(stream);
+
+         IDescribedType decoded = DecodeProtonPerformative(stream);
+         Assert.IsNotNull(decoded);
+         Assert.IsTrue(decoded is Attach);
+
+         Attach performative = (Attach)decoded;
+
+         Assert.AreEqual(1, performative.Handle);
+         Assert.AreEqual("test", performative.Name);
+      }
+
+      private IDescribedType DecodeProtonPerformative(MemoryStream stream)
+      {
+         IDescribedType performative = null;
+
+         try
+         {
+            codec.Decode(stream);
+         }
+         catch (Exception e)
+         {
+            throw new AssertionException("Decoder failed reading remote input:", e);
+         }
+
+         DataType dataType = codec.DataType;
+         if (dataType != DataType.Described)
+         {
+            throw new ArgumentException(
+                "Decoded type expected to be " + DataType.Described + " but was: " + dataType);
+         }
+
+         try
+         {
+            performative = codec.GetDescribedType();
+         }
+         finally
+         {
+            codec.Clear();
+         }
+
+         return performative;
       }
 
       private Stream EncodeProtonPerformative(IDescribedType performative, out long encodingSize)

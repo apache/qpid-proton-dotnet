@@ -143,8 +143,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public long Encode(BinaryWriter writer)
       {
+         long position = writer.BaseStream.Position;
          IElement elt = first;
          uint size = 0;
+
          while (elt != null)
          {
             uint eltSize = elt.GetSize();
@@ -159,6 +161,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
             elt = elt.Next;
          }
+
+         writer.BaseStream.Seek(position, SeekOrigin.Begin);
 
          return size;
       }

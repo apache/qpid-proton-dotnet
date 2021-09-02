@@ -89,7 +89,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
          {
             // Return a List containing only the 'used fields' (i.e up to the
             // highest field used)
-            int highestSetField = HighestSetFieldId;
+            int highestSetField = GetHighestSetFieldId();
 
             // Create a list with the fields in the correct positions.
             IList list = new ArrayList();
@@ -117,21 +117,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
          }
       }
 
-      protected int HighestSetFieldId
+      protected int GetHighestSetFieldId()
       {
-         get
+         int highestSetField = -1;
+         for (int i = 0; i < fields.Count; ++i)
          {
-            int numUsedFields = -1;
-            foreach (object element in fields)
+            if (fields[i] != null)
             {
-               if (element != null)
-               {
-                  numUsedFields++;
-               }
+               highestSetField = i;
             }
-
-            return numUsedFields;
          }
+
+         return highestSetField;
       }
 
       protected IList List => fields;
