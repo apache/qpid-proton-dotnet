@@ -720,9 +720,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          {
             PutSymbol((Symbol)o);
          }
-         else if (o is DescribedType)
+         else if (o is IDescribedType)
          {
-            PutDescribedType((DescribedType)o);
+            PutDescribedType((IDescribedType)o);
          }
          else if (o is Symbol[])
          {

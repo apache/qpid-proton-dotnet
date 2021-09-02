@@ -81,19 +81,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       public Role? Role
       {
          get => (Role)List[((int)AttachField.Role)];
-         set => List[((int)AttachField.Role)] = value;
+         set => List[((int)AttachField.Role)] = value == null ? null : value == Transport.Role.Receiver ? true : false;
       }
 
       public SenderSettleMode? SenderSettleMode
       {
          get => (SenderSettleMode?)List[((int)AttachField.SenderSettleMode)];
-         set => List[((int)AttachField.SenderSettleMode)] = value;
+         set => List[((int)AttachField.SenderSettleMode)] = ((byte?)value);
       }
 
       public ReceiverSettleMode? ReceiverSettleMode
       {
          get => (ReceiverSettleMode?)List[((int)AttachField.ReceiverSettleMode)];
-         set => List[((int)AttachField.ReceiverSettleMode)] = value;
+         set => List[((int)AttachField.ReceiverSettleMode)] = ((byte?)value);
       }
 
       public Source Source

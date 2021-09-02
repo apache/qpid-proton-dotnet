@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       public Role? Role
       {
          get => (Role?)List[((int)DispositionField.Role)];
-         set => List[((int)DispositionField.Role)] = value;
+         set => List[((int)DispositionField.Role)] = value == null ? null : value == Transport.Role.Receiver ? true : false;
       }
 
       public uint? First

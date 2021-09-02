@@ -96,7 +96,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          Assert.AreEqual(512, described.HandleMax);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestDecodeAttach()
       {
          Attach attach = new Attach();
@@ -123,7 +123,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          Assert.AreEqual("test", described.Name);
       }
 
-      // TODO [Test]
+      [Test]
       public void TestEncodeAttach()
       {
          Attach attach = new Attach();

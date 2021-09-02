@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
       public SaslCode Code
       {
          get => (SaslCode)List[((int)SaslOutcomeField.Code)];
-         set => List[((int)SaslOutcomeField.Code)] = value;
+         set => List[((int)SaslOutcomeField.Code)] = ((byte)value);
       }
 
       public byte[] AdditionalData

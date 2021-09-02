@@ -97,7 +97,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       public ReceiverSettleMode? ReceiverSettleMode
       {
          get => (ReceiverSettleMode?)List[((int)TransferField.ReceiverSettleMode)];
-         set => List[((int)TransferField.ReceiverSettleMode)] = value;
+         set => List[((int)TransferField.ReceiverSettleMode)] = ((byte?)value);
       }
 
       public IDeliveryState State
