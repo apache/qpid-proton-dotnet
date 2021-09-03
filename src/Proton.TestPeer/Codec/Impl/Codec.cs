@@ -208,7 +208,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          if (current is ArrayElement)
          {
-            return ((ArrayElement)current).DataType;
+            return ((ArrayElement)current).ArrayType;
          }
          throw new InvalidOperationException("Current value not array");
       }

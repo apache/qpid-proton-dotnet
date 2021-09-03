@@ -30,6 +30,86 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       private ICodec codec = CodecFactory.Create();
 
       [Test]
+      public void TestEncodeAndDecodeString()
+      {
+         String input = "test";
+
+         ICodec codec = CodecFactory.Create();
+         codec.PutString(input);
+
+         MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
+         long encodingSize = codec.Encode(stream);
+         Assert.IsTrue(encodingSize > input.Length);
+
+         codec.Clear();
+
+         long decodedSize = codec.Decode(stream);
+         Assert.AreEqual(encodingSize, decodedSize);
+
+         string output = codec.GetString();
+
+         Assert.AreEqual(input, output);
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeUInt32()
+      {
+         uint input = uint.MaxValue;
+
+         ICodec codec = CodecFactory.Create();
+         codec.PutUnsignedInteger(input);
+
+         MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
+         long encodingSize = codec.Encode(stream);
+         Assert.IsTrue(encodingSize > sizeof(uint));
+
+         codec.Clear();
+
+         long decodedSize = codec.Decode(stream);
+         Assert.AreEqual(encodingSize, decodedSize);
+
+         uint output = codec.GetUnsignedInteger();
+
+         Assert.AreEqual(input, output);
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeSymbolArray()
+      {
+         Symbol[] input = new Symbol[] { new Symbol("one"), new Symbol("two") };
+
+         ICodec codec = CodecFactory.Create();
+         codec.PutArray(false, DataType.Symbol);
+         codec.Enter();
+
+         foreach(Symbol sym in input)
+         {
+            codec.PutSymbol(sym);
+         }
+
+         codec.Exit();
+
+         MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
+         long encodingSize = codec.Encode(stream);
+         Assert.IsTrue(encodingSize > 0);
+
+         codec = CodecFactory.Create();
+
+         long decodedSize = codec.Decode(stream);
+         Assert.AreEqual(encodingSize, decodedSize);
+
+         Assert.AreEqual(input.Length, codec.GetArray());
+         Assert.AreEqual(DataType.Symbol, codec.GetArrayType());
+
+         Symbol[] output = (Symbol[])codec.GetPrimitiveArray();
+
+         for (int i = 0; i < input.Length; ++i)
+         {
+            Assert.AreEqual(input[i], output[i]);
+         }
+      }
+
+      [Test]
       public void TestDecodeOpen()
       {
          Open open = new Open();
@@ -50,6 +130,36 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          Assert.AreEqual(open.ContainerId, described.ContainerId);
          Assert.AreEqual(open.Hostname, described.Hostname);
+      }
+
+      [Test]
+      public void TestDecodeOpenWithLocales()
+      {
+         Open open = new Open();
+         open.ContainerId = "test";
+         open.Hostname = "localhost";
+         open.IncomingLocales = new Symbol[] { new Symbol("A"), new Symbol("B") };
+
+         long expectedRead;
+         Stream encoded = EncodeProtonPerformative(open, out expectedRead);
+         Assert.AreNotEqual(0, expectedRead);
+
+         ICodec codec = CodecFactory.Create();
+
+         Assert.AreEqual(expectedRead, codec.Decode(new BinaryReader(encoded)));
+
+         Open described = (Open)codec.GetDescribedType();
+         Assert.IsNotNull(described);
+         Assert.AreEqual(Open.DESCRIPTOR_SYMBOL, described.Descriptor);
+
+         Assert.AreEqual(open.ContainerId, described.ContainerId);
+         Assert.AreEqual(open.Hostname, described.Hostname);
+         Assert.IsNotNull(described.IncomingLocales);
+
+         for (int i = 0; i < open.IncomingLocales.Length; ++i)
+         {
+            Assert.AreEqual(open.IncomingLocales[i], described.IncomingLocales[i]);
+         }
       }
 
       [Test]
