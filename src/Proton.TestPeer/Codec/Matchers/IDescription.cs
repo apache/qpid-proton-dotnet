@@ -15,20 +15,10 @@
  * limitations under the License.
  */
 
-using System;
-
-namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
+namespace Apache.Qpid.Proton.Test.Driver.Matchers
 {
-   /// <summary>
-   /// Handler Interface that can be used to implement a visitor pattern of
-   /// processing the AMQP Header types as they are sent or received.
-   /// </summary>
-   /// <typeparam name="T">The type of the context used in the processing</typeparam>
-   public interface IHeaderHandler<T>
+   public interface IDescription
    {
-      void HandleAMQPHeader(AMQPHeader header, T context) { }
-
-      void HandleSASLHeader(AMQPHeader header, T context) { }
 
    }
 }

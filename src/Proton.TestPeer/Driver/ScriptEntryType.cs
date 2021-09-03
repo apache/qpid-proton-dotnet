@@ -15,20 +15,14 @@
  * limitations under the License.
  */
 
-using System;
-
-namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
+namespace Apache.Qpid.Proton.Test.Driver
 {
    /// <summary>
-   /// Handler Interface that can be used to implement a visitor pattern of
-   /// processing the AMQP Header types as they are sent or received.
+   /// Defines the type of a scripted entry in a test driver script.
    /// </summary>
-   /// <typeparam name="T">The type of the context used in the processing</typeparam>
-   public interface IHeaderHandler<T>
+   public enum ScriptEntryType
    {
-      void HandleAMQPHeader(AMQPHeader header, T context) { }
-
-      void HandleSASLHeader(AMQPHeader header, T context) { }
-
+      Expectation,
+      Action
    }
 }

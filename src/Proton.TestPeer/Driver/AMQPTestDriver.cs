@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
@@ -88,6 +89,21 @@ namespace Apache.Qpid.Proton.Test.Driver
       public Open RemoteOpen => remoteOpen;
 
       public Open LocalOpen => localOpen;
+
+      internal void AfterDelay(long delay, IScriptedAction action)
+      {
+         throw new NotImplementedException();
+      }
+
+      internal void AddScriptedElement(IScriptedElement element)
+      {
+         throw new NotImplementedException();
+      }
+
+      internal void SendAMQPFrame(ushort? channel, IDescribedType performative, byte[] payload)
+      {
+         throw new NotImplementedException();
+      }
 
       #region Handlers for frame events
 

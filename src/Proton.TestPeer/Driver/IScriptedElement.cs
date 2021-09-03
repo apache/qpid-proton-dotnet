@@ -16,10 +16,6 @@
  */
 
 using System;
-using System.IO;
-using Apache.Qpid.Proton.Test.Driver.Codec;
-using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -28,5 +24,10 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public interface IScriptedElement
    {
+      /// <summary>
+      /// Defines the type of scripted element that this entry implements.
+      /// </summary>
+      ScriptEntryType ScriptedType => throw new NotImplementedException("Must be implemented in base classes or interfaces");
+
    }
 }

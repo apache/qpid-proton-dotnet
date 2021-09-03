@@ -17,7 +17,7 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec
+namespace Apache.Qpid.Proton.Test.Driver.Exceptions
 {
    /// <summary>
    /// Exception type that is thrown when an unexpected AMQP performative is received
@@ -25,7 +25,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
    /// </summary>
    public sealed class UnexpectedPerformativeError : Exception
    {
-      public UnexpectedPerformativeError()
+      public UnexpectedPerformativeError() : base()
+      {
+      }
+
+      public UnexpectedPerformativeError(String message) : base(message)
       {
       }
 
