@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+using System;
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
    public enum TerminusExpiryPolicy
@@ -23,5 +26,62 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       SessionEnd,
       ConnectionClose,
       Never
+   }
+
+   public static class TerminusExpiryPolicyExtension
+   {
+      private static readonly Symbol LinkDetach = new Symbol("link-detach");
+      private static readonly Symbol SessionEnd = new Symbol("session-end");
+      private static readonly Symbol ConnectionClose = new Symbol("connection-close");
+      private static readonly Symbol Never = new Symbol("never");
+
+      public static Symbol ToSymbol(this TerminusExpiryPolicy mode)
+      {
+         switch (mode)
+         {
+            case TerminusExpiryPolicy.LinkDetach:
+               return LinkDetach;
+            case TerminusExpiryPolicy.SessionEnd:
+               return SessionEnd;
+            case TerminusExpiryPolicy.ConnectionClose:
+               return ConnectionClose;
+            case TerminusExpiryPolicy.Never:
+               return Never;
+         }
+
+         throw new ArgumentOutOfRangeException("Unknown TerminusExpiryPolicy");
+      }
+
+      public static TerminusExpiryPolicy Lookup(Symbol policy)
+      {
+         if (policy == null)
+         {
+            return TerminusExpiryPolicy.SessionEnd;
+         }
+
+         return Lookup(policy.ToString());
+      }
+
+      public static TerminusExpiryPolicy Lookup(string policy)
+      {
+         if (policy == null)
+         {
+            return TerminusExpiryPolicy.SessionEnd;
+         }
+
+         switch (policy)
+         {
+            case "link-detach":
+               return TerminusExpiryPolicy.LinkDetach;
+            case "session-end":
+               return TerminusExpiryPolicy.SessionEnd;
+            case "connection-close":
+               return TerminusExpiryPolicy.ConnectionClose;
+            case "never":
+               return TerminusExpiryPolicy.Never;
+         }
+
+         throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + policy);
+      }
    }
 }

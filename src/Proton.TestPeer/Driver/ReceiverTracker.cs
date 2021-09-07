@@ -15,37 +15,31 @@
  * limitations under the License.
  */
 
-using System;
+using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
+namespace Apache.Qpid.Proton.Test.Driver
 {
-   public enum TerminusDurability : uint
+   /// <summary>
+   /// Tracks information about receiver links that are opened be the client under test.
+   /// </summary>
+   public sealed class ReceiverTracker : LinkTracker
    {
-      None,
-      Configuration,
-      UnsettledState
-   }
-
-   public static class TerminusDurabilityExtension
-   {
-      public static uint ToUInt32(this TerminusDurability mode)
+      public ReceiverTracker(SessionTracker session) : base(session)
       {
-         return (uint)mode;
       }
 
-      public static TerminusDurability Lookup(uint mode)
+      public override bool IsSender => false;
+
+      public override bool IsReceiver => true;
+
+      internal override void HandleFlow(Flow flow)
       {
-         switch (mode)
-         {
-            case 0:
-               return TerminusDurability.None;
-            case 1:
-               return TerminusDurability.Configuration;
-            case 2:
-               return TerminusDurability.UnsettledState;
-            default:
-               throw new ArgumentOutOfRangeException("Terminus Durability value out or range [0...2]");
-         }
+         // TODO
+      }
+
+      internal override void HandleTransfer(Transfer transfer, byte[] payload)
+      {
+         // TODO
       }
    }
 }

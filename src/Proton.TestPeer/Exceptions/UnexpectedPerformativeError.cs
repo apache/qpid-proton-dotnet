@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Exceptions
    /// Exception type that is thrown when an unexpected AMQP performative is received
    /// by the test driver during a scripted test run.
    /// </summary>
-   public sealed class UnexpectedPerformativeError : Exception
+   public sealed class UnexpectedPerformativeError : AssertionError
    {
       public UnexpectedPerformativeError() : base()
       {

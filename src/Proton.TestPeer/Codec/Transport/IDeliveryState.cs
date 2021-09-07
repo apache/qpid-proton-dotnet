@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
    /// <summary>
    /// Interface for all implementations of an AMQP DeliveryState type.
    /// </summary>
-   public interface IDeliveryState
+   public interface IDeliveryState : IDescribedType
    {
       DeliveryStateType Type { get; }
    }

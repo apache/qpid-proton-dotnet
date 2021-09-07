@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -29,6 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public sealed class AMQPTestDriver
    {
+      private readonly Mutex mutex = new Mutex();
       private readonly String driverName;
       private readonly FrameDecoder frameParser;
       private readonly FrameEncoder frameEncoder;
@@ -36,7 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private Open localOpen;
       private Open remoteOpen;
 
-      // TODO private readonly DriverSessions sessions = new DriverSessions(this);
+      private readonly DriverSessions sessions;
 
       private readonly Action<byte[]> frameConsumer;
       private readonly Action<Exception> assertionConsumer;
@@ -47,7 +50,9 @@ namespace Apache.Qpid.Proton.Test.Driver
       private uint advertisedIdleTimeout = 0;
 
       private volatile uint emptyFrameCount;
+
       private volatile uint performativeCount;
+
       private volatile uint saslPerformativeCount;
 
       private uint inboundMaxFrameSize = UInt32.MaxValue;
@@ -59,6 +64,13 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// and processing incoming data (although you should probably not do that).
       /// </summary>
       private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
+
+      public AMQPTestDriver()
+      {
+         this.sessions = new DriverSessions(this);
+      }
+
+      internal DriverSessions Sessions => sessions;
 
       public string Name => driverName;
 
@@ -100,12 +112,43 @@ namespace Apache.Qpid.Proton.Test.Driver
          throw new NotImplementedException();
       }
 
+      #region Trigger sends of Header, AMQP and SASL frames to connected peers
+
+      internal void SendHeader(AMQPHeader header)
+      {
+         throw new NotImplementedException();
+      }
+
       internal void SendAMQPFrame(ushort? channel, IDescribedType performative, byte[] payload)
       {
          throw new NotImplementedException();
       }
 
+      internal void SendSaslFrame<T>(ushort onChannel, T performative) where T : IDescribedType
+      {
+         throw new NotImplementedException();
+      }
+
+      #endregion
+
       #region Handlers for frame events
+
+      internal void handleConnectedEstablished()
+      {
+         mutex.WaitOne();
+         try
+         {
+            IScriptedElement peekNext = script.Peek();
+            if (peekNext.ScriptedType == ScriptEntryType.Action)
+            {
+               ProcessScript(peekNext);
+            }
+         }
+         finally
+         {
+            mutex.ReleaseMutex();
+         }
+      }
 
       internal void HandleHeader(AMQPHeader header)
       {
@@ -125,6 +168,58 @@ namespace Apache.Qpid.Proton.Test.Driver
       internal void HandleHeartbeat(uint frameSize, ushort channel)
       {
          // TODO
+      }
+
+      #endregion
+
+      #region Internal Test Driver Utilities
+
+      private void SearchForScriptCompletionAndTrigger()
+      {
+         foreach (IScriptedElement element in script)
+         {
+            if (element is ScriptCompleteAction)
+            {
+               ScriptCompleteAction completed = (ScriptCompleteAction)element;
+               completed.Perform(this);
+            }
+         }
+      }
+
+      private void ProcessScript(IScriptedElement current)
+      {
+         if (current is IScriptedExpectation expectation)
+         {
+            while (expectation.PerformAfterwards() != null && failureCause == null)
+            {
+               expectation.PerformAfterwards().Perform(this);
+            }
+         }
+
+         IScriptedElement peekNext = script.Peek();
+         do
+         {
+            if (peekNext is IScriptedAction action)
+            {
+               script.Dequeue();
+               action.Perform(this);
+            }
+            else
+            {
+               return;
+            }
+
+            peekNext = script.Peek();
+         }
+         while (peekNext != null && failureCause == null);
+      }
+
+      private void CheckFailed()
+      {
+         if (failureCause != null)
+         {
+            throw failureCause;
+         }
       }
 
       #endregion

@@ -17,35 +17,24 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
+namespace Apache.Qpid.Proton.Test.Driver.Exceptions
 {
-   public enum TerminusDurability : uint
+   /// <summary>
+   /// Exception type that is thrown when an unexpected AMQP performative is received
+   /// by the test driver during a scripted test run.
+   /// </summary>
+   public sealed class ScriptConfigurationError : AssertionError
    {
-      None,
-      Configuration,
-      UnsettledState
-   }
-
-   public static class TerminusDurabilityExtension
-   {
-      public static uint ToUInt32(this TerminusDurability mode)
+      public ScriptConfigurationError() : base()
       {
-         return (uint)mode;
       }
 
-      public static TerminusDurability Lookup(uint mode)
+      public ScriptConfigurationError(String message) : base(message)
       {
-         switch (mode)
-         {
-            case 0:
-               return TerminusDurability.None;
-            case 1:
-               return TerminusDurability.Configuration;
-            case 2:
-               return TerminusDurability.UnsettledState;
-            default:
-               throw new ArgumentOutOfRangeException("Terminus Durability value out or range [0...2]");
-         }
+      }
+
+      public ScriptConfigurationError(String message, Exception cause) : base(message, cause)
+      {
       }
    }
 }
