@@ -26,9 +26,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
    /// <typeparam name="T">The type of the context used in the processing</typeparam>
    public interface IHeaderHandler<T>
    {
-      void HandleAMQPHeader(AMQPHeader header, T context) { }
+      void HandleAMQPHeader(AMQPHeader header, T context);
 
-      void HandleSASLHeader(AMQPHeader header, T context) { }
+      void HandleSASLHeader(AMQPHeader header, T context);
 
    }
 }

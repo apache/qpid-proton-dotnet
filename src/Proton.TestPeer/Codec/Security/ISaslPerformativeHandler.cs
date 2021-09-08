@@ -21,29 +21,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 {
    public interface ISaslPerformativeHandler<T>
    {
-      void HandleMechanisms(uint frameSize, SaslMechanisms saslMechanisms, T context)
-      {
-         throw new NotImplementedException("SASL Mechanisms was not handled");
-      }
+      void HandleMechanisms(uint frameSize, SaslMechanisms saslMechanisms, T context);
 
-      void HandleInit(uint frameSize, SaslInit saslInit, T context)
-      {
-         throw new NotImplementedException("SASL Init was not handled");
-      }
+      void HandleInit(uint frameSize, SaslInit saslInit, T context);
 
-      void HandleChallenge(uint frameSize, SaslChallenge saslChallenge, T context)
-      {
-         throw new NotImplementedException("SASL Challenge was not handled");
-      }
+      void HandleChallenge(uint frameSize, SaslChallenge saslChallenge, T context);
 
-      void HandleResponse(uint frameSize, SaslResponse saslResponse, T context)
-      {
-         throw new NotImplementedException("SASL Response was not handled");
-      }
+      void HandleResponse(uint frameSize, SaslResponse saslResponse, T context);
 
-      void HandleOutcome(uint frameSize, SaslOutcome saslOutcome, T context)
-      {
-         throw new NotImplementedException("SASL Outcome was not handled");
-      }
+      void HandleOutcome(uint frameSize, SaslOutcome saslOutcome, T context);
    }
 }

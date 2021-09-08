@@ -116,82 +116,82 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       #region Overrides for all the incoming frames and headers events
 
-      public virtual void HandleAMQPHeader(AMQPHeader header, AMQPTestDriver context)
+      public override void HandleAMQPHeader(AMQPHeader header, AMQPTestDriver context)
       {
          DoVerification((uint)header.Buffer.Length, header, null, 0, context);
       }
 
-      public virtual void HandleSASLHeader(AMQPHeader header, AMQPTestDriver context)
+      public override void HandleSASLHeader(AMQPHeader header, AMQPTestDriver context)
       {
          DoVerification((uint)header.Buffer.Length, header, null, 0, context);
       }
 
-      public virtual void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, open, payload, channel, context);
       }
 
-      public virtual void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, begin, payload, channel, context);
       }
 
-      public virtual void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, attach, payload, channel, context);
       }
 
-      public virtual void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, flow, payload, channel, context);
       }
 
-      public virtual void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, transfer, payload, channel, context);
       }
 
-      public virtual void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, disposition, payload, channel, context);
       }
 
-      public virtual void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, detach, payload, channel, context);
       }
 
-      public virtual void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, end, payload, channel, context);
       }
 
-      public virtual void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, close, payload, channel, context);
       }
 
-      public virtual void HandleMechanisms(uint frameSize, SaslMechanisms saslMechanisms, AMQPTestDriver context)
+      public override void HandleMechanisms(uint frameSize, SaslMechanisms saslMechanisms, AMQPTestDriver context)
       {
          DoVerification(frameSize, saslMechanisms, null, 0, context);
       }
 
-      public virtual void HandleInit(uint frameSize, SaslInit saslInit, AMQPTestDriver context)
+      public override void HandleInit(uint frameSize, SaslInit saslInit, AMQPTestDriver context)
       {
          DoVerification(frameSize, saslInit, null, 0, context);
       }
 
-      public virtual void HandleChallenge(uint frameSize, SaslChallenge saslChallenge, AMQPTestDriver context)
+      public override void HandleChallenge(uint frameSize, SaslChallenge saslChallenge, AMQPTestDriver context)
       {
          DoVerification(frameSize, saslChallenge, null, 0, context);
       }
 
-      public virtual void HandleResponse(uint frameSize, SaslResponse saslResponse, AMQPTestDriver context)
+      public override void HandleResponse(uint frameSize, SaslResponse saslResponse, AMQPTestDriver context)
       {
          DoVerification(frameSize, saslResponse, null, 0, context);
       }
 
-      public virtual void HandleOutcome(uint frameSize, SaslOutcome saslOutcome, AMQPTestDriver context)
+      public override void HandleOutcome(uint frameSize, SaslOutcome saslOutcome, AMQPTestDriver context)
       {
          DoVerification(frameSize, saslOutcome, null, 0, context);
       }

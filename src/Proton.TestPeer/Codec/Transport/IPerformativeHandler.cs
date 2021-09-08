@@ -26,25 +26,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
    /// <typeparam name="T">The type of the context used in the processing</typeparam>
    public interface IPerformativeHandler<T>
    {
-      void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, T context) { }
+      void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, T context);
 
-      void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, T context) { }
+      void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, T context);
 
-      void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, T context) { }
+      void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, T context);
 
-      void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, T context) { }
+      void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, T context);
 
-      void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, T context) { }
+      void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, T context);
 
-      void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, T context) { }
+      void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, T context);
 
-      void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, T context) { }
+      void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, T context);
 
-      void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, T context) { }
+      void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, T context);
 
-      void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, T context) { }
+      void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, T context);
 
-      void HandleHeartbeat(uint frameSize, Heartbeat beat, Span<byte> payload, ushort channel, T context) { }
+      void HandleHeartbeat(uint frameSize, Heartbeat beat, Span<byte> payload, ushort channel, T context);
 
    }
 }

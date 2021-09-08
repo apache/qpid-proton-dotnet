@@ -17,8 +17,19 @@
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers
 {
-   public interface IDescription
+   /// <summary>
+   /// Marks an object as having the ability to describe itself for matcher
+   /// error message or other output.
+   /// </summary>
+   public interface ISelfDescribing
    {
+      /// <summary>
+      /// Provides a description of this object which could be a subset of a
+      /// larger description so care should be taken when creating the final
+      /// wording of the description text.
+      /// </summary>
+      /// <param name="description">The description object that collects descriptive text</param>
+      void DescribeTo(IDescription description);
 
    }
 }
