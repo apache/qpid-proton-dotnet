@@ -21,6 +21,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec;
 using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
+using Apache.Qpid.Proton.Test.Driver.Exceptions;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -49,6 +50,41 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.frameSizeParser = new FrameSizeParsingStage(this);
          // this.frameBufferingStage = new FrameBufferingStage(this);
          // this.frameBodyParsingStage = new FrameBodyParsingStage(this);
+      }
+
+      /// <summary>
+      /// Resets the parser back to the expect a header state.
+      /// </summary>
+      public void ResetToExpectingHeader()
+      {
+         this.stage = new HeaderParsingStage(this);
+      }
+
+      /// <summary>
+      /// Accepts an incoming stream of bytes and parses a single frame from that stream
+      /// in order to signal the test driver of some event.
+      /// </summary>
+      /// <param name="stream"></param>
+      public void Ingest(Stream stream)
+      {
+         try
+         {
+            // Parses in-incoming data and emit one complete frame before returning, caller should
+            // ensure that the input buffer is drained into the engine or stop if the engine
+            // has changed to a non-writable state.
+            stage.Parse(stream);
+         }
+         catch (AssertionError ex)
+         {
+            TransitionToErrorStage(ex);
+            throw ex;
+         }
+         catch (Exception throwable)
+         {
+            AssertionError error = new AssertionError("Frame decode failed.", throwable);
+            TransitionToErrorStage(error);
+            throw error;
+         }
       }
 
       #region Private frame decoder implementation
@@ -208,7 +244,6 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal class FrameBufferingStage : FrameParserStage
       {
-
          private MemoryStream buffer;
 
          public FrameBufferingStage(FrameDecoder decoder) : base(decoder)

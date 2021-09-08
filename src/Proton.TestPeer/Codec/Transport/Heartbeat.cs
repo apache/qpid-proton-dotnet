@@ -16,33 +16,24 @@
  */
 
 using System;
-using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
-namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
+namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
-   public abstract class SaslDescribedType : ListDescribedType
+   public sealed class Heartbeat : PerformativeDescribedType
    {
-      protected SaslDescribedType(int numberOfFields) : base(numberOfFields)
+      public static readonly Heartbeat INSTANCE = new Heartbeat();
+
+      public Heartbeat() : base(0)
       {
       }
 
-      protected SaslDescribedType(int numberOfFields, IList described) : base(numberOfFields, described)
+      public override PerformativeType Type => PerformativeType.Heartbeat;
+
+      public override object Descriptor => null;
+
+      public override void Invoke<T>(IPerformativeHandler<T> handler, uint frameSize, Span<byte> payload, ushort channel, T context)
       {
-      }
-
-      public abstract SaslPerformativeType Type { get; }
-
-      public abstract void Invoke<T>(ISaslPerformativeHandler<T> handler, uint frameSize, byte[] payload, ushort channel, T context);
-
-      public virtual object FieldValueOrSpecDefault(int index)
-      {
-         return this[index];
-      }
-
-      public override string ToString()
-      {
-         return Type + " " + List;
+         handler.HandleHeartbeat(frameSize, INSTANCE, payload, channel, context);
       }
    }
 }

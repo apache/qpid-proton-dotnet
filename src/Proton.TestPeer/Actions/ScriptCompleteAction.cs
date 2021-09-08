@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// Action type used to inject the AMQP Header into a test script to
    /// drive the connect phase of the AMQP connection lifecycle.
    /// </summary>
-   public sealed class ScriptCompleteAction : IScriptedAction
+   public sealed class ScriptCompleteAction : ScriptedAction
    {
       private readonly AMQPTestDriver driver;
       private readonly CountdownEvent complete = new CountdownEvent(1);
@@ -35,25 +35,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.driver = driver;
       }
 
-      public IScriptedAction Later(long delay)
+      public override ScriptCompleteAction Later(long delay)
       {
          driver.AfterDelay(delay, this);
          return this;
       }
 
-      public IScriptedAction Now()
+      public override ScriptCompleteAction Now()
       {
          complete.Signal();
          return this;
       }
 
-      public IScriptedAction Perform(AMQPTestDriver driver)
+      public override ScriptCompleteAction Perform(AMQPTestDriver driver)
       {
          complete.Signal();
          return this;
       }
 
-      public IScriptedAction Queue()
+      public override ScriptCompleteAction Queue()
       {
          driver.AddScriptedElement(this);
          return this;
@@ -67,6 +67,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       public void Await(long timeout)
       {
          if (!complete.Wait(TimeSpan.FromMilliseconds(timeout)))
+         {
+            throw new AssertionError("Timed out waiting for scripted expectations to be met", new TimeoutException());
+         }
+      }
+
+      public void Await(TimeSpan timeout)
+      {
+         if (!complete.Wait(timeout))
          {
             throw new AssertionError("Timed out waiting for scripted expectations to be met", new TimeoutException());
          }

@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// Action type for a test script which produces some output or otherwise affects
    /// the state of the test driver in a proactive manner.
    /// </summary>
-   public interface IScriptedAction : IScriptedElement
+   public abstract class ScriptedAction : IScriptedElement
    {
       ScriptEntryType IScriptedElement.ScriptedType => ScriptEntryType.Action;
 
@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// regardless of any queued tasks or expected inputs.
       /// </summary>
       /// <returns>The scripted action</returns>
-      IScriptedAction Now();
+      public abstract ScriptedAction Now();
 
       /// <summary>
       /// Runs the scripted action on its associated test driver immediately
@@ -39,21 +39,21 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       /// <param name="millis"></param>
       /// <returns></returns>
-      IScriptedAction Later(long millis);
+      public abstract ScriptedAction Later(long millis);
 
       /// <summary>
       /// Queues the scripted action for later run after any preceding scripted
       /// elements are performed.
       /// </summary>
       /// <returns>The scripted action</returns>
-      IScriptedAction Queue();
+      public abstract ScriptedAction Queue();
 
       /// <summary>
       /// Triggers the action to be performed on the given test driver immediately.
       /// </summary>
       /// <param name="driver">The driver to perform the action on</param>
       /// <returns>The scripted action</returns>
-      IScriptedAction Perform(AMQPTestDriver driver);
+      public abstract ScriptedAction Perform(AMQPTestDriver driver);
 
    }
 }

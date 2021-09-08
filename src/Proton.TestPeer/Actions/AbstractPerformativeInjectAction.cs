@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// Action type for a test script which produces some output or otherwise affects
    /// the state of the test driver in a proactive manner.
    /// </summary>
-   public abstract class AbstractPerformativeInjectAction<T> : IScriptedAction where T : IDescribedType
+   public abstract class AbstractPerformativeInjectAction<T> : ScriptedAction where T : IDescribedType
    {
       private readonly AMQPTestDriver driver;
 
@@ -37,13 +37,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.driver = driver;
       }
 
-      public IScriptedAction Later(long millis)
+      public override AbstractPerformativeInjectAction<T> Later(long millis)
       {
          driver.AfterDelay(millis, this);
          return this;
       }
 
-      public IScriptedAction Now()
+      public override AbstractPerformativeInjectAction<T> Now()
       {
          BeforeActionPerformed(driver);
          driver.SendAMQPFrame(channel ?? 0, Performative, Payload);
@@ -51,13 +51,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public IScriptedAction Queue()
+      public override AbstractPerformativeInjectAction<T> Queue()
       {
          driver.AddScriptedElement(this);
          return this;
       }
 
-      public IScriptedAction Perform(AMQPTestDriver driver)
+      public override AbstractPerformativeInjectAction<T> Perform(AMQPTestDriver driver)
       {
          if (delay > 0)
          {
@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public IScriptedAction OnChannel(ushort channel)
+      public ScriptedAction OnChannel(ushort channel)
       {
          this.channel = channel;
          return this;
@@ -110,33 +110,33 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// Internal proxy action used for delayed tasks that will not accept any
    /// API call other than to perform the action.
    /// </summary>
-   internal sealed class ProxyDelayedScriptedAction : IScriptedAction
+   internal sealed class ProxyDelayedScriptedAction : ScriptedAction
    {
-      private readonly IScriptedAction parent;
+      private readonly ScriptedAction parent;
 
-      public ProxyDelayedScriptedAction(IScriptedAction parent)
+      public ProxyDelayedScriptedAction(ScriptedAction parent)
       {
          this.parent = parent;
       }
 
-      public IScriptedAction Perform(AMQPTestDriver driver)
+      public override ScriptedAction Perform(AMQPTestDriver driver)
       {
          return parent.Now();
       }
 
       #region Explicitly failing API methods
 
-      public IScriptedAction Later(long millis)
+      public override ScriptedAction Later(long millis)
       {
          throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
       }
 
-      public IScriptedAction Now()
+      public override ScriptedAction Now()
       {
          throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
       }
 
-      public IScriptedAction Queue()
+      public override ScriptedAction Queue()
       {
          throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
       }

@@ -24,10 +24,10 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// Expectation type that defines a want for some incoming activity
    /// that defines success or failure of a scripted test sequence.
    /// </summary>
-   public interface IScriptedExpectation : IScriptedElement,
-                                           IHeaderHandler<AMQPTestDriver>,
-                                           IPerformativeHandler<AMQPTestDriver>,
-                                           ISaslPerformativeHandler<AMQPTestDriver>
+   public abstract class ScriptedExpectation : IScriptedElement,
+                                               IHeaderHandler<AMQPTestDriver>,
+                                               IPerformativeHandler<AMQPTestDriver>,
+                                               ISaslPerformativeHandler<AMQPTestDriver>
    {
       ScriptEntryType IScriptedElement.ScriptedType => ScriptEntryType.Expectation;
 
@@ -35,14 +35,14 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// Indicates if the scripted element is optional and the test should not fail
       /// if the element desired outcome is not met.
       /// </summary>
-      bool IsOptional => false;
+      public virtual bool IsOptional => false;
 
       /// <summary>
       /// Provides a scripted expectation the means of initiating some action
       /// following successful compeltion of the expectation.
       /// </summary>
       /// <returns>a scripted action to perform following the expectation being me</returns>
-      IScriptedAction PerformAfterwards() => null;
+      public ScriptedAction PerformAfterwards() => null;
 
    }
 }

@@ -44,5 +44,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, T context) { }
 
+      void HandleHeartbeat(uint frameSize, Heartbeat beat, Span<byte> payload, ushort channel, T context) { }
+
    }
 }

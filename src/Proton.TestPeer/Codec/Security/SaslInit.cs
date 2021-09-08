@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
       public override SaslPerformativeType Type => SaslPerformativeType.Challenge;
 
-      public override void Invoke<T>(ISaslPerformativeHandler<T> handler, uint frameSize, Span<byte> payload, ushort channel, T context)
+      public override void Invoke<T>(ISaslPerformativeHandler<T> handler, uint frameSize, byte[] payload, ushort channel, T context)
       {
         handler.HandleInit(frameSize, this, context);
       }

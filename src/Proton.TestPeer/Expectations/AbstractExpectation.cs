@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// <summary>
    /// The AMQP Test driver internal frame processing a script handler class.
    /// </summary>
-   public abstract class AbstractExpectation<T> : IScriptedExpectation where T : ListDescribedType
+   public abstract class AbstractExpectation<T> : ScriptedExpectation where T : ListDescribedType
    {
       private ushort? channelExpectation;
       private uint? frameSizeExpectation;
@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return this;
       }
 
-      bool IsOptional => optional;
+      public override bool IsOptional => optional;
 
       public AbstractExpectation<T> Optional()
       {

@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// Action type used to inject the AMQP Header into a test script to
    /// drive the connect phase of the AMQP connection lifecycle.
    /// </summary>
-   public sealed class AMQPHeaderInjectAction : IScriptedAction
+   public sealed class AMQPHeaderInjectAction : ScriptedAction
    {
       private readonly AMQPTestDriver driver;
       private readonly AMQPHeader header;
@@ -36,25 +36,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.header = header;
       }
 
-      public IScriptedAction Later(long delay)
+      public override AMQPHeaderInjectAction Later(long delay)
       {
          driver.AfterDelay(delay, this);
          return this;
       }
 
-      public IScriptedAction Now()
+      public override AMQPHeaderInjectAction Now()
       {
          Perform(driver);
          return this;
       }
 
-      public IScriptedAction Perform(AMQPTestDriver driver)
+      public override AMQPHeaderInjectAction Perform(AMQPTestDriver driver)
       {
          driver.SendHeader(header);
          return this;
       }
 
-      public IScriptedAction Queue()
+      public override AMQPHeaderInjectAction Queue()
       {
          driver.AddScriptedElement(this);
          return this;

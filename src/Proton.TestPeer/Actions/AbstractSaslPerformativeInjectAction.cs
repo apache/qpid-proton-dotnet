@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// the state of the test driver in a proactive manner.  This action produces SASL
    /// performatives used when driving a scripted SASL authentication interaction.
    /// </summary>
-   public abstract class AbstractSaslPerformativeInjectAction<T> : IScriptedAction where T : IDescribedType
+   public abstract class AbstractSaslPerformativeInjectAction<T> : ScriptedAction where T : IDescribedType
    {
       private readonly AMQPTestDriver driver;
 
@@ -36,25 +36,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.driver = driver;
       }
 
-      public IScriptedAction Later(long delay)
+      public override AbstractSaslPerformativeInjectAction<T> Later(long delay)
       {
         driver.AfterDelay(delay, this);
         return this;
       }
 
-      public IScriptedAction Now()
+      public override AbstractSaslPerformativeInjectAction<T> Now()
       {
         Perform(driver);
         return this;
       }
 
-      public IScriptedAction Perform(AMQPTestDriver driver)
+      public override AbstractSaslPerformativeInjectAction<T> Perform(AMQPTestDriver driver)
       {
         driver.SendSaslFrame(OnChannel, Performative);
          return this;
       }
 
-      public IScriptedAction Queue()
+      public override AbstractSaslPerformativeInjectAction<T> Queue()
       {
         driver.AddScriptedElement(this);
          return this;
