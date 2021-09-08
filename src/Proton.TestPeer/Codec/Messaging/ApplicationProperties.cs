@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public void SetApplicationProperty(string name, object value)
+      public void AddApplicationProperty(string name, object value)
       {
          if (name == null)
          {

@@ -364,7 +364,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          return linkTracker;
       }
 
-      public LinkTracker handleRemoteDetach(Detach detach)
+      public LinkTracker HandleRemoteDetach(Detach detach)
       {
          LinkTracker tracker = null;
 
@@ -395,7 +395,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          return tracker;
       }
 
-      public LinkTracker handleLocalDetach(Detach detach)
+      public LinkTracker HandleLocalDetach(Detach detach)
       {
          LinkTracker tracker = null;
 
@@ -445,7 +445,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          return tracker;
       }
 
-      public void handleLocalTransfer(Transfer transfer, byte[] payload)
+      public void HandleLocalTransfer(Transfer transfer, byte[] payload)
       {
          LinkTracker tracker = null;
 
@@ -464,17 +464,17 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      public void handleDisposition(Disposition disposition)
+      public void HandleDisposition(Disposition disposition)
       {
          // TODO Forward to attached links or issue errors if invalid.
       }
 
-      public void handleLocalDisposition(Disposition disposition)
+      public void HandleLocalDisposition(Disposition disposition)
       {
          // TODO Forward to attached links or issue error if invalid.
       }
 
-      public LinkTracker handleFlow(Flow flow)
+      public LinkTracker HandleFlow(Flow flow)
       {
          LinkTracker tracker = null;
 

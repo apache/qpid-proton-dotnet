@@ -27,17 +27,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public void setSymbolKeyedAnnotation(string name, object value)
+      public void AddSymbolKeyedAnnotation(string name, object value)
       {
          Map.Add(new Symbol(name), value);
       }
 
-      public void setSymbolKeyedAnnotation(Symbol name, object value)
+      public void AddSymbolKeyedAnnotation(Symbol name, object value)
       {
          Map.Add(name, value);
       }
 
-      public void setUnsignedLongKeyedAnnotation(ulong name, object value)
+      public void AddUnsignedLongKeyedAnnotation(ulong name, object value)
       {
          throw new NotSupportedException("UnsignedLong keys are currently reserved");
       }

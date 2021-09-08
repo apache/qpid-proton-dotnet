@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return new SourceBuilder(this, GetOrCreateSource());
       }
 
-      public AttachInjectAction withSource(Source source)
+      public AttachInjectAction WithSource(Source source)
       {
          nullSourceRequired = source == null;
          attach.Source = source;

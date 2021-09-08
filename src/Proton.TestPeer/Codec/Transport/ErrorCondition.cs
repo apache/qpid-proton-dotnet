@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
@@ -45,6 +46,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public ErrorCondition(IList described) : base(Enum.GetNames(typeof(ErrorConditionField)).Length, described)
       {
+      }
+
+      public ErrorCondition(Symbol condition, String description) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
+      {
+         Condition = condition;
+         Description = description;
+      }
+
+      public ErrorCondition(String condition, String description) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
+      {
+         Condition = new Symbol(condition);
+         Description = description;
+      }
+
+      public ErrorCondition(Symbol condition, String description, IDictionary<Symbol, object> info) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
+      {
+         Condition = condition;
+         Description = description;
+         Info = (IDictionary)info;
       }
 
       public Symbol Condition
