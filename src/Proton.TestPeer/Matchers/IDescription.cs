@@ -82,13 +82,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       /// Appends a list of self describing values into the description, the values will
       /// be prefixed with the start value and suffixed by the end value provided.
       /// </summary>
-      /// <typeparam name="T">The type of values being appended</typeparam>
       /// <param name="start">The prefix text for the list description</param>
       /// <param name="separator">the separator for each list entry</param>
       /// <param name="end">The suffix text for the list description</param>
       /// <param name="values">The collection of actual values to append</param>
       /// <returns>This description instance</returns>
-      IDescription AppendList<T>(string start, string separator, string end, IEnumerable<T> values) where T : ISelfDescribing;
+      IDescription AppendList(string start, string separator, string end, IEnumerable<ISelfDescribing> values);
 
       /// <summary>
       /// Appends an environment specific newline to the description text
@@ -105,7 +104,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
          return this;
       }
 
-      public IDescription AppendList<T>(string start, string separator, string end, IEnumerable<T> values) where T : ISelfDescribing
+      public IDescription AppendList(string start, string separator, string end, IEnumerable<ISelfDescribing> values)
       {
          return this;
       }

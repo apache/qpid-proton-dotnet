@@ -16,6 +16,7 @@
  */
 
 using System;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Core;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers
 {
@@ -34,17 +35,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       {
          if (!matcher.Matches(value))
          {
-            // TODO
-            // IDescription description = new StringDescription();
-            // description.AppendText(reason)
-            //            .AppendText(Environment.NewLine)
-            //            .AppendText("Expected: ")
-            //            .AppendDescriptionOf(matcher)
-            //            .AppendText(Environment.NewLine)
-            //            .AppendText("     but: ");
-            // matcher.DescribeMismatch(value, description);
+            IDescription description = new StringDescription();
+            description.AppendText(reason)
+                       .AppendNewLine()
+                       .AppendText("Expected: ")
+                       .AppendDescriptionOf(matcher)
+                       .AppendNewLine()
+                       .AppendText("     but: ");
+            matcher.DescribeMismatch(value, description);
 
-            // throw new ArgumentException(description.ToString());
+            throw new ArgumentException(description.ToString());
          }
       }
 

@@ -15,30 +15,42 @@
  * limitations under the License.
  */
 
+using System.Text;
+
 namespace Apache.Qpid.Proton.Test.Driver.Matchers
 {
    /// <summary>
-   /// Defines a matcher interface that provides means of defining well formed
-   /// matching expectation over given values.
+   /// Base class for custom description implementations which provides some of
+   /// the more universal implementation of description accumulation APIs.
    /// </summary>
-   public interface IMatcher : ISelfDescribing
+   public sealed class StringDescription : BaseDescription
    {
-      /// <summary>
-      /// Matches the target type defined by a concreate matcher implementation
-      /// against the provided value to determine if they match.  The mechanics
-      /// of the matching process are deferred to the matcher implementation.
-      /// </summary>
-      /// <param name="actual"></param>
-      /// <returns></returns>
-      bool Matches(object actual);
+      private readonly StringBuilder builder;
 
       /// <summary>
-      /// Provides a method for matcher implementations to define descriptive but
-      /// concise test that describes why a match failed.
+      /// Creates a new StringDescription that uses its own StringBuilder instance.
       /// </summary>
-      /// <param name="actual"></param>
-      /// <param name="mismatchDescription"></param>
-      void DescribeMismatch(object actual, IDescription mismatchDescription);
+      public StringDescription() : this(new StringBuilder())
+      {
+      }
 
+      /// <summary>
+      /// Creates a new StringDescription that uses the provided StringBuilder instance.
+      /// </summary>
+      public StringDescription(StringBuilder builder)
+      {
+         this.builder = builder;
+      }
+
+      protected override IDescription Append(string text)
+      {
+         builder.Append(text);
+         return this;
+      }
+
+      public override string ToString()
+      {
+         return builder.ToString();
+      }
    }
 }

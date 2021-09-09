@@ -15,30 +15,40 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Test.Driver.Matchers
+namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
    /// <summary>
-   /// Defines a matcher interface that provides means of defining well formed
-   /// matching expectation over given values.
+   /// A type matcher that checks if the target value is null if not the
+   /// match fails.
    /// </summary>
-   public interface IMatcher : ISelfDescribing
+   public sealed class IsNullMatcher : BaseMatcher<object>
    {
-      /// <summary>
-      /// Matches the target type defined by a concreate matcher implementation
-      /// against the provided value to determine if they match.  The mechanics
-      /// of the matching process are deferred to the matcher implementation.
-      /// </summary>
-      /// <param name="actual"></param>
-      /// <returns></returns>
-      bool Matches(object actual);
+      public override void DescribeTo(IDescription description)
+      {
+         description.AppendText("null");
+      }
+
+      public override bool Matches(object actual)
+      {
+         return actual == null;
+      }
 
       /// <summary>
-      /// Provides a method for matcher implementations to define descriptive but
-      /// concise test that describes why a match failed.
+      /// Creates and returns a matcher that checks that a given value is null
       /// </summary>
-      /// <param name="actual"></param>
-      /// <param name="mismatchDescription"></param>
-      void DescribeMismatch(object actual, IDescription mismatchDescription);
+      /// <returns>A null checking matcher instance</returns>
+      public static IMatcher NullValue()
+      {
+         return new IsNullMatcher();
+      }
 
+      /// <summary>
+      /// Creates and returns a matcher that checks that a given value is not null
+      /// </summary>
+      /// <returns>A not null checking matcher instance</returns>
+      public static IMatcher NotNullValue()
+      {
+         return IsNotMatcher.Not(NullValue());
+      }
    }
 }
