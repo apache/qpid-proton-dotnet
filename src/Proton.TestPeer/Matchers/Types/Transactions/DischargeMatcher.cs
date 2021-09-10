@@ -17,34 +17,44 @@
 
 using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
-using Apache.Qpid.Proton.Test.Driver.Codec.Security;
-using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
+using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
 
-namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Security
+namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
 {
-   public sealed class SaslMechanismsMatcher : ListDescribedTypeMatcher
+   public sealed class DischargeMatcher : ListDescribedTypeMatcher
    {
-      public SaslMechanismsMatcher() : base(Enum.GetNames(typeof(SaslMechanismsField)).Length, SaslMechanisms.DESCRIPTOR_CODE, SaslMechanisms.DESCRIPTOR_SYMBOL)
+      public DischargeMatcher() : base(Enum.GetNames(typeof(DischargeField)).Length, Discharge.DESCRIPTOR_CODE, Discharge.DESCRIPTOR_SYMBOL)
       {
       }
 
-      protected override Type DescribedTypeClassType => typeof(SaslMechanisms);
+      protected override Type DescribedTypeClassType => typeof(Discharge);
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(params String[] mechanisms)
+      public DischargeMatcher WithTxnId(byte[] txnId)
       {
-         return WithSaslServerMechanisms(Is.EqualTo(TypeMapper.ToSymbolArray(mechanisms)));
+         return WithTxnId(Is.EqualTo(new Binary(txnId)));
       }
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(params Symbol[] mechanisms)
+      public DischargeMatcher WithTxnId(Binary txnId)
       {
-         return WithSaslServerMechanisms(Is.EqualTo(mechanisms));
+         return WithTxnId(Is.EqualTo(txnId));
+      }
+
+      public DischargeMatcher WithFail(bool fail)
+      {
+         return WithFail(Is.EqualTo(fail));
       }
 
       #region Matcher based with API
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(IMatcher m)
+      public DischargeMatcher WithTxnId(IMatcher m)
       {
-         AddFieldMatcher((int)SaslMechanismsField.SaslServerMechanisms, m);
+         AddFieldMatcher((int)DischargeField.TxnId, m);
+         return this;
+      }
+
+      public DischargeMatcher WithFail(IMatcher m)
+      {
+         AddFieldMatcher((int)DischargeField.Fail, m);
          return this;
       }
 

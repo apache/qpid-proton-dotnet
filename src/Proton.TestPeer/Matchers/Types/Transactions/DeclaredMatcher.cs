@@ -17,34 +17,33 @@
 
 using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
-using Apache.Qpid.Proton.Test.Driver.Codec.Security;
-using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
+using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
 
-namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Security
+namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
 {
-   public sealed class SaslMechanismsMatcher : ListDescribedTypeMatcher
+   public sealed class DeclaredMatcher : ListDescribedTypeMatcher
    {
-      public SaslMechanismsMatcher() : base(Enum.GetNames(typeof(SaslMechanismsField)).Length, SaslMechanisms.DESCRIPTOR_CODE, SaslMechanisms.DESCRIPTOR_SYMBOL)
+      public DeclaredMatcher() : base(Enum.GetNames(typeof(DeclaredField)).Length, Declared.DESCRIPTOR_CODE, Declared.DESCRIPTOR_SYMBOL)
       {
       }
 
-      protected override Type DescribedTypeClassType => typeof(SaslMechanisms);
+      protected override Type DescribedTypeClassType => typeof(Declared);
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(params String[] mechanisms)
+      public DeclaredMatcher WithTxnId(byte[] txnId)
       {
-         return WithSaslServerMechanisms(Is.EqualTo(TypeMapper.ToSymbolArray(mechanisms)));
+         return WithTxnId(Is.EqualTo(new Binary(txnId)));
       }
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(params Symbol[] mechanisms)
+      public DeclaredMatcher WithTxnId(Binary txnId)
       {
-         return WithSaslServerMechanisms(Is.EqualTo(mechanisms));
+         return WithTxnId(Is.EqualTo(txnId));
       }
 
       #region Matcher based with API
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(IMatcher m)
+      public DeclaredMatcher WithTxnId(IMatcher m)
       {
-         AddFieldMatcher((int)SaslMechanismsField.SaslServerMechanisms, m);
+         AddFieldMatcher((int)DeclaredField.TxnId, m);
          return this;
       }
 

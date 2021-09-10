@@ -19,7 +19,7 @@ using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 
-namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
+namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Security
 {
    public sealed class SaslChallengeMatcher : ListDescribedTypeMatcher
    {
