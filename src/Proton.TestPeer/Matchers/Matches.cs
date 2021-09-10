@@ -46,5 +46,27 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       {
          return AllOfMatcher.AllOf(matchers);
       }
+
+      /// <summary>
+      /// Creates a matcher instance that matches if any of the supplied matchers
+      /// succeeds in matching the actual value supplied in the match operation.
+      /// </summary>
+      /// <param name="matchers">A collection of matches to test against</param>
+      /// <returns>A new matcher instance that validates the given criteria</returns>
+      public static IMatcher AnyOf(IEnumerable<IMatcher> matchers)
+      {
+         return AnyOfMatcher.AnyOf(matchers);
+      }
+
+      /// <summary>
+      /// Creates a matcher instance that matches if any of the supplied matchers
+      /// succeeds in matching the actual value supplied in the match operation.
+      /// </summary>
+      /// <param name="matchers">A collection of matches to test against</param>
+      /// <returns>A new matcher instance that validates the given criteria</returns>
+      public static IMatcher AnyOf(params IMatcher[] matchers)
+      {
+         return AnyOfMatcher.AnyOf(matchers);
+      }
    }
 }

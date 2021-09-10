@@ -22,8 +22,8 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types
 {
    /// <summary>
-   /// Type safe diagnosing matcher for AMQP described types that described
-   /// a list of values with a well know structure.
+   /// Type safe matcher for AMQP described types that describe a list of
+   /// values with a well know structure.
    /// </summary>
    public abstract class ListDescribedTypeMatcher : TypeSafeMatcher<ListDescribedType>
    {

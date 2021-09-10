@@ -22,7 +22,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public enum ModifiedField
+   public enum ModifiedField : int
    {
       DELIVERY_FAILED,
       UNDELIVERABLE_HERE,
