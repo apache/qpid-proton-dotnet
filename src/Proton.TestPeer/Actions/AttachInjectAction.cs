@@ -147,7 +147,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public bool isNullTargetRequired => nullTargetRequired;
+      public bool IsNullTargetRequired => nullTargetRequired;
 
       public AttachInjectAction WithNullTarget()
       {
@@ -462,6 +462,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             source.Capabilities = TypeMapper.ToSymbolArray(capabilities);
             return this;
          }
+      }
+
+      internal void WithRcvSettleMode(ReceiverSettleMode? receiverSettleMode)
+      {
+         throw new NotImplementedException();
       }
 
       public sealed class TargetBuilder : TerminusBuilder

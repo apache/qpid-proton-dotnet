@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 {
-   public sealed class SourceMatcher : ListDescribedTypeMatcher
+   public class SourceMatcher : ListDescribedTypeMatcher
    {
       public SourceMatcher() : base(Enum.GetNames(typeof(SourceField)).Length, Source.DESCRIPTOR_CODE, Source.DESCRIPTOR_SYMBOL)
       {
@@ -37,154 +37,154 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       protected override Type DescribedTypeClassType => typeof(Source);
 
-      public SourceMatcher WithAddress(string name)
+      public virtual SourceMatcher WithAddress(string name)
       {
          return WithAddress(Is.EqualTo(name));
       }
 
-      public SourceMatcher WithDurable(TerminusDurability durability)
+      public virtual SourceMatcher WithDurable(TerminusDurability durability)
       {
          return WithDurable(Is.EqualTo(durability));
       }
 
-      public SourceMatcher WithExpiryPolicy(TerminusExpiryPolicy expiry)
+      public virtual SourceMatcher WithExpiryPolicy(TerminusExpiryPolicy expiry)
       {
          return WithExpiryPolicy(Is.EqualTo(expiry));
       }
 
-      public SourceMatcher WithTimeout(uint timeout)
+      public virtual SourceMatcher WithTimeout(uint timeout)
       {
          return WithTimeout(Is.EqualTo(timeout));
       }
 
-      public SourceMatcher WithDefaultTimeout()
+      public virtual SourceMatcher WithDefaultTimeout()
       {
          return WithTimeout(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
       }
 
-      public SourceMatcher WithDynamic(bool dynamic)
+      public virtual SourceMatcher WithDynamic(bool dynamic)
       {
          return WithDynamic(Is.EqualTo(dynamic));
       }
 
-      public SourceMatcher WithDynamicNodeProperties(IDictionary<Symbol, object> properties)
+      public virtual SourceMatcher WithDynamicNodeProperties(IDictionary<Symbol, object> properties)
       {
          return WithDynamicNodeProperties(Is.EqualTo(properties));
       }
 
-      public SourceMatcher WithDynamicNodeProperties(IDictionary<string, object> properties)
+      public virtual SourceMatcher WithDynamicNodeProperties(IDictionary<string, object> properties)
       {
          return WithDynamicNodeProperties(Is.EqualTo(TypeMapper.ToSymbolKeyedMap(properties)));
       }
 
-      public SourceMatcher WithDistributionMode(string distributionMode)
+      public virtual SourceMatcher WithDistributionMode(string distributionMode)
       {
          return WithDistributionMode(Is.EqualTo(new Symbol(distributionMode)));
       }
 
-      public SourceMatcher WithDistributionMode(Symbol distributionMode)
+      public virtual SourceMatcher WithDistributionMode(Symbol distributionMode)
       {
          return WithDistributionMode(Is.EqualTo(distributionMode));
       }
 
-      public SourceMatcher WithFilter(IDictionary<string, object> filter)
+      public virtual SourceMatcher WithFilter(IDictionary<string, object> filter)
       {
          return WithFilter(Is.EqualTo(TypeMapper.ToSymbolKeyedMap(filter)));
       }
 
-      public SourceMatcher WithFilter(IDictionary<Symbol, object> filter)
+      public virtual SourceMatcher WithFilter(IDictionary<Symbol, object> filter)
       {
          return WithFilter(Is.EqualTo(filter));
       }
 
-      public SourceMatcher WithDefaultOutcome(IDeliveryState defaultOutcome)
+      public virtual SourceMatcher WithDefaultOutcome(IDeliveryState defaultOutcome)
       {
          return WithDefaultOutcome(Is.EqualTo(defaultOutcome));
       }
 
-      public SourceMatcher WithOutcomes(params string[] outcomes)
+      public virtual SourceMatcher WithOutcomes(params string[] outcomes)
       {
          return WithOutcomes(Is.EqualTo(TypeMapper.ToSymbolArray(outcomes)));
       }
 
-      public SourceMatcher WithOutcomes(params Symbol[] outcomes)
+      public virtual SourceMatcher WithOutcomes(params Symbol[] outcomes)
       {
          return WithOutcomes(Is.EqualTo(outcomes));
       }
 
-      public SourceMatcher WithCapabilities(params string[] capabilities)
+      public virtual SourceMatcher WithCapabilities(params string[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(capabilities)));
       }
 
-      public SourceMatcher WithCapabilities(params Symbol[] capabilities)
+      public virtual SourceMatcher WithCapabilities(params Symbol[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(capabilities));
       }
 
       #region Matcher based expectations
 
-      public SourceMatcher WithAddress(IMatcher m)
+      public virtual SourceMatcher WithAddress(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Address, m);
          return this;
       }
 
-      public SourceMatcher WithDurable(IMatcher m)
+      public virtual SourceMatcher WithDurable(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Durable, m);
          return this;
       }
 
-      public SourceMatcher WithExpiryPolicy(IMatcher m)
+      public virtual SourceMatcher WithExpiryPolicy(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.ExpiryPolicy, m);
          return this;
       }
 
-      public SourceMatcher WithTimeout(IMatcher m)
+      public virtual SourceMatcher WithTimeout(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Timeout, m);
          return this;
       }
 
-      public SourceMatcher WithDynamic(IMatcher m)
+      public virtual SourceMatcher WithDynamic(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Dynamic, m);
          return this;
       }
 
-      public SourceMatcher WithDynamicNodeProperties(IMatcher m)
+      public virtual SourceMatcher WithDynamicNodeProperties(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.DynamicNodeProperties, m);
          return this;
       }
 
-      public SourceMatcher WithDistributionMode(IMatcher m)
+      public virtual SourceMatcher WithDistributionMode(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.DistributionMode, m);
          return this;
       }
 
-      public SourceMatcher WithFilter(IMatcher m)
+      public virtual SourceMatcher WithFilter(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Filter, m);
          return this;
       }
 
-      public SourceMatcher WithDefaultOutcome(IMatcher m)
+      public virtual SourceMatcher WithDefaultOutcome(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.DefaultOutcome, m);
          return this;
       }
 
-      public SourceMatcher WithOutcomes(IMatcher m)
+      public virtual SourceMatcher WithOutcomes(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Outcomes, m);
          return this;
       }
 
-      public SourceMatcher WithCapabilities(IMatcher m)
+      public virtual SourceMatcher WithCapabilities(IMatcher m)
       {
          AddFieldMatcher((int)SourceField.Capabilities, m);
          return this;

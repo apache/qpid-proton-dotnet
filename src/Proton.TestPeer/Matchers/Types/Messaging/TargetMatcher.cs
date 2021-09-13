@@ -23,7 +23,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 {
-   public sealed class TargetMatcher : ListDescribedTypeMatcher
+   public class TargetMatcher : ListDescribedTypeMatcher
    {
       public TargetMatcher() : base(Enum.GetNames(typeof(TargetField)).Length, Target.DESCRIPTOR_CODE, Target.DESCRIPTOR_SYMBOL)
       {
@@ -36,95 +36,95 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       protected override Type DescribedTypeClassType => typeof(Target);
 
-      public TargetMatcher WithAddress(string name)
+      public virtual  TargetMatcher WithAddress(string name)
       {
          return WithAddress(Is.EqualTo(name));
       }
 
-      public TargetMatcher WithDurable(TerminusDurability durability)
+      public virtual TargetMatcher WithDurable(TerminusDurability durability)
       {
          return WithDurable(Is.EqualTo(durability));
       }
 
-      public TargetMatcher WithExpiryPolicy(TerminusExpiryPolicy expiry)
+      public virtual TargetMatcher WithExpiryPolicy(TerminusExpiryPolicy expiry)
       {
          return WithExpiryPolicy(Is.EqualTo(expiry));
       }
 
-      public TargetMatcher WithTimeout(uint timeout)
+      public virtual TargetMatcher WithTimeout(uint timeout)
       {
          return WithTimeout(Is.EqualTo(timeout));
       }
 
-      public TargetMatcher WithDefaultTimeout()
+      public virtual TargetMatcher WithDefaultTimeout()
       {
          return WithTimeout(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
       }
 
-      public TargetMatcher WithDynamic(bool dynamic)
+      public virtual TargetMatcher WithDynamic(bool dynamic)
       {
          return WithDynamic(Is.EqualTo(dynamic));
       }
 
-      public TargetMatcher WithDynamicNodeProperties(IDictionary<Symbol, object> properties)
+      public virtual TargetMatcher WithDynamicNodeProperties(IDictionary<Symbol, object> properties)
       {
          return WithDynamicNodeProperties(Is.EqualTo(properties));
       }
 
-      public TargetMatcher WithDynamicNodeProperties(IDictionary<string, object> properties)
+      public virtual TargetMatcher WithDynamicNodeProperties(IDictionary<string, object> properties)
       {
          return WithDynamicNodeProperties(Is.EqualTo(TypeMapper.ToSymbolKeyedMap(properties)));
       }
 
-      public TargetMatcher WithCapabilities(params string[] capabilities)
+      public virtual TargetMatcher WithCapabilities(params string[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(capabilities)));
       }
 
-      public TargetMatcher WithCapabilities(params Symbol[] capabilities)
+      public virtual TargetMatcher WithCapabilities(params Symbol[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(capabilities));
       }
 
       #region Matcher based expectations
 
-      public TargetMatcher WithAddress(IMatcher m)
+      public virtual TargetMatcher WithAddress(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.Address, m);
          return this;
       }
 
-      public TargetMatcher WithDurable(IMatcher m)
+      public virtual TargetMatcher WithDurable(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.Durable, m);
          return this;
       }
 
-      public TargetMatcher WithExpiryPolicy(IMatcher m)
+      public virtual TargetMatcher WithExpiryPolicy(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.ExpiryPolicy, m);
          return this;
       }
 
-      public TargetMatcher WithTimeout(IMatcher m)
+      public virtual TargetMatcher WithTimeout(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.Timeout, m);
          return this;
       }
 
-      public TargetMatcher WithDynamic(IMatcher m)
+      public virtual TargetMatcher WithDynamic(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.Dynamic, m);
          return this;
       }
 
-      public TargetMatcher WithDynamicNodeProperties(IMatcher m)
+      public virtual TargetMatcher WithDynamicNodeProperties(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.DynamicNodeProperties, m);
          return this;
       }
 
-      public TargetMatcher WithCapabilities(IMatcher m)
+      public virtual TargetMatcher WithCapabilities(IMatcher m)
       {
          AddFieldMatcher((int)TargetField.Capabilities, m);
          return this;

@@ -145,6 +145,27 @@ namespace Apache.Qpid.Proton.Engine
       IEngine Ingest(IProtonBuffer input);
 
       /// <summary>
+      /// Provide data input for this Engine from some external source. If the engine is not
+      /// writable when this method is called an EngineNotWritableException will be thrown
+      /// unless the reason for the not writable state is due to engine failure or the engine
+      /// already having been shut down in which case the appropriate EngineStateException
+      /// will be thrown to indicate the reason.
+      /// </summary>
+      /// <param name="input">The binary data to ingest into the engine</param>
+      /// <returns>This Engine instance</returns>
+      /// <exception cref="EngineNotWritableException">If the engine is not currently accepting input</exception>
+      /// <exception cref="EngineStateException">If the engine state is already failed or shutdown</exception>
+      IEngine Ingest(byte[] input)
+      {
+         if (input == null)
+         {
+            throw new ArgumentNullException("Input byte array must not be null");
+         }
+
+         return Ingest(ProtonByteBufferAllocator.Instance.Wrap(input));
+      }
+
+      /// <summary>
       /// Prompt the engine to perform idle-timeout/heartbeat handling, and return an absolute
       /// deadline in milliseconds that tick must again be called by/at, based on the provided
       /// current time in milliseconds, to ensure the periodic work is carried out as necessary.

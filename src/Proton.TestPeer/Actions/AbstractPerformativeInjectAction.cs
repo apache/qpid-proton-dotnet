@@ -77,6 +77,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
+      internal ushort? OnChannel()
+      {
+         return channel;
+      }
+
       /// <summary>
       /// Returns the channel this action was instructed to operate on or null if
       /// nothing configured which allows the action code to select an appropriate
@@ -104,48 +109,5 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       protected virtual void BeforeActionPerformed(AMQPTestDriver driver)
       {
       }
-   }
-
-   /// <summary>
-   /// Internal proxy action used for delayed tasks that will not accept any
-   /// API call other than to perform the action.
-   /// </summary>
-   internal sealed class ProxyDelayedScriptedAction : ScriptedAction
-   {
-      private readonly ScriptedAction parent;
-
-      public ProxyDelayedScriptedAction(ScriptedAction parent)
-      {
-         this.parent = parent;
-      }
-
-      public override ScriptedAction Perform(AMQPTestDriver driver)
-      {
-         return parent.Now();
-      }
-
-      #region Explicitly failing API methods
-
-      public override ScriptedAction Later(long millis)
-      {
-         throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
-      }
-
-      public override ScriptedAction Now()
-      {
-         throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
-      }
-
-      public override ScriptedAction Queue()
-      {
-         throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
-      }
-
-      public override string ToString()
-      {
-         return parent.ToString();
-      }
-
-      #endregion
    }
 }

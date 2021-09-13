@@ -22,7 +22,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
 {
-   public sealed class CoordinatorMatcher : ListDescribedTypeMatcher
+   public class CoordinatorMatcher : ListDescribedTypeMatcher
    {
       public CoordinatorMatcher() : base(Enum.GetNames(typeof(CoordinatorField)).Length, Coordinator.DESCRIPTOR_CODE, Coordinator.DESCRIPTOR_SYMBOL)
       {
@@ -35,19 +35,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
 
       protected override Type DescribedTypeClassType => typeof(Coordinator);
 
-      public CoordinatorMatcher WithCapabilities(params Symbol[] capabilities)
+      public virtual CoordinatorMatcher WithCapabilities(params Symbol[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(capabilities));
       }
 
-      public CoordinatorMatcher WithCapabilities(params String[] capabilities)
+      public virtual CoordinatorMatcher WithCapabilities(params String[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(capabilities)));
       }
 
       #region Matcher based with API
 
-      public CoordinatorMatcher WithCapabilities(IMatcher m)
+      public virtual CoordinatorMatcher WithCapabilities(IMatcher m)
       {
          AddFieldMatcher((int)CoordinatorField.Capabilities, m);
          return this;

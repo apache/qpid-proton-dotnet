@@ -67,9 +67,20 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
 
-      public AMQPTestDriver()
+      public AMQPTestDriver(string name, Action<byte[]> frameConsumer, Func<TaskFactory> scheduler) :
+         this(name, frameConsumer, null, scheduler)
+      {
+      }
+
+      public AMQPTestDriver(string name, Action<byte[]> frameConsumer, Action<Exception> assertConsumer, Func<TaskFactory> scheduler)
       {
          this.sessions = new DriverSessions(this);
+         this.frameConsumer = frameConsumer;
+         this.taskFactorySupplier = scheduler;
+         this.assertionConsumer = assertConsumer;
+
+         this.frameEncoder = new FrameEncoder(this);
+         this.frameParser = new FrameDecoder(this);
       }
 
       internal DriverSessions Sessions => sessions;

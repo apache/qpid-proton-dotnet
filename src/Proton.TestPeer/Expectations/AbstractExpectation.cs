@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          this.driver = driver;
       }
 
-      public AbstractExpectation<T> OnChannel(ushort channel)
+      public virtual AbstractExpectation<T> OnChannel(ushort channel)
       {
          this.channelExpectation = channel;
          return this;
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public override bool IsOptional => optional;
 
-      public AbstractExpectation<T> Optional()
+      public virtual AbstractExpectation<T> Optional()
       {
          this.optional = true;
          return this;
