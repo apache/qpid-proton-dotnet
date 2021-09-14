@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections;
+using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 {
@@ -26,13 +28,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
       TxnId
    }
 
-   public sealed class Declared : ListDescribedType
+   public sealed class Declared : ListDescribedType, IDeliveryState, IOutcome
    {
       public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:declared:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000033ul;
 
       public Declared() : base(Enum.GetNames(typeof(DeclaredField)).Length)
       {
+      }
+
+      public Declared(byte[] txnId) : base(Enum.GetNames(typeof(DeclaredField)).Length)
+      {
+         TxnId = txnId;
       }
 
       public Declared(object described) : base(Enum.GetNames(typeof(DeclaredField)).Length, (IList)described)
@@ -50,6 +57,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
          get => (byte[])List[((int)DeclaredField.TxnId)];
          set => List[((int)DeclaredField.TxnId)] = value;
       }
+
+      public DeliveryStateType Type => DeliveryStateType.Declared;
 
       public override string ToString()
       {

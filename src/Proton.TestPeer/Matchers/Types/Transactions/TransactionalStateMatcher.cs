@@ -22,7 +22,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
 {
-   public sealed class TransactionalStateMatcher : ListDescribedTypeMatcher
+   public class TransactionalStateMatcher : ListDescribedTypeMatcher
    {
       public TransactionalStateMatcher() : base(Enum.GetNames(typeof(TransactionalStateField)).Length, TransactionalState.DESCRIPTOR_CODE, TransactionalState.DESCRIPTOR_SYMBOL)
       {
@@ -30,30 +30,30 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
 
       protected override Type DescribedTypeClassType => typeof(TransactionalState);
 
-      public TransactionalStateMatcher WithTxnId(byte[] txnId)
+      public virtual TransactionalStateMatcher WithTxnId(byte[] txnId)
       {
          return WithTxnId(Is.EqualTo(new Binary(txnId)));
       }
 
-      public TransactionalStateMatcher WithTxnId(Binary txnId)
+      public virtual TransactionalStateMatcher WithTxnId(Binary txnId)
       {
          return WithTxnId(Is.EqualTo(txnId));
       }
 
-      public TransactionalStateMatcher withOutcome(IOutcome outcome)
+      public virtual TransactionalStateMatcher WithOutcome(IOutcome outcome)
       {
          return WithOutcome(Is.EqualTo(outcome));
       }
 
       #region Matcher based with API
 
-      public TransactionalStateMatcher WithTxnId(IMatcher m)
+      public virtual TransactionalStateMatcher WithTxnId(IMatcher m)
       {
          AddFieldMatcher((int)TransactionalStateField.TxnId, m);
          return this;
       }
 
-      public TransactionalStateMatcher WithOutcome(IMatcher m)
+      public virtual TransactionalStateMatcher WithOutcome(IMatcher m)
       {
          AddFieldMatcher((int)TransactionalStateField.Outcome, m);
          return this;

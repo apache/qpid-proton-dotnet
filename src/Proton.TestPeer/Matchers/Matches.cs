@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Matchers.Core;
 
@@ -67,6 +68,30 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       public static IMatcher AnyOf(params IMatcher[] matchers)
       {
          return AnyOfMatcher.AnyOf(matchers);
+      }
+
+      /// <summary>
+      /// Creates a matcher that matches when the examined object is an instance of the specified
+      /// Type as determined by calling the Type IsAssignableFrom method on that type, passing the
+      /// the examined object.
+      /// </summary>
+      /// <param name="type">The type that is expected</param>
+      /// <returns>A new matcher that examins the type of a target object</returns>
+      public static IMatcher Any(Type type)
+      {
+         return IsInstanceOfMatcher.Any(type);
+      }
+
+      /// <summary>
+      /// Creates a matcher that matches when the examined object is an instance of the specified
+      /// Type as determined by calling the Type IsAssignableFrom method on that type, passing the
+      /// the examined object.
+      /// </summary>
+      /// <param name="type">The type that is expected</param>
+      /// <returns>A new matcher that examins the type of a target object</returns>
+      public static IMatcher InstanceOf(Type type)
+      {
+         return IsInstanceOfMatcher.InstanceOf(type);
       }
    }
 }

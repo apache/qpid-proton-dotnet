@@ -40,6 +40,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       {
       }
 
+      public Rejected(ErrorCondition error) : base(Enum.GetNames(typeof(RejectedField)).Length)
+      {
+         Error = error;
+      }
+
       public Rejected(object described) : base(Enum.GetNames(typeof(RejectedField)).Length, (IList)described)
       {
       }

@@ -42,6 +42,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       {
       }
 
+      public Modified(bool deliveryFailed) : base(Enum.GetNames(typeof(ModifiedField)).Length)
+      {
+         DeliveryFailed = deliveryFailed;
+      }
+
+      public Modified(bool deliveryFailed, bool undeliverableHere) : base(Enum.GetNames(typeof(ModifiedField)).Length)
+      {
+         DeliveryFailed = deliveryFailed;
+         UndeliverableHere = undeliverableHere;
+      }
+
       public Modified(Object described) : base(Enum.GetNames(typeof(ModifiedField)).Length, (IList)described)
       {
       }

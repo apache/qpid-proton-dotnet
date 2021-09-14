@@ -31,138 +31,138 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       protected override Type DescribedTypeClassType => typeof(Open);
 
-      public OpenMatcher withContainerId(string container)
+      public OpenMatcher WithContainerId(string container)
       {
-         return withContainerId(Is.EqualTo(container));
+         return WithContainerId(Is.EqualTo(container));
       }
 
-      public OpenMatcher withHostname(string hostname)
+      public OpenMatcher WithHostname(string hostname)
       {
-         return withHostname(Is.EqualTo(hostname));
+         return WithHostname(Is.EqualTo(hostname));
       }
 
-      public OpenMatcher withMaxFrameSize(uint maxFrameSize)
+      public OpenMatcher WithMaxFrameSize(uint maxFrameSize)
       {
-         return withMaxFrameSize(Is.EqualTo(maxFrameSize));
+         return WithMaxFrameSize(Is.EqualTo(maxFrameSize));
       }
 
-      public OpenMatcher withChannelMax(ushort channelMax)
+      public OpenMatcher WithChannelMax(ushort channelMax)
       {
-         return withChannelMax(Is.EqualTo(channelMax));
+         return WithChannelMax(Is.EqualTo(channelMax));
       }
 
-      public OpenMatcher withIdleTimeOut(uint idleTimeout)
+      public OpenMatcher WithIdleTimeOut(uint idleTimeout)
       {
-         return withIdleTimeOut(Is.EqualTo(idleTimeout));
+         return WithIdleTimeOut(Is.EqualTo(idleTimeout));
       }
 
-      public OpenMatcher withOutgoingLocales(params string[] outgoingLocales)
+      public OpenMatcher WithOutgoingLocales(params string[] outgoingLocales)
       {
-         return withOutgoingLocales(Is.EqualTo(TypeMapper.ToSymbolArray(outgoingLocales)));
+         return WithOutgoingLocales(Is.EqualTo(TypeMapper.ToSymbolArray(outgoingLocales)));
       }
 
-      public OpenMatcher withOutgoingLocales(params Symbol[] outgoingLocales)
+      public OpenMatcher WithOutgoingLocales(params Symbol[] outgoingLocales)
       {
-         return withOutgoingLocales(Is.EqualTo(outgoingLocales));
+         return WithOutgoingLocales(Is.EqualTo(outgoingLocales));
       }
 
-      public OpenMatcher withIncomingLocales(params string[] incomingLocales)
+      public OpenMatcher WithIncomingLocales(params string[] incomingLocales)
       {
-         return withIncomingLocales(Is.EqualTo(TypeMapper.ToSymbolArray(incomingLocales)));
+         return WithIncomingLocales(Is.EqualTo(TypeMapper.ToSymbolArray(incomingLocales)));
       }
 
-      public OpenMatcher withIncomingLocales(params Symbol[] incomingLocales)
+      public OpenMatcher WithIncomingLocales(params Symbol[] incomingLocales)
       {
-         return withIncomingLocales(Is.EqualTo(incomingLocales));
+         return WithIncomingLocales(Is.EqualTo(incomingLocales));
       }
 
-      public OpenMatcher withOfferedCapabilities(params string[] offeredCapabilities)
+      public OpenMatcher WithOfferedCapabilities(params string[] offeredCapabilities)
       {
-         return withOfferedCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(offeredCapabilities)));
+         return WithOfferedCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(offeredCapabilities)));
       }
 
-      public OpenMatcher withOfferedCapabilities(params Symbol[] offeredCapabilities)
+      public OpenMatcher WithOfferedCapabilities(params Symbol[] offeredCapabilities)
       {
-         return withOfferedCapabilities(Is.EqualTo(offeredCapabilities));
+         return WithOfferedCapabilities(Is.EqualTo(offeredCapabilities));
       }
 
-      public OpenMatcher withDesiredCapabilities(params string[] desiredCapabilities)
+      public OpenMatcher WithDesiredCapabilities(params string[] desiredCapabilities)
       {
-         return withDesiredCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(desiredCapabilities)));
+         return WithDesiredCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(desiredCapabilities)));
       }
 
-      public OpenMatcher withDesiredCapabilities(params Symbol[] desiredCapabilities)
+      public OpenMatcher WithDesiredCapabilities(params Symbol[] desiredCapabilities)
       {
-         return withDesiredCapabilities(Is.EqualTo(desiredCapabilities));
+         return WithDesiredCapabilities(Is.EqualTo(desiredCapabilities));
       }
 
-      public OpenMatcher withPropertiesMap(IDictionary<Symbol, object> properties)
+      public OpenMatcher WithPropertiesMap(IDictionary<Symbol, object> properties)
       {
-         return withProperties(Is.EqualTo(properties));
+         return WithProperties(Is.EqualTo(properties));
       }
 
-      public OpenMatcher withProperties(IDictionary<string, object> properties)
+      public OpenMatcher WithProperties(IDictionary<string, object> properties)
       {
-         return withProperties(Is.EqualTo(TypeMapper.ToSymbolKeyedMap(properties)));
+         return WithProperties(Is.EqualTo(TypeMapper.ToSymbolKeyedMap(properties)));
       }
 
       #region Matcher based With API
 
-      public OpenMatcher withContainerId(IMatcher m)
+      public OpenMatcher WithContainerId(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.ContainerId, m);
          return this;
       }
 
-      public OpenMatcher withHostname(IMatcher m)
+      public OpenMatcher WithHostname(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.Hostname, m);
          return this;
       }
 
-      public OpenMatcher withMaxFrameSize(IMatcher m)
+      public OpenMatcher WithMaxFrameSize(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.MaxFrameSize, m);
          return this;
       }
 
-      public OpenMatcher withChannelMax(IMatcher m)
+      public OpenMatcher WithChannelMax(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.ChannelMax, m);
          return this;
       }
 
-      public OpenMatcher withIdleTimeOut(IMatcher m)
+      public OpenMatcher WithIdleTimeOut(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.IdleTimeout, m);
          return this;
       }
 
-      public OpenMatcher withOutgoingLocales(IMatcher m)
+      public OpenMatcher WithOutgoingLocales(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.OutgoingLocales, m);
          return this;
       }
 
-      public OpenMatcher withIncomingLocales(IMatcher m)
+      public OpenMatcher WithIncomingLocales(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.IncmoningLocales, m);
          return this;
       }
 
-      public OpenMatcher withOfferedCapabilities(IMatcher m)
+      public OpenMatcher WithOfferedCapabilities(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.OfferedCapabilities, m);
          return this;
       }
 
-      public OpenMatcher withDesiredCapabilities(IMatcher m)
+      public OpenMatcher WithDesiredCapabilities(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.DesiredCapabilities, m);
          return this;
       }
 
-      public OpenMatcher withProperties(IMatcher m)
+      public OpenMatcher WithProperties(IMatcher m)
       {
          AddFieldMatcher((int)OpenField.Properties, m);
          return this;
