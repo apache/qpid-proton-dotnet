@@ -22,8 +22,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public sealed class RawBytesInjectAction : ScriptedAction
    {
-      private readonly byte[] bytes;
       private readonly AMQPTestDriver driver;
+
+      private byte[] bytes;
+
+      public RawBytesInjectAction(AMQPTestDriver driver)
+      {
+         this.driver = driver;
+      }
 
       public RawBytesInjectAction(AMQPTestDriver driver, byte[] bytes)
       {
@@ -51,6 +57,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       public override RawBytesInjectAction Queue()
       {
          driver.AddScriptedElement(this);
+         return this;
+      }
+
+      public RawBytesInjectAction WithBytes(byte[] bytes)
+      {
+         this.bytes = bytes;
          return this;
       }
    }

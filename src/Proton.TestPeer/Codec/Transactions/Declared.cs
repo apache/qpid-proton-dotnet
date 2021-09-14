@@ -39,6 +39,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
       public Declared(byte[] txnId) : base(Enum.GetNames(typeof(DeclaredField)).Length)
       {
+         TxnId = new Binary(txnId);
+      }
+
+      public Declared(Binary txnId) : base(Enum.GetNames(typeof(DeclaredField)).Length)
+      {
          TxnId = txnId;
       }
 
@@ -52,9 +57,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public byte[] TxnId
+      public Binary TxnId
       {
-         get => (byte[])List[((int)DeclaredField.TxnId)];
+         get => (Binary)List[((int)DeclaredField.TxnId)];
          set => List[((int)DeclaredField.TxnId)] = value;
       }
 

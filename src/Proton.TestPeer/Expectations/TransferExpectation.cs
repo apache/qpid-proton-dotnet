@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       private IMatcher payloadMatcher = Matches.Any(typeof(byte[]));
 
-      private DispositionInjectAction response;
+      protected DispositionInjectAction response;
 
       public TransferExpectation(AMQPTestDriver driver) : base(driver)
       {
@@ -48,14 +48,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected override IMatcher GetExpectationMatcher() => matcher;
 
-      public DispositionInjectAction Respond()
+      public virtual DispositionInjectAction Respond()
       {
          response = new DispositionInjectAction(driver);
          driver.AddScriptedElement(response);
          return response;
       }
 
-      public DispositionInjectAction Accept()
+      public virtual DispositionInjectAction Accept()
       {
          response = new DispositionInjectAction(driver);
          response.WithSettled(true);
@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return response;
       }
 
-      public DispositionInjectAction Release()
+      public virtual DispositionInjectAction Release()
       {
          response = new DispositionInjectAction(driver);
          response.WithSettled(true);
@@ -75,22 +75,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return response;
       }
 
-      public DispositionInjectAction Reject()
+      public virtual DispositionInjectAction Reject()
       {
          return Reject(null);
       }
 
-      public DispositionInjectAction Reject(string condition, string description)
+      public virtual DispositionInjectAction Reject(string condition, string description)
       {
          return Reject(new ErrorCondition(new Symbol(condition), description));
       }
 
-      public DispositionInjectAction Reject(Symbol condition, string description)
+      public virtual DispositionInjectAction Reject(Symbol condition, string description)
       {
          return Reject(new ErrorCondition(condition, description));
       }
 
-      public DispositionInjectAction Reject(ErrorCondition error)
+      public virtual DispositionInjectAction Reject(ErrorCondition error)
       {
          response = new DispositionInjectAction(driver);
          response.WithSettled(true);
@@ -100,12 +100,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return response;
       }
 
-      public DispositionInjectAction Modify(bool failed)
+      public virtual DispositionInjectAction Modify(bool failed)
       {
          return Modify(failed, false);
       }
 
-      public DispositionInjectAction Modify(bool failed, bool undeliverable)
+      public virtual DispositionInjectAction Modify(bool failed, bool undeliverable)
       {
          response = new DispositionInjectAction(driver);
          response.WithSettled(true);

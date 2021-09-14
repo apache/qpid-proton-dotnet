@@ -52,64 +52,64 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override Transfer Performative => transfer;
 
-      public TransferInjectAction WithHandle(uint handle)
+      public virtual TransferInjectAction WithHandle(uint handle)
       {
          transfer.Handle = handle;
          return this;
       }
 
-      public TransferInjectAction WithDeliveryId(uint deliveryId)
+      public virtual TransferInjectAction WithDeliveryId(uint deliveryId)
       {
          transfer.DeliveryId = deliveryId;
          return this;
       }
 
-      public TransferInjectAction WithDeliveryTag(byte[] deliveryTag)
+      public virtual TransferInjectAction WithDeliveryTag(byte[] deliveryTag)
       {
          explicitlyNullDeliveryTag = deliveryTag == null;
          transfer.DeliveryTag = deliveryTag;
          return this;
       }
 
-      public TransferInjectAction WithDeliveryTag(Binary deliveryTag)
+      public virtual TransferInjectAction WithDeliveryTag(Binary deliveryTag)
       {
          explicitlyNullDeliveryTag = deliveryTag == null;
          transfer.DeliveryTag = deliveryTag.Array;
          return this;
       }
 
-      public TransferInjectAction WithNullDeliveryTag()
+      public virtual TransferInjectAction WithNullDeliveryTag()
       {
          explicitlyNullDeliveryTag = true;
          transfer.DeliveryTag = null;
          return this;
       }
 
-      public TransferInjectAction WithMessageFormat(uint messageFormat)
+      public virtual TransferInjectAction WithMessageFormat(uint messageFormat)
       {
          transfer.MessageFormat = messageFormat;
          return this;
       }
 
-      public TransferInjectAction WithSettled(bool settled)
+      public virtual TransferInjectAction WithSettled(bool settled)
       {
          transfer.Settled = settled;
          return this;
       }
 
-      public TransferInjectAction WithMore(bool more)
+      public virtual TransferInjectAction WithMore(bool more)
       {
          transfer.More = more;
          return this;
       }
 
-      public TransferInjectAction WithRcvSettleMode(ReceiverSettleMode rcvSettleMode)
+      public virtual TransferInjectAction WithRcvSettleMode(ReceiverSettleMode rcvSettleMode)
       {
          transfer.ReceiverSettleMode = rcvSettleMode;
          return this;
       }
 
-      public TransferInjectAction WithState(IDeliveryState state)
+      public virtual TransferInjectAction WithState(IDeliveryState state)
       {
          transfer.State = state;
          return this;
@@ -120,25 +120,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return stateBuilder;
       }
 
-      public TransferInjectAction WithResume(bool resume)
+      public virtual TransferInjectAction WithResume(bool resume)
       {
          transfer.Resume = resume;
          return this;
       }
 
-      public TransferInjectAction WithAborted(bool aborted)
+      public virtual TransferInjectAction WithAborted(bool aborted)
       {
          transfer.Aborted = aborted;
          return this;
       }
 
-      public TransferInjectAction WithBatchable(bool batchable)
+      public virtual TransferInjectAction WithBatchable(bool batchable)
       {
          transfer.Batchable = batchable;
          return this;
       }
 
-      public TransferInjectAction WithPayload(byte[] payload)
+      public virtual TransferInjectAction WithPayload(byte[] payload)
       {
          this.payload = payload;
          return this;

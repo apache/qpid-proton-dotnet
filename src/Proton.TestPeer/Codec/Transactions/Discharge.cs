@@ -46,9 +46,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public byte[] TxnId
+      public Binary TxnId
       {
-         get => (byte[])List[((int)DischargeField.TxnId)];
+         get => (Binary)List[((int)DischargeField.TxnId)];
          set => List[((int)DischargeField.TxnId)] = value;
       }
 
