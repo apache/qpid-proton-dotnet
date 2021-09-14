@@ -30,8 +30,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    {
       private readonly Open open = new Open();
 
-      private bool explicitlyNullHandle;
-
       public OpenInjectAction(AMQPTestDriver driver) : base(driver)
       {
       }

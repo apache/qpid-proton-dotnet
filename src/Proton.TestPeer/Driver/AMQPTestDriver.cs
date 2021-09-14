@@ -78,6 +78,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.frameConsumer = frameConsumer;
          this.taskFactorySupplier = scheduler;
          this.assertionConsumer = assertConsumer;
+         this.driverName = name;
 
          this.frameEncoder = new FrameEncoder(this);
          this.frameParser = new FrameDecoder(this);
@@ -355,7 +356,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                   {
                      // TODO LOG.warn(t.getMessage());
                      SignalFailure(t);
-                     throw t;
+                     throw;
                   }
                }
             }
@@ -378,6 +379,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          try
          {
             IScriptedElement scriptEntry = script.Dequeue();
+            saslPerformativeCount++;
 
             if (scriptEntry == null)
             {
@@ -399,14 +401,14 @@ namespace Apache.Qpid.Proton.Test.Driver
                   {
                      // TODO LOG.warn(t.getMessage());
                      SignalFailure(unexpected);
-                     throw unexpected;
+                     throw;
                   }
                }
                catch (Exception assertion)
                {
                   // TODO LOG.warn(assertion.getMessage());
                   SignalFailure(assertion);
-                  throw assertion;
+                  throw;
                }
             }
             else
@@ -463,14 +465,14 @@ namespace Apache.Qpid.Proton.Test.Driver
                   {
                      // TODO LOG.warn(t.getMessage());
                      SignalFailure(unexpected);
-                     throw unexpected;
+                     throw;
                   }
                }
                catch (Exception assertion)
                {
                   // TODO LOG.warn(assertion.getMessage());
                   SignalFailure(assertion);
-                  throw assertion;
+                  throw;
                }
             }
             else

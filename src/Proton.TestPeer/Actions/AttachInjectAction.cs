@@ -59,6 +59,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
+      public AttachInjectAction WithNullHandle()
+      {
+         attach.Handle = null;
+         explicitlyNullHandle = true;
+         return this;
+      }
+
       public AttachInjectAction WithRole(bool role)
       {
          attach.Role = RoleExtension.Lookup(role);

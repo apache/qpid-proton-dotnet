@@ -36,8 +36,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       private readonly DispositionMatcher matcher = new DispositionMatcher();
       private readonly DispositionDeliveryStateBuilder stateBuilder;
 
-      private DetachInjectAction response;
-
       public DispositionExpectation(AMQPTestDriver driver) : base(driver)
       {
          this.stateBuilder = new DispositionDeliveryStateBuilder(this);

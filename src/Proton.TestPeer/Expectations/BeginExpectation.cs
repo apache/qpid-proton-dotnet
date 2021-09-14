@@ -34,7 +34,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       private readonly BeginMatcher matcher = new BeginMatcher();
 
       private BeginInjectAction response;
-      private bool rejecting;
 
       public BeginExpectation(AMQPTestDriver driver) : base(driver)
       {

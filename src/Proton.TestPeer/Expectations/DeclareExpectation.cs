@@ -33,8 +33,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    {
       private readonly AmqpValueMatcher defaultPayloadMatcher = new AmqpValueMatcher(new Declare());
 
-      private AmqpValueMatcher matcher;
-
       public DeclareExpectation(AMQPTestDriver driver) : base(driver)
       {
          WithPayload(defaultPayloadMatcher);

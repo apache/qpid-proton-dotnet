@@ -48,8 +48,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          this.driver = driver;
          this.frameSizeParser = new FrameSizeParsingStage(this);
-         // this.frameBufferingStage = new FrameBufferingStage(this);
-         // this.frameBodyParsingStage = new FrameBodyParsingStage(this);
+         this.frameBufferingStage = new FrameBufferingStage(this);
+         this.frameBodyParsingStage = new FrameBodyParsingStage(this);
       }
 
       /// <summary>
@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          catch (AssertionError ex)
          {
             TransitionToErrorStage(ex);
-            throw ex;
+            throw;
          }
          catch (Exception throwable)
          {

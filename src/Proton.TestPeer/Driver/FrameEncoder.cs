@@ -34,11 +34,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private static readonly uint AMQP_PERFORMATIVE_PAD = 512;
       private static readonly uint FRAME_HEADER_SIZE = 8;
 
-      private static readonly int FRAME_START_BYTE = 0;
-      private static readonly int FRAME_DOFF_BYTE = 4;
       private static readonly int FRAME_DOFF_SIZE = 2;
-      private static readonly int FRAME_TYPE_BYTE = 5;
-      private static readonly int FRAME_CHANNEL_BYTE = 6;
 
       private readonly AMQPTestDriver driver;
 

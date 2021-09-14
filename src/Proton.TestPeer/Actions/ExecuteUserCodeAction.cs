@@ -51,6 +51,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.action = action;
       }
 
+      /// <summary>
+      /// Used only when queuing a scripted user code action which should delay once the
+      /// queued action is finalled reached, this is a rare edge case test mechanism and
+      /// could cause issues if other scripted actions depend on executing after this but
+      /// are not suitably delayed themselves.
+      /// </summary>
+      /// <param name="delay">time in milliseconds to delay</param>
+      /// <returns>This user code execution action instance</returns>/
+      public ExecuteUserCodeAction AfterDelay(long delay)
+      {
+         this.delay = delay;
+         return this;
+      }
+
       public override ExecuteUserCodeAction Later(long delay)
       {
          driver.AfterDelay(delay, this);
@@ -65,7 +79,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override ExecuteUserCodeAction Perform(AMQPTestDriver driver)
       {
-         return Now();
+         if (delay != null)
+         {
+            driver.AfterDelay((long)delay, new ProxyDelayedScriptedAction(this));
+         }
+         else
+         {
+            return Now();
+         }
+
+         return this;
       }
 
       public override ExecuteUserCodeAction Queue()

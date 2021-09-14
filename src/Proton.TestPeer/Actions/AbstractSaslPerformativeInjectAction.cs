@@ -38,29 +38,38 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override AbstractSaslPerformativeInjectAction<T> Later(long delay)
       {
-        driver.AfterDelay(delay, this);
-        return this;
+         driver.AfterDelay(delay, this);
+         return this;
       }
 
       public override AbstractSaslPerformativeInjectAction<T> Now()
       {
-        Perform(driver);
-        return this;
+         Perform(driver);
+         return this;
       }
 
       public override AbstractSaslPerformativeInjectAction<T> Perform(AMQPTestDriver driver)
       {
-        driver.SendSaslFrame(OnChannel, Performative);
+         driver.SendSaslFrame(OnChannel() ?? 0, Performative);
          return this;
       }
 
       public override AbstractSaslPerformativeInjectAction<T> Queue()
       {
-        driver.AddScriptedElement(this);
+         driver.AddScriptedElement(this);
          return this;
       }
 
-      public ushort OnChannel => channel ?? 0;
+      public ScriptedAction OnChannel(ushort channel)
+      {
+         this.channel = channel;
+         return this;
+      }
+
+      internal ushort? OnChannel()
+      {
+         return channel;
+      }
 
       public abstract T Performative { get; }
    }

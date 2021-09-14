@@ -28,8 +28,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       private readonly AMQPTestDriver driver;
       private readonly AMQPHeader header;
 
-      private ushort? channel;
-
       public AMQPHeaderInjectAction(AMQPTestDriver driver, AMQPHeader header)
       {
          this.driver = driver;

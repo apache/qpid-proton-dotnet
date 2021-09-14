@@ -54,5 +54,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          driver.AddScriptedElement(this);
          return this;
       }
+
+      public ScriptedAction OnChannel(ushort channel)
+      {
+         this.channel = channel;
+         return this;
+      }
+
+      internal ushort? OnChannel()
+      {
+         return channel;
+      }
    }
 }
