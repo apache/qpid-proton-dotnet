@@ -39,18 +39,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Char;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = GetSize();
 
-         if (writer.IsWritable())
+         if (stream.IsWritable())
          {
             if (!IsElementOfArray())
             {
-               writer.Write(((byte)EncodingCodes.Char));
+               stream.WriteByte(((byte)EncodingCodes.Char));
             }
 
-            writer.Write((int)value);
+            stream.WriteShort((short)value);
 
             return size;
          }

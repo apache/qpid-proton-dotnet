@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return closeAction;
       }
 
-      public override void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleOpen(uint frameSize, Open open, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleOpen(frameSize, open, payload, channel, context);
 

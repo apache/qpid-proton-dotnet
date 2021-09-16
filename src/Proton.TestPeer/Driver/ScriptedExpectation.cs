@@ -16,7 +16,6 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
@@ -56,52 +55,52 @@ namespace Apache.Qpid.Proton.Test.Driver
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleOpen(uint frameSize, Open open, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleBegin(uint frameSize, Begin begin, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleAttach(uint frameSize, Attach attach, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleFlow(uint frameSize, Flow flow, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleTransfer(uint frameSize, Transfer transfer, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleDisposition(uint frameSize, Disposition disposition, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleDetach(uint frameSize, Detach detach, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleEnd(uint frameSize, End end, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleClose(uint frameSize, Close close, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }
 
-      public virtual void HandleHeartbeat(uint frameSize, Heartbeat beat, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public virtual void HandleHeartbeat(uint frameSize, Heartbeat beat, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          throw new NotImplementedException("Handle received AMQP performative but it wasn't handled.");
       }

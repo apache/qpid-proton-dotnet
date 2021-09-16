@@ -39,11 +39,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.UInt;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = ComputeSize();
 
-         if (!writer.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
@@ -53,23 +53,23 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             case 1:
                if (IsElementOfArray())
                {
-                  writer.Write((byte)value);
+                  stream.WriteByte((byte)value);
                }
                else
                {
-                  writer.Write(((byte)EncodingCodes.UInt0));
+                  stream.WriteByte(((byte)EncodingCodes.UInt0));
                }
                break;
             case 2:
-               writer.Write(((byte)EncodingCodes.SmallUInt));
-               writer.Write((byte)value);
+               stream.WriteByte((byte)EncodingCodes.SmallUInt);
+               stream.WriteByte((byte)value);
                break;
             case 4: // Array Element
-               writer.Write(value);
+               stream.WriteUnsignedInt(value);
                break;
             case 5:
-               writer.Write(((byte)EncodingCodes.UInt));
-               writer.Write(value);
+               stream.WriteByte((byte)EncodingCodes.UInt);
+               stream.WriteUnsignedInt(value);
                break;
          }
 

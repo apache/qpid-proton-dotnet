@@ -39,27 +39,27 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Int;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = ComputeSize();
 
-         if (writer.IsWritable())
+         if (stream.IsWritable())
          {
             switch (size)
             {
                case 1: // Array Element
-                  writer.Write((byte)value);
+                  stream.WriteByte((byte)value);
                   break;
                case 2:
-                  writer.Write(((byte)EncodingCodes.SmallInt));
-                  writer.Write((byte)value);
+                  stream.WriteByte((byte)EncodingCodes.SmallInt);
+                  stream.WriteByte((byte)value);
                   break;
                case 4: // Array Element
-                  writer.Write(value);
+                  stream.WriteInt(value);
                   break;
                case 5:
-                  writer.Write(((byte)EncodingCodes.Int));
-                  writer.Write(value);
+                  stream.WriteByte((byte)EncodingCodes.Int);
+                  stream.WriteInt(value);
                   break;
             }
 

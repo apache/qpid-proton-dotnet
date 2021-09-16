@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected override IMatcher GetExpectationMatcher() => matcher;
 
-      public override void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleClose(uint frameSize, Close close, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleClose(frameSize, close, payload, channel, context);
 

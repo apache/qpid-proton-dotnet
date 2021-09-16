@@ -98,11 +98,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
          }
          else if (value is ulong)
          {
-            Append(((long)value).ToString(CultureInfo.InvariantCulture) + "UL");
+            Append(((ulong)value).ToString(CultureInfo.InvariantCulture) + "UL");
          }
          else if (value is uint)
          {
-            Append(((long)value).ToString(CultureInfo.InvariantCulture) + "U");
+            Append(((uint)value).ToString(CultureInfo.InvariantCulture) + "U");
          }
          else if (value is float)
          {

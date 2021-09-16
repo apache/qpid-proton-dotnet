@@ -169,7 +169,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
              ", properties=" + Properties + '}';
       }
 
-      public override void Invoke<T>(IPerformativeHandler<T> handler, uint frameSize, Span<byte> payload, ushort channel, T context)
+      public override void Invoke<T>(IPerformativeHandler<T> handler, uint frameSize, byte[] payload, ushort channel, T context)
       {
          handler.HandleAttach(frameSize, this, payload, channel, context);
       }

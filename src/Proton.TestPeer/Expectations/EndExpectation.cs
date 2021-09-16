@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return response;
       }
 
-      public override void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleEnd(uint frameSize, End end, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleEnd(frameSize, end, payload, channel, context);
 

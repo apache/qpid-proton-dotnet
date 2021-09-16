@@ -43,17 +43,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Bool;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
-         if (writer.IsWritable())
+         if (stream.IsWritable())
          {
             if (IsElementOfArray())
             {
-               writer.Write(value ? (byte)1 : (byte)0);
+               stream.WriteByte(value ? (byte)1 : (byte)0);
             }
             else
             {
-               writer.Write(value ? ((byte)EncodingCodes.BooleanTrue) : ((byte)EncodingCodes.BooleanFalse));
+               stream.WriteByte(value ? ((byte)EncodingCodes.BooleanTrue) : ((byte)EncodingCodes.BooleanFalse));
             }
 
             return 1;

@@ -186,7 +186,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       #endregion
 
-      public override void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleBegin(uint frameSize, Begin begin, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleBegin(frameSize, begin, payload, channel, context);
 

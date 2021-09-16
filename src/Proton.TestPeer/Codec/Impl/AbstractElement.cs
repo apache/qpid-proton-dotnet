@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public abstract IElement CheckChild(IElement element);
 
-      public abstract uint Encode(BinaryWriter writer);
+      public abstract uint Encode(Stream stream);
 
       public void Render(StringBuilder sb)
       {

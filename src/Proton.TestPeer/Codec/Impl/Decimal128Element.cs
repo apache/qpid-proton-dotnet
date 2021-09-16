@@ -40,19 +40,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Decimal128;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = GetSize();
 
-         if (writer.IsWritable())
+         if (stream.IsWritable())
          {
             if (!IsElementOfArray())
             {
-               writer.Write(((byte)EncodingCodes.Decimal128));
+               stream.WriteByte(((byte)EncodingCodes.Decimal128));
             }
 
-            writer.Write(value.MostSignificantBits);
-            writer.Write(value.LeastSignificantBits);
+            stream.WriteUnsignedLong(value.MostSignificantBits);
+            stream.WriteUnsignedLong(value.LeastSignificantBits);
 
             return size;
          }

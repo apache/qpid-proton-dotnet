@@ -39,11 +39,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Long;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = ComputeSize();
 
-         if (!writer.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
@@ -51,18 +51,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          switch (size)
          {
             case 1: // Array Element
-               writer.Write((byte)value);
+               stream.WriteByte((byte)value);
                break;
             case 2:
-               writer.Write(((byte)EncodingCodes.SmallLong));
-               writer.Write((byte)value);
+               stream.WriteByte((byte)EncodingCodes.SmallLong);
+               stream.WriteByte((byte)value);
                break;
             case 8: // Array Element
-               writer.Write(value);
+               stream.WriteLong(value);
                break;
             case 9:
-               writer.Write(((byte)EncodingCodes.Long));
-               writer.Write(value);
+               stream.WriteByte((byte)EncodingCodes.Long);
+               stream.WriteLong(value);
                break;
          }
 

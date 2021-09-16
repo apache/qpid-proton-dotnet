@@ -96,7 +96,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       protected abstract void ProcessCloseRequest();
 
-      protected abstract void ProcessDriverOutput(byte[] output);
+      protected abstract void ProcessDriverOutput(Stream output);
 
       protected abstract void ProcessConnectionEstablished();
 

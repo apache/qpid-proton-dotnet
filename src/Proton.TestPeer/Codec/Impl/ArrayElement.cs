@@ -210,26 +210,26 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return null;
       }
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = GetSize();
          uint count = Count;
 
-         if (writer.IsWritable())
+         if (stream.IsWritable())
          {
             if (!IsElementOfArray())
             {
                if (size > 257 || count > 255)
                {
-                  writer.Write((byte)0xf0);
-                  writer.Write(size - 5);
-                  writer.Write(count);
+                  stream.WriteByte((byte)0xf0);
+                  stream.WriteUnsignedInt(size - 5);
+                  stream.WriteUnsignedInt(count);
                }
                else
                {
-                  writer.Write((byte)0xe0);
-                  writer.Write((byte)(size - 2));
-                  writer.Write((byte)count);
+                  stream.WriteByte((byte)0xe0);
+                  stream.WriteByte((byte)(size - 2));
+                  stream.WriteByte((byte)count);
                }
             }
             else
@@ -237,124 +237,124 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
                ArrayElement parent = (ArrayElement)Parent;
                if (parent.ConstructorType == ConstructorType.Tiny)
                {
-                  writer.Write((byte)(size - 1));
-                  writer.Write((byte)count);
+                  stream.WriteByte((byte)(size - 1));
+                  stream.WriteByte((byte)count);
                }
                else
                {
-                  writer.Write(size - 4);
-                  writer.Write(count);
+                  stream.WriteUnsignedInt(size - 4);
+                  stream.WriteUnsignedInt(count);
                }
             }
             IElement element = first;
             if (IsDescribed)
             {
-               writer.Write((byte)0);
+               stream.WriteByte((byte)0);
                if (element == null)
                {
-                  writer.Write((byte)0x40);
+                  stream.WriteByte((byte)0x40);
                }
                else
                {
-                  element.Encode(writer);
+                  element.Encode(stream);
                   element = element.Next;
                }
             }
             switch (arrayType)
             {
                case DataType.Null:
-                  writer.Write((byte)0x40);
+                  stream.WriteByte((byte)0x40);
                   break;
                case DataType.Bool:
-                  writer.Write((byte)0x56);
+                  stream.WriteByte((byte)0x56);
                   break;
                case DataType.UByte:
-                  writer.Write((byte)0x50);
+                  stream.WriteByte((byte)0x50);
                   break;
                case DataType.Byte:
-                  writer.Write((byte)0x51);
+                  stream.WriteByte((byte)0x51);
                   break;
                case DataType.UShort:
-                  writer.Write((byte)0x60);
+                  stream.WriteByte((byte)0x60);
                   break;
                case DataType.Short:
-                  writer.Write((byte)0x61);
+                  stream.WriteByte((byte)0x61);
                   break;
                case DataType.UInt:
                   switch (ConstructorType)
                   {
                      case ConstructorType.Tiny:
-                        writer.Write((byte)0x43);
+                        stream.WriteByte((byte)0x43);
                         break;
                      case ConstructorType.Small:
-                        writer.Write((byte)0x52);
+                        stream.WriteByte((byte)0x52);
                         break;
                      case ConstructorType.Large:
-                        writer.Write((byte)0x70);
+                        stream.WriteByte((byte)0x70);
                         break;
                   }
                   break;
                case DataType.Int:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0x54 : (byte)0x71);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0x54 : (byte)0x71);
                   break;
                case DataType.Char:
-                  writer.Write((byte)0x73);
+                  stream.WriteByte((byte)0x73);
                   break;
                case DataType.ULong:
                   switch (ConstructorType)
                   {
                      case ConstructorType.Tiny:
-                        writer.Write((byte)0x44);
+                        stream.WriteByte((byte)0x44);
                         break;
                      case ConstructorType.Small:
-                        writer.Write((byte)0x53);
+                        stream.WriteByte((byte)0x53);
                         break;
                      case ConstructorType.Large:
-                        writer.Write((byte)0x80);
+                        stream.WriteByte((byte)0x80);
                         break;
                   }
                   break;
                case DataType.Long:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0x55 : (byte)0x81);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0x55 : (byte)0x81);
                   break;
                case DataType.Timestamp:
-                  writer.Write((byte)0x83);
+                  stream.WriteByte((byte)0x83);
                   break;
                case DataType.Float:
-                  writer.Write((byte)0x72);
+                  stream.WriteByte((byte)0x72);
                   break;
                case DataType.Double:
-                  writer.Write((byte)0x82);
+                  stream.WriteByte((byte)0x82);
                   break;
                case DataType.Decimal32:
-                  writer.Write((byte)0x74);
+                  stream.WriteByte((byte)0x74);
                   break;
                case DataType.Decimal64:
-                  writer.Write((byte)0x84);
+                  stream.WriteByte((byte)0x84);
                   break;
                case DataType.Decimal128:
-                  writer.Write((byte)0x94);
+                  stream.WriteByte((byte)0x94);
                   break;
                case DataType.Uuid:
-                  writer.Write((byte)0x98);
+                  stream.WriteByte((byte)0x98);
                   break;
                case DataType.Binary:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0xa0 : (byte)0xb0);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0xa0 : (byte)0xb0);
                   break;
                case DataType.String:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0xa1 : (byte)0xb1);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0xa1 : (byte)0xb1);
                   break;
                case DataType.Symbol:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0xa3 : (byte)0xb3);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0xa3 : (byte)0xb3);
                   break;
                case DataType.Array:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0xe0 : (byte)0xf0);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0xe0 : (byte)0xf0);
                   break;
                case DataType.List:
-                  writer.Write(ConstructorType == ConstructorType.Tiny ? (byte)0x45 : ConstructorType == ConstructorType.Small ? (byte)0xc0 : (byte)0xd0);
+                  stream.WriteByte(ConstructorType == ConstructorType.Tiny ? (byte)0x45 : ConstructorType == ConstructorType.Small ? (byte)0xc0 : (byte)0xd0);
                   break;
                case DataType.Map:
-                  writer.Write(ConstructorType == ConstructorType.Small ? (byte)0xc1 : (byte)0xd1);
+                  stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0xc1 : (byte)0xd1);
                   break;
                case DataType.Described:
                   break;
@@ -363,7 +363,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             }
             while (element != null)
             {
-               element.Encode(writer);
+               element.Encode(stream);
                element = element.Next;
             }
             return size;

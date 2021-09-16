@@ -126,47 +126,47 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          DoVerification((uint)header.Buffer.Length, header, null, 0, context);
       }
 
-      public override void HandleOpen(uint frameSize, Open open, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleOpen(uint frameSize, Open open, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, open, payload, channel, context);
       }
 
-      public override void HandleBegin(uint frameSize, Begin begin, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleBegin(uint frameSize, Begin begin, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, begin, payload, channel, context);
       }
 
-      public override void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleAttach(uint frameSize, Attach attach, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, attach, payload, channel, context);
       }
 
-      public override void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleFlow(uint frameSize, Flow flow, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, flow, payload, channel, context);
       }
 
-      public override void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleTransfer(uint frameSize, Transfer transfer, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, transfer, payload, channel, context);
       }
 
-      public override void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleDisposition(uint frameSize, Disposition disposition, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, disposition, payload, channel, context);
       }
 
-      public override void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleDetach(uint frameSize, Detach detach, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, detach, payload, channel, context);
       }
 
-      public override void HandleEnd(uint frameSize, End end, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleEnd(uint frameSize, End end, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, end, payload, channel, context);
       }
 
-      public override void HandleClose(uint frameSize, Close close, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleClose(uint frameSize, Close close, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          DoVerification(frameSize, close, payload, channel, context);
       }
@@ -198,12 +198,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       #endregion
 
-      private void DoVerification(uint frameSize, object performative, Span<byte> payload, ushort channel, AMQPTestDriver driver)
+      private void DoVerification(uint frameSize, object performative, byte[] payload, ushort channel, AMQPTestDriver driver)
       {
          if (typeof(T).Equals(performative.GetType()))
          {
             VerifyFrameSize(frameSize);
-            VerifyPayload(payload.ToArray()); // TODO spans or arrays ?
+            VerifyPayload(payload);
             VerifyChannel(channel);
             VerifyPerformative((T)performative);
          }

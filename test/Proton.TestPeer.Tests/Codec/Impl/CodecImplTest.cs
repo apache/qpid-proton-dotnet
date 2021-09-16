@@ -82,7 +82,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          codec.PutArray(false, DataType.Symbol);
          codec.Enter();
 
-         foreach(Symbol sym in input)
+         foreach (Symbol sym in input)
          {
             codec.PutSymbol(sym);
          }
@@ -122,7 +122,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          ICodec codec = CodecFactory.Create();
 
-         Assert.AreEqual(expectedRead, codec.Decode(new BinaryReader(encoded)));
+         Assert.AreEqual(expectedRead, codec.Decode(encoded));
 
          Open described = (Open)codec.GetDescribedType();
          Assert.IsNotNull(described);
@@ -146,7 +146,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          ICodec codec = CodecFactory.Create();
 
-         Assert.AreEqual(expectedRead, codec.Decode(new BinaryReader(encoded)));
+         Assert.AreEqual(expectedRead, codec.Decode(encoded));
 
          Open described = (Open)codec.GetDescribedType();
          Assert.IsNotNull(described);
@@ -261,6 +261,31 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          Assert.AreEqual("test", performative.Name);
       }
 
+      [Test]
+      public void TestDecodeOpenFromBytes()
+      {
+         // Encoded data for: Open
+         //   Open{ containerId='container', hostname='localhost', maxFrameSize=16384, channelMax=65535,
+         //         idleTimeOut=30000, outgoingLocales=null, incomingLocales=null, offeredCapabilities=null,
+         //         desiredCapabilities=null, properties=null}
+         byte[] basicOpen = new byte[] {0, 83, 16, 192, 36, 5, 161, 9, 99, 111,
+                                        110, 116, 97, 105, 110, 101, 114, 161, 9, 108, 111, 99, 97, 108,
+                                        104, 111, 115, 116, 112, 0, 0, 64, 0, 96, 255, 255, 112, 0, 0, 117, 48};
+
+         MemoryStream stream = new MemoryStream(basicOpen);
+         IDescribedType decoded = DecodeProtonPerformative(stream);
+         Assert.IsNotNull(decoded);
+         Assert.IsTrue(decoded is Open);
+
+         Open performative = (Open)decoded;
+
+         Assert.AreEqual("container", performative.ContainerId);
+         Assert.AreEqual("localhost", performative.Hostname);
+         Assert.AreEqual(16384u, performative.MaxFrameSize);
+         Assert.AreEqual(30000u, performative.IdleTimeout);
+         Assert.AreEqual(65535u, performative.ChannelMax);
+      }
+
       private IDescribedType DecodeProtonPerformative(MemoryStream stream)
       {
          IDescribedType performative = null;
@@ -303,7 +328,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             try
             {
                codec.PutDescribedType(performative);
-               encodingSize = codec.Encode(new BinaryWriter(stream));
+               encodingSize = codec.Encode(stream);
             }
             finally
             {

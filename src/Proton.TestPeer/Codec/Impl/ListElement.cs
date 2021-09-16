@@ -88,7 +88,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return element;
       }
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint encodedSize = ComputeSize();
 
@@ -102,7 +102,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             elt = elt.Next;
          }
 
-         if (!writer.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
@@ -115,12 +115,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
                   case ConstructorType.Tiny:
                      break;
                   case ConstructorType.Small:
-                     writer.Write((byte)(size + 1));
-                     writer.Write((byte)count);
+                     stream.WriteByte((byte)(size + 1));
+                     stream.WriteByte((byte)count);
                      break;
                   case ConstructorType.Large:
-                     writer.Write((size + 4));
-                     writer.Write(count);
+                     stream.WriteUnsignedInt((size + 4));
+                     stream.WriteUnsignedInt(count);
                      break;
                }
             }
@@ -128,27 +128,26 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             {
                if (count == 0)
                {
-                  writer.Write((byte)0x45);
+                  stream.WriteByte((byte)0x45);
                }
                else if (size <= 254 && count <= 255)
                {
-                  writer.Write((byte)0xc0);
-                  writer.Write((byte)(size + 1));
-                  writer.Write((byte)count);
+                  stream.WriteByte((byte)0xc0);
+                  stream.WriteByte((byte)(size + 1));
+                  stream.WriteByte((byte)count);
                }
                else
                {
-                  writer.Write((byte)0xd0);
-                  writer.Write((size + 4));
-                  writer.Write(count);
+                  stream.WriteByte((byte)0xd0);
+                  stream.WriteUnsignedInt((size + 4));
+                  stream.WriteUnsignedInt(count);
                }
-
             }
 
             elt = first;
             while (elt != null)
             {
-               elt.Encode(writer);
+               elt.Encode(stream);
                elt = elt.Next;
             }
 

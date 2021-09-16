@@ -136,23 +136,23 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return false;
       }
 
-      public long Decode(BinaryReader reader)
+      public long Decode(Stream stream)
       {
-        return TypeDecoder.Decode(reader, this);
+        return TypeDecoder.Decode(stream, this);
       }
 
-      public long Encode(BinaryWriter writer)
+      public long Encode(Stream stream)
       {
-         long position = writer.BaseStream.Position;
+         long position = stream.Position;
          IElement elt = first;
          uint size = 0;
 
          while (elt != null)
          {
             uint eltSize = elt.GetSize();
-            if (writer.BaseStream.CanWrite)
+            if (stream.CanWrite)
             {
-               size += elt.Encode(writer);
+               size += elt.Encode(stream);
             }
             else
             {
@@ -162,7 +162,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             elt = elt.Next;
          }
 
-         writer.BaseStream.Seek(position, SeekOrigin.Begin);
+         stream.Seek(position, SeekOrigin.Begin);
 
          return size;
       }

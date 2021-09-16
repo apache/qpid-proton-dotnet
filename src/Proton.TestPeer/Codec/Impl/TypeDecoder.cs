@@ -25,9 +25,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
    {
       DataType DataType { get; }
 
-      uint Size(BinaryReader reader);
+      uint Size(Stream stream);
 
-      void Parse(BinaryReader reader, Codec data);
+      void Parse(Stream stream, Codec data);
 
    }
 
@@ -79,23 +79,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          constructors[0xf0] = new ArrayConstructor();
       }
 
-      internal static long Decode(BinaryReader reader, Codec codec)
+      internal static long Decode(Stream input, Codec codec)
       {
-         Stream baseStream = reader.BaseStream;
-         if (baseStream.Position < baseStream.Length)
+         if (input.Position < input.Length)
          {
-            long position = baseStream.Position;
-            ITypeConstructor c = ReadConstructor(reader);
-            uint size = c.Size(reader);
+            long position = input.Position;
+            ITypeConstructor c = ReadConstructor(input);
+            uint size = c.Size(input);
 
-            if (baseStream.ReadableBytes() >= size)
+            if (input.ReadableBytes() >= size)
             {
-               c.Parse(reader, codec);
+               c.Parse(input, codec);
                return 1 + size;
             }
             else
             {
-               baseStream.Position = position;
+               input.Position = position;
                return -4;
             }
          }
@@ -103,9 +102,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return 0;
       }
 
-      private static ITypeConstructor ReadConstructor(BinaryReader reader)
+      private static ITypeConstructor ReadConstructor(Stream stream)
       {
-         byte index = reader.ReadByte();
+         byte index = stream.ReadUnsignedByte();
          ITypeConstructor tc = constructors[index];
          if (tc == null)
          {
@@ -116,18 +115,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       private static void ParseChildren(Codec codec, byte[] buffer, int count)
       {
-         BinaryReader reader = new BinaryReader(new MemoryStream(buffer));
+         Stream stream = new MemoryStream(buffer);
 
          codec.Enter();
          for (int i = 0; i < count; i++)
          {
-            ITypeConstructor c = ReadConstructor(reader);
-            uint size = c.Size(reader);
-            long getReadableBytes = reader.ReadableBytes();
+            ITypeConstructor c = ReadConstructor(stream);
+            uint size = c.Size(stream);
+            long getReadableBytes = stream.ReadableBytes();
 
             if (size <= getReadableBytes)
             {
-               c.Parse(reader, codec);
+               c.Parse(stream, codec);
             }
             else
             {
@@ -140,17 +139,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       private static void ParseArray(Codec codec, byte[] buffer, int count)
       {
-         BinaryReader reader = new BinaryReader(new MemoryStream(buffer));
+         Stream stream = new MemoryStream(buffer);
 
-         byte type = reader.ReadByte();
+         byte type = stream.ReadUnsignedByte();
          bool isDescribed = type == (byte)0x00;
-         long descriptorPosition = reader.ReadIndex();
+         long descriptorPosition = stream.ReadIndex();
 
          if (isDescribed)
          {
-            ITypeConstructor descriptorTc = ReadConstructor(reader);
-            reader.ReadIndex(descriptorPosition + descriptorTc.Size(reader));
-            type = reader.ReadByte();
+            ITypeConstructor descriptorTc = ReadConstructor(stream);
+            stream.ReadIndex(descriptorPosition + descriptorTc.Size(stream));
+            type = stream.ReadUnsignedByte();
             if (type == (byte)0x00)
             {
                throw new ArgumentException("Malformed array data");
@@ -165,16 +164,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          if (isDescribed)
          {
-            long position = reader.ReadIndex();
-            reader.ReadIndex(descriptorPosition);
-            ITypeConstructor descriptorTc = ReadConstructor(reader);
-            descriptorTc.Parse(reader, codec);
-            reader.ReadIndex(position);
+            long position = stream.ReadIndex();
+            stream.ReadIndex(descriptorPosition);
+            ITypeConstructor descriptorTc = ReadConstructor(stream);
+            descriptorTc.Parse(stream, codec);
+            stream.ReadIndex(position);
          }
 
          for (int i = 0; i < count; i++)
          {
-            tc.Parse(reader, codec);
+            tc.Parse(stream, codec);
          }
 
          codec.Exit();
@@ -186,12 +185,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.Null;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutNull();
          }
@@ -201,12 +200,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.Bool;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutBoolean(true);
          }
@@ -216,12 +215,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.Bool;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutBoolean(false);
          }
@@ -231,12 +230,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.UInt;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutUnsignedInteger(0);
          }
@@ -246,12 +245,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.ULong;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutUnsignedLong(0);
          }
@@ -261,12 +260,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.List;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutList();
          }
@@ -276,9 +275,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 0;
          }
@@ -288,9 +287,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 1;
          }
@@ -300,9 +299,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 2;
          }
@@ -312,9 +311,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 4;
          }
@@ -324,9 +323,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 8;
          }
@@ -336,9 +335,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
             return 16;
          }
@@ -348,9 +347,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.UByte;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUnsignedByte(reader.ReadByte());
+            codec.PutUnsignedByte(stream.ReadUnsignedByte());
          }
       }
 
@@ -358,9 +357,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Byte;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutByte((sbyte)reader.ReadByte());
+            codec.PutByte(stream.ReadSignedByte());
          }
       }
 
@@ -368,9 +367,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.UInt;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUnsignedInteger(reader.ReadByte());
+            codec.PutUnsignedInteger(stream.ReadUnsignedByte());
          }
       }
 
@@ -378,9 +377,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Int;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutInt(reader.ReadByte());
+            codec.PutInt(stream.ReadSignedByte());
          }
       }
 
@@ -388,9 +387,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.ULong;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUnsignedLong(reader.ReadByte());
+            codec.PutUnsignedLong(stream.ReadUnsignedByte());
          }
       }
 
@@ -398,9 +397,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Long;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutLong(reader.ReadByte());
+            codec.PutLong(stream.ReadSignedByte());
          }
       }
 
@@ -408,9 +407,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Bool;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte i = reader.ReadByte();
+            byte i = stream.ReadUnsignedByte();
             if (i != 0 && i != 1)
             {
                throw new ArgumentOutOfRangeException("Illegal value " + i + " for boolean");
@@ -424,9 +423,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.UShort;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUnsignedShort(reader.ReadUInt16());
+            codec.PutUnsignedShort(stream.ReadUnsignedShort());
          }
       }
 
@@ -434,9 +433,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Short;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutShort(reader.ReadInt16());
+            codec.PutShort(stream.ReadShort());
          }
       }
 
@@ -444,9 +443,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.UInt;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUnsignedInteger(reader.ReadUInt32());
+            codec.PutUnsignedInteger(stream.ReadUnsignedInt());
          }
       }
 
@@ -454,9 +453,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Int;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutInt(reader.ReadInt32());
+            codec.PutInt(stream.ReadInt());
          }
       }
 
@@ -464,9 +463,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Float;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutFloat(reader.ReadSingle());
+            codec.PutFloat(stream.ReadFloat());
          }
       }
 
@@ -474,9 +473,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Char;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutChar(reader.ReadChar());
+            codec.PutChar((char)stream.ReadShort());
          }
       }
 
@@ -484,9 +483,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Decimal32;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutDecimal32(new Decimal32(reader.ReadUInt32()));
+            codec.PutDecimal32(new Decimal32(stream.ReadUnsignedInt()));
          }
       }
 
@@ -494,9 +493,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.ULong;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUnsignedLong(reader.ReadUInt64());
+            codec.PutUnsignedLong(stream.ReadUnsignedLong());
          }
       }
 
@@ -504,9 +503,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Long;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutLong(reader.ReadInt64());
+            codec.PutLong(stream.ReadLong());
          }
       }
 
@@ -514,9 +513,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Double;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutDouble(reader.ReadDouble());
+            codec.PutDouble(stream.ReadDouble());
          }
       }
 
@@ -524,9 +523,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Timestamp;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutTimestamp(new DateTime(reader.ReadInt64(), DateTimeKind.Utc));
+            codec.PutTimestamp(new DateTime(stream.ReadLong(), DateTimeKind.Utc));
          }
       }
 
@@ -534,9 +533,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Decimal64;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutDecimal64(new Decimal64(reader.ReadUInt64()));
+            codec.PutDecimal64(new Decimal64(stream.ReadUnsignedLong()));
          }
       }
 
@@ -544,9 +543,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Decimal128;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutDecimal128(new Decimal128(reader.ReadUInt64(), reader.ReadUInt64()));
+            codec.PutDecimal128(new Decimal128(stream.ReadUnsignedLong(), stream.ReadUnsignedLong()));
          }
       }
 
@@ -556,9 +555,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          public override DataType DataType => DataType.Uuid;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            codec.PutUUID(new Guid(reader.ReadBytes(BYTES)));
+            codec.PutUUID(new Guid(stream.ReadBytes(BYTES)));
          }
       }
 
@@ -566,15 +565,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
-            long position = reader.ReadIndex();
-            if (reader.IsReadable())
+            long position = stream.ReadIndex();
+            if (stream.IsReadable())
             {
-               byte size = reader.ReadByte();
-               reader.ReadIndex(position);
+               byte size = stream.ReadUnsignedByte();
+               stream.ReadIndex(position);
 
                return (uint)(size + 1);
             }
@@ -589,15 +588,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public abstract DataType DataType { get; }
 
-         public abstract void Parse(BinaryReader reader, Codec data);
+         public abstract void Parse(Stream stream, Codec data);
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
-            long position = reader.ReadIndex();
-            if (reader.IsReadable())
+            long position = stream.ReadIndex();
+            if (stream.IsReadable())
             {
-               uint size = reader.ReadUInt32();
-               reader.ReadIndex(position);
+               uint size = stream.ReadUnsignedInt();
+               stream.ReadIndex(position);
 
                return size + 4u;
             }
@@ -612,10 +611,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Binary;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte size = reader.ReadByte();
-            byte[] bytes = reader.ReadBytes(size);
+            byte size = stream.ReadUnsignedByte();
+            byte[] bytes = stream.ReadBytes(size);
             codec.PutBinary(bytes);
          }
       }
@@ -624,10 +623,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Symbol;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte size = reader.ReadByte();
-            byte[] bytes = reader.ReadBytes(size);
+            byte size = stream.ReadUnsignedByte();
+            byte[] bytes = stream.ReadBytes(size);
             codec.PutSymbol(new Symbol(bytes));
          }
       }
@@ -636,10 +635,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.String;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte size = reader.ReadByte();
-            byte[] bytes = reader.ReadBytes(size);
+            byte size = stream.ReadUnsignedByte();
+            byte[] bytes = stream.ReadBytes(size);
             codec.PutString(System.Text.Encoding.UTF8.GetString(bytes));
          }
       }
@@ -648,10 +647,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Binary;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            int size = reader.ReadInt32();
-            byte[] bytes = reader.ReadBytes(size);
+            int size = stream.ReadInt();
+            byte[] bytes = stream.ReadBytes(size);
             codec.PutBinary(bytes);
          }
       }
@@ -660,10 +659,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Symbol;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            int size = reader.ReadInt32();
-            byte[] bytes = reader.ReadBytes(size);
+            int size = stream.ReadInt();
+            byte[] bytes = stream.ReadBytes(size);
             codec.PutSymbol(new Symbol(bytes));
          }
       }
@@ -672,10 +671,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.String;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            int size = reader.ReadInt32();
-            byte[] bytes = reader.ReadBytes(size);
+            int size = stream.ReadInt();
+            byte[] bytes = stream.ReadBytes(size);
             codec.PutString(System.Text.Encoding.UTF8.GetString(bytes));
          }
       }
@@ -684,12 +683,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.List;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte size = reader.ReadByte();
-            byte count = reader.ReadByte();
+            byte size = stream.ReadUnsignedByte();
+            byte count = stream.ReadUnsignedByte();
 
-            byte[] bytes = reader.ReadBytes(size - 1);
+            byte[] bytes = stream.ReadBytes(size - 1);
 
             codec.PutList();
 
@@ -701,12 +700,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Map;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte size = reader.ReadByte();
-            byte count = reader.ReadByte();
+            byte size = stream.ReadUnsignedByte();
+            byte count = stream.ReadUnsignedByte();
 
-            byte[] bytes = reader.ReadBytes(size - 1);
+            byte[] bytes = stream.ReadBytes(size - 1);
 
             codec.PutMap();
 
@@ -718,12 +717,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.List;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            uint size = reader.ReadUInt32();
-            int count = reader.ReadInt32();
+            uint size = stream.ReadUnsignedInt();
+            int count = stream.ReadInt();
 
-            byte[] bytes = reader.ReadBytes((int)(size - 4));
+            byte[] bytes = stream.ReadBytes((int)(size - 4));
 
             codec.PutList();
 
@@ -735,12 +734,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Map;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            uint size = reader.ReadUInt32();
-            int count = reader.ReadInt32();
+            uint size = stream.ReadUnsignedInt();
+            int count = stream.ReadInt();
 
-            byte[] bytes = reader.ReadBytes((int)(size - 4));
+            byte[] bytes = stream.ReadBytes((int)(size - 4));
 
             codec.PutMap();
 
@@ -752,20 +751,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public DataType DataType => DataType.Described;
 
-         public uint Size(BinaryReader reader)
+         public uint Size(Stream stream)
          {
-            if (reader.IsReadable())
+            if (stream.IsReadable())
             {
-               long position = reader.ReadIndex();
+               long position = stream.ReadIndex();
                try
                {
-                  ITypeConstructor c = ReadConstructor(reader);
-                  uint size = c.Size(reader);
-                  if (reader.ReadableBytes() > size)
+                  ITypeConstructor c = ReadConstructor(stream);
+                  uint size = c.Size(stream);
+                  if (stream.ReadableBytes() > size)
                   {
-                     reader.ReadIndex(position + size + 1);
-                     c = ReadConstructor(reader);
-                     return size + 2 + c.Size(reader);
+                     stream.ReadIndex(position + size + 1);
+                     c = ReadConstructor(stream);
+                     return size + 2 + c.Size(stream);
                   }
                   else
                   {
@@ -774,7 +773,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
                }
                finally
                {
-                  reader.ReadIndex(position);
+                  stream.ReadIndex(position);
                }
             }
             else
@@ -783,14 +782,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             }
          }
 
-         public void Parse(BinaryReader reader, Codec codec)
+         public void Parse(Stream stream, Codec codec)
          {
             codec.PutDescribed();
             codec.Enter();
-            ITypeConstructor constructor = ReadConstructor(reader);
-            constructor.Parse(reader, codec);
-            constructor = ReadConstructor(reader);
-            constructor.Parse(reader, codec);
+            ITypeConstructor constructor = ReadConstructor(stream);
+            constructor.Parse(stream, codec);
+            constructor = ReadConstructor(stream);
+            constructor.Parse(stream, codec);
             codec.Exit();
          }
       }
@@ -799,12 +798,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Array;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            byte size = reader.ReadByte();
-            byte count = reader.ReadByte();
+            byte size = stream.ReadUnsignedByte();
+            byte count = stream.ReadUnsignedByte();
 
-            byte[] bytes = reader.ReadBytes(size - 1);
+            byte[] bytes = stream.ReadBytes(size - 1);
 
             ParseArray(codec, bytes, count);
          }
@@ -814,12 +813,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          public override DataType DataType => DataType.Array;
 
-         public override void Parse(BinaryReader reader, Codec codec)
+         public override void Parse(Stream stream, Codec codec)
          {
-            int size = reader.ReadInt32();
-            int count = reader.ReadInt32();
+            int size = stream.ReadInt();
+            int count = stream.ReadInt();
 
-            byte[] bytes = reader.ReadBytes(size - 4);
+            byte[] bytes = stream.ReadBytes(size - 4);
 
             ParseArray(codec, bytes, count);
          }

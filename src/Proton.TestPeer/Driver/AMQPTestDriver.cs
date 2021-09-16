@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private readonly DriverSessions sessions;
 
-      private readonly Action<byte[]> frameConsumer;
+      private readonly Action<Stream> frameConsumer;
       private readonly Action<Exception> assertionConsumer;
       private readonly Func<TaskFactory> taskFactorySupplier;
 
@@ -67,12 +67,12 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
 
-      public AMQPTestDriver(string name, Action<byte[]> frameConsumer, Func<TaskFactory> scheduler) :
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Func<TaskFactory> scheduler) :
          this(name, frameConsumer, null, scheduler)
       {
       }
 
-      public AMQPTestDriver(string name, Action<byte[]> frameConsumer, Action<Exception> assertConsumer, Func<TaskFactory> scheduler)
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Action<Exception> assertConsumer, Func<TaskFactory> scheduler)
       {
          this.sessions = new DriverSessions(this);
          this.frameConsumer = frameConsumer;
@@ -222,7 +222,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          // TODO : LOG.trace("{} Sending AMQP Header: {}", driverName, header);
          try
          {
-            frameConsumer.Invoke(header.ToArray());
+            frameConsumer.Invoke(new MemoryStream(header.ToArray()));
          }
          catch (Exception ex)
          {
@@ -249,7 +249,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel, payload, null);
             // TODO : LOG.trace("{} Writing out buffer {} to consumer: {}", driverName, buffer, frameConsumer);
-            frameConsumer.Invoke(stream.ToArray());
+            frameConsumer.Invoke(stream);
          }
          catch (Exception ex)
          {
@@ -272,7 +272,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel);
-            frameConsumer.Invoke(stream.ToArray());
+            frameConsumer.Invoke(stream);
          }
          catch (Exception ex)
          {
@@ -287,7 +287,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          try
          {
-            frameConsumer.Invoke(stream.ToArray());
+            frameConsumer.Invoke(stream);
          }
          catch (Exception ex)
          {
@@ -300,7 +300,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          // TODO : LOG.trace("{} Sending bytes from ProtonBuffer: {}", driverName, buffer);
          try
          {
-            frameConsumer.Invoke(buffer);
+            frameConsumer.Invoke(new MemoryStream(buffer));
          }
          catch (Exception ex)
          {
@@ -334,9 +334,9 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            IScriptedElement scriptEntry = script.Dequeue();
+            IScriptedElement scriptEntry;
 
-            if (scriptEntry == null)
+            if (!script.TryDequeue(out scriptEntry))
             {
                SignalFailure(new AssertionError("Received header when not expecting any input."));
             }
@@ -378,10 +378,11 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            IScriptedElement scriptEntry = script.Dequeue();
             saslPerformativeCount++;
 
-            if (scriptEntry == null)
+            IScriptedElement scriptEntry;
+
+            if (!script.TryDequeue(out scriptEntry))
             {
                SignalFailure(new AssertionError("Received SASL performative when not expecting any input."));
             }
@@ -443,9 +444,9 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            IScriptedElement scriptEntry = script.Dequeue();
+            IScriptedElement scriptEntry;
 
-            if (scriptEntry == null)
+            if (!script.TryDequeue(out scriptEntry))
             {
                SignalFailure(new AssertionError("Received AMQP performative when not expecting any input."));
             }
@@ -652,22 +653,21 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
          }
 
-         IScriptedElement peekNext = script.Peek();
-         do
+         IScriptedElement peekNext = null;
+
+         while (script.TryPeek(out peekNext) && failureCause == null)
          {
             if (peekNext is ScriptedAction action)
             {
                script.Dequeue();
                action.Perform(this);
+               peekNext = null;
             }
             else
             {
                return;
             }
-
-            peekNext = script.Peek();
          }
-         while (peekNext != null && failureCause == null);
       }
 
       private void CheckFailed()

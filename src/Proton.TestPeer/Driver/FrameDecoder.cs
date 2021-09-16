@@ -47,6 +47,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       public FrameDecoder(AMQPTestDriver driver)
       {
          this.driver = driver;
+         this.stage = new HeaderParsingStage(this);
          this.frameSizeParser = new FrameSizeParsingStage(this);
          this.frameBufferingStage = new FrameBufferingStage(this);
          this.frameBodyParsingStage = new FrameBodyParsingStage(this);
@@ -206,7 +207,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                // Normalize the frame size to the reminder portion
                uint length = (uint)(frameSize - FRAME_SIZE_BYTES);
 
-               if (input.Length != input.Position)
+               if ((input.Length - input.Position) < length)
                {
                   decoder.TransitionToFrameBufferingStage(length);
                }
@@ -297,8 +298,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             ValidateDataOffset(dataOffset, frameSize);
 
             int type = input.ReadByte() & 0xFF;
-            BinaryReader reader = new BinaryReader(input);
-            ushort channel = reader.ReadUInt16();
+            ushort channel = input.ReadUnsignedShort();
 
             // note that this skips over the extended header if it's present
             if (dataOffset != 8)
@@ -317,7 +317,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
                try
                {
-                  decoder.codec.Decode(reader);
+                  decoder.codec.Decode(input);
                }
                catch (Exception e)
                {
@@ -349,7 +349,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                   uint payloadSize = (uint)(frameBodySize - (input.Position - frameBodyStartIndex));
                   if (payloadSize > 0)
                   {
-                     payload = reader.ReadBytes((int)payloadSize);
+                     payload = input.ReadBytes((int)payloadSize);
                   }
                }
             }

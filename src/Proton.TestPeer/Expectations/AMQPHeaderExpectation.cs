@@ -17,6 +17,7 @@
 
 using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
+using Apache.Qpid.Proton.Test.Driver.Matchers;
 
 namespace Apache.Qpid.Proton.Test.Driver.Expectations
 {
@@ -57,12 +58,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public override void HandleAMQPHeader(AMQPHeader header, AMQPTestDriver context)
       {
-         // TODO assertThat("AMQP Header should match expected.", expected, equalTo(header));
+         MatcherAssert.AssertThat("AMQP Header should match expected.", expected, Is.EqualTo(header));
       }
 
       public override void HandleSASLHeader(AMQPHeader header, AMQPTestDriver driver)
       {
-         // TODO assertThat("SASL Header should match expected.", expected, equalTo(header));
+         MatcherAssert.AssertThat("SASL Header should match expected.", expected, Is.EqualTo(header));
       }
    }
 }

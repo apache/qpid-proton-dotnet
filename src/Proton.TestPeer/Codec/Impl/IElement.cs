@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       DataType DataType { get; }
 
-      uint Encode(BinaryWriter writer);
+      uint Encode(Stream stream);
 
       IElement Next { get; set; }
 
@@ -48,13 +48,5 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       void Render(StringBuilder sb);
 
-   }
-
-   internal static class BinaryWriterExtensions
-   {
-      public static bool IsWritable(this BinaryWriter writer)
-      {
-         return writer.BaseStream.CanWrite;
-      }
    }
 }

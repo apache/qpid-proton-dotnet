@@ -34,11 +34,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Null;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
-         if (writer.IsWritable() && !IsElementOfArray())
+         if (stream.IsWritable() && !IsElementOfArray())
          {
-            writer.Write(((byte)EncodingCodes.Null));
+            stream.WriteByte((byte)EncodingCodes.Null);
             return 1;
          }
 

@@ -360,7 +360,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       #endregion
 
-      public override void HandleAttach(uint frameSize, Attach attach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleAttach(uint frameSize, Attach attach, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleAttach(frameSize, attach, payload, channel, context);
 

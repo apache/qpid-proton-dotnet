@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return this;
       }
 
-      public override void HandleTransfer(uint frameSize, Transfer transfer, Span<byte> payload, ushort channel, AMQPTestDriver driver)
+      public override void HandleTransfer(uint frameSize, Transfer transfer, byte[] payload, ushort channel, AMQPTestDriver driver)
       {
          base.HandleTransfer(frameSize, transfer, payload, channel, driver);
 
@@ -133,7 +133,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
                 "Received Transfer on channel [{0}] that has no matching Session for that remote channel. ", channel));
          }
 
-         LinkTracker link = session.HandleTransfer(transfer, payload.ToArray());
+         LinkTracker link = session.HandleTransfer(transfer, payload);
 
          if (response != null)
          {

@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return matcher;
       }
 
-      public override void HandleDisposition(uint frameSize, Disposition disposition, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleDisposition(uint frameSize, Disposition disposition, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleDisposition(frameSize, disposition, payload, channel, context);
 

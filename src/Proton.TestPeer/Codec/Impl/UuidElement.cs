@@ -40,17 +40,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Uuid;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = GetSize();
-         if (writer.IsWritable())
+         if (stream.IsWritable())
          {
             if (size == 17)
             {
-               writer.Write(((byte)EncodingCodes.Uuid));
+               stream.WriteByte(((byte)EncodingCodes.Uuid));
             }
 
-            writer.Write(value.ToByteArray());
+            stream.Write(value.ToByteArray());
 
             return size;
          }

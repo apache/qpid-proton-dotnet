@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return response;
       }
 
-      public override void HandleFlow(uint frameSize, Flow flow, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleFlow(uint frameSize, Flow flow, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleFlow(frameSize, flow, payload, channel, context);
 

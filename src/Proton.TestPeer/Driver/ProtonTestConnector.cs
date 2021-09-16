@@ -33,13 +33,28 @@ namespace Apache.Qpid.Proton.Test.Driver
    public sealed class ProtonTestConnector : ProtonTestPeer
    {
       private readonly AMQPTestDriver driver;
-      private readonly Action<byte[]> frameSink;
+      private Action<Stream> frameSink;
 
-      public ProtonTestConnector(Action<byte[]> frameSink)
+      public ProtonTestConnector(Action<Stream> frameSink = null)
       {
-         this.driver = new AMQPTestDriver(PeerName, (frame) => ProcessDriverOutput(frame), null);
+         this.driver = new AMQPTestDriver(PeerName, ConnectorFrameSink, null);
 
          this.frameSink = frameSink;
+      }
+
+      public void ConnectorFrameSink(Action<Stream> frameSink)
+      {
+         this.frameSink = frameSink;
+      }
+
+      private void ConnectorFrameSink(Stream frame)
+      {
+         if (frameSink == null)
+         {
+            throw new InvalidOperationException("Connector was not properly configured with a frame sink");
+         }
+
+         frameSink.Invoke(frame);
       }
 
       public override AMQPTestDriver Driver => driver;
@@ -68,7 +83,7 @@ namespace Apache.Qpid.Proton.Test.Driver
         driver.HandleConnectedEstablished();
       }
 
-      protected override void ProcessDriverOutput(byte[] output)
+      protected override void ProcessDriverOutput(Stream output)
       {
         frameSink.Invoke(output);
       }

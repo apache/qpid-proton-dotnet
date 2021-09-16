@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             try
             {
                codec.PutDescribedType(performative);
-               encodedSize = codec.Encode(new BinaryWriter(stream));
+               encodedSize = codec.Encode(stream);
             }
             finally
             {

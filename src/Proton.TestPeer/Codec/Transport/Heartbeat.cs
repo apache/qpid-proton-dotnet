@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public override object Descriptor => null;
 
-      public override void Invoke<T>(IPerformativeHandler<T> handler, uint frameSize, Span<byte> payload, ushort channel, T context)
+      public override void Invoke<T>(IPerformativeHandler<T> handler, uint frameSize, byte[] payload, ushort channel, T context)
       {
          handler.HandleHeartbeat(frameSize, INSTANCE, payload, channel, context);
       }

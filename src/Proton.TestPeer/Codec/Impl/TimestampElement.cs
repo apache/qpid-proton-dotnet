@@ -40,21 +40,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.Timestamp;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint size = GetSize();
 
-         if (!writer.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
 
          if (!IsElementOfArray())
          {
-            writer.Write(((byte)EncodingCodes.Timestamp));
+            stream.WriteByte((byte)EncodingCodes.Timestamp);
          }
 
-         writer.Write(value);
+         stream.WriteLong(value);
 
          return size;
       }

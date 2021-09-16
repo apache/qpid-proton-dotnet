@@ -66,9 +66,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
       /// Writes a copy of the Symbol bytes to the given buffer.
       /// </summary>
       /// <param name="buffer">The buffer to write the Symbol bytes to</param>
-      public void WriteTo(Span<byte> buffer)
+      public void WriteTo(Stream stream)
       {
-         underlying.CopyTo(buffer);
+         stream.Write(underlying);
       }
 
       /// <summary>

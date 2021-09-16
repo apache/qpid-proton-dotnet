@@ -40,14 +40,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override DataType DataType => DataType.String;
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          byte[] bytes = new UTF8Encoding().GetBytes(value);
          uint length = (uint)bytes.Length;
 
          uint size = ComputeSize(length);
 
-         if (!writer.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
@@ -58,25 +58,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
             if (parent.ConstructorType == ConstructorType.Small)
             {
-               writer.Write((byte)length);
+               stream.WriteByte((byte)length);
             }
             else
             {
-               writer.Write(length);
+               stream.WriteUnsignedInt(length);
             }
          }
          else if (length <= 255)
          {
-            writer.Write(((byte)EncodingCodes.Str8));
-            writer.Write((byte)length);
+            stream.WriteByte(((byte)EncodingCodes.Str8));
+            stream.WriteByte((byte)length);
          }
          else
          {
-            writer.Write(((byte)EncodingCodes.Str32));
-            writer.Write(length);
+            stream.WriteByte(((byte)EncodingCodes.Str32));
+            stream.WriteUnsignedInt(length);
          }
 
-         writer.Write(bytes);
+         stream.Write(bytes);
          return size;
       }
 

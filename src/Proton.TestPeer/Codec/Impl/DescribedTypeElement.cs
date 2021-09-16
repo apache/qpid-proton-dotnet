@@ -103,32 +103,32 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return element;
       }
 
-      public override uint Encode(BinaryWriter writer)
+      public override uint Encode(Stream stream)
       {
          uint encodedSize = GetSize();
 
-         if (!writer.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
          else
          {
-            writer.Write((byte)0);
+            stream.WriteByte((byte)0);
             if (first == null)
             {
-               writer.Write((byte)0x40);
-               writer.Write((byte)0x40);
+               stream.WriteByte((byte)0x40);
+               stream.WriteByte((byte)0x40);
             }
             else
             {
-               first.Encode(writer);
+               first.Encode(stream);
                if (first.Next == null)
                {
-                  writer.Write((byte)0x40);
+                  stream.WriteByte((byte)0x40);
                }
                else
                {
-                  first.Next.Encode(writer);
+                  first.Next.Encode(stream);
                }
             }
          }

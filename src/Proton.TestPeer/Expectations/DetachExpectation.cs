@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return response;
       }
 
-      public override void HandleDetach(uint frameSize, Detach detach, Span<byte> payload, ushort channel, AMQPTestDriver context)
+      public override void HandleDetach(uint frameSize, Detach detach, byte[] payload, ushort channel, AMQPTestDriver context)
       {
          base.HandleDetach(frameSize, detach, payload, channel, context);
 
