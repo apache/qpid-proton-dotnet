@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          set => first = value;
       }
 
-      public override bool CanEnter => throw new NotImplementedException();
+      public override bool CanEnter => true;
 
       public override IElement AddChild(IElement element)
       {

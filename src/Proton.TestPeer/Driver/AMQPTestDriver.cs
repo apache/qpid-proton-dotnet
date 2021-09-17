@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// <summary>
    /// The AMQP Test driver internal frame processing a script handler class.
    /// </summary>
-   public sealed class AMQPTestDriver
+   public sealed class AMQPTestDriver : IFrameHandler
    {
       private readonly Mutex mutex = new Mutex();
       private readonly String driverName;
@@ -329,7 +329,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      internal void HandleHeader(AMQPHeader header)
+      public void HandleHeader(AMQPHeader header)
       {
          mutex.WaitOne();
          try
@@ -373,7 +373,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      internal void HandleSaslPerformative(uint frameSize, SaslDescribedType sasl, ushort channel, byte[] payload)
+      public void HandleSaslPerformative(uint frameSize, SaslDescribedType sasl, ushort channel, byte[] payload)
       {
          mutex.WaitOne();
          try
@@ -426,7 +426,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      internal void HandlePerformative(uint frameSize, PerformativeDescribedType amqp, ushort channel, byte[] payload)
+      public void HandlePerformative(uint frameSize, PerformativeDescribedType amqp, ushort channel, byte[] payload)
       {
          switch (amqp.Type)
          {
@@ -490,7 +490,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      internal void HandleHeartbeat(uint frameSize, ushort channel)
+      public void HandleHeartbeat(uint frameSize, ushort channel)
       {
          emptyFrameCount++;
          HandlePerformative(frameSize, Heartbeat.INSTANCE, channel, null);

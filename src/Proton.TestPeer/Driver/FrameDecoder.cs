@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public static readonly int FRAME_SIZE_BYTES = 4;
 
-      private readonly AMQPTestDriver driver;
+      private readonly IFrameHandler frameHandler;
       private readonly ICodec codec = CodecFactory.Create();
       private FrameParserStage stage;
 
@@ -44,9 +44,9 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly FrameParserStage frameBufferingStage;
       private readonly FrameParserStage frameBodyParsingStage;
 
-      public FrameDecoder(AMQPTestDriver driver)
+      public FrameDecoder(IFrameHandler frameHandler)
       {
-         this.driver = driver;
+         this.frameHandler = frameHandler;
          this.stage = new HeaderParsingStage(this);
          this.frameSizeParser = new FrameSizeParsingStage(this);
          this.frameBufferingStage = new FrameBufferingStage(this);
@@ -122,12 +122,12 @@ namespace Apache.Qpid.Proton.Test.Driver
       internal abstract class FrameParserStage
       {
          protected FrameDecoder decoder;
-         protected AMQPTestDriver driver;
+         protected IFrameHandler frameHandler;
 
          internal FrameParserStage(FrameDecoder decoder)
          {
             this.decoder = decoder;
-            this.driver = decoder.driver;
+            this.frameHandler = decoder.frameHandler;
          }
 
          internal abstract void Parse(Stream input);
@@ -163,11 +163,11 @@ namespace Apache.Qpid.Proton.Test.Driver
 
                if (header.IsSaslHeader)
                {
-                  driver.HandleHeader(AMQPHeader.SASLHeader);
+                  frameHandler.HandleHeader(AMQPHeader.SASLHeader);
                }
                else
                {
-                  driver.HandleHeader(AMQPHeader.Header);
+                  frameHandler.HandleHeader(AMQPHeader.Header);
                }
             }
          }
@@ -228,10 +228,10 @@ namespace Apache.Qpid.Proton.Test.Driver
                     "specified frame size {0} smaller than minimum frame header size 8", frameSize));
             }
 
-            if (frameSize > driver.InboundMaxFrameSize)
+            if (frameSize > frameHandler.InboundMaxFrameSize)
             {
                throw new ArgumentOutOfRangeException(String.Format(
-                   "specified frame size {0} larger than maximum frame size", frameSize, driver.InboundMaxFrameSize));
+                   "specified frame size {0} larger than maximum frame size", frameSize, frameHandler.InboundMaxFrameSize));
             }
          }
 
@@ -357,7 +357,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             {
                // TODO LOG.trace("{} Read: CH[{}] : {} [{}]", driver.getName(), channel, HeartBeat.INSTANCE, payload);
                decoder.TransitionToFrameSizeParsingStage();
-               driver.HandleHeartbeat(frameSize, channel);
+               frameHandler.HandleHeartbeat(frameSize, channel);
                return;
             }
 
@@ -366,14 +366,14 @@ namespace Apache.Qpid.Proton.Test.Driver
                PerformativeDescribedType performative = (PerformativeDescribedType)val;
                // TODO LOG.trace("{} Read: CH[{}] : {} [{}]", driver.getName(), channel, performative, payload);
                decoder.TransitionToFrameSizeParsingStage();
-               driver.HandlePerformative(frameSize, performative, channel, payload);
+               frameHandler.HandlePerformative(frameSize, performative, channel, payload);
             }
             else if (type == SASL_FRAME_TYPE)
             {
                SaslDescribedType performative = (SaslDescribedType)val;
                // TODO LOG.trace("{} Read: {} [{}]", driver.getName(), performative, payload);
                decoder.TransitionToFrameSizeParsingStage();
-               driver.HandleSaslPerformative(frameSize, performative, channel, payload);
+               frameHandler.HandleSaslPerformative(frameSize, performative, channel, payload);
             }
             else
             {
