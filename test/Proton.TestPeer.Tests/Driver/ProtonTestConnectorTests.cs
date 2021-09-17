@@ -155,11 +155,11 @@ namespace Apache.Qpid.Proton.Test.Driver
                             .WithHostname("localhost")
                             .WithMaxFrameSize(16384u)
                             .WithChannelMax(65535)
-                            .WithIdleTimeOut(36000u);
-                            // TODO Matchers must be smarter
-                           //  .WithOfferedCapabilities("SOMETHING")
-                           //  .WithDesiredCapabilities("ANONYMOUS-RELAY", "DELAYED-DELIVERY")
-                           //  .WithProperties(expectedProperties);
+                            .WithIdleTimeOut(36000u)
+                            .WithOfferedCapabilities("SOMETHING")
+                            .WithDesiredCapabilities("ANONYMOUS-RELAY", "DELAYED-DELIVERY");
+         // TODO Matchers must be smarter
+         //  .WithProperties(expectedProperties);
          client.ExpectAMQPHeader();
          client.RemoteHeader(AMQPHeader.Header).Now();
          client.RemoteBytes().WithBytes(completeOpen).Now();

@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
    /// <summary>
@@ -53,14 +57,50 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
             return false;
          }
 
-         // TODO: Array validation
-
-         return actual.Equals(expected);
+         if (expected.GetType().IsArray && actual.GetType().IsArray)
+         {
+            return ArraysMatch((Array)expected, (Array)actual);
+         }
+         else
+         {
+            return actual.Equals(expected);
+         }
       }
 
       public static IMatcher EqualTo(object operand)
       {
          return new IsEqualMatcher(operand);
+      }
+
+      public static bool ArraysMatch(Array expected, Array actual)
+      {
+         if (expected.Length != actual.Length)
+         {
+            return false;
+         }
+
+         for (int i = 0; i < expected.Length; ++i)
+         {
+            object expectedN = expected.GetValue(i);
+            object actualN = actual.GetValue(i);
+
+            if (ReferenceEquals(actualN, expectedN))
+            {
+               return true;
+            }
+
+            if (ReferenceEquals(null, actualN) || ReferenceEquals(null, expectedN))
+            {
+               return false;
+            }
+
+            if (!actualN.Equals(expectedN))
+            {
+               return false;
+            }
+         }
+
+         return true;
       }
    }
 }
