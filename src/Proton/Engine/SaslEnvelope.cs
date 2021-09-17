@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Creates a new SASL Envelope with the given performative as the body.
       /// </summary>
       /// <param name="performative">The performative to carry</param>
-      internal SaslEnvelope(ISaslPerformative performative) : this(performative, null)
+      public SaslEnvelope(ISaslPerformative performative) : this(performative, null)
       {
       }
 
@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Engine
       /// given proton buffer as the payload.
       /// </summary>
       /// <param name="performative">The performative to carry</param>
-      internal SaslEnvelope(ISaslPerformative performative, IProtonBuffer payload) : base(SaslFrameType)
+      public SaslEnvelope(ISaslPerformative performative, IProtonBuffer payload) : base(SaslFrameType)
       {
          Initialize(performative, 0, payload);
       }

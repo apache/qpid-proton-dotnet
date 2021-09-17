@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Engine.Implementation;
+
 namespace Apache.Qpid.Proton.Engine
 {
    /// <summary>
@@ -22,6 +24,8 @@ namespace Apache.Qpid.Proton.Engine
    /// </summary>
    public interface IEngineFactory
    {
+      public static readonly IEngineFactory Proton = ProtonEngineFactory.Instance;
+
       /// <summary>
       /// Create a new Engine instance with a SASL authentication layer added. The returned
       /// Engine can either be fully pre-configured for SASL or can require additional user

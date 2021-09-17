@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private static bool CheckTraceFramesEnabled()
       {
-         string value = Environment.GetEnvironmentVariable(PN_TRACE_FRM).ToLower() ?? "false";
+         string value = Environment.GetEnvironmentVariable(PN_TRACE_FRM)?.ToLower() ?? "false";
          return "true".Equals(value) || "1".Equals(value) || "yes".Equals(value);
       }
 
