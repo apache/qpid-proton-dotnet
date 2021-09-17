@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using Apache.Qpid.Proton.Test.Driver.Exceptions;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
@@ -43,6 +45,33 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       public override string ToString()
       {
          return Type + " " + List;
+      }
+
+      internal IDictionary<TKey, TValue> SafeDictionaryConvert<TKey, TValue>(int field)
+      {
+         object fieldValue = this[field];
+
+         if (fieldValue == null)
+         {
+            return null;
+         }
+
+         if (fieldValue is not IDictionary)
+         {
+            throw new AssertionError("Cannot convert from value " + fieldValue + " to requested Dictionary type");
+         }
+
+         IDictionary<TKey, TValue> result = new Dictionary<TKey, TValue>();
+         IDictionary current = (IDictionary)fieldValue;
+
+         IDictionaryEnumerator enumerator = current.GetEnumerator();
+
+         while (enumerator.MoveNext())
+         {
+            result.Add((TKey)enumerator.Key, (TValue)enumerator.Value);
+         }
+
+         return result;
       }
    }
 }

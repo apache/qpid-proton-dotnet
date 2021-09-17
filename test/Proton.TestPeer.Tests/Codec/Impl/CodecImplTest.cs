@@ -293,13 +293,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          //   Open{ containerId='container', hostname='localhost', maxFrameSize=16384, channelMax=65535,
          //         idleTimeOut=36000, outgoingLocales=null, incomingLocales=null, offeredCapabilities=[SOMETHING],
          //         desiredCapabilities=[ANONYMOUS-RELAY, DELAYED-DELIVERY], properties={queue-prefix=queue://}}
-         byte[] completeOpen = new byte[] { 0, 83, 16, 192, 116, 10, 161, 9, 99, 111, 110, 116, 97, 105, 110, 101, 114,
-                                            161, 9, 108, 111, 99, 97, 108, 104, 111, 115, 116, 112, 0, 0, 64, 0, 96,
-                                            255, 255, 112, 0, 0, 140, 160, 64, 64, 224, 12, 1, 163, 9, 83, 79, 77,
-                                            69, 84, 72, 73, 78, 71, 224, 35, 2, 163, 15, 65, 78, 79, 78, 89, 77, 79,
-                                            85, 83, 45, 82, 69, 76, 65, 89, 16, 68, 69, 76, 65, 89, 69, 68, 45, 68,
-                                            69, 76, 73, 86, 69, 82, 89, 193, 25, 2, 161, 12, 113, 117, 101, 117, 101,
-                                            45, 112, 114, 101, 102, 105, 120, 161, 8, 113, 117, 101, 117, 101, 58, 47, 47 };
+         byte[] completeOpen = new byte[] {0, 83, 16, 192, 116, 10, 161, 9, 99, 111,
+                                           110, 116, 97, 105, 110, 101, 114, 161, 9, 108, 111, 99, 97, 108, 104,
+                                           111, 115, 116, 112, 0, 0, 64, 0, 96, 255, 255, 112, 0, 0, 140, 160,
+                                           64, 64, 224, 12, 1, 163, 9, 83, 79, 77, 69, 84, 72, 73, 78, 71, 224,
+                                           35, 2, 163, 15, 65, 78, 79, 78, 89, 77, 79, 85, 83, 45, 82, 69, 76,
+                                           65, 89, 16, 68, 69, 76, 65, 89, 69, 68, 45, 68, 69, 76, 73, 86, 69,
+                                           82, 89, 193, 25, 2, 163, 12, 113, 117, 101, 117, 101, 45, 112, 114,
+                                           101, 102, 105, 120, 161, 8, 113, 117, 101, 117, 101, 58, 47, 47};
 
          MemoryStream stream = new MemoryStream(completeOpen);
          IDescribedType decoded = DecodeProtonPerformative(stream);
