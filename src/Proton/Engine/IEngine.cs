@@ -193,10 +193,10 @@ namespace Apache.Qpid.Proton.Engine
       /// while removing the need for the client library or server application to manage calls to
       /// the tick processing methods.
       /// </summary>
-      /// <param name="scheduler">The single threaded scheduler where are engine work is queued</param>
+      /// <param name="taskFactory">The single threaded task factory where are engine work is queued</param>
       /// <returns>This engine instance</returns>
       /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
-      IEngine TickAuto(TaskScheduler scheduler);
+      IEngine TickAuto(TaskFactory taskFactory);
 
       /// <summary>
       /// Sets a Action instance that will be notified when data from the engine is ready to

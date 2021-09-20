@@ -143,10 +143,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return engine.Tick(current);
       }
 
-      public IConnection TickAuto(in TaskScheduler scheduler)
+      public IConnection TickAuto(in TaskFactory taskFactory)
       {
          CheckConnectionClosed("Cannot call tickAuto on an already closed Connection");
-         engine.TickAuto(scheduler);
+         engine.TickAuto(taskFactory);
          return this;
       }
 

@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       // Idle Timeout Check data
       private Task nextIdleTimeoutCheck;
-      private TaskScheduler idleTimeoutExecutor;
+      private TaskFactory idleTimeoutExecutor;
       private long lastInputSequence;
       private long lastOutputSequence;
       private long localIdleDeadline = 0;
@@ -193,11 +193,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return NextTickDeadline(localIdleDeadline, remoteIdleDeadline);
       }
 
-      public IEngine TickAuto(TaskScheduler scheduler)
+      public IEngine TickAuto(TaskFactory taskFactory)
       {
          CheckShutdownOrFailed("Cannot start auto tick on an Engine that has been shutdown or failed");
 
-         if (scheduler == null)
+         if (taskFactory == null)
          {
             throw new ArgumentNullException("The provided Task Scheduler cannot be null");
          }
@@ -219,7 +219,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // Immediate run of the idle timeout check logic will decide afterwards when / if we should
          // reschedule the idle timeout processing.
          // TODO : LOG.trace("Auto Idle Timeout Check being initiated");
-         idleTimeoutExecutor = scheduler;
+         idleTimeoutExecutor = taskFactory;
          // TODO : idleTimeoutExecutor.TryExecuteTask(new IdleTimeoutCheck());
 
          return this;

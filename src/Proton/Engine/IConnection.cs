@@ -92,10 +92,10 @@ namespace Apache.Qpid.Proton.Engine
       /// <summary>
       /// Convenience method which is the same as calling Engine auto tick idle checking API.
       /// </summary>
-      /// <param name="scheduler">The single threaded scheduler where are engine work is queued</param>
+      /// <param name="taskFactory">The single threaded task factory where are engine work is queued</param>
       /// <returns>This connection instance</returns>
       /// <exception cref="EngineStateException">If the engine has failed or was shutdown</exception>
-      IConnection TickAuto(in TaskScheduler scheduler);
+      IConnection TickAuto(in TaskFactory taskFactory);
 
       /// <summary>
       /// Provides access to the current connection operating state.

@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Engine.Sasl;
@@ -321,6 +322,144 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          catch (EngineShutdownException)
          {
          }
+      }
+
+      [Test]
+      public void TestAutoTickFailsWhenConnectionNotOpenedNoLocalIdleSet()
+      {
+         DoTestAutoTickFailsBasedOnState(false, false, false, false);
+      }
+
+      [Test]
+      public void TestAutoTickFailsWhenConnectionNotOpenedLocalIdleSet()
+      {
+         DoTestAutoTickFailsBasedOnState(true, false, false, false);
+      }
+
+      [Test]
+      public void TestAutoTickFailsWhenEngineShutdownNoLocalIdleSet()
+      {
+         DoTestAutoTickFailsBasedOnState(false, true, true, true);
+      }
+
+      [Test]
+      public void TestAutoTickFailsWhenEngineShutdownLocalIdleSet()
+      {
+         DoTestAutoTickFailsBasedOnState(true, true, true, true);
+      }
+
+      private void DoTestAutoTickFailsBasedOnState(bool setLocalTimeout, bool open, bool close, bool shutdown)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         if (setLocalTimeout)
+         {
+            connection.IdleTimeout = 1000;
+         }
+
+         if (open)
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().Respond();
+            connection.Open();
+         }
+
+         if (close)
+         {
+            peer.ExpectClose().Respond();
+            connection.Close();
+         }
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+
+         if (shutdown)
+         {
+            engine.Shutdown();
+         }
+
+         try
+         {
+            engine.TickAuto(Task.Factory);
+            Assert.Fail("Should not be able to tick an unopened connection");
+         }
+         catch (InvalidOperationException)
+         {
+         }
+         catch (EngineShutdownException)
+         {
+         }
+      }
+
+      [Test]
+      public void TestTickAutoPreventsDoubleInvocation()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().Respond();
+
+         connection.Open();
+
+         engine.TickAuto(Task.Factory);
+
+         try
+         {
+            engine.TickAuto(Task.Factory);
+            Assert.Fail("Should not be able call tickAuto more than once.");
+         }
+         catch (InvalidOperationException)
+         {
+         }
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotCallTickAfterTickAutoCalled()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().Respond();
+
+         connection.Open();
+
+         engine.TickAuto(Task.Factory);
+
+         try
+         {
+            engine.Tick(5000);
+            Assert.Fail("Should not be able call tick after enabling the auto tick feature.");
+         }
+         catch (InvalidOperationException)
+         {
+         }
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
       }
    }
 }
