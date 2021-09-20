@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
@@ -46,7 +45,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public override PerformativeType Type => PerformativeType.Close;
 
-      public override object Descriptor => throw new NotImplementedException();
+      public override object Descriptor => DESCRIPTOR_SYMBOL;
 
       public ErrorCondition Error
       {

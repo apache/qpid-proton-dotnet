@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Engine.Sasl;
@@ -236,6 +237,90 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.AreEqual(ConnectionState.Active, connection.RemoteConnectionState);
 
          Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestTickFailsWhenConnectionNotOpenedNoLocalIdleSet()
+      {
+         DoTestTickFailsBasedOnState(false, false, false, false);
+      }
+
+      [Test]
+      public void TestTickFailsWhenConnectionNotOpenedLocalIdleSet()
+      {
+         DoTestTickFailsBasedOnState(true, false, false, false);
+      }
+
+      [Test]
+      public void TestTickFailsWhenEngineIsShutdownNoLocalIdleSet()
+      {
+         DoTestTickFailsBasedOnState(false, true, true, true);
+      }
+
+      [Test]
+      public void TestTickFailsWhenEngineIsShutdownLocalIdleSet()
+      {
+         DoTestTickFailsBasedOnState(true, true, true, true);
+      }
+
+      [Test]
+      public void TestTickFailsWhenEngineIsShutdownButCloseNotCalledNoLocalIdleSet()
+      {
+         DoTestTickFailsBasedOnState(false, true, false, true);
+      }
+
+      [Test]
+      public void TestTickFailsWhenEngineIsShutdownButCloseNotCalledLocalIdleSet()
+      {
+         DoTestTickFailsBasedOnState(true, true, false, true);
+      }
+
+      private void DoTestTickFailsBasedOnState(bool setLocalTimeout, bool open, bool close, bool shutdown)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         if (setLocalTimeout)
+         {
+            connection.IdleTimeout = 1000;
+         }
+
+         if (open)
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().Respond();
+            connection.Open();
+         }
+
+         if (close)
+         {
+            peer.ExpectClose().Respond();
+            connection.Close();
+         }
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+
+         if (shutdown)
+         {
+            engine.Shutdown();
+         }
+
+         try
+         {
+            engine.Tick(5000);
+            Assert.Fail("Should not be able to tick an unopened connection");
+         }
+         catch (InvalidOperationException)
+         {
+         }
+         catch (EngineShutdownException)
+         {
+         }
       }
    }
 }
