@@ -18,6 +18,7 @@
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Engine.Sasl;
+using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Types.Security;
 using Apache.Qpid.Proton.Types.Transport;
 using NUnit.Framework;
@@ -174,6 +175,67 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.IsNotNull(connection);
          Assert.IsNotNull(failure);
          Assert.IsTrue(failure is SaslException);
+      }
+
+      [Test]
+      public void TestEngineStartAfterConnectionOpen()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         // Engine cannot accept input bytes until started.
+         Assert.IsFalse(engine.IsWritable);
+
+         IConnection connection = engine.Connection;
+         Assert.IsNotNull(connection);
+
+         Assert.IsFalse(engine.IsShutdown);
+         Assert.IsFalse(engine.IsFailed);
+         Assert.IsNull(engine.FailureCause);
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen();
+
+         // Should be idempotent and return same Connection
+         IConnection another = engine.Start();
+         Assert.AreSame(connection, another);
+
+         // Default engine should start and return a connection immediately
+         Assert.IsTrue(engine.IsWritable);
+         Assert.IsNotNull(connection);
+         Assert.IsNull(failure);
+
+         peer.WaitForScriptToComplete();
+      }
+
+      [Test]
+      public void TestEngineEmitsAMQPHeaderOnConnectionOpen()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+
+         connection.ContainerId = "test";
+         connection.Open();
+
+         Assert.IsFalse(engine.IsFailed);
+
+         peer.WaitForScriptToComplete();
+
+         Assert.AreEqual(ConnectionState.Active, connection.ConnectionState);
+         Assert.AreEqual(ConnectionState.Active, connection.RemoteConnectionState);
+
+         Assert.IsNull(failure);
       }
    }
 }

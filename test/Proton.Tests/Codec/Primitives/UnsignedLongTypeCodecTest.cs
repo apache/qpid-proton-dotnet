@@ -586,7 +586,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          {
             IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
             Assert.AreEqual(typeof(ulong), typeDecoder.DecodesType);
-            Assert.IsFalse(stream.Length > 0);
+            Assert.IsFalse(stream.Length - stream.Position > 0);
             Assert.AreEqual(0ul, typeDecoder.ReadValue(stream, streamDecoderState));
          }
          else

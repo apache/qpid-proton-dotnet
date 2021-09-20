@@ -229,7 +229,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      public uint RemoteMaxFrameSize => remoteOpen?.MaxFrameSize ?? 0;
+      public uint RemoteMaxFrameSize => remoteOpen?.MaxFrameSize ?? ProtonConstants.MinMaxAmqpFrameSize;
 
       public uint IdleTimeout
       {

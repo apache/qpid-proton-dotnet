@@ -170,11 +170,11 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.Throws<ArgumentOutOfRangeException>(() => stream.Seek(Int32.MaxValue, SeekOrigin.Begin));
          Assert.AreEqual(payload.Length, stream.Length);
          Assert.AreEqual(payload.Length, stream.Seek(payload.Length, SeekOrigin.Begin));
-         Assert.AreEqual(0, stream.Length);
+         Assert.AreEqual(6, stream.Length);
          Assert.AreEqual(0, stream.Seek(0, SeekOrigin.Begin));
          Assert.AreEqual(payload.Length, stream.Length);
          Assert.AreEqual(payload.Length - 3, stream.Seek(3, SeekOrigin.Current));
-         Assert.AreEqual(payload.Length - 3, stream.Length);
+         Assert.AreEqual(6, stream.Length);
          Assert.AreEqual(0, stream.Seek(-3, SeekOrigin.Current));
          Assert.AreEqual(payload.Length, stream.Length);
 
@@ -213,7 +213,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.Throws<ArgumentOutOfRangeException>(() => stream.Seek(Int64.MaxValue, SeekOrigin.Begin));
          Assert.AreEqual(payload.LongLength, stream.Length);
          Assert.AreEqual(payload.LongLength, stream.Seek(payload.LongLength, SeekOrigin.Begin));
-         Assert.AreEqual(0, stream.Length);
+         Assert.AreEqual(6, stream.Length);
          stream.Close();
       }
    }

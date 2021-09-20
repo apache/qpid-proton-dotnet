@@ -47,12 +47,12 @@ namespace Apache.Qpid.Proton.Buffer
 
       public override bool CanWrite => buffer.IsWritable;
 
-      public override long Length => buffer.WritableBytes;
+      public override long Length => buffer.ReadableBytes;
 
       public override long Position
       {
          get => buffer.WriteOffset;
-         set => throw new NotImplementedException();
+         set => throw new NotSupportedException();
       }
 
       public long BytesWritten => buffer.WriteOffset - initialWriteIndex;

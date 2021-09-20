@@ -17,8 +17,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
+using Apache.Qpid.Proton.Test.Driver;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
@@ -28,6 +30,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       protected IList<IProtonBuffer> engineWrites = new List<IProtonBuffer>();
 
       protected Exception failure;
+      protected string name;
 
       protected readonly IDecoder decoder = CodecFactory.DefaultDecoder;
       protected IDecoderState decoderState;
@@ -46,6 +49,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public void SetUp()
       {
          failure = null;
+         name = TestContext.CurrentContext.Test.Name;
          decoderState.Reset();
          encoderState.Reset();
       }
@@ -54,6 +58,30 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public void TearDown()
       {
 
+      }
+
+      protected ProtonTestConnector CreateTestPeer(IEngine engine)
+      {
+         ProtonTestConnector peer = new ProtonTestConnector(stream =>
+         {
+            if (stream is MemoryStream mem)
+            {
+               engine.Ingest(ProtonByteBufferAllocator.Instance.Wrap(mem.ToArray()));
+            }
+            else
+            {
+               byte[] bytes = new byte[stream.Length - stream.Position];
+               stream.Read(bytes, 0, bytes.Length);
+               engine.Ingest(ProtonByteBufferAllocator.Instance.Wrap(bytes));
+            }
+         });
+
+         engine.OutputHandler(buffer =>
+         {
+            peer.Ingest(new ProtonBufferInputStream(buffer));
+         });
+
+         return peer;
       }
    }
 }

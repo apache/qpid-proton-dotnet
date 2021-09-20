@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             else if (stream.Length < length)
             {
                throw new DecodeException(string.Format(
-                   "Failed to read requested number of bytes %d: instead only %d bytes are ready.", length, stream.Length));
+                  "Failed to read requested number of bytes {0}: instead only {1} bytes are ready.", length, stream.Length));
             }
             else
             {
@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                if (stream.Read(payload) < length)
                {
                   throw new DecodeException(string.Format(
-                      "Failed to read requested number of bytes %d: instead only %d bytes were read.", length, payload.Length));
+                     "Failed to read requested number of bytes {0}: instead only {1} bytes were read.", length, payload.Length));
                }
 
                return payload;

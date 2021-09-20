@@ -72,12 +72,13 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          stream.Seek(0, SeekOrigin.Begin);
 
-         BinaryWriter writer = new BinaryWriter(stream);
+         // Write the frame header and then reset to start for output.
+         stream.WriteUnsignedInt((uint)stream.Length);
+         stream.WriteByte((byte)FRAME_DOFF_SIZE);
+         stream.WriteByte((byte)frameType);
+         stream.WriteUnsignedShort(channel);
 
-         writer.Write((int)(endIndex - startIndex));
-         writer.Write((byte)FRAME_DOFF_SIZE);
-         writer.Write((byte)frameType);
-         writer.Write(channel);
+         stream.Seek(0, SeekOrigin.Begin);
       }
 
       private uint WritePerformative(Stream stream, IDescribedType performative, Span<byte> payload, uint maxFrameSize, Action onPayloadTooLarge)
@@ -100,7 +101,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
          }
 
-         long performativeSize = stream.Position - startIndex;
+         long performativeSize = stream.Length - startIndex;
 
          if (performativeSize != encodedSize)
          {

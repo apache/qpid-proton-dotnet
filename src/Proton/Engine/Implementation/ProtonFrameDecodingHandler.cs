@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Threading;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Engine.Exceptions;

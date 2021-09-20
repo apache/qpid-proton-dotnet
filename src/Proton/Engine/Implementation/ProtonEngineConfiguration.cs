@@ -73,6 +73,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             uint localMaxFrameSize = engine.Connection.MaxFrameSize;
             uint remoteMaxFrameSize = engine.Connection.RemoteMaxFrameSize;
 
+            // Safety check ensure no implementation try to sneak by a lower bound than
+            // the specification defined min-max AMQP Frame size;
+            localMaxFrameSize = Math.Max(localMaxFrameSize, ProtonConstants.MinMaxAmqpFrameSize);
+            remoteMaxFrameSize = Math.Max(remoteMaxFrameSize, ProtonConstants.MinMaxAmqpFrameSize);
+
             // We limit outbound max frame size to our own set max frame size unless the remote has actually
             // requested something smaller as opposed to just using a default like 2GB or something similarly
             // large which we could never support in practice.
