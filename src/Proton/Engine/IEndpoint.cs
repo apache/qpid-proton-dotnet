@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Engine
       /// If the remote has closed this endpoint and provided an ErrorCondition
       /// as part of the closing AMQP performative then this method will return it.
       /// </summary>
-      ErrorCondition RemoteCondition { get; }
+      ErrorCondition RemoteErrorCondition { get; }
 
       /// <summary>
       /// Returns true if the endpoint open was previously called and the close

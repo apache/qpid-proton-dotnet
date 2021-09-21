@@ -389,7 +389,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public void HandleClose(Close close, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
          remoteState = ConnectionState.Closed;
-         RemoteCondition = close.Error?.Copy();
+         RemoteErrorCondition = close.Error?.Copy();
 
          foreach (ProtonSession session in AllSessions())
          {

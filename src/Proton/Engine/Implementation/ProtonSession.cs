@@ -338,7 +338,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             link.HandleSessionRemotelyClosed(this);
          }
 
-         RemoteCondition = end.Error;
+         RemoteErrorCondition = end.Error;
          remoteState = SessionState.Closed;
 
          FireRemoteClose();

@@ -644,7 +644,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       IProtonLink IProtonLink.RemoteDetach(in Detach detach)
       {
          // TODO LOG.trace("Link:{} Received remote Detach:{}", self(), detach);
-         RemoteCondition = detach.Error;
+         RemoteErrorCondition = detach.Error;
          if (IsSender)
          {
             CreditState.ClearCredit();

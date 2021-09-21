@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          set => localError = value;
       }
 
-      public ErrorCondition RemoteCondition
+      public ErrorCondition RemoteErrorCondition
       {
          get => remoteError;
          internal set => remoteError = value;
