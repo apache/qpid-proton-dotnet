@@ -17,14 +17,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Apache.Qpid.Proton.Buffer;
+using System.IO;
+using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Engine.Exceptions;
-using Apache.Qpid.Proton.Engine.Sasl;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
 using Apache.Qpid.Proton.Types;
-using Apache.Qpid.Proton.Types.Security;
 using Apache.Qpid.Proton.Types.Transport;
 using NUnit.Framework;
 using Is = Apache.Qpid.Proton.Test.Driver.Matchers.Is;
@@ -312,7 +310,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          IConnection connection = engine.Start();
 
-         // Default engine should start and return a connection immediately
+         // Default engine should Start and return a connection immediately
          Assert.IsNotNull(connection);
 
          connection.Open();
@@ -344,7 +342,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          IConnection connection = engine.Start();
 
-         // Default engine should start and return a connection immediately
+         // Default engine should Start and return a connection immediately
          Assert.IsNotNull(connection);
 
          connection.OpenHandler((result) => RemoteOpened = true);
@@ -367,7 +365,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          IConnection connection = engine.Start();
 
-         // Default engine should start and return a connection immediately
+         // Default engine should Start and return a connection immediately
          Assert.IsNotNull(connection);
 
          connection.OpenHandler((result) => RemoteOpened = true);
@@ -401,7 +399,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          IConnection connection = engine.Start();
 
-         // Default engine should start and return a connection immediately
+         // Default engine should Start and return a connection immediately
          Assert.IsNotNull(connection);
 
          connection.OpenHandler((result) => connectionOpenedSignaled = true);
@@ -782,6 +780,1240 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.WaitForScriptToComplete();
 
          Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestChannelMaxDefaultsToMax()
+      {
+         bool remotelyOpened = false;
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithChannelMax(Is.NullValue()).Respond();
+         peer.ExpectClose().Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.OpenHandler((result) => remotelyOpened = true);
+         connection.Open();
+
+         Assert.IsTrue(remotelyOpened, "Connection remote opened event did not fire");
+
+         Assert.AreEqual(65535, connection.ChannelMax);
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCloseConnectionAfterShutdownDoesNotThrowExceptionOpenWrittenAndResponse()
+      {
+         TestCloseConnectionAfterShutdownNoOutputAndNoException(true, true);
+      }
+
+      [Test]
+      public void TestCloseConnectionAfterShutdownDoesNotThrowExceptionOpenWrittenButNoResponse()
+      {
+         TestCloseConnectionAfterShutdownNoOutputAndNoException(true, false);
+      }
+
+      [Test]
+      public void TestCloseConnectionAfterShutdownDoesNotThrowExceptionOpenNotWritten()
+      {
+         TestCloseConnectionAfterShutdownNoOutputAndNoException(false, false);
+      }
+
+      private void TestCloseConnectionAfterShutdownNoOutputAndNoException(bool respondToHeader, bool respondToOpen)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         if (respondToHeader)
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            if (respondToOpen)
+            {
+               peer.ExpectOpen().Respond();
+            }
+            else
+            {
+               peer.ExpectOpen();
+            }
+         }
+         else
+         {
+            peer.ExpectAMQPHeader();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+
+         engine.Shutdown();
+
+         // Should clean up and not throw as we knowingly shutdown engine operations.
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test hangs waiting for script to complete")]
+      public void TestCloseConnectionAfterFailureThrowsEngineStateExceptionOpenWrittenAndResponse()
+      {
+         TestCloseConnectionAfterEngineFailedThrowsAndNoOutputWritten(true, true);
+      }
+
+      [Test]
+      [Ignore("Test hangs waiting for script to complete")]
+      public void TestCloseConnectionAfterFailureThrowsEngineStateExceptionOpenWrittenButNoResponse()
+      {
+         TestCloseConnectionAfterEngineFailedThrowsAndNoOutputWritten(true, false);
+      }
+
+      [Test]
+      public void TestCloseConnectionAfterFailureThrowsEngineStateExceptionOpenNotWritten()
+      {
+         TestCloseConnectionAfterEngineFailedThrowsAndNoOutputWritten(false, false);
+      }
+
+      private void TestCloseConnectionAfterEngineFailedThrowsAndNoOutputWritten(bool respondToHeader, bool respondToOpen)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         if (respondToHeader)
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            if (respondToOpen)
+            {
+               peer.ExpectOpen().Respond();
+               peer.ExpectClose();
+            }
+            else
+            {
+               peer.ExpectOpen();
+               peer.ExpectClose();
+            }
+         }
+         else
+         {
+            peer.ExpectAMQPHeader();
+         }
+
+         IConnection connection = engine.Start().Open();
+
+         engine.EngineFailed(new IOException());
+
+         try
+         {
+            connection.Close();
+            Assert.Fail("Should throw exception indicating engine is in a failed state.");
+         }
+         catch (EngineFailedException)
+         {
+         }
+
+         engine.Shutdown();  // Explicit shutdown now allows local close to complete
+
+         // Should clean up and not throw as we knowingly shutdown engine operations.
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      public void TestOpenAndCloseWhileWaitingForHeaderResponseDoesNotWriteUntilHeaderArrives()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader();
+
+         IConnection connection = engine.Start();
+         connection.Open();  // Trigger write of AMQP Header, we don't respond here.
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         // Now respond and Connection should open and close
+         peer.ExpectOpen();
+         peer.ExpectClose();
+         peer.RemoteHeader(AmqpHeader.GetAMQPHeader().ToArray()).Now();
+
+         peer.WaitForScriptToComplete();
+
+         engine.Shutdown();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Proton can't write type ErrorCondition for some reason")]
+      public void TestOpenWhileWaitingForHeaderResponseDoesNotWriteThenWritesFlowAsExpected()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader();
+
+         IConnection connection = engine.Start();
+         connection.Open();  // Trigger write of AMQP Header, we don't respond here.
+
+         peer.WaitForScriptToComplete();
+
+         // Now respond and Connection should open and close
+         peer.ExpectOpen();
+         peer.ExpectClose().WithError(Is.NotNullValue());
+         peer.RemoteHeader(AmqpHeader.GetAMQPHeader().ToArray()).Now();
+
+         connection.ErrorCondition = new ErrorCondition(ConnectionError.CONNECTION_FORCED, "something about errors");
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         engine.Shutdown();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Proton can't write type ErrorCondition for some reason")]
+      public void TestCloseOrDetachWithErrorCondition()
+      {
+         string condition = "amqp:connection:forced";
+         string description = "something bad happened.";
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().WithError(condition, description).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         connection.ErrorCondition = new ErrorCondition(Symbol.Lookup(condition), description);
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotCreateSessionFromLocallyClosedConnection()
+      {
+         TestCannotCreateSessionFromClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotCreateSessionFromRemotelyClosedConnection()
+      {
+         TestCannotCreateSessionFromClosedConnection(false);
+      }
+
+      private void TestCannotCreateSessionFromClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.Session();
+            Assert.Fail("Should not create new Session from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetContainerIdOnOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start();
+         connection.Open();
+
+         try
+         {
+            connection.ContainerId = "test";
+            Assert.Fail("Should not be able to set container ID from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetContainerIdOnLocallyClosedConnection()
+      {
+         TestCannotSetContainerIdOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetContainerIdOnRemotelyClosedConnection()
+      {
+         TestCannotSetContainerIdOnClosedConnection(false);
+      }
+
+      private void TestCannotSetContainerIdOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.ContainerId = "test";
+            Assert.Fail("Should not be able to set container ID from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetHostnameOnOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start();
+         connection.Open();
+
+         try
+         {
+            connection.Hostname = "test";
+            Assert.Fail("Should not be able to set host name from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetHostnameOnLocallyClosedConnection()
+      {
+         TestCannotSetHostnameOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetHostnameOnRemotelyClosedConnection()
+      {
+         TestCannotSetHostnameOnClosedConnection(false);
+      }
+
+      private void TestCannotSetHostnameOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.Hostname = "test";
+            Assert.Fail("Should not be able to set host name from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetChannelMaxOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start();
+         connection.Open();
+
+         try
+         {
+            connection.ChannelMax = 0;
+            Assert.Fail("Should not be able to set channel max from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetChannelMaxOnLocallyClosedConnection()
+      {
+         TestCannotSetChannelMaxOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetChannelMaxOnRemotelyClosedConnection()
+      {
+         TestCannotSetChannelMaxOnClosedConnection(false);
+      }
+
+      private void TestCannotSetChannelMaxOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.ChannelMax = 0;
+            Assert.Fail("Should not be able to set channel max from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetMaxFrameSizeOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start();
+         connection.Open();
+
+         try
+         {
+            connection.MaxFrameSize = 65535u;
+            Assert.Fail("Should not be able to set max frame size from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetMaxFrameSizeOnLocallyClosedConnection()
+      {
+         TestCannotSetMaxFrameSizeOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetMaxFrameSizeOnRemotelyClosedConnection()
+      {
+         TestCannotSetMaxFrameSizeOnClosedConnection(false);
+      }
+
+      private void TestCannotSetMaxFrameSizeOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.MaxFrameSize = 65535u;
+            Assert.Fail("Should not be able to set max frame size from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetIdleTimeoutOnOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+
+         Assert.AreEqual(0, connection.IdleTimeout);
+
+         try
+         {
+            connection.IdleTimeout = 65535;
+            Assert.Fail("Should not be able to set idle timeout from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         Assert.AreEqual(0, connection.IdleTimeout);
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetIdleTimeoutOnLocallyClosedConnection()
+      {
+         TestCannotSetIdleTimeoutOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetIdleTimeoutOnRemotelyClosedConnection()
+      {
+         TestCannotSetIdleTimeoutOnClosedConnection(false);
+      }
+
+      private void TestCannotSetIdleTimeoutOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start();
+         connection.Open();
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.IdleTimeout = 65535;
+            Assert.Fail("Should not be able to set idle timeout from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetOfferedCapabilitiesOnOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start().Open();
+
+         try
+         {
+            connection.OfferedCapabilities = new Symbol[] { Symbol.Lookup("ANONYMOUS_RELAY") };
+            Assert.Fail("Should not be able to set offered capabilities from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetOfferedCapabilitiesOnLocallyClosedConnection()
+      {
+         TestCannotSetOfferedCapabilitiesOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetOfferedCapabilitiesOnRemotelyClosedConnection()
+      {
+         TestCannotSetOfferedCapabilitiesOnClosedConnection(false);
+      }
+
+      private void TestCannotSetOfferedCapabilitiesOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start().Open();
+
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.OfferedCapabilities = new Symbol[] { Symbol.Lookup("ANONYMOUS_RELAY") };
+            Assert.Fail("Should not be able to set offered capabilities from closed Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetDesiredCapabilitiesOnOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start().Open();
+
+         try
+         {
+            connection.DesiredCapabilities = new Symbol[] { Symbol.Lookup("ANONYMOUS_RELAY") };
+            Assert.Fail("Should not be able to set desired capabilities from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetDesiredCapabilitiesOnLocallyClosedConnection()
+      {
+         TestCannotSetDesiredCapabilitiesOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetDesiredCapabilitiesOnRemotelyClosedConnection()
+      {
+         TestCannotSetDesiredCapabilitiesOnClosedConnection(false);
+      }
+
+      private void TestCannotSetDesiredCapabilitiesOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start().Open();
+
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.DesiredCapabilities = new Symbol[] { Symbol.Lookup("ANONYMOUS_RELAY") };
+            Assert.Fail("Should not be able to set desired capabilities from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetPropertiesOnOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         IConnection connection = engine.Start().Open();
+
+         try
+         {
+            connection.Properties = new Dictionary<Symbol, object>();
+            Assert.Fail("Should not be able to set properties from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestCannotSetPropertiesOnLocallyClosedConnection()
+      {
+         TestCannotSetPropertiesOnClosedConnection(true);
+      }
+
+      [Test]
+      public void TestCannotSetPropertiesOnRemotelyClosedConnection()
+      {
+         TestCannotSetPropertiesOnClosedConnection(false);
+      }
+
+      private void TestCannotSetPropertiesOnClosedConnection(bool localClose)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         if (localClose)
+         {
+            peer.ExpectClose().Respond();
+         }
+         else
+         {
+            peer.RemoteClose().Queue();
+         }
+
+         IConnection connection = engine.Start().Open();
+
+         if (localClose)
+         {
+            connection.Close();
+         }
+
+         try
+         {
+            connection.Properties = new Dictionary<Symbol, object>();
+            Assert.Fail("Should not be able to set properties from open Connection");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with NPE error from driver")]
+      public void TestIterateAndCloseSessionsFromSessionsAPI()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin().Respond();
+         peer.ExpectBegin().Respond();
+         peer.ExpectBegin().Respond();
+
+         IConnection connection = engine.Start().Open();
+
+         connection.Session().Open();
+         connection.Session().Open();
+         connection.Session().Open();
+
+         peer.WaitForScriptToComplete();
+
+         peer.ExpectEnd().Respond();
+         peer.ExpectEnd().Respond();
+         peer.ExpectEnd().Respond();
+         peer.ExpectClose();
+
+         foreach (ISession session in connection.Sessions)
+         {
+            session.Close();
+         }
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.AreEqual(0, connection.Sessions.Count);
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with cast error from driver")]
+      public void TestConnectionClosedWhenChannelMaxExceeded()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         bool closed = false;
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithChannelMax(16).Respond();
+         peer.ExpectClose().WithError(ConnectionError.FRAMING_ERROR.ToString(), "Channel Max Exceeded for session Begin").Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.ChannelMax = 16;
+         connection.LocalCloseHandler((conn) => closed = true);
+         connection.Open();
+
+         peer.RemoteBegin().OnChannel(32).Now();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.AreEqual(0, connection.Sessions.Count);
+         Assert.IsTrue(closed);
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with NPE error from driver")]
+      public void TestConnectionThrowsWhenLocalChannelMaxExceeded()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithChannelMax(1).Respond();
+         peer.ExpectBegin().OnChannel(0).Respond().OnChannel(1);
+         peer.ExpectBegin().OnChannel(1).Respond().OnChannel(0);
+         peer.ExpectEnd().OnChannel(1).Respond().OnChannel(0);
+
+         IConnection connection = engine.Start();
+
+         connection.ChannelMax = 1;
+         connection.Open();
+
+         ISession session1 = connection.Session().Open();
+         ISession session2 = connection.Session().Open();
+
+         try
+         {
+            connection.Session().Open();
+            Assert.Fail("Should not be able to exceed local channel max");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         session2.Close();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectBegin().OnChannel(1).Respond().OnChannel(0);
+         peer.ExpectEnd().OnChannel(0).Respond().OnChannel(1);
+         peer.ExpectEnd().OnChannel(1).Respond().OnChannel(0);
+         peer.ExpectClose().Respond();
+
+         session2 = connection.Session().Open();
+         session1.Close();
+         session2.Close();
+
+         connection.Close();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestNoOpenWrittenAfterEncodeErrorFromConnectionProperties()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+
+         Dictionary<Symbol, object> properties = new Dictionary<Symbol, object>();
+         properties.Add(Symbol.Lookup("test"), engine);
+
+         IConnection connection = engine.Start();
+         connection.Properties = properties;
+
+         // Ensures that open is synchronous as header exchange will be complete.
+         connection.Negotiate();
+
+         try
+         {
+            connection.Open();
+            Assert.Fail("Should not have been able to open with invalid type in properties");
+         }
+         catch (FrameEncodingException fee)
+         {
+            Assert.IsTrue(fee.InnerException is EncodeException);
+            engine.Shutdown();
+         }
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with NPE error from driver")]
+      public void TestPipelinedResourceOpenAllowsForReturningResponsesAfterCloseOfConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin();
+         peer.ExpectEnd();
+
+         IConnection connection = engine.Start().Open();
+         ISession session = connection.Session().Open();
+
+         session.Close();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectClose();
+         peer.RemoteBegin().WithRemoteChannel(0)
+                           .WithNextOutgoingId(0).Queue();
+         peer.RemoteClose().Queue();
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with timeout error from driver")]
+      public void TestSecondOpenAfterReceiptOfFirstFailsEngine()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection;
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().WithError(Is.NotNullValue());
+
+         engine.Start();
+
+         peer.RemoteOpen().OnChannel(0).Now();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with timeout error from driver")]
+      public void TestUnexpectedEndFrameFailsEngine()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection;
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().WithError(Is.NotNullValue());
+
+         engine.Start();
+
+         peer.RemoteEnd().OnChannel(10).Now();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with KeyNotFound error from driver")]
+      public void TestUnexpectedAttachForUnknownChannelFrameFailsEngine()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection;
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().WithError(Is.NotNullValue());
+
+         engine.Start();
+
+         peer.RemoteAttach().OfSender().WithName("test").WithHandle(0).OnChannel(10).Now();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with KeyNotFound error from driver")]
+      public void TestUnexpectedDetachForUnknownChannelFrameFailsEngine()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection;
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectClose().WithError(Is.NotNullValue());
+
+         engine.Start();
+
+         peer.RemoteDetach().WithHandle(0).OnChannel(10).Now();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with invalid cast error from driver")]
+      public void TestSecondBeginForAlreadyBegunSessionTriggerEngineFailure()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection;
+         connection.Session().Open();
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin().OnChannel(0).Respond().OnChannel(0);
+         peer.ExpectClose().WithError(Is.NotNullValue());
+
+         engine.Start();
+
+         peer.RemoteBegin().OnChannel(0).Now();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNotNull(failure);
       }
    }
 }
