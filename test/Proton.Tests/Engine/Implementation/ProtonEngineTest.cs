@@ -315,7 +315,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          try
          {
             engine.Tick(5000);
-            Assert.Fail("Should not be able to tick an unopened connection");
+            Assert.Fail("Should not be able to Tick an unopened connection");
          }
          catch (InvalidOperationException)
          {
@@ -387,7 +387,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          try
          {
             engine.TickAuto(Task.Factory);
-            Assert.Fail("Should not be able to tick an unopened connection");
+            Assert.Fail("Should not be able to Tick an unopened connection");
          }
          catch (InvalidOperationException)
          {
@@ -451,7 +451,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          try
          {
             engine.Tick(5000);
-            Assert.Fail("Should not be able call tick after enabling the auto tick feature.");
+            Assert.Fail("Should not be able call Tick after enabling the auto Tick feature.");
          }
          catch (InvalidOperationException)
          {
@@ -486,32 +486,700 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.AreEqual(2000, deadline, "Expected to be returned a deadline of 2000");  // deadline = 4000 / 2
 
          deadline = engine.Tick(1000);    // Wait for less than the deadline with no data - get the same value
-         Assert.AreEqual(2000, deadline, "When the deadline hasn't been reached tick() should return the previous deadline");
-         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached tick() shouldn't write data");
+         Assert.AreEqual(2000, deadline, "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached Tick() shouldn't write data");
 
          peer.ExpectEmptyFrame();
 
          deadline = engine.Tick(remoteTimeout / 2); // Wait for the deadline - next deadline should be (4000/2)*2
          Assert.AreEqual(4000, deadline, "When the deadline has been reached expected a new deadline to be returned 4000");
-         Assert.AreEqual(1, peer.EmptyFrameCount, "tick() should have written data");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data");
 
          peer.ExpectBegin();
          ISession session = connection.Session().Open();
 
          deadline = engine.Tick(3000);
          Assert.AreEqual(5000, deadline, "Writing data resets the deadline");
-         Assert.AreEqual(1, peer.EmptyFrameCount, "When the deadline is reset tick() shouldn't write an empty frame");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "When the deadline is reset Tick() shouldn't write an empty frame");
 
          peer.ExpectAttach();
          session.Sender("test").Open();
 
          deadline = engine.Tick(4000);
          Assert.AreEqual(6000, deadline, "Writing data resets the deadline");
-         Assert.AreEqual(1, peer.EmptyFrameCount, "When the deadline is reset tick() shouldn't write an empty frame");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "When the deadline is reset Tick() shouldn't write an empty frame");
 
          peer.WaitForScriptToComplete();
          Assert.IsNull(failure);
       }
 
+      [Test]
+      [Ignore("Issue in test peer around begin handling needs to be fixed")]
+      public void TestTickLocalTimeout()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         uint localTimeout = 4000;
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithIdleTimeOut(localTimeout).Respond();
+
+         // Set our local idleTimeout
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         long deadline = engine.Tick(0);
+         Assert.AreEqual(4000, deadline, "Expected to be returned a deadline of 4000");
+
+         deadline = engine.Tick(1000);    // Wait for less than the deadline with no data - get the same value
+         Assert.AreEqual(4000, deadline, "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "Reading data should never result in a frame being written");
+
+         // remote sends an empty frame now
+         peer.RemoteEmptyFrame().Now();
+
+         deadline = engine.Tick(2000);
+         Assert.AreEqual(6000, deadline, "Reading data resets the deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "Reading data should never result in a frame being written");
+         Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Reading data before the deadline should keep the connection open");
+
+         peer.ExpectClose().Respond();
+
+         deadline = engine.Tick(7000);
+         Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      public void TestTickWithZeroIdleTimeoutsGivesZeroDeadline()
+      {
+         DoTickWithNoIdleTimeoutGivesZeroDeadlineTestImpl(true);
+      }
+
+      [Test]
+      public void TestTickWithNullIdleTimeoutsGivesZeroDeadline()
+      {
+         DoTickWithNoIdleTimeoutGivesZeroDeadlineTestImpl(false);
+      }
+
+      private void DoTickWithNoIdleTimeoutGivesZeroDeadlineTestImpl(bool useZero)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         if (useZero)
+         {
+            peer.ExpectOpen().WithIdleTimeOut(Is.NullValue()).Respond().WithIdleTimeOut(0);
+         }
+         else
+         {
+            peer.ExpectOpen().WithIdleTimeOut(Is.NullValue()).Respond();
+         }
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+
+         Assert.AreEqual(0, connection.RemoteIdleTimeout);
+
+         long deadline = engine.Tick(0);
+         Assert.AreEqual(0, deadline, "Unexpected deadline returned");
+
+         deadline = engine.Tick(10);
+         Assert.AreEqual(0, deadline, "Unexpected deadline returned");
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestTickWithLocalTimeout()
+      {
+         // all-positive
+         DoTickWithLocalTimeoutTestImpl(4000, 10000, 14000, 18000, 22000);
+
+         // all-negative
+         DoTickWithLocalTimeoutTestImpl(2000, -100000, -98000, -96000, -94000);
+
+         // negative to positive missing 0
+         DoTickWithLocalTimeoutTestImpl(500, -950, -450, 50, 550);
+
+         // negative to positive striking 0
+         DoTickWithLocalTimeoutTestImpl(3000, -6000, -3000, 1, 3001);
+      }
+
+      private void DoTickWithLocalTimeoutTestImpl(uint localTimeout, long tick1, long expectedDeadline1, long expectedDeadline2, long expectedDeadline3)
+      {
+         this.failure = null;
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithIdleTimeOut(localTimeout).Respond();
+
+         // Set our local idleTimeout
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+
+         long deadline = engine.Tick(tick1);
+         Assert.AreEqual(expectedDeadline1, deadline, "Unexpected deadline returned");
+
+         // Wait for less time than the deadline with no data - get the same value
+         long interimTick = tick1 + 10;
+         Assert.IsTrue(interimTick < expectedDeadline1);
+         Assert.AreEqual(expectedDeadline1, engine.Tick(interimTick), "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(1, peer.PerformativeCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+         Assert.IsNull(failure);
+
+         peer.RemoteEmptyFrame().Now();
+
+         deadline = engine.Tick(expectedDeadline1);
+         Assert.AreEqual(expectedDeadline2, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(1, peer.PerformativeCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+         Assert.IsNull(failure);
+
+         peer.RemoteEmptyFrame().Now();
+
+         deadline = engine.Tick(expectedDeadline2);
+         Assert.AreEqual(expectedDeadline3, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(1, peer.PerformativeCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+         Assert.IsNull(failure);
+
+         peer.ExpectClose().WithError(Is.NotNullValue()).Respond();
+
+         Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+         engine.Tick(expectedDeadline3); // Wait for the deadline, but don't receive traffic, allow local timeout to expire
+         Assert.AreEqual(2, peer.PerformativeCount, "Tick() should have written data");
+         Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Issue in test peer around begin handling needs to be fixed")]
+      public void TestTickWithRemoteTimeout()
+      {
+         // all-positive
+         DoTickWithRemoteTimeoutTestImpl(4000, 10000, 14000, 18000, 22000);
+
+         // all-negative
+         DoTickWithRemoteTimeoutTestImpl(2000, -100000, -98000, -96000, -94000);
+
+         // negative to positive missing 0
+         DoTickWithRemoteTimeoutTestImpl(500, -950, -450, 50, 550);
+
+         // negative to positive striking 0
+         DoTickWithRemoteTimeoutTestImpl(3000, -6000, -3000, 1, 3001);
+      }
+
+      private void DoTickWithRemoteTimeoutTestImpl(uint remoteTimeoutHalf, long tick1, long expectedDeadline1, long expectedDeadline2, long expectedDeadline3)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         // Handle the peer transmitting [half] their timeout. We half it on receipt to avoid spurious timeouts
+         // if they not have transmitted half their actual timeout, as the AMQP spec only says they SHOULD do that.
+         peer.ExpectOpen().Respond().WithIdleTimeOut(remoteTimeoutHalf * 2);
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+
+         long deadline = engine.Tick(tick1);
+         Assert.AreEqual(expectedDeadline1, deadline, "Unexpected deadline returned");
+
+         // Wait for less time than the deadline with no data - get the same value
+         long interimTick = tick1 + 10;
+         Assert.IsTrue(interimTick < expectedDeadline1);
+         Assert.AreEqual(expectedDeadline1, engine.Tick(interimTick), "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(1, peer.PerformativeCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(expectedDeadline1);
+         Assert.AreEqual(expectedDeadline2, deadline, "When the deadline has been reached expected a new remote deadline to be returned");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.ExpectBegin();
+
+         // Do some actual work, create real traffic, removing the need to send empty frame to satisfy idle-timeout
+         connection.Session().Open();
+
+         Assert.AreEqual(2, peer.PerformativeCount, "session open should have written data");
+
+         deadline = engine.Tick(expectedDeadline2);
+         Assert.AreEqual(expectedDeadline3, deadline, "When the deadline has been reached expected a new remote deadline to be returned");
+         Assert.AreEqual(2, peer.PerformativeCount, "Tick() should not have written data as there was actual activity");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should not have written data as there was actual activity");
+
+         peer.ExpectEmptyFrame();
+
+         engine.Tick(expectedDeadline3);
+         Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestTickWithBothTimeouts()
+      {
+         // all-positive
+         DoTickWithBothTimeoutsTestImpl(true, 5000, 2000, 10000, 12000, 14000, 15000);
+         DoTickWithBothTimeoutsTestImpl(false, 5000, 2000, 10000, 12000, 14000, 15000);
+
+         // all-negative
+         DoTickWithBothTimeoutsTestImpl(true, 10000, 4000, -100000, -96000, -92000, -90000);
+         DoTickWithBothTimeoutsTestImpl(false, 10000, 4000, -100000, -96000, -92000, -90000);
+
+         // negative to positive missing 0
+         DoTickWithBothTimeoutsTestImpl(true, 500, 200, -450, -250, -50, 50);
+         DoTickWithBothTimeoutsTestImpl(false, 500, 200, -450, -250, -50, 50);
+
+         // negative to positive striking 0 with local deadline
+         DoTickWithBothTimeoutsTestImpl(true, 500, 200, -500, -300, -100, 1);
+         DoTickWithBothTimeoutsTestImpl(false, 500, 200, -500, -300, -100, 1);
+
+         // negative to positive striking 0 with remote deadline
+         DoTickWithBothTimeoutsTestImpl(true, 500, 200, -200, 1, 201, 300);
+         DoTickWithBothTimeoutsTestImpl(false, 500, 200, -200, 1, 201, 300);
+      }
+
+      private void DoTickWithBothTimeoutsTestImpl(bool allowLocalTimeout, uint localTimeout, uint remoteTimeoutHalf, long tick1,
+                                                  long expectedDeadline1, long expectedDeadline2, long expectedDeadline3)
+      {
+         this.failure = null;
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         // Handle the peer transmitting [half] their timeout. We half it on receipt to avoid spurious timeouts
+         // if they not have transmitted half their actual timeout, as the AMQP spec only says they SHOULD do that.
+         peer.ExpectOpen().Respond().WithIdleTimeOut(remoteTimeoutHalf * 2);
+
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         long deadline = engine.Tick(tick1);
+         Assert.AreEqual(expectedDeadline1, deadline, "Unexpected deadline returned");
+
+         // Wait for less time than the deadline with no data - get the same value
+         long interimTick = tick1 + 10;
+         Assert.IsTrue(interimTick < expectedDeadline1);
+         Assert.AreEqual(expectedDeadline1, engine.Tick(interimTick), "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(expectedDeadline1);
+         Assert.AreEqual(expectedDeadline2, deadline, "When the deadline has been reached expected a new remote deadline to be returned");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(expectedDeadline2);
+         Assert.AreEqual(expectedDeadline3, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.WaitForScriptToComplete();
+
+         if (allowLocalTimeout)
+         {
+            peer.ExpectClose().Respond();
+
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+            engine.Tick(expectedDeadline3); // Wait for the deadline, but don't receive traffic, allow local timeout to expire
+            Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+            Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data but not an empty frame");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNotNull(failure);
+         }
+         else
+         {
+            peer.RemoteEmptyFrame().Now();
+
+            deadline = engine.Tick(expectedDeadline3);
+            Assert.AreEqual(expectedDeadline2 + (remoteTimeoutHalf), deadline, "Receiving data should have reset the deadline (to the next remote one)");
+            Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNull(failure);
+         }
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsLocalThenRemote()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsLocalThenRemoteTestImpl(false);
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsLocalThenRemoteWithLocalTimeout()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsLocalThenRemoteTestImpl(true);
+      }
+
+      private void DoTickWithNanoTimeDerivedValueWhichWrapsLocalThenRemoteTestImpl(bool allowLocalTimeout)
+      {
+         uint localTimeout = 5000;
+         uint remoteTimeoutHalf = 2000;
+         Assert.IsTrue(remoteTimeoutHalf < localTimeout);
+
+         long offset = 2500;
+         Assert.IsTrue(offset < localTimeout);
+         Assert.IsTrue(offset > remoteTimeoutHalf);
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         // Handle the peer transmitting [half] their timeout. We half it on receipt to avoid spurious timeouts
+         // if they not have transmitted half their actual timeout, as the AMQP spec only says they SHOULD do that.
+         peer.ExpectOpen().Respond().WithIdleTimeOut(remoteTimeoutHalf * 2);
+
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         long deadline = engine.Tick(long.MaxValue - offset);
+         Assert.AreEqual(long.MaxValue - offset + remoteTimeoutHalf, deadline, "Unexpected deadline returned");
+
+         deadline = engine.Tick(long.MaxValue - (offset - 100));    // Wait for less time than the deadline with no data - get the same value
+         Assert.AreEqual(long.MaxValue - offset + remoteTimeoutHalf, deadline, "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(long.MaxValue - offset + remoteTimeoutHalf); // Wait for the deadline - next deadline should be previous + remoteTimeoutHalf;
+         Assert.AreEqual(long.MinValue + (2 * remoteTimeoutHalf) - offset - 1, deadline, "When the deadline has been reached expected a new remote deadline to be returned");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(long.MinValue + (2 * remoteTimeoutHalf) - offset - 1); // Wait for the deadline - next deadline should be orig + localTimeout;
+         Assert.AreEqual(long.MinValue + (localTimeout - offset) - 1, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.WaitForScriptToComplete();
+
+         if (allowLocalTimeout)
+         {
+            peer.ExpectClose().Respond();
+
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+            engine.Tick(long.MinValue + (localTimeout - offset) - 1); // Wait for the deadline, but don't receive traffic, allow local timeout to expire
+            Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+            Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data but not an empty frame");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNotNull(failure);
+         }
+         else
+         {
+            peer.RemoteEmptyFrame().Now();
+
+            deadline = engine.Tick(long.MinValue + (localTimeout - offset) - 1); // Wait for the deadline - next deadline should be orig + 3*remoteTimeoutHalf;
+            Assert.AreEqual(long.MinValue + (3 * remoteTimeoutHalf) - offset - 1, deadline, "Receiving data should have reset the deadline (to the remote one)");
+            Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNull(failure);
+         }
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsRemoteThenLocal()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsRemoteThenLocalTestImpl(false);
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsRemoteThenLocalWithLocalTimeout()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsRemoteThenLocalTestImpl(true);
+      }
+
+      private void DoTickWithNanoTimeDerivedValueWhichWrapsRemoteThenLocalTestImpl(bool allowLocalTimeout)
+      {
+         uint localTimeout = 2000;
+         uint remoteTimeoutHalf = 5000;
+         Assert.IsTrue(localTimeout < remoteTimeoutHalf);
+
+         long offset = 2500;
+         Assert.IsTrue(offset > localTimeout);
+         Assert.IsTrue(offset < remoteTimeoutHalf);
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         // Handle the peer transmitting [half] their timeout. We half it on receipt to avoid spurious timeouts
+         // if they not have transmitted half their actual timeout, as the AMQP spec only says they SHOULD do that.
+         peer.ExpectOpen().Respond().WithIdleTimeOut(remoteTimeoutHalf * 2);
+
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         long deadline = engine.Tick(long.MaxValue - offset);
+         Assert.AreEqual(long.MaxValue - offset + localTimeout, deadline, "Unexpected deadline returned");
+
+         deadline = engine.Tick(long.MaxValue - (offset - 100));    // Wait for less time than the deadline with no data - get the same value
+         Assert.AreEqual(long.MaxValue - offset + localTimeout, deadline, "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+
+         // Receive Empty frame to satisfy local deadline
+         peer.RemoteEmptyFrame().Now();
+
+         deadline = engine.Tick(long.MaxValue - offset + localTimeout); // Wait for the deadline - next deadline should be orig + 2* localTimeout;
+         Assert.AreEqual(long.MinValue + (localTimeout - offset) - 1 + localTimeout, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "Tick() should not have written data");
+
+         peer.WaitForScriptToComplete();
+
+         if (allowLocalTimeout)
+         {
+            peer.ExpectClose().Respond();
+
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+            engine.Tick(long.MinValue + (localTimeout - offset) - 1 + localTimeout); // Wait for the deadline, but don't receive traffic, allow local timeout to expire
+            Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+            Assert.AreEqual(0, peer.EmptyFrameCount, "Tick() should have written data but not an empty frame");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNotNull(failure);
+         }
+         else
+         {
+            // Receive Empty frame to satisfy local deadline
+            peer.RemoteEmptyFrame().Now();
+
+            deadline = engine.Tick(long.MinValue + (localTimeout - offset) - 1 + localTimeout); // Wait for the deadline - next deadline should be orig + remoteTimeoutHalf;
+            Assert.AreEqual(long.MinValue + remoteTimeoutHalf - offset - 1, deadline, "Receiving data should have reset the deadline (to the remote one)");
+            Assert.AreEqual(0, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+
+            peer.ExpectEmptyFrame();
+
+            deadline = engine.Tick(long.MinValue + remoteTimeoutHalf - offset - 1); // Wait for the deadline - next deadline should be orig + 3* localTimeout;
+            Assert.AreEqual(long.MinValue + (3 * localTimeout) - offset - 1, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+            Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written an empty frame");
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNull(failure);
+         }
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsBothRemoteFirst()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsBothRemoteFirstTestImpl(false);
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsBothRemoteFirstWithLocalTimeout()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsBothRemoteFirstTestImpl(true);
+      }
+
+      private void DoTickWithNanoTimeDerivedValueWhichWrapsBothRemoteFirstTestImpl(bool allowLocalTimeout)
+      {
+         uint localTimeout = 2000;
+         uint remoteTimeoutHalf = 2500;
+         Assert.IsTrue(localTimeout < remoteTimeoutHalf);
+
+         long offset = 500;
+         Assert.IsTrue(offset < localTimeout);
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         // Handle the peer transmitting [half] their timeout. We half it on receipt to avoid spurious timeouts
+         // if they not have transmitted half their actual timeout, as the AMQP spec only says they SHOULD do that.
+         peer.ExpectOpen().Respond().WithIdleTimeOut(remoteTimeoutHalf * 2);
+
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         long deadline = engine.Tick(long.MaxValue - offset);
+         Assert.AreEqual(long.MinValue + (localTimeout - offset) - 1, deadline, "Unexpected deadline returned");
+
+         deadline = engine.Tick(long.MaxValue - (offset - 100));    // Wait for less time than the deadline with no data - get the same value
+         Assert.AreEqual(long.MinValue + (localTimeout - offset) - 1, deadline, "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+
+         // Receive Empty frame to satisfy local deadline
+         peer.RemoteEmptyFrame().Now();
+
+         deadline = engine.Tick(long.MinValue + (localTimeout - offset) - 1); // Wait for the deadline - next deadline should be orig + remoteTimeoutHalf;
+         Assert.AreEqual(long.MinValue + (remoteTimeoutHalf - offset) - 1, deadline, "When the deadline has been reached expected a new remote deadline to be returned");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(long.MinValue + (remoteTimeoutHalf - offset) - 1); // Wait for the deadline - next deadline should be orig + 2* localTimeout;
+         Assert.AreEqual(long.MinValue + (localTimeout - offset) - 1 + localTimeout, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.WaitForScriptToComplete();
+
+         if (allowLocalTimeout)
+         {
+            peer.ExpectClose().Respond();
+
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+            engine.Tick(long.MinValue + (localTimeout - offset) - 1 + localTimeout); // Wait for the deadline, but don't receive traffic, allow local timeout to expire
+            Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+            Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data but not an empty frame");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNotNull(failure);
+         }
+         else
+         {
+            // Receive Empty frame to satisfy local deadline
+            peer.RemoteEmptyFrame().Now();
+
+            deadline = engine.Tick(long.MinValue + (localTimeout - offset) - 1 + localTimeout); // Wait for the deadline - next deadline should be orig + 2*remoteTimeoutHalf;
+            Assert.AreEqual(long.MinValue + (2 * remoteTimeoutHalf) - offset - 1, deadline, "Receiving data should have reset the deadline (to the remote one)");
+            Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNull(failure);
+         }
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsBothLocalFirst()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsBothLocalFirstTestImpl(false);
+      }
+
+      [Test]
+      public void TestTickWithNanoTimeDerivedValueWhichWrapsBothLocalFirstWithLocalTimeout()
+      {
+         DoTickWithNanoTimeDerivedValueWhichWrapsBothLocalFirstTestImpl(true);
+      }
+
+      private void DoTickWithNanoTimeDerivedValueWhichWrapsBothLocalFirstTestImpl(bool allowLocalTimeout)
+      {
+         uint localTimeout = 5000;
+         uint remoteTimeoutHalf = 2000;
+         Assert.IsTrue(remoteTimeoutHalf < localTimeout);
+
+         long offset = 500;
+         Assert.IsTrue(offset < remoteTimeoutHalf);
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         // Handle the peer transmitting [half] their timeout. We half it on receipt to avoid spurious timeouts
+         // if they not have transmitted half their actual timeout, as the AMQP spec only says they SHOULD do that.
+         peer.ExpectOpen().Respond().WithIdleTimeOut(remoteTimeoutHalf * 2);
+
+         connection.IdleTimeout = localTimeout;
+         connection.Open();
+
+         long deadline = engine.Tick(long.MaxValue - offset);
+         Assert.AreEqual(long.MinValue + (remoteTimeoutHalf - offset) - 1, deadline, "Unexpected deadline returned");
+
+         deadline = engine.Tick(long.MaxValue - (offset - 100));    // Wait for less time than the deadline with no data - get the same value
+         Assert.AreEqual(long.MinValue + (remoteTimeoutHalf - offset) - 1, deadline, "When the deadline hasn't been reached Tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached Tick() shouldn't write data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(long.MinValue + (remoteTimeoutHalf - offset) - 1); // Wait for the deadline - next deadline should be previous + remoteTimeoutHalf;
+         Assert.AreEqual(long.MinValue + (remoteTimeoutHalf - offset) - 1 + remoteTimeoutHalf, deadline, "When the deadline has been reached expected a new remote deadline to be returned");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(long.MinValue + (remoteTimeoutHalf - offset) - 1 + remoteTimeoutHalf); // Wait for the deadline - next deadline should be orig + localTimeout;
+         Assert.AreEqual(long.MinValue + (localTimeout - offset) - 1, deadline, "When the deadline has been reached expected a new local deadline to be returned");
+         Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data");
+
+         peer.WaitForScriptToComplete();
+
+         if (allowLocalTimeout)
+         {
+            peer.ExpectClose().Respond();
+
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+            engine.Tick(long.MinValue + (localTimeout - offset) - 1); // Wait for the deadline, but don't receive traffic, allow local timeout to expire
+            Assert.AreEqual(ConnectionState.Closed, connection.ConnectionState, "Calling Tick() after the deadline should result in the connection being closed");
+            Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() should have written data but not an empty frame");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNotNull(failure);
+         }
+         else
+         {
+            // Receive Empty frame to satisfy local deadline
+            peer.RemoteEmptyFrame().Now();
+
+            deadline = engine.Tick(long.MinValue + (localTimeout - offset) - 1); // Wait for the deadline - next deadline should be orig + 3*remoteTimeoutHalf;
+            Assert.AreEqual(long.MinValue + (3 * remoteTimeoutHalf) - offset - 1, deadline, "Receiving data should have reset the deadline (to the remote one)");
+            Assert.AreEqual(2, peer.EmptyFrameCount, "Tick() shouldn't have written data");
+            Assert.AreEqual(ConnectionState.Active, connection.ConnectionState, "Connection should be active");
+
+            peer.WaitForScriptToComplete();
+            Assert.IsNull(failure);
+         }
+      }
    }
 }
