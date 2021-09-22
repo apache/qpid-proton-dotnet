@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private readonly IEncoder saslEncoder = CodecFactory.SaslEncoder;
       private readonly IEncoderState saslEncoderState = CodecFactory.SaslEncoder.NewEncoderState();
       private readonly IEncoder amqpEncoder = CodecFactory.Encoder;
-      private readonly IEncoderState amqpEncoderState = CodecFactory.SaslEncoder.NewEncoderState();
+      private readonly IEncoderState amqpEncoderState = CodecFactory.Encoder.NewEncoderState();
 
       private ProtonEngine engine;
       private ProtonEngineConfiguration configuration;

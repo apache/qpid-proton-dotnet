@@ -961,7 +961,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Proton can't write type ErrorCondition for some reason")]
       public void TestOpenWhileWaitingForHeaderResponseDoesNotWriteThenWritesFlowAsExpected()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -991,7 +990,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Proton can't write type ErrorCondition for some reason")]
+      [Ignore("Proton can't match type ErrorCondition for some reason")]
       public void TestCloseOrDetachWithErrorCondition()
       {
          string condition = "amqp:connection:forced";

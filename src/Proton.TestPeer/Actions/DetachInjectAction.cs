@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       {
       }
 
-      public override Detach Performative => throw new NotImplementedException();
+      public override Detach Performative => detach;
 
       public DetachInjectAction WithHandle(uint handle)
       {

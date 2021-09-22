@@ -57,9 +57,19 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public AMQPTestDriver Driver => driver;
 
-      public SessionTracker SessionFromLocalChannel(ushort localChannel) => localSessions[localChannel];
+      public SessionTracker SessionFromLocalChannel(ushort localChannel)
+      {
+         SessionTracker tracker = null;
+         localSessions.TryGetValue(localChannel, out tracker);
+         return tracker;
+      }
 
-      public SessionTracker SessionFromRemoteChannel(ushort remoteChannel) => remoteSessions[remoteChannel];
+      public SessionTracker SessionFromRemoteChannel(ushort remoteChannel)
+      {
+         SessionTracker tracker = null;
+         remoteSessions.TryGetValue(remoteChannel, out tracker);
+         return tracker;
+      }
 
       internal ushort FindFreeLocalChannel()
       {

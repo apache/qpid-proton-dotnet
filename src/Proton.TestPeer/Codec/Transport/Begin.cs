@@ -63,19 +63,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public uint? NextOutgoingId
       {
-         get => (ushort?)List[((int)BeginField.NextOutgoingId)];
+         get => (uint?)List[((int)BeginField.NextOutgoingId)];
          set => List[((int)BeginField.NextOutgoingId)] = value;
       }
 
       public uint? IncomingWindow
       {
-         get => (ushort?)List[((int)BeginField.IncomingWindow)];
+         get => (uint?)List[((int)BeginField.IncomingWindow)];
          set => List[((int)BeginField.IncomingWindow)] = value;
       }
 
       public uint? OutgoingWindow
       {
-         get => (ushort?)List[((int)BeginField.OutgoingWindow)];
+         get => (uint?)List[((int)BeginField.OutgoingWindow)];
          set => List[((int)BeginField.OutgoingWindow)] = value;
       }
 
