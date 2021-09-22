@@ -171,6 +171,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          DoVerification(frameSize, close, payload, channel, context);
       }
 
+      public override void HandleHeartbeat(uint frameSize, Heartbeat beat, byte[] payload, ushort channel, AMQPTestDriver context)
+      {
+         DoVerification(frameSize, beat, payload, channel, context);
+      }
+
       public override void HandleMechanisms(uint frameSize, SaslMechanisms saslMechanisms, AMQPTestDriver context)
       {
          DoVerification(frameSize, saslMechanisms, null, 0, context);

@@ -24,6 +24,7 @@ using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Types.Security;
 using Apache.Qpid.Proton.Types.Transport;
 using NUnit.Framework;
+using Is = Apache.Qpid.Proton.Test.Driver.Matchers.Is;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
 {
@@ -461,5 +462,56 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.WaitForScriptToComplete();
          Assert.IsNull(failure);
       }
+
+      [Test]
+      [Ignore("Issue in test peer around begin handling needs to be fixed")]
+      public void TestTickRemoteTimeout()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         uint remoteTimeout = 4000;
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithIdleTimeOut(Is.NullValue()).Respond().WithIdleTimeOut(remoteTimeout);
+
+         // Set our local idleTimeout
+         connection.Open();
+
+         long deadline = engine.Tick(0);
+         Assert.AreEqual(2000, deadline, "Expected to be returned a deadline of 2000");  // deadline = 4000 / 2
+
+         deadline = engine.Tick(1000);    // Wait for less than the deadline with no data - get the same value
+         Assert.AreEqual(2000, deadline, "When the deadline hasn't been reached tick() should return the previous deadline");
+         Assert.AreEqual(0, peer.EmptyFrameCount, "When the deadline hasn't been reached tick() shouldn't write data");
+
+         peer.ExpectEmptyFrame();
+
+         deadline = engine.Tick(remoteTimeout / 2); // Wait for the deadline - next deadline should be (4000/2)*2
+         Assert.AreEqual(4000, deadline, "When the deadline has been reached expected a new deadline to be returned 4000");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "tick() should have written data");
+
+         peer.ExpectBegin();
+         ISession session = connection.Session().Open();
+
+         deadline = engine.Tick(3000);
+         Assert.AreEqual(5000, deadline, "Writing data resets the deadline");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "When the deadline is reset tick() shouldn't write an empty frame");
+
+         peer.ExpectAttach();
+         session.Sender("test").Open();
+
+         deadline = engine.Tick(4000);
+         Assert.AreEqual(6000, deadline, "Writing data resets the deadline");
+         Assert.AreEqual(1, peer.EmptyFrameCount, "When the deadline is reset tick() shouldn't write an empty frame");
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
    }
 }
