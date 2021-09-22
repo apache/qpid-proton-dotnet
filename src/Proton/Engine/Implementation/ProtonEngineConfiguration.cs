@@ -51,11 +51,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          set => throw new NotImplementedException();
       }
 
+      public uint OutboundMaxFrameSize => effectiveMaxOutboundFrameSize;
+
+      public uint InboundMaxFrameSize => effectiveMaxInboundFrameSize;
+
       #region Internal Engine API
-
-      internal uint OutboundMaxFrameSize => effectiveMaxOutboundFrameSize;
-
-      internal uint InboundMaxFrameSize => effectiveMaxInboundFrameSize;
 
       internal void RecomputeEffectiveFrameSizeLimits()
       {

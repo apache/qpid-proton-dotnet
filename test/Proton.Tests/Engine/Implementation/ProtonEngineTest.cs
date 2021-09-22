@@ -1181,5 +1181,259 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             Assert.IsNull(failure);
          }
       }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte1()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'a', (byte)'M', (byte)'Q', (byte)'P', 0, 1, 0, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte2()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'m', (byte)'Q', (byte)'P', 0, 1, 0, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte3()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'M', (byte)'q', (byte)'P', 0, 1, 0, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte4()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'p', 0, 1, 0, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte5()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 99, 1, 0, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte6()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 0, 99, 0, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte7()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 0, 1, 99, 0 });
+      }
+
+      [Test]
+      public void TestEngineFailsWithMeaningfulErrorOnNonAMQPHeaderResponseBadByte8()
+      {
+         DoTestEngineFailsWithMalformedHeaderException(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 0, 1, 0, 99 });
+      }
+
+      private void DoTestEngineFailsWithMalformedHeaderException(byte[] headerBytes)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithBytes(headerBytes);
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+         connection.Negotiate();
+
+         peer.WaitForScriptToCompleteIgnoreErrors();
+
+         Assert.IsNotNull(failure);
+         Assert.IsTrue(failure is MalformedAMQPHeaderException);
+      }
+
+      [Test]
+      public void TestEngineConfiguresDefaultMaxFrameSizeLimits()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+         ProtonEngineConfiguration configuration = (ProtonEngineConfiguration)engine.Configuration;
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithMaxFrameSize(ProtonConstants.DefaultMaxAmqpFrameSize).Respond();
+
+         connection.Open();
+
+         Assert.AreEqual(ProtonConstants.DefaultMaxAmqpFrameSize, configuration.OutboundMaxFrameSize);
+         Assert.AreEqual(ProtonConstants.DefaultMaxAmqpFrameSize, configuration.InboundMaxFrameSize);
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestEngineConfiguresSpecifiedMaxFrameSizeLimitsMatchesDefaultMinMax()
+      {
+         DoTestEngineConfiguresSpecifiedFrameSizeLimits(512, 512);
+      }
+
+      [Test]
+      public void TestEngineConfiguresSpecifiedMaxFrameSizeLimitsRemoteLargerThanLocal()
+      {
+         DoTestEngineConfiguresSpecifiedFrameSizeLimits(1024, 1025);
+      }
+
+      [Test]
+      public void TestEngineConfiguresSpecifiedMaxFrameSizeLimitsRemoteSmallerThanLocal()
+      {
+         DoTestEngineConfiguresSpecifiedFrameSizeLimits(1024, 1023);
+      }
+
+      [Test]
+      public void TestEngineConfiguresSpecifiedMaxFrameSizeLimitsGreaterThanDefaultValues()
+      {
+         DoTestEngineConfiguresSpecifiedFrameSizeLimits(
+             ProtonConstants.DefaultMaxAmqpFrameSize + 32, ProtonConstants.DefaultMaxAmqpFrameSize + 64);
+      }
+
+      [Test]
+      public void TestEngineConfiguresRemoteMaxFrameSizeSetToMaxUnsignedLong()
+      {
+         DoTestEngineConfiguresSpecifiedFrameSizeLimits(int.MaxValue, uint.MaxValue);
+      }
+
+      private void DoTestEngineConfiguresSpecifiedFrameSizeLimits(uint localValue, uint remoteResponse)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+         ProtonEngineConfiguration configuration = (ProtonEngineConfiguration)engine.Configuration;
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithMaxFrameSize(localValue)
+                          .Respond()
+                          .WithMaxFrameSize(remoteResponse);
+
+         connection.MaxFrameSize = localValue;
+         connection.Open();
+
+         if (localValue > 0)
+         {
+            Assert.AreEqual(localValue, configuration.InboundMaxFrameSize);
+         }
+         else
+         {
+            Assert.AreEqual(int.MaxValue, configuration.InboundMaxFrameSize);
+         }
+
+         if (remoteResponse > localValue)
+         {
+            Assert.AreEqual(localValue, configuration.OutboundMaxFrameSize);
+         }
+         else
+         {
+            if (remoteResponse > 0)
+            {
+               Assert.AreEqual(remoteResponse, configuration.OutboundMaxFrameSize);
+            }
+            else
+            {
+               Assert.AreEqual(int.MaxValue, configuration.OutboundMaxFrameSize);
+            }
+         }
+
+         Assert.AreEqual(localValue, connection.MaxFrameSize);
+         Assert.AreEqual(remoteResponse, connection.RemoteMaxFrameSize);
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestEngineErrorsOnLocalMaxFrameSizeLargerThanImposedLimit()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         Assert.Throws<ArgumentOutOfRangeException>(() => connection.MaxFrameSize = uint.MaxValue);
+      }
+
+      [Test]
+      public void TestEngineShutdownHandlerThrowsIsIgnoredAndShutdownCompletes()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+
+         engine.ShutdownHandler((theEngine) => throw new InvalidOperationException());
+
+         IConnection connection = engine.Start();
+         Assert.IsNotNull(connection);
+
+         Assert.IsTrue(engine.IsWritable);
+         Assert.IsTrue(engine.IsRunning);
+         Assert.IsFalse(engine.IsShutdown);
+         Assert.IsFalse(engine.IsFailed);
+         Assert.IsNull(engine.FailureCause);
+         Assert.AreEqual(EngineState.Started, engine.EngineState);
+
+         try
+         {
+            engine.Shutdown();
+            Assert.Fail("User event handler throw wasn't propagated");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         Assert.IsFalse(engine.IsWritable);
+         Assert.IsFalse(engine.IsRunning);
+         Assert.IsTrue(engine.IsShutdown);
+         Assert.IsFalse(engine.IsFailed);
+         Assert.IsNull(engine.FailureCause);
+         Assert.AreEqual(EngineState.Shutdown, engine.EngineState);
+
+         // should not perform any additional work.
+         engine.Shutdown();
+
+         Assert.IsNotNull(connection);
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestEnginePipelineProtectsFromExternalUserMischief()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen();
+
+         engine.Start();
+
+         Assert.IsTrue(engine.IsWritable);
+         Assert.IsNotNull(connection);
+         Assert.IsNull(failure);
+
+         Assert.Throws<InvalidOperationException>(() => engine.Pipeline.FireEngineStarting());
+         Assert.Throws<InvalidOperationException>(() => engine.Pipeline.FireEngineStateChanged());
+         Assert.Throws<InvalidOperationException>(() => engine.Pipeline.FireFailed(new EngineFailedException(null)));
+
+         engine.Shutdown();
+
+         Assert.Throws<EngineShutdownException>(() => engine.Pipeline.First());
+         Assert.Throws<EngineShutdownException>(() => engine.Pipeline.Last());
+         Assert.Throws<EngineShutdownException>(() => engine.Pipeline.FirstContext());
+         Assert.Throws<EngineShutdownException>(() => engine.Pipeline.LastContext());
+
+         peer.WaitForScriptToComplete();
+      }
    }
 }
