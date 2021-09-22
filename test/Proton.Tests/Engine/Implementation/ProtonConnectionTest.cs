@@ -688,7 +688,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test failure needs investigation")]
       public void TestOpenedCarriesRemoteErrorCondition()
       {
          IDictionary<string, object> errorInfoExpectation = new Dictionary<string, object>();
@@ -870,14 +869,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test hangs waiting for script to complete")]
       public void TestCloseConnectionAfterFailureThrowsEngineStateExceptionOpenWrittenAndResponse()
       {
          TestCloseConnectionAfterEngineFailedThrowsAndNoOutputWritten(true, true);
       }
 
       [Test]
-      [Ignore("Test hangs waiting for script to complete")]
       public void TestCloseConnectionAfterFailureThrowsEngineStateExceptionOpenWrittenButNoResponse()
       {
          TestCloseConnectionAfterEngineFailedThrowsAndNoOutputWritten(true, false);
@@ -1894,7 +1891,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with timeout error from driver")]
       public void TestSecondOpenAfterReceiptOfFirstFailsEngine()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1944,7 +1940,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with KeyNotFound error from driver")]
       public void TestUnexpectedAttachForUnknownChannelFrameFailsEngine()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1969,7 +1964,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with KeyNotFound error from driver")]
       public void TestUnexpectedDetachForUnknownChannelFrameFailsEngine()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
