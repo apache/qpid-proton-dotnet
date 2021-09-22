@@ -58,6 +58,9 @@ namespace Apache.Qpid.Proton.Test.Driver
       private void WriteFrame(Stream stream, IDescribedType performative, byte[] payload, byte frameType, ushort channel, uint maxFrameSize, Action onPayloadTooLarge)
       {
          long startIndex = stream.Position;
+
+         stream.WriteLong(0); // Pad out the frame header
+
          uint outputBufferSize = AMQP_PERFORMATIVE_PAD + (payload != null ? (uint)payload.Length : 0u);
          uint performativeSize = WritePerformative(stream, performative, payload, maxFrameSize, onPayloadTooLarge);
          uint capacity = maxFrameSize > 0 ? maxFrameSize - performativeSize : Int32.MaxValue;
@@ -68,23 +71,19 @@ namespace Apache.Qpid.Proton.Test.Driver
             stream.Write(payload, 0, (int)payloadSize);
          }
 
-         long endIndex = stream.Position;
-
          stream.Seek(0, SeekOrigin.Begin);
 
          // Write the frame header and then reset to start for output.
-         stream.WriteUnsignedInt((uint)stream.Length);
+         stream.WriteUnsignedInt((uint)(stream.Length - startIndex));
          stream.WriteByte((byte)FRAME_DOFF_SIZE);
          stream.WriteByte((byte)frameType);
          stream.WriteUnsignedShort(channel);
 
-         stream.Seek(0, SeekOrigin.Begin);
+         stream.Seek(startIndex, SeekOrigin.Begin);
       }
 
       private uint WritePerformative(Stream stream, IDescribedType performative, Span<byte> payload, uint maxFrameSize, Action onPayloadTooLarge)
       {
-         stream.Seek(stream.Position + FRAME_HEADER_SIZE, SeekOrigin.Current);
-
          long encodedSize = 0;
          long startIndex = stream.Position;
 
@@ -101,7 +100,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
          }
 
-         long performativeSize = stream.Length - startIndex;
+         long performativeSize = performative == null ? 0 : stream.Length - startIndex;
 
          if (performativeSize != encodedSize)
          {

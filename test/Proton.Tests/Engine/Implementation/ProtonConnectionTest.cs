@@ -729,7 +729,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.IsNull(connection.ErrorCondition);
          Assert.IsNotNull(connection.RemoteErrorCondition);
 
-         Assert.AreEqual(remoteCondition, connection.RemoteErrorCondition);
+         // Figure out a sane way of checking equality of contained info map
+         // TODO Equality ? Assert.AreEqual(remoteCondition, connection.RemoteErrorCondition);
+
+         Assert.AreEqual(remoteCondition.Condition, connection.RemoteErrorCondition.Condition);
+         Assert.AreEqual(remoteCondition.Description, connection.RemoteErrorCondition.Description);
+         Assert.AreEqual(remoteCondition.Info, connection.RemoteErrorCondition.Info);
 
          connection.Close();
 
@@ -744,7 +749,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Empty frame or action processing breaks and remote open doesn't arrive")]
       public void TestEmptyFrameBeforeOpenDoesNotCauseError()
       {
          bool remotelyOpened = false;
