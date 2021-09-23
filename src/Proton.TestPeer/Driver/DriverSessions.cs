@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       }
 
       public SessionTracker LastRemotelyOpenedSession =>
-         lastRemotelyOpenedSession != null ? localSessions[(ushort)lastRemotelyOpenedSession] : null;
+         lastRemotelyOpenedSession != null ? remoteSessions[(ushort)lastRemotelyOpenedSession] : null;
 
       public SessionTracker LastLocallyOpenedSession =>
          lastLocallyOpenedSession != null ? localSessions[(ushort)lastLocallyOpenedSession] : null;
@@ -125,14 +125,12 @@ namespace Apache.Qpid.Proton.Test.Driver
             // Remote has requested that the driver create a new session which will require a scripted
             // response in order to complete the begin cycle.  Start tracking now for future
             sessionTracker = new SessionTracker(driver);
-
-            localSessions.Add((ushort)sessionTracker.LocalChannel, sessionTracker);
          }
 
          sessionTracker.HandleBegin(remoteBegin, remoteChannel);
 
          remoteSessions.Add(remoteChannel, sessionTracker);
-         lastRemotelyOpenedSession = sessionTracker.LocalChannel;
+         lastRemotelyOpenedSession = sessionTracker.RemoteChannel;
 
          return sessionTracker;
       }

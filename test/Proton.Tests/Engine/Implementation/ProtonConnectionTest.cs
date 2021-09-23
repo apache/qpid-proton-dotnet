@@ -1702,7 +1702,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with NPE error from driver")]
       public void TestIterateAndCloseSessionsFromSessionsAPI()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1776,7 +1775,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with NPE error from driver")]
       public void TestConnectionThrowsWhenLocalChannelMaxExceeded()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
