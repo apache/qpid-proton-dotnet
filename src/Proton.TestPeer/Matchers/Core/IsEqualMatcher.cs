@@ -61,6 +61,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
          {
             return ArraysMatch((Array)expected, (Array)actual);
          }
+         else if(expected is IDictionary && actual is IDictionary)
+         {
+            return DictionariesMatch((IDictionary)expected, (IDictionary)actual);
+         }
          else
          {
             return actual.Equals(expected);
@@ -101,6 +105,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
          }
 
          return true;
+      }
+
+      public static bool DictionariesMatch(IDictionary expected, IDictionary actual)
+      {
+         if (expected.Count != actual.Count)
+         {
+            return false;
+         }
+
+         return false;
       }
    }
 }
