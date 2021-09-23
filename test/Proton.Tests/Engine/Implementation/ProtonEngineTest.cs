@@ -464,7 +464,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue in test peer around begin handling needs to be fixed")]
       public void TestTickRemoteTimeout()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -514,7 +513,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue in test peer around begin handling needs to be fixed")]
       public void TestTickLocalTimeout()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -679,7 +677,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue in test peer around begin handling needs to be fixed")]
       public void TestTickWithRemoteTimeout()
       {
          // all-positive

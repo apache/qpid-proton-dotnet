@@ -44,6 +44,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
          return role == Role.Receiver;
       }
 
+      public static Role ReverseOf(this Role role)
+      {
+         return role.IsSender() ? Role.Receiver : Role.Sender;
+      }
+
       public static Role Lookup(bool role)
       {
          return role ? Role.Receiver : Role.Sender;

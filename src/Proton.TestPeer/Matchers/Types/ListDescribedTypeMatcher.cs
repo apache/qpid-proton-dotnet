@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types
             throw new ArgumentOutOfRangeException("Field index supplied exceeds number of fields in type");
          }
 
-         fieldMatchers.Add(field, matcher);
+         fieldMatchers[field] = matcher;
 
          return this;
       }

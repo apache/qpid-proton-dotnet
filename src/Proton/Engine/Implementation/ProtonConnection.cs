@@ -487,11 +487,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             // due to it being cleaned up by GC,
             if (zombieSessions.TryGetValue(channel, out session))
             {
-               engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on End from remote: " + channel));
+               zombieSessions.Remove(channel);
             }
             else
             {
-               zombieSessions.Remove(channel);
+               engine.EngineFailed(new ProtocolViolationException("Received uncorrelated channel on End from remote: " + channel));
             }
          }
       }
@@ -776,7 +776,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             // The remote hasn't answered our begin yet so we need to hold onto this information
             // and process the eventual begin that must be provided per specification.
-            zombieSessions.CreateEntry(localChannel).Value = session;
+            zombieSessions.Set(localChannel, session);
          }
       }
 

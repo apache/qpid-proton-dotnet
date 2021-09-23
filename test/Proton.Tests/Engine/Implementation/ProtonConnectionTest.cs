@@ -121,7 +121,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fixes needed for link creation bits that aren't tested yet")]
       public void TestConnectionSyncStateAfterEngineStarted()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1743,7 +1742,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with cast error from driver")]
+      [Ignore("Test fails with cast error from driver due to ErrorCondition matcher issue")]
       public void TestConnectionClosedWhenChannelMaxExceeded()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1859,7 +1858,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with NPE error from driver")]
       public void TestPipelinedResourceOpenAllowsForReturningResponsesAfterCloseOfConnection()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1913,7 +1911,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with timeout error from driver")]
       public void TestUnexpectedEndFrameFailsEngine()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1986,7 +1983,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with invalid cast error from driver")]
       public void TestSecondBeginForAlreadyBegunSessionTriggerEngineFailure()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

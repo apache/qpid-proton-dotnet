@@ -549,7 +549,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (!localLinks.ContainsKey(i))
             {
-               localLinks.Add((int)i, link);
+               localLinks.Add(i, link);
                return i;
             }
          }

@@ -448,7 +448,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
             if (!script.TryDequeue(out scriptEntry))
             {
-               SignalFailure(new AssertionError("Received AMQP performative when not expecting any input."));
+               SignalFailure(new AssertionError(
+                  "Received AMQP performative when not expecting any input: " + amqp?.GetType().Name));
             }
             else if (scriptEntry is ScriptedExpectation expectation)
             {
@@ -479,7 +480,8 @@ namespace Apache.Qpid.Proton.Test.Driver
             else
             {
                SignalFailure(new AssertionError(
-                  "Received AMQP performative when not expecting to perform some action or other script item."));
+                  "Received AMQP performative when not expecting to perform some action or other script item: " +
+                  amqp?.GetType().Name));
             }
 
             ProcessScript(scriptEntry);

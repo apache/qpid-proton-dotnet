@@ -92,22 +92,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachExpectation WithRole(bool role)
       {
-         return WithRole(Is.EqualTo(role ? Role.Receiver : Role.Sender));
+         return WithRole(Is.EqualTo(role));
       }
 
       public AttachExpectation WithRole(Role role)
       {
-         return WithRole(Is.EqualTo(role));
+         return WithRole(Is.EqualTo(RoleExtension.ToBooleanEncoding(role)));
       }
 
       public AttachExpectation OfSender()
       {
-         return WithRole(Is.EqualTo(Role.Sender));
+         return WithRole(Is.EqualTo(false));
       }
 
       public AttachExpectation OfReceiver()
       {
-         return WithRole(Is.EqualTo(Role.Receiver));
+         return WithRole(Is.EqualTo(true));
       }
 
       public AttachExpectation WithSndSettleMode(byte sndSettleMode)
@@ -394,15 +394,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
             }
             if (response.Performative.Role == null)
             {
-               response.WithRole((Role)attach.Role);
+               response.WithRole(attach.Role?.ReverseOf() ?? Role.Sender);
             }
             if (response.Performative.SenderSettleMode == null)
             {
-               response.WithSndSettleMode((SenderSettleMode)attach.SenderSettleMode);
+               response.WithSndSettleMode(attach.SenderSettleMode ?? SenderSettleMode.Mixed);
             }
             if (response.Performative.ReceiverSettleMode == null)
             {
-               response.WithRcvSettleMode(attach.ReceiverSettleMode);
+               response.WithRcvSettleMode(attach.ReceiverSettleMode ?? ReceiverSettleMode.First);
             }
             if (response.Performative.Source == null && !response.IsNullSourceRequired)
             {

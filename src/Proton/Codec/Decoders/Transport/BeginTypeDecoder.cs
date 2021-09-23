@@ -89,8 +89,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
             bool nullValue = buffer.GetByte(buffer.ReadOffset) == (byte)EncodingCodes.Null;
             if (nullValue)
             {
-               // Ensure mandatory fields are set
-               if (index < MinBeginListEntries)
+               // Ensure mandatory fields are set, channel is not mandatory so it can
+               // be null an so we have to account for that here.
+               if (index > 0 && index < MinBeginListEntries)
                {
                   throw new DecodeException(ErrorForMissingRequiredFields(index));
                }
