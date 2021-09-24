@@ -96,6 +96,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
+      public AttachInjectAction WithSndSettleMode(byte? sndSettleMode)
+      {
+         if (sndSettleMode.HasValue)
+         {
+            attach.SenderSettleMode = (SenderSettleMode?)sndSettleMode;
+         }
+
+         return this;
+      }
+
       public AttachInjectAction WithSenderSettleModeMixed()
       {
          attach.SenderSettleMode = SenderSettleMode.Mixed;
@@ -117,6 +127,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       public AttachInjectAction WithRcvSettleMode(ReceiverSettleMode rcvSettleMode)
       {
          attach.ReceiverSettleMode = rcvSettleMode;
+         return this;
+      }
+
+      public AttachInjectAction WithRcvSettleMode(byte? rcvSettleMode)
+      {
+         if (rcvSettleMode.HasValue)
+         {
+            attach.ReceiverSettleMode = (ReceiverSettleMode?)rcvSettleMode;
+         }
+
          return this;
       }
 

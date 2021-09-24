@@ -115,6 +115,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return WithSndSettleMode(Is.EqualTo((SenderSettleMode)sndSettleMode));
       }
 
+      public AttachExpectation WithSndSettleMode(byte? sndSettleMode)
+      {
+         if (sndSettleMode.HasValue)
+         {
+            return WithSndSettleMode(Is.EqualTo((SenderSettleMode)sndSettleMode));
+         }
+         else
+         {
+            return WithRcvSettleMode(Is.NullValue());
+         }
+      }
+
       public AttachExpectation WithSndSettleMode(SenderSettleMode sndSettleMode)
       {
          return WithSndSettleMode(Is.EqualTo(sndSettleMode));
@@ -138,6 +150,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       public AttachExpectation WithRcvSettleMode(byte rcvSettleMode)
       {
          return WithRcvSettleMode(Is.EqualTo(rcvSettleMode));
+      }
+
+      public AttachExpectation WithRcvSettleMode(byte? rcvSettleMode)
+      {
+         if (rcvSettleMode.HasValue)
+         {
+            return WithRcvSettleMode(Is.EqualTo(rcvSettleMode));
+         }
+         else
+         {
+            return WithRcvSettleMode(Is.NullValue());
+         }
       }
 
       public AttachExpectation WithRcvSettleMode(ReceiverSettleMode rcvSettleMode)

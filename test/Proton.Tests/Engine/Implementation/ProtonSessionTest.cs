@@ -18,13 +18,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
-using Apache.Qpid.Proton.Engine.Sasl;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Types;
-using Apache.Qpid.Proton.Types.Security;
 using Apache.Qpid.Proton.Types.Transport;
 using NUnit.Framework;
 using Is = Apache.Qpid.Proton.Test.Driver.Matchers.Is;
