@@ -246,9 +246,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region ISession API implementations
 
-      public IEnumerable<IReceiver> Receivers => throw new NotImplementedException();
+      public IEnumerable<IReceiver> Receivers => new List<IReceiver>(receiverByNameMap.Values);
 
-      public IEnumerable<ISender> Senders => throw new NotImplementedException();
+      public IEnumerable<ISender> Senders => new List<ISender>(senderByNameMap.Values);
 
       public ISender Sender(string name)
       {

@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public BeginInjectAction withHandleMax(uint handleMax)
+      public BeginInjectAction WithHandleMax(uint handleMax)
       {
          begin.HandleMax = handleMax;
          return this;

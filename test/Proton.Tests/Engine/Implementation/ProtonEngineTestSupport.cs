@@ -83,5 +83,45 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          return peer;
       }
+
+      protected ProtonTestConnector CreateTestPeer(IEngine engine, Queue<Action> asyncIOCallback)
+      {
+         ProtonTestConnector peer = new ProtonTestConnector(stream =>
+         {
+            if (stream is MemoryStream mem)
+            {
+               engine.Ingest(ProtonByteBufferAllocator.Instance.Wrap(mem.ToArray()));
+            }
+            else
+            {
+               byte[] bytes = new byte[stream.Length - stream.Position];
+               stream.Read(bytes, 0, bytes.Length);
+               engine.Ingest(ProtonByteBufferAllocator.Instance.Wrap(bytes));
+            }
+         });
+
+         engine.OutputHandler((buffer, asyncCallback) =>
+         {
+            if (asyncCallback != null)
+            {
+               asyncIOCallback.Enqueue(asyncCallback);
+            }
+            peer.Ingest(new ProtonBufferInputStream(buffer));
+         });
+
+         return peer;
+      }
+
+      protected uint CountElements<T>(IEnumerable<T> enumerable)
+      {
+         uint count = 0;
+
+         foreach (T element in enumerable)
+         {
+            count++;
+         }
+
+         return count;
+      }
    }
 }

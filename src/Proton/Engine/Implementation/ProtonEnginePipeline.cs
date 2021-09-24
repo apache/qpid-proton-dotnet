@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (handler == null)
          {
-            throw new ArgumentException("Handler provided cannot be null");
+            throw new ArgumentNullException("Handler provided cannot be null");
          }
 
          ProtonEngineHandlerContext oldFirst = head.next;

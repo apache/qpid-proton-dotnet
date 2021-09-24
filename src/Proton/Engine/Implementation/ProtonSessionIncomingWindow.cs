@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonSessionIncomingWindow
    {
-      private static readonly uint DEFAULT_WINDOW_SIZE = uint.MaxValue; // biggest legal value
+      private static readonly uint DEFAULT_WINDOW_SIZE = int.MaxValue; // biggest legal value
 
       private readonly ProtonSession session;
       private readonly ProtonEngine engine;
