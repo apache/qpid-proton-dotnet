@@ -34,7 +34,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<IIncomingDelivery> deliveryReadEventHandler = null;
       private Action<IIncomingDelivery> deliveryAbortedEventHandler = null;
       private Action<IIncomingDelivery> deliveryUpdatedEventHandler = null;
-      private Action<IReceiver> linkCreditUpdatedHandler = null;
 
       private readonly ProtonSessionIncomingWindow sessionWindow;
       private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
@@ -235,7 +234,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             }
          }
 
-         FireLinkCreditStateUpdated();
+         FireCreditStateUpdated();
       }
 
       protected override void HandleRemoteDisposition(Disposition disposition, ProtonOutgoingDelivery delivery)
@@ -326,7 +325,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          if (IsDraining && Credit == 0)
          {
             drainStateSnapshot = null;
-            FireLinkCreditStateUpdated();
+            FireCreditStateUpdated();
          }
       }
 
@@ -348,8 +347,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       internal bool HasDeliveryReadHandler => deliveryReadEventHandler != null;
 
       internal bool HasDeliveryStateUpdatedHandler => deliveryUpdatedEventHandler != null;
-
-      internal bool HasLinkCreditUpdatedHandler => linkCreditUpdatedHandler != null;
 
       internal void FireDeliveryAborted(ProtonIncomingDelivery delivery)
       {
@@ -385,11 +382,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             deliveryUpdatedEventHandler?.Invoke(delivery);
          }
-      }
-
-      internal void FireLinkCreditStateUpdated()
-      {
-         linkCreditUpdatedHandler?.Invoke(this);
       }
 
       internal override IReceiver FireRemoteOpen()

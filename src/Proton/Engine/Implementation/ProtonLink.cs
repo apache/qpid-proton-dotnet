@@ -416,12 +416,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return linkCreditStateUpdateHandler;
       }
 
-      internal T ForeCreditStateUpdated()
+      internal T FireCreditStateUpdated()
       {
-         if (linkCreditStateUpdateHandler != null)
-         {
-            linkCreditStateUpdateHandler.Invoke(Self());
-         }
+         linkCreditStateUpdateHandler?.Invoke(Self());
 
          return Self();
       }

@@ -35,7 +35,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          new SplayedDictionary<uint, ProtonOutgoingDelivery>();
 
       private Action<IOutgoingDelivery> deliveryUpdatedEventHandler = null;
-      private Action<ISender> linkCreditUpdatedHandler = null;
 
       private uint? currentDeliveryId = null;
       private bool sendable;
@@ -229,7 +228,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             sendable = Credit > 0 && sessionWindow.IsSendable;
 
-            linkCreditUpdatedHandler?.Invoke(this);
+            FireCreditStateUpdated();
          }
       }
 

@@ -21,6 +21,7 @@ using System.IO;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
+using Apache.Qpid.Proton.Test.Driver.Matchers;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
@@ -1227,6 +1228,201 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          IReceiver receiver = session.Receiver("test");
          receiver.Open();
          receiver.AddCredit(100);
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverSendsFlowWithNoIncomingIdWhenRemoteBeginHasNotArrivedYet()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin();
+         peer.ExpectAttach();
+         peer.ExpectFlow().WithLinkCredit(100).WithNextIncomingId(Is.NullValue());
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session().Open();
+         IReceiver receiver = session.Receiver("test").Open();
+
+         receiver.AddCredit(100);
+
+         bool opened = false;
+         receiver.OpenHandler((self) =>
+         {
+            opened = true;
+         });
+
+         peer.WaitForScriptToComplete();
+         peer.RespondToLastBegin().WithNextOutgoingId(42).Now();
+         peer.RespondToLastAttach().Now();
+         peer.ExpectFlow().WithLinkCredit(101).WithNextIncomingId(42);
+         peer.ExpectDetach().Respond();
+
+         Assert.IsTrue(opened);
+
+         receiver.AddCredit(1);
+
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverSendsFlowAfterOpenedWhenCreditSetBeforeOpened()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(100);
+         peer.ExpectDetach().Respond();
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.AddCredit(100);
+         receiver.Open();
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverSendsFlowAfterConnectionOpenFinallySent()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+
+         // Create and open all resources except don't open the connection and then
+         // we will observe that the receiver flow doesn't fire until it has sent its
+         // attach following the session send its Begin.
+         IConnection connection = engine.Start();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.AddCredit(1);
+         receiver.Open();
+
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(1);
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverOmitsFlowAfterConnectionOpenFinallySentWhenAfterDetached()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         // Create and open all resources except don't open the connection and then
+         // we will observe that the receiver flow doesn't fire since the link was
+         // detached prior to being able to send any state updates.
+         IConnection connection = engine.Start();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.AddCredit(1);
+         receiver.Open();
+         receiver.Detach();
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectDetach().Respond();
+
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.AreEqual(0, receiver.Credit);
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverDrainAllOutstanding()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.Open();
+
+         uint creditWindow = 100;
+
+         // Add some credit, verify not draining
+         IMatcher notDrainingMatcher = Matches.AnyOf(Is.EqualTo(false), Is.NullValue());
+         peer.ExpectFlow().WithDrain(notDrainingMatcher).WithLinkCredit(creditWindow).WithDeliveryCount(0);
+         receiver.AddCredit(creditWindow);
+
+         peer.WaitForScriptToComplete();
+
+         // Check that calling drain sends flow, and calls handler on response draining all credit
+         bool handlerCalled = false;
+         receiver.CreditStateUpdateHandler((x) => handlerCalled = true);
+
+         peer.ExpectFlow().WithDrain(true).WithLinkCredit(creditWindow).WithDeliveryCount(0)
+                          .Respond()
+                          .WithDrain(true).WithLinkCredit(0).WithDeliveryCount(creditWindow);
+
+         receiver.Drain();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsTrue(handlerCalled, "Handler was not called");
+
+         peer.ExpectDetach().Respond();
          receiver.Close();
 
          peer.WaitForScriptToComplete();
