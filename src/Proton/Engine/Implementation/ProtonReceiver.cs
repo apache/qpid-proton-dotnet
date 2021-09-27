@@ -414,11 +414,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                }
             }
 
-            if (session.HasSenderOpenEventHandler)
+            if (session.HasReceiverOpenEventHandler)
             {
                session.FireRemoteReceiverOpened(this);
             }
-            else if (connection.HasSenderOpenEventHandler)
+            else if (connection.HasReceiverOpenEventHandler)
             {
                connection.FireRemoteReceiverOpened(this);
             }

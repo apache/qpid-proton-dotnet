@@ -112,14 +112,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachExpectation WithSndSettleMode(byte sndSettleMode)
       {
-         return WithSndSettleMode(Is.EqualTo((SenderSettleMode)sndSettleMode));
+         return WithSndSettleMode(Is.EqualTo(sndSettleMode));
       }
 
       public AttachExpectation WithSndSettleMode(byte? sndSettleMode)
       {
          if (sndSettleMode.HasValue)
          {
-            return WithSndSettleMode(Is.EqualTo((SenderSettleMode)sndSettleMode));
+            return WithSndSettleMode(Is.EqualTo(sndSettleMode));
          }
          else
          {
@@ -129,7 +129,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachExpectation WithSndSettleMode(SenderSettleMode sndSettleMode)
       {
-         return WithSndSettleMode(Is.EqualTo(sndSettleMode));
+         return WithSndSettleMode(Is.EqualTo((byte)sndSettleMode));
       }
 
       public AttachExpectation WithSenderSettleModeMixed()
@@ -166,7 +166,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachExpectation WithRcvSettleMode(ReceiverSettleMode rcvSettleMode)
       {
-         return WithRcvSettleMode(Is.EqualTo(rcvSettleMode));
+         return WithRcvSettleMode(Is.EqualTo((byte)rcvSettleMode));
       }
 
       public AttachExpectation WithReceiverSettlesFirst()

@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = localLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
             }
 
             return linkTracker;
@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = remoteLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
             }
 
             return linkTracker;
@@ -107,7 +107,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = localLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
                if (linkTracker.Coordinator == null)
                {
                   linkTracker = null;
@@ -126,7 +126,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = remoteLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
                if (linkTracker.Coordinator == null)
                {
                   linkTracker = null;
@@ -145,7 +145,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = remoteLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
                if (linkTracker.IsReceiver)
                {
                   linkTracker = null;
@@ -164,7 +164,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = remoteLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
                if (linkTracker.IsSender)
                {
                   linkTracker = null;
@@ -183,7 +183,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = localLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
                if (linkTracker.IsReceiver)
                {
                   linkTracker = null;
@@ -202,7 +202,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             IDictionaryEnumerator enumerator = localLinks.GetEnumerator();
             while (enumerator.MoveNext())
             {
-               linkTracker = (LinkTracker)enumerator.Current;
+               linkTracker = (LinkTracker)enumerator.Value;
                if (linkTracker.IsSender)
                {
                   linkTracker = null;

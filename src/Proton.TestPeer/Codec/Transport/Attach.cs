@@ -96,13 +96,29 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public SenderSettleMode? SenderSettleMode
       {
-         get => (SenderSettleMode?)List[((int)AttachField.SenderSettleMode)];
+         get
+         {
+            if (List[((int)AttachField.SenderSettleMode)] != null)
+            {
+               return (SenderSettleMode)List[((int)AttachField.SenderSettleMode)];
+            }
+
+            return null;
+         }
          set => List[((int)AttachField.SenderSettleMode)] = ((byte?)value);
       }
 
       public ReceiverSettleMode? ReceiverSettleMode
       {
-         get => (ReceiverSettleMode?)List[((int)AttachField.ReceiverSettleMode)];
+         get
+         {
+            if (List[((int)AttachField.ReceiverSettleMode)] != null)
+            {
+               return (ReceiverSettleMode)List[((int)AttachField.ReceiverSettleMode)];
+            }
+
+            return null;
+         }
          set => List[((int)AttachField.ReceiverSettleMode)] = ((byte?)value);
       }
 

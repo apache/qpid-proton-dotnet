@@ -47,22 +47,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       public AttachMatcher WithRole(bool role)
       {
-         return WithRole(Is.EqualTo(RoleExtension.Lookup(role)));
+         return WithRole(Is.EqualTo(role));
       }
 
       public AttachMatcher WithRole(Role role)
       {
-         return WithRole(Is.EqualTo(role));
+         return WithRole(Is.EqualTo(role.ToBooleanEncoding()));
       }
 
       public AttachMatcher WithSndSettleMode(byte sndSettleMode)
       {
-         return WithSndSettleMode(Is.EqualTo((SenderSettleMode)sndSettleMode));
+         return WithSndSettleMode(Is.EqualTo(sndSettleMode));
       }
 
       public AttachMatcher WithSndSettleMode(SenderSettleMode? sndSettleMode)
       {
-         return WithSndSettleMode(sndSettleMode == null ? Is.NullValue() : Is.EqualTo(sndSettleMode));
+         return WithSndSettleMode(sndSettleMode == null ? Is.NullValue() : Is.EqualTo((byte)sndSettleMode));
       }
 
       public AttachMatcher WithRcvSettleMode(byte rcvSettleMode)
@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       public AttachMatcher WithRcvSettleMode(ReceiverSettleMode? rcvSettleMode)
       {
-         return WithRcvSettleMode(rcvSettleMode == null ? Is.NullValue() : Is.EqualTo(rcvSettleMode));
+         return WithRcvSettleMode(rcvSettleMode == null ? Is.NullValue() : Is.EqualTo((byte)rcvSettleMode));
       }
 
       public AttachMatcher WithSource(Source source)

@@ -721,14 +721,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          ISet<IProtonLink> result;
 
-         if (localLinks.Count == 0 && remoteLinks.Count == 0)
+         if (senderByNameMap.Count == 0 && receiverByNameMap.Count == 0)
          {
             result = new HashSet<IProtonLink>();
          }
          else
          {
-            result = new HashSet<IProtonLink>(localLinks.Values);
-            foreach (IProtonLink link in remoteLinks.Values)
+            result = new HashSet<IProtonLink>(senderByNameMap.Values);
+            foreach (IProtonLink link in receiverByNameMap.Values)
             {
                result.Add(link);
             }
