@@ -1429,5 +1429,241 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsNull(failure);
       }
+
+      [Test]
+      public void TestReceiverDrainWithNoCreditResultInNoOutAdd()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+
+         IConnection connection = engine.Start().Open();
+         ISession session = connection.Session().Open();
+         IReceiver receiver = session.Receiver("test").Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectDetach().Respond();
+
+         receiver.Drain();
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverDrainAllowsOnlyOnePendingDrain()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.Open();
+
+         uint creditWindow = 100;
+
+         // Add some credit, verify not draining
+         IMatcher notDrainingMatcher = Matches.AnyOf(Is.EqualTo(false), Is.NullValue());
+         peer.ExpectFlow().WithDrain(notDrainingMatcher).WithLinkCredit(creditWindow).WithDeliveryCount(0);
+         receiver.AddCredit(creditWindow);
+
+         peer.WaitForScriptToComplete();
+
+         peer.ExpectFlow().WithDrain(true).WithLinkCredit(creditWindow).WithDeliveryCount(0);
+
+         receiver.Drain();
+
+         Assert.Throws<InvalidOperationException>(() => receiver.Drain());
+
+         peer.WaitForScriptToComplete();
+
+         peer.ExpectDetach().Respond();
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverDrainWithCreditsAllowsOnlyOnePendingDrain()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+
+         IConnection connection = engine.Start().Open();
+         ISession session = connection.Session().Open();
+         IReceiver receiver = session.Receiver("test").Open();
+
+         uint creditWindow = 100;
+
+         peer.WaitForScriptToComplete();
+
+         peer.ExpectFlow().WithDrain(true).WithLinkCredit(creditWindow).WithDeliveryCount(0);
+
+         receiver.Drain(creditWindow);
+
+         Assert.Throws<InvalidOperationException>(() => receiver.Drain(creditWindow));
+
+         peer.WaitForScriptToComplete();
+
+         peer.ExpectDetach().Respond();
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverThrowsOnAddCreditAfterConnectionClosed()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectClose().Respond();
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.Open();
+         connection.Close();
+
+         try
+         {
+            receiver.AddCredit(100);
+            Assert.Fail("Should not be able to add credit after connection was closed");
+         }
+         catch (InvalidOperationException)
+         {
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverThrowsOnAddCreditAfterSessionClosed()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectEnd().Respond();
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+         receiver.Open();
+         session.Close();
+
+         try
+         {
+            receiver.AddCredit(100);
+            Assert.Fail("Should not be able to add credit after session was closed");
+         }
+         catch (InvalidOperationException)
+         {
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestReceiverDispatchesIncomingDelivery()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(100);
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(false)
+                              .WithMessageFormat(0).Queue();
+         peer.ExpectDetach().Respond();
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+
+         bool deliveryArrived = false;
+         IIncomingDelivery receivedDelivery = null;
+         receiver.DeliveryReadHandler((delivery) =>
+         {
+            deliveryArrived = true;
+            receivedDelivery = delivery;
+         });
+         receiver.Open();
+         receiver.AddCredit(100);
+         receiver.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsTrue(deliveryArrived, "Delivery did not arrive at the receiver");
+         Assert.IsFalse(receivedDelivery.IsPartial, "Deliver should not be partial");
+
+         Assert.IsNull(failure);
+      }
    }
 }

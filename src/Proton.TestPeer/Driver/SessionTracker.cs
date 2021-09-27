@@ -427,7 +427,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          LinkTracker tracker = null;
 
-         if (remoteLinks.Contains(tracker.Handle))
+         if (remoteLinks.Contains(transfer.Handle))
          {
             tracker = (LinkTracker)remoteLinks[transfer.Handle];
          }
@@ -449,7 +449,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          LinkTracker tracker = null;
 
-         if (localLinks.Contains(tracker.Handle))
+         if (localLinks.Contains(transfer.Handle))
          {
             tracker = (LinkTracker)localLinks[transfer.Handle];
          }

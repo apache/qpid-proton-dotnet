@@ -70,9 +70,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
          set => List[((int)TransferField.DeliveryId)] = value;
       }
 
-      public byte[] DeliveryTag
+      public Binary DeliveryTag
       {
-         get => (byte[])List[((int)TransferField.DeliveryTag)];
+         get => (Binary)List[((int)TransferField.DeliveryTag)];
          set => List[((int)TransferField.DeliveryTag)] = value;
       }
 

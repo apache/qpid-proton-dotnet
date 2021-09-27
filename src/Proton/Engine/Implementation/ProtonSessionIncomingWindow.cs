@@ -258,7 +258,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       internal void ValidateNextDeliveryId(uint deliveryId)
       {
          uint previousId = lastDeliveryid ?? deliveryId - 1;
-         if (previousId++ != deliveryId)
+         if (++previousId != deliveryId)
          {
             session.Connection.Engine.EngineFailed(
                   new ProtocolViolationException("Expected delivery-id " + previousId + ", got " + deliveryId));

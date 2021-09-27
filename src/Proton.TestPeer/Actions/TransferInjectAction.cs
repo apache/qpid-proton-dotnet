@@ -67,14 +67,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       public virtual TransferInjectAction WithDeliveryTag(byte[] deliveryTag)
       {
          explicitlyNullDeliveryTag = deliveryTag == null;
-         transfer.DeliveryTag = deliveryTag;
+         transfer.DeliveryTag = new Binary(deliveryTag);
          return this;
       }
 
       public virtual TransferInjectAction WithDeliveryTag(Binary deliveryTag)
       {
          explicitlyNullDeliveryTag = deliveryTag == null;
-         transfer.DeliveryTag = deliveryTag.Array;
+         transfer.DeliveryTag = deliveryTag;
          return this;
       }
 
@@ -214,9 +214,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          }
       }
 
-      private static byte[] GenerateUniqueDeliveryTag()
+      private static Binary GenerateUniqueDeliveryTag()
       {
-         return Guid.NewGuid().ToByteArray();
+         return new Binary(Guid.NewGuid().ToByteArray());
       }
 
       private Header GetOrCreateHeader()

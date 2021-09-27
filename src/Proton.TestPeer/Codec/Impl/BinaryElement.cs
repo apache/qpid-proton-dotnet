@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       public override uint Encode(Stream stream)
       {
          uint size = GetSize();
-         if (stream.IsWritable())
+         if (!stream.IsWritable())
          {
             return 0;
          }
