@@ -21,8 +21,11 @@ using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Transactions;
 using Apache.Qpid.Proton.Types.Transport;
 using NUnit.Framework;
 using Is = Apache.Qpid.Proton.Test.Driver.Matchers.Is;
@@ -2445,6 +2448,364 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.WaitForScriptToComplete();
 
          Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSettleTransferWithNullDisposition()
+      {
+         DoTestSettleTransferWithSpecifiedOutcome(null, Is.NullValue(), true);
+      }
+
+      [Test]
+      public void TestSettleTransferWithAcceptedDisposition()
+      {
+         IDeliveryState state = Accepted.Instance;
+         AcceptedMatcher matcher = new AcceptedMatcher();
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, true);
+      }
+
+      [Test]
+      public void TestUnsettledDispositionOfTransferWithAcceptedOutcome()
+      {
+         IDeliveryState state = Accepted.Instance;
+         AcceptedMatcher matcher = new AcceptedMatcher();
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, false);
+      }
+
+      [Test]
+      public void TestSettleTransferWithReleasedDisposition()
+      {
+         IDeliveryState state = Released.Instance;
+         ReleasedMatcher matcher = new ReleasedMatcher();
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, true);
+      }
+
+      [Test]
+      public void TestSettleTransferWithRejectedDisposition()
+      {
+         Rejected state = new Rejected();
+         RejectedMatcher matcher = new RejectedMatcher();
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, true);
+      }
+
+      [Test]
+      [Ignore("Fails due to test peer not handling Error Condition matching")]
+      public void TestSettleTransferWithRejectedWithErrorDisposition()
+      {
+         Rejected state = new Rejected();
+         state.Error = new ErrorCondition(AmqpError.DECODE_ERROR, "test");
+         RejectedMatcher matcher = new RejectedMatcher().WithError(AmqpError.DECODE_ERROR.ToString(), "test");
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, true);
+      }
+
+      [Test]
+      public void TestSettleTransferWithModifiedDisposition()
+      {
+         Modified state = new Modified();
+         state.DeliveryFailed = true;
+         state.UndeliverableHere = true;
+         ModifiedMatcher matcher = new ModifiedMatcher().WithDeliveryFailed(true).WithUndeliverableHere(true);
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, true);
+      }
+
+      [Test]
+      public void TestSettleTransferWithTransactionalDisposition()
+      {
+         TransactionalState state = new TransactionalState();
+         state.TxnId = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 });
+         state.Outcome = Accepted.Instance;
+         TransactionalStateMatcher matcher =
+             new TransactionalStateMatcher();
+         matcher.WithTxnId(new byte[] { 1 });
+         matcher.WithOutcome(new AcceptedMatcher());
+         DoTestSettleTransferWithSpecifiedOutcome(state, matcher, true);
+      }
+
+      private void DoTestSettleTransferWithSpecifiedOutcome(IDeliveryState state, IMatcher stateMatcher, bool settled)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 });
+         peer.ExpectDisposition().WithFirst(0)
+                                 .WithSettled(settled)
+                                 .WithState(stateMatcher);
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4 });
+
+         ISender sender = session.Sender("sender-1");
+
+         bool deliverySentAfterSendable = false;
+         IOutgoingDelivery sentDelivery = null;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            sentDelivery = handler.Next;
+            sentDelivery.DeliveryTagBytes = new byte[] { 0 };
+            sentDelivery.WriteBytes(payload);
+            deliverySentAfterSendable = sender.IsSendable;
+         });
+
+         sender.Open();
+
+         Assert.IsTrue(deliverySentAfterSendable, "Delivery should have been sent after credit arrived");
+
+         IOutgoingDelivery delivery = sender.Current;
+         Assert.IsNull(delivery);
+         sentDelivery.Disposition(state, settled);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestAttemptedSecondDispositionOnAlreadySettledDeliveryNull()
+      {
+         DoTestAttemptedSecondDispositionOnAlreadySettledDelivery(Accepted.Instance, null);
+      }
+
+      [Test]
+      public void TestAttemptedSecondDispositionOnAlreadySettledDeliveryReleased()
+      {
+         DoTestAttemptedSecondDispositionOnAlreadySettledDelivery(Accepted.Instance, Released.Instance);
+      }
+
+      [Test]
+      public void TestAttemptedSecondDispositionOnAlreadySettledDeliveryModified()
+      {
+         Modified modified = new Modified();
+         modified.DeliveryFailed = true;
+         DoTestAttemptedSecondDispositionOnAlreadySettledDelivery(Released.Instance, modified);
+      }
+
+      [Test]
+      public void TestAttemptedSecondDispositionOnAlreadySettledDeliveryRejected()
+      {
+         DoTestAttemptedSecondDispositionOnAlreadySettledDelivery(Released.Instance, new Rejected());
+      }
+
+      [Test]
+      public void TestAttemptedSecondDispositionOnAlreadySettledDeliveryTransactional()
+      {
+         TransactionalState state = new TransactionalState();
+         state.Outcome = Accepted.Instance;
+         DoTestAttemptedSecondDispositionOnAlreadySettledDelivery(Released.Instance, state);
+      }
+
+      private void DoTestAttemptedSecondDispositionOnAlreadySettledDelivery(IDeliveryState first, IDeliveryState second)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 });
+         peer.ExpectDisposition().WithFirst(0)
+                                 .WithSettled(true)
+                                 .WithState(Is.NotNullValue());
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4 });
+
+         ISender sender = session.Sender("sender-1");
+         IOutgoingDelivery sentDelivery = null;
+
+         bool deliverySentAfterSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            sentDelivery = handler.Next;
+            sentDelivery.DeliveryTagBytes = new byte[] { 0 };
+            sentDelivery.WriteBytes(payload);
+            deliverySentAfterSendable = sender.IsSendable;
+         });
+
+         sender.Open();
+
+         Assert.IsTrue(deliverySentAfterSendable, "Delivery should have been sent after credit arrived");
+
+         IOutgoingDelivery delivery = sender.Current;
+         Assert.IsNull(delivery);
+         sentDelivery.Disposition(first, true);
+
+         // A second attempt at the same outcome should result in no action.
+         sentDelivery.Disposition(first, true);
+
+         try
+         {
+            sentDelivery.Disposition(second, true);
+            Assert.Fail("Should not be able to update outcome on already settled delivery");
+         }
+         catch (InvalidOperationException)
+         {
+            // Expected
+         }
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSettleSentDeliveryAfterRemoteSettles()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .Accept();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4 });
+
+         ISender sender = session.Sender("sender-1");
+
+         bool deliverySentAfterSendable = false;
+         IOutgoingDelivery sentDelivery = null;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            sentDelivery = handler.Next;
+            sentDelivery.DeliveryTagBytes = new byte[] { 0 };
+            sentDelivery.WriteBytes(payload);
+            deliverySentAfterSendable = sender.IsSendable;
+         });
+
+         sender.DeliveryStateUpdatedHandler((delivery) =>
+         {
+            if (delivery.IsRemotelySettled)
+            {
+               delivery.Settle();
+            }
+         });
+
+         sender.Open();
+
+         Assert.IsTrue(deliverySentAfterSendable, "Delivery should have been sent after credit arrived");
+
+         Assert.IsNull(sender.Current);
+
+         Assert.IsTrue(sentDelivery.IsRemotelySettled);
+         Assert.AreSame(Accepted.Instance, sentDelivery.RemoteState);
+         Assert.IsNull(sentDelivery.State);
+         Assert.IsTrue(sentDelivery.IsSettled);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderHandlesDeferredOpenAndBeginAttachResponses()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         bool senderRemotelyOpened = false;
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen();
+         peer.ExpectBegin();
+         peer.ExpectAttach().OfSender()
+                            .WithTarget().WithDynamic(true).WithAddress((string)null);
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+         Target target = new Target();
+         target.Dynamic = true;
+         target.Address = null;
+         sender.Target = target;
+         sender.OpenHandler((result) => senderRemotelyOpened = true).Open();
+
+         peer.WaitForScriptToComplete();
+
+         // This should happen after we inject the held open and attach
+         peer.ExpectClose().Respond();
+
+         // Inject held responses to get the ball rolling again
+         peer.RemoteOpen().WithOfferedCapabilities("ANONYMOUS_RELAY").Now();
+         peer.RespondToLastBegin().Now();
+         peer.RespondToLastAttach().Now();
+
+         Assert.IsTrue(senderRemotelyOpened, "Sender remote opened event did not fire");
+         ITerminus terminus = sender.RemoteTerminus;
+         Assert.True(terminus is Target);
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
       }
    }
 }

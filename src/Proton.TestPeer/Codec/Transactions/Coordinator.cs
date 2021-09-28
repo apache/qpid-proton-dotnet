@@ -39,6 +39,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
       {
       }
 
+      public Coordinator(Coordinator value) : base(Enum.GetNames(typeof(CoordinatorField)).Length, value)
+      {
+      }
+
       public Coordinator(IList described) : base(Enum.GetNames(typeof(CoordinatorField)).Length, described)
       {
       }

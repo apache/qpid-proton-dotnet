@@ -51,6 +51,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       {
       }
 
+      public Source(Source value) : base(Enum.GetNames(typeof(SourceField)).Length, value)
+      {
+      }
+
       public Source(IList described) : base(Enum.GetNames(typeof(SourceField)).Length, described)
       {
       }
