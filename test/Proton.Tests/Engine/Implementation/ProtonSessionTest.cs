@@ -968,14 +968,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Delivery processing still not working")]
       public void TestEmittedSessionIncomingWindowOnFirstFlowWithNoFrameSizeButWithSessionCapacitySet()
       {
          DoSessionIncomingWindowTestImpl(false, true);
       }
 
       [Test]
-      [Ignore("Delivery processing still not working")]
       public void TestEmittedSessionIncomingWindowOnFirstFlowWithFrameSizeAndSessionCapacitySet()
       {
          DoSessionIncomingWindowTestImpl(true, true);
@@ -1327,42 +1325,36 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingClosedSenders()
       {
          DoTestSessionTrackingOfSenders(true, true, false, true);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingDetachedSenders()
       {
          DoTestSessionTrackingOfSenders(true, true, false, false);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingClosedSendersRemoteGoesFirst()
       {
          DoTestSessionTrackingOfSenders(true, true, true, true);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingDetachedSendersRemoteGoesFirst()
       {
          DoTestSessionTrackingOfSenders(true, true, true, false);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionTracksRemotelyOpenSenders()
       {
          DoTestSessionTrackingOfSenders(true, false, false, false);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionTracksLocallyOpenSenders()
       {
          DoTestSessionTrackingOfSenders(false, true, false, false);
@@ -2032,7 +2024,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestSessionNotWritableWhenOutgoingCapacitySetToZeroAlsoReflectsInSenders()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
