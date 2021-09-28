@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
             return false;
          }
 
-         if (expected.GetType().IsArray && actual.GetType().IsArray)
+         if (expected is Array && actual is Array)
          {
             return ArraysMatch((Array)expected, (Array)actual);
          }

@@ -48,9 +48,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       public override bool Equals(object obj)
       {
-         return obj is Binary binary &&
-                Length == binary.Length &&
-                EqualityComparer<byte[]>.Default.Equals(buffer, binary.buffer);
+         if (obj is Binary binary)
+         {
+            if (Length != binary.Length)
+            {
+               return false;
+            }
+
+            for (int i = 0; i < Length; ++i)
+            {
+               if (buffer[i] != binary.buffer[i])
+               {
+                  return false;
+               }
+            }
+
+            return true;
+         }
+
+         return false;
       }
 
       public override int GetHashCode()

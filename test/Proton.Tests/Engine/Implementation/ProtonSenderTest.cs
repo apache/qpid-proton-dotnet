@@ -18,7 +18,9 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
+using Apache.Qpid.Proton.Test.Driver.Matchers;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
@@ -1217,7 +1219,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to error that causes link to detach itself.")]
       public void TestSendSmallPayloadWhenCreditAvailable()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -1266,6 +1267,1179 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          });
 
          sender.Open();
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSendTransferWithNonDefaultMessageFormat()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payloadBuffer = new byte[] { 0, 1, 2, 3, 4 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithMessageFormat(17).WithPayload(payloadBuffer);
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(payloadBuffer);
+
+         ISender sender = session.Sender("sender-1");
+
+         Assert.IsFalse(sender.IsSendable);
+
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            if (handler.IsSendable)
+            {
+               IOutgoingDelivery delivery = handler.Next;
+
+               delivery.DeliveryTagBytes = new byte[] { 0 };
+               delivery.MessageFormat = 17;
+               delivery.WriteBytes(payload);
+            }
+         });
+
+         sender.Open();
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderSignalsDeliveryUpdatedOnSettledThenSettleFromLinkAPI()
+      {
+         DoTestSenderSignalsDeliveryUpdatedOnSettled(true);
+      }
+
+      [Test]
+      public void TestSenderSignalsDeliveryUpdatedOnSettledThenSettleDelivery()
+      {
+         DoTestSenderSignalsDeliveryUpdatedOnSettled(false);
+      }
+
+      private void DoTestSenderSignalsDeliveryUpdatedOnSettled(bool settleFromLink)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithPayload(payload);
+         peer.RemoteDisposition().WithSettled(true)
+                                 .WithRole(Role.Receiver.ToBoolean())
+                                 .WithState().Accepted()
+                                 .WithFirst(0).Queue();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+
+         bool deliveryUpdatedAndSettled = false;
+         IOutgoingDelivery updatedDelivery = null;
+         sender.DeliveryStateUpdatedHandler(delivery =>
+         {
+            if (delivery.IsRemotelySettled)
+            {
+               deliveryUpdatedAndSettled = true;
+            }
+
+            updatedDelivery = delivery;
+         });
+
+         Assert.IsFalse(sender.IsSendable);
+
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            if (handler.IsSendable)
+            {
+               IOutgoingDelivery delivery = handler.Next;
+               delivery.DeliveryTagBytes = new byte[] { 0 };
+               delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+            }
+         });
+
+         sender.Open();
+
+         Assert.IsTrue(deliveryUpdatedAndSettled, "Delivery should have been updated and state settled");
+         Assert.AreEqual(Accepted.Instance, updatedDelivery.RemoteState);
+         Assert.IsTrue(sender.HasUnsettled);
+         int count = 0;
+         foreach (IOutgoingDelivery unsettled in sender.Unsettled)
+         {
+            count++;
+         }
+
+         Assert.AreEqual(1, count);
+
+         if (settleFromLink)
+         {
+            sender.Settle(delivery => true);
+         }
+         else
+         {
+            updatedDelivery.Settle();
+         }
+
+         Assert.IsFalse(sender.HasUnsettled);
+         count = 0;
+         foreach (IOutgoingDelivery unsettled in sender.Unsettled)
+         {
+            count++;
+         }
+
+         Assert.AreEqual(0, count);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestOpenSenderBeforeOpenConnection()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         // Create the connection but don't open, then open a session and a sender and
+         // the session begin and sender attach shouldn't go out until the connection
+         // is opened locally.
+         IConnection connection = engine.Start();
+         ISession session = connection.Session();
+         session.Open();
+         ISender sender = session.Sender("sender");
+         sender.Open();
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().WithHandle(0).WithName("sender").OfSender().Respond();
+
+         // Now open the connection, expect the Open, Begin, and Attach frames
+         connection.Open();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestOpenSenderBeforeOpenSession()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+
+         // Create the connection and open it, then create a session and a sender
+         // and observe that the sender doesn't send its attach until the session
+         // is opened.
+         IConnection connection = engine.Start();
+         connection.Open();
+         ISession session = connection.Session();
+         ISender sender = session.Sender("sender");
+         sender.Open();
+
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().WithHandle(0).WithName("sender").OfSender().Respond();
+
+         // Now open the session, expect the Begin, and Attach frames
+         session.Open();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderDetachAfterEndSent()
+      {
+         DoTestSenderClosedOrDetachedAfterEndSent(false);
+      }
+
+      [Test]
+      public void TestSenderCloseAfterEndSent()
+      {
+         DoTestSenderClosedOrDetachedAfterEndSent(true);
+      }
+
+      public void DoTestSenderClosedOrDetachedAfterEndSent(bool close)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().WithHandle(0).WithName("sender").WithRole(Role.Sender.ToBoolean()).Respond();
+         peer.ExpectEnd().Respond();
+
+         // Create the connection and open it, then create a session and a sender
+         // and observe that the sender doesn't send its detach if the session has
+         // already been closed.
+         IConnection connection = engine.Start();
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         ISender sender = session.Sender("sender");
+         sender.Open();
+
+         // Causes the End frame to be sent
+         session.Close();
+
+         // The sender should not emit an end as the session was closed which implicitly
+         // detached the link.
+         if (close)
+         {
+            sender.Close();
+         }
+         else
+         {
+            sender.Detach();
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderDetachAfterCloseSent()
+      {
+         DoTestSenderClosedOrDetachedAfterCloseSent(false);
+      }
+
+      [Test]
+      public void TestSenderCloseAfterCloseSent()
+      {
+         DoTestSenderClosedOrDetachedAfterCloseSent(true);
+      }
+
+      public void DoTestSenderClosedOrDetachedAfterCloseSent(bool close)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().WithHandle(0).WithName("sender").OfSender().Respond();
+         peer.ExpectClose().Respond();
+
+         // Create the connection and open it, then create a session and a sender
+         // and observe that the sender doesn't send its detach if the connection has
+         // already been closed.
+         IConnection connection = engine.Start();
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         ISender sender = session.Sender("sender");
+         sender.Open();
+
+         // Cause an Close frame to be sent
+         connection.Close();
+
+         // The sender should not emit an detach as the connection was closed which implicitly
+         // detached the link.
+         if (close)
+         {
+            sender.Close();
+         }
+         else
+         {
+            sender.Detach();
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestNoDispositionSentAfterDeliverySettledForSender()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 });
+         peer.ExpectDisposition().WithFirst(0)
+                                 .WithSettled(true)
+                                 .WithState().Accepted();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4 });
+
+         ISender sender = session.Sender("sender-1");
+
+         bool deliverySentAfterSendable = false;
+         IOutgoingDelivery sent = null;
+
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            if (handler.IsSendable)
+            {
+               sent = handler.Next;
+               sent.DeliveryTagBytes = new byte[] { 0 };
+               sent.WriteBytes(payload);
+               deliverySentAfterSendable = true;
+            }
+         });
+
+         sender.Open();
+
+         Assert.IsTrue(deliverySentAfterSendable, "Delivery should have been sent after credit arrived");
+
+         Assert.IsNull(sender.Current);
+
+         sent.Disposition(Accepted.Instance, true);
+
+         IOutgoingDelivery delivery2 = sender.Next;
+
+         Assert.AreNotSame(delivery2, sent);
+         delivery2.Disposition(Released.Instance, true);
+
+         Assert.IsFalse(sender.HasUnsettled);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderCannotSendAfterConnectionClosed()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectClose().Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+
+         Assert.IsFalse(sender.IsSendable);
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         sender.Open();
+
+         Assert.AreEqual(10, sender.Credit);
+         Assert.IsTrue(sender.IsSendable);
+
+         connection.Close();
+
+         Assert.IsFalse(sender.IsSendable);
+         try
+         {
+            delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 }));
+            Assert.Fail("Should not be able to write to delivery after connection closed.");
+         }
+         catch (InvalidOperationException)
+         {
+            // Should not allow writes on past delivery instances after connection closed
+         }
+
+         try
+         {
+            IOutgoingDelivery next = sender.Next;
+            Assert.Fail("Should not be able get next after connection closed");
+         }
+         catch (InvalidOperationException)
+         {
+            // Should not allow next message after close of connection
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderCannotSendAfterSessionClosed()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectEnd().Respond();
+         peer.ExpectClose().Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+
+         Assert.IsFalse(sender.IsSendable);
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         sender.Open();
+
+         Assert.AreEqual(10, sender.Credit);
+         Assert.IsTrue(sender.IsSendable);
+
+         session.Close();
+
+         Assert.IsFalse(sender.IsSendable);
+         try
+         {
+            delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 }));
+            Assert.Fail("Should not be able to write to delivery after session closed.");
+         }
+         catch (InvalidOperationException)
+         {
+            // Should not allow writes on past delivery instances after session closed
+         }
+
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSenderWriteBytesThrowsEngineFailedAfterConnectionDropped()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.DropAfterLastHandler();
+
+         IConnection connection = engine.Start().Open();
+         ISession session = connection.Session().Open();
+         ISender sender = session.Sender("sender-1").Open();
+         IOutgoingDelivery delivery = sender.Next;
+
+         Assert.IsNotNull(delivery);
+         Assert.IsTrue(sender.IsSendable);
+
+         try
+         {
+            delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 }));
+            Assert.Fail("Should not be able to write to delivery afters simulated connection drop.");
+         }
+         catch (EngineFailedException)
+         {
+         }
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails with transfer sending null payload")]
+      public void TestSendMultiFrameDeliveryAndSingleFrameDeliveryOnSingleSessionFromDifferentSenders()
+      {
+         DoMultiplexMultiFrameDeliveryOnSingleSessionOutgoingTestImpl(false);
+      }
+
+      [Test]
+      [Ignore("Test fails with transfer sending null payload")]
+      public void TestMultipleMultiFrameDeliveriesOnSingleSessionFromDifferentSenders()
+      {
+         DoMultiplexMultiFrameDeliveryOnSingleSessionOutgoingTestImpl(true);
+      }
+
+      private void DoMultiplexMultiFrameDeliveryOnSingleSessionOutgoingTestImpl(bool bothDeliveriesMultiFrame)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         uint contentLength1 = 6000;
+         uint frameSizeLimit = 4000;
+         uint contentLength2 = 2000;
+
+         if (bothDeliveriesMultiFrame)
+         {
+            contentLength2 = 6000;
+         }
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithMaxFrameSize(frameSizeLimit)
+                          .Respond()
+                          .WithContainerId("driver")
+                          .WithMaxFrameSize(frameSizeLimit);
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+
+         IConnection connection = engine.Start();
+         connection.MaxFrameSize = frameSizeLimit;
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         string linkName1 = "Sender1";
+         ISender sender1 = session.Sender(linkName1);
+         sender1.Open();
+
+         string linkName2 = "Sender2";
+         ISender sender2 = session.Sender(linkName2);
+         sender2.Open();
+
+         bool sender1MarkedSendable = false;
+         sender1.CreditStateUpdateHandler(handler =>
+         {
+            sender1MarkedSendable = handler.IsSendable;
+         });
+
+         bool sender2MarkedSendable = false;
+         sender2.CreditStateUpdateHandler(handler =>
+         {
+            sender2MarkedSendable = handler.IsSendable;
+         });
+
+         peer.RemoteFlow().WithHandle(0)
+                          .WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Now();
+         peer.RemoteFlow().WithHandle(1)
+                          .WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Now();
+
+         Assert.IsTrue(sender1MarkedSendable, "Sender 1 should now be sendable");
+         Assert.IsTrue(sender2MarkedSendable, "Sender 2 should now be sendable");
+
+         // Frames are not multiplexed for large deliveries as we write the full
+         // writable portion out when a write is called.
+
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(true)
+                              .WithState().Accepted()
+                              .WithDeliveryId(0)
+                              .WithMore(true)
+                              .WithDeliveryTag(new byte[] { 1 });
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(true)
+                              .WithState().Accepted()
+                              .WithDeliveryId(0)
+                              .WithMore(false)
+                              .WithDeliveryTag(Is.NullValue());
+         peer.ExpectTransfer().WithHandle(1)
+                              .WithSettled(true)
+                              .WithState().Accepted()
+                              .WithDeliveryId(1)
+                              .WithMore(bothDeliveriesMultiFrame)
+                              .WithDeliveryTag(new byte[] { 2 });
+         if (bothDeliveriesMultiFrame)
+         {
+            peer.ExpectTransfer().WithHandle(1)
+                                 .WithSettled(true)
+                                 .WithState().Accepted()
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithDeliveryTag(Is.NullValue());
+         }
+
+         IProtonBuffer messageContent1 = CreateContentBuffer(contentLength1);
+         IOutgoingDelivery delivery1 = sender1.Next;
+         delivery1.DeliveryTagBytes = new byte[] { 1 };
+         delivery1.Disposition(Accepted.Instance, true);
+         delivery1.WriteBytes(messageContent1);
+
+         IProtonBuffer messageContent2 = CreateContentBuffer(contentLength2);
+         IOutgoingDelivery delivery2 = sender2.Next;
+         delivery2.DeliveryTagBytes = new byte[] { 2 };
+         delivery2.Disposition(Accepted.Instance, true);
+         delivery2.WriteBytes(messageContent2);
+
+         peer.ExpectClose().Respond();
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Test fails due to frame decoding error on test peer")]
+      public void TestMaxFrameSizeOfPeerHasEffect()
+      {
+         DoMaxFrameSizeTestImpl(0, 0, 5700, 1);
+         DoMaxFrameSizeTestImpl(1024, 0, 5700, 6);
+      }
+
+      [Test]
+      [Ignore("Test fails due to frame decoding error on test peer")]
+      public void TestMaxFrameSizeOutgoingFrameSizeLimitHasEffect()
+      {
+         DoMaxFrameSizeTestImpl(0, 512, 5700, 12);
+         DoMaxFrameSizeTestImpl(1024, 512, 5700, 12);
+         DoMaxFrameSizeTestImpl(1024, 2048, 5700, 6);
+      }
+
+      void DoMaxFrameSizeTestImpl(uint remoteMaxFrameSize, uint outboundFrameSizeLimit, uint contentLength, uint expectedNumFrames)
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         if (outboundFrameSizeLimit == 0)
+         {
+            if (remoteMaxFrameSize == 0)
+            {
+               peer.ExpectOpen().Respond();
+            }
+            else
+            {
+               peer.ExpectOpen().Respond().WithMaxFrameSize(remoteMaxFrameSize);
+            }
+         }
+         else
+         {
+            if (remoteMaxFrameSize == 0)
+            {
+               peer.ExpectOpen().WithMaxFrameSize(outboundFrameSizeLimit).Respond();
+            }
+            else
+            {
+               peer.ExpectOpen().WithMaxFrameSize(outboundFrameSizeLimit)
+                                .Respond()
+                                .WithMaxFrameSize(remoteMaxFrameSize);
+            }
+         }
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+
+         IConnection connection = engine.Start();
+         if (outboundFrameSizeLimit != 0)
+         {
+            connection.MaxFrameSize = outboundFrameSizeLimit;
+         }
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         string linkName = "mySender";
+         ISender sender = session.Sender(linkName);
+         sender.Open();
+
+         bool senderMarkedSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            senderMarkedSendable = handler.IsSendable;
+         });
+
+         peer.RemoteFlow().WithHandle(0)
+                          .WithDeliveryCount(0)
+                          .WithLinkCredit(50)
+                          .WithIncomingWindow(65535)
+                          .WithOutgoingWindow(65535)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Now();
+
+         Assert.IsTrue(senderMarkedSendable, "Sender should now be sendable");
+
+         // This calculation isn't entirely precise, there is some added performative/frame overhead not
+         // accounted for...but values are chosen to work, and verified here.
+         uint frameCount;
+         if (remoteMaxFrameSize == 0 && outboundFrameSizeLimit == 0)
+         {
+            frameCount = 1;
+         }
+         else if (remoteMaxFrameSize == 0 && outboundFrameSizeLimit != 0)
+         {
+            frameCount = (uint)Math.Ceiling((double)contentLength / (double)outboundFrameSizeLimit);
+         }
+         else
+         {
+            uint effectiveMaxFrameSize;
+            if (outboundFrameSizeLimit != 0)
+            {
+               effectiveMaxFrameSize = Math.Min(outboundFrameSizeLimit, remoteMaxFrameSize);
+            }
+            else
+            {
+               effectiveMaxFrameSize = remoteMaxFrameSize;
+            }
+
+            frameCount = (uint)Math.Ceiling((double)contentLength / (double)effectiveMaxFrameSize);
+         }
+
+         Assert.AreEqual(expectedNumFrames, frameCount, "Unexpected number of frames calculated");
+
+         for (int i = 1; i <= expectedNumFrames; ++i)
+         {
+            peer.ExpectTransfer().WithHandle(0)
+                                 .WithSettled(true)
+                                 .WithState().Accepted()
+                                 .WithDeliveryId(0)
+                                 .WithMore(i != expectedNumFrames ? true : false)
+                                 .WithDeliveryTag(i == 1 ? Is.NotNullValue() : Is.NullValue())
+                                 .WithNonNullPayload();
+         }
+
+         IProtonBuffer messageContent = CreateContentBuffer(contentLength);
+         IOutgoingDelivery delivery = sender.Next;
+         delivery.DeliveryTagBytes = new byte[] { 1 };
+         delivery.Disposition(Accepted.Instance, true);
+         delivery.WriteBytes(messageContent);
+
+         peer.ExpectClose().Respond();
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      [Ignore("Fails due to error from splayed tree that indicates duplicate add attempted.")]
+      public void TestCompleteInProgressDeliveryWithFinalEmptyTransfer()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithMore(true)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithPayload(payload);
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithAborted(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
+                              .WithSettled(false)
+                              .WithMore(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
+                              .WithNullPayload();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+         sender.Open();
+
+         bool senderMarkedSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            senderMarkedSendable = sender.IsSendable;
+         });
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         delivery.DeliveryTagBytes = new byte[] { 0 };
+         delivery.StreamBytes(ProtonByteBufferAllocator.Instance.Wrap(payload), false);
+         delivery.StreamBytes(null, true);
+
+         Assert.IsFalse(delivery.IsAborted);
+         Assert.IsFalse(delivery.IsPartial);
+         Assert.IsFalse(delivery.IsSettled);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestAbortInProgressDelivery()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithMore(true)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithPayload(payload);
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithAborted(true)
+                              .WithSettled(true)
+                              .WithMore(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
+                              .WithNullPayload();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+         sender.Open();
+
+         bool senderMarkedSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            senderMarkedSendable = sender.IsSendable;
+         });
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         delivery.DeliveryTagBytes = new byte[] { 0 };
+         delivery.StreamBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+         delivery.Abort();
+
+         Assert.IsTrue(delivery.IsAborted);
+         Assert.IsFalse(delivery.IsPartial);
+         Assert.IsTrue(delivery.IsSettled);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestAbortAlreadyAbortedDelivery()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithMore(true)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithPayload(payload);
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithAborted(true)
+                              .WithSettled(true)
+                              .WithMore(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
+                              .WithNullPayload();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+         sender.Open();
+
+         bool senderMarkedSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            senderMarkedSendable = sender.IsSendable;
+         });
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         delivery.DeliveryTagBytes = new byte[] { 0 };
+         delivery.StreamBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+
+         Assert.IsTrue(sender.HasUnsettled);
+
+         delivery.Abort();
+
+         Assert.IsTrue(delivery.IsAborted);
+         Assert.IsFalse(delivery.IsPartial);
+         Assert.IsTrue(delivery.IsSettled);
+
+         // Second abort attempt should not error out or trigger additional frames
+         delivery.Abort();
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestAbortOnDeliveryThatHasNoWritesIsNoOp()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+         sender.Open();
+
+         bool senderMarkedSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            senderMarkedSendable = sender.IsSendable;
+         });
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         delivery.DeliveryTagBytes = new byte[] { 0 };
+         delivery.Abort();
+
+         Assert.IsNull(sender.Current);
+         Assert.IsTrue(delivery.IsAborted);
+         Assert.IsFalse(delivery.IsPartial);
+         Assert.IsTrue(delivery.IsSettled);
+
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestAbortOnDeliveryThatHasNoWritesIsNoOpThenSendUsingCurrent()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         ISender sender = session.Sender("sender-1");
+         sender.Open();
+
+         bool senderMarkedSendable = false;
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            senderMarkedSendable = sender.IsSendable;
+         });
+
+         IOutgoingDelivery delivery = sender.Next;
+         Assert.IsNotNull(delivery);
+
+         delivery.DeliveryTagBytes = new byte[] { 0 };
+         delivery.Abort();
+
+         Assert.IsNull(sender.Current);
+         Assert.IsTrue(delivery.IsAborted);
+         Assert.IsFalse(delivery.IsPartial);
+         Assert.IsTrue(delivery.IsSettled);
+
+         try
+         {
+            IOutgoingDelivery d = sender.Next;
+         }
+         catch (InvalidOperationException)
+         {
+            Assert.Fail("Should not be able to next as current was not aborted since nothing was ever written.");
+         }
+
+         peer.ExpectTransfer().WithHandle(0)
+                              .WithSettled(false)
+                              .WithState(Is.NullValue())
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 1 })
+                              .WithPayload(payload);
+         peer.ExpectDisposition().WithFirst(0).WithSettled(true).WithState().Accepted();
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         delivery = sender.Current;
+         delivery.DeliveryTagBytes = new byte[] { 1 };
+         delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+         delivery.Disposition(Accepted.Instance, true);
+
          sender.Close();
 
          peer.WaitForScriptToComplete();

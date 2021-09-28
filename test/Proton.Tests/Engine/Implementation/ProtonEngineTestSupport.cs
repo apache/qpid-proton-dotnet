@@ -112,6 +112,19 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return peer;
       }
 
+      protected static IProtonBuffer CreateContentBuffer(uint length)
+      {
+         Random rand = new Random(Environment.TickCount);
+
+         byte[] payload = new byte[length];
+         for (uint i = 0; i < length; i++)
+         {
+            payload[i] = (byte)(64 + 1 + rand.Next(9));
+         }
+
+         return ProtonByteBufferAllocator.Instance.Wrap(payload);
+      }
+
       protected uint CountElements<T>(IEnumerable<T> enumerable)
       {
          uint count = 0;

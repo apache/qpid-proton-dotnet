@@ -48,6 +48,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected override IMatcher GetExpectationMatcher() => matcher;
 
+      protected override IMatcher GetPayloadMatcher() => payloadMatcher;
+
       public virtual DispositionInjectAction Respond()
       {
          response = new DispositionInjectAction(driver);

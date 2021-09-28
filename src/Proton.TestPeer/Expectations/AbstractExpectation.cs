@@ -107,7 +107,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected abstract IMatcher GetExpectationMatcher();
 
-      protected IMatcher GetPayloadMatcher()
+      protected virtual IMatcher GetPayloadMatcher()
       {
          return null;
       }
