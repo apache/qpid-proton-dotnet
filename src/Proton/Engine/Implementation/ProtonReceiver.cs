@@ -281,6 +281,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             currentDeliveryId = transfer.DeliveryId;
          }
 
+         delivery.IncrementAndGetTransferCount();
+
          if (transfer.HasState())
          {
             delivery.RemoteState = transfer.DeliveryState;

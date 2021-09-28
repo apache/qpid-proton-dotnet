@@ -17,6 +17,9 @@
 
 using System;
 using System.Collections;
+using System.IO;
+using Apache.Qpid.Proton.Test.Driver.Codec;
+using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
@@ -51,6 +54,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       }
 
       public override Transfer Performative => transfer;
+
+      public override byte[] Payload => EncodePayload();
 
       public virtual TransferInjectAction WithHandle(uint handle)
       {
@@ -210,7 +215,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             // next Id from the driver as well as checking for a session and using last
             // created one if none set.
 
-            session.HandleLocalTransfer(transfer, payload);
+            session.HandleLocalTransfer(transfer, Payload);
          }
       }
 
@@ -271,6 +276,45 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             footer = new Footer();
          }
          return footer;
+      }
+
+      private byte[] EncodePayload()
+      {
+         ICodec codec = CodecFactory.Create();
+         MemoryStream encoding = new MemoryStream();
+
+         if (header != null)
+         {
+            codec.PutDescribedType(header);
+         }
+         if (deliveryAnnotations != null)
+         {
+            codec.PutDescribedType(deliveryAnnotations);
+         }
+         if (messageAnnotations != null)
+         {
+            codec.PutDescribedType(messageAnnotations);
+         }
+         if (properties != null)
+         {
+            codec.PutDescribedType(properties);
+         }
+         if (applicationProperties != null)
+         {
+            codec.PutDescribedType(applicationProperties);
+         }
+         if (body != null)
+         {
+            codec.PutDescribedType(body);
+         }
+         if (footer != null)
+         {
+            codec.PutDescribedType(footer);
+         }
+
+         codec.Encode(encoding);
+
+         return encoding.ToArray();
       }
 
       #region Builders for AMQP message body sections

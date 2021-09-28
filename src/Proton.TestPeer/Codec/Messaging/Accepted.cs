@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections;
-using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
@@ -55,26 +54,24 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
             return true;
          }
 
-         if (!(obj is DescribedType)) {
+         if (!(obj is IDescribedType))
+         {
             return false;
          }
 
-         DescribedType d = (DescribedType)obj;
+         IDescribedType d = (IDescribedType)obj;
          if (!(DESCRIPTOR_CODE.Equals(d.Descriptor) || DESCRIPTOR_SYMBOL.Equals(d.Descriptor)))
          {
             return false;
          }
 
-         Object described = Described;
-         Object described2 = d.Described;
-         if (described == null)
+         Accepted other = (Accepted)obj;
+         if (other.GetHighestSetFieldId() != GetHighestSetFieldId())
          {
-            return described2 == null;
+            return false;
          }
-         else
-         {
-            return described.Equals(described2);
-         }
+
+         return true;
       }
 
       public override int GetHashCode()

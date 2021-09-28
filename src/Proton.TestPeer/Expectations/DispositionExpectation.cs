@@ -16,7 +16,6 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
@@ -31,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// <summary>
    /// Scripted expectation for the AMQP performative
    /// </summary>
-   public sealed class DispositionExpectation : AbstractExpectation<Detach>
+   public sealed class DispositionExpectation : AbstractExpectation<Disposition>
    {
       private readonly DispositionMatcher matcher = new DispositionMatcher();
       private readonly DispositionDeliveryStateBuilder stateBuilder;
@@ -65,9 +64,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          session.HandleDisposition(disposition);
       }
 
-      public DispositionExpectation WithRole(Role role)
+      public DispositionExpectation WithRole(bool role)
       {
          WithRole(Is.EqualTo(role));
+         return this;
+      }
+
+      public DispositionExpectation WithRole(Role role)
+      {
+         WithRole(Is.EqualTo(role.ToBoolean()));
          return this;
       }
 

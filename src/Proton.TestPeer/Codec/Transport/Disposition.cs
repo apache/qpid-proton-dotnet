@@ -54,7 +54,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public Role? Role
       {
-         get => (Role?)List[((int)DispositionField.Role)];
+         get
+         {
+            if (List[((int)DispositionField.Role)] != null)
+            {
+               return (bool)List[((int)DispositionField.Role)] ? Transport.Role.Receiver : Transport.Role.Sender;
+            }
+            else
+            {
+               return null;
+            }
+         }
          set => List[((int)DispositionField.Role)] = value == null ? null : value == Transport.Role.Receiver ? true : false;
       }
 

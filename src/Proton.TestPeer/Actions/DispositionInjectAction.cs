@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.stateBuilder = new DeliveryStateBuilder(this);
       }
 
-      public override Disposition Performative => throw new NotImplementedException();
+      public override Disposition Performative => disposition;
 
       public DispositionInjectAction WithRole(bool role)
       {

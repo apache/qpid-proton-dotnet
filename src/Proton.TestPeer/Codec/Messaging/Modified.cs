@@ -86,11 +86,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
             return true;
          }
 
-         if (!(obj is DescribedType)) {
+         if (!(obj is IDescribedType)) {
             return false;
          }
 
-         DescribedType d = (DescribedType)obj;
+         IDescribedType d = (IDescribedType)obj;
          if (!(DESCRIPTOR_CODE.Equals(d.Descriptor) || DESCRIPTOR_SYMBOL.Equals(d.Descriptor)))
          {
             return false;

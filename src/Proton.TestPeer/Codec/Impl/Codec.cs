@@ -162,8 +162,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             elt = elt.Next;
          }
 
-         stream.Seek(position, SeekOrigin.Begin);
-
          return size;
       }
 

@@ -43,6 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          codec.Clear();
 
+         stream.Seek(0, SeekOrigin.Begin);
          long decodedSize = codec.Decode(stream);
          Assert.AreEqual(encodingSize, decodedSize);
 
@@ -65,6 +66,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          codec.Clear();
 
+         stream.Seek(0, SeekOrigin.Begin);
          long decodedSize = codec.Decode(stream);
          Assert.AreEqual(encodingSize, decodedSize);
 
@@ -95,6 +97,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          codec = CodecFactory.Create();
 
+         stream.Seek(0, SeekOrigin.Begin);
          long decodedSize = codec.Decode(stream);
          Assert.AreEqual(encodingSize, decodedSize);
 
@@ -174,6 +177,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          codec.PutDescribedType(open);
          MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
          codec.Encode(stream);
+         stream.Seek(0, SeekOrigin.Begin);
 
          IDescribedType decoded = DecodeProtonPerformative(stream);
          Assert.IsNotNull(decoded);
@@ -250,6 +254,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          codec.PutDescribedType(attach);
          MemoryStream stream = new MemoryStream((int)codec.EncodedSize);
          codec.Encode(stream);
+         stream.Seek(0, SeekOrigin.Begin);
 
          IDescribedType decoded = DecodeProtonPerformative(stream);
          Assert.IsNotNull(decoded);

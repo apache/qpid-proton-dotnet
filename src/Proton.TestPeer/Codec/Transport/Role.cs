@@ -34,6 +34,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
          return role == Role.Sender ? EncodingCodes.BooleanFalse : EncodingCodes.BooleanTrue;
       }
 
+      public static bool ToBoolean(this Role role)
+      {
+         return role == Role.Sender ? false : true;
+      }
+
       public static bool IsSender(this Role role)
       {
          return role == Role.Sender;
