@@ -341,7 +341,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                delivery.DeliveryId = (uint)currentDeliveryId;
             }
 
-            if (!delivery.IsSettled)
+            if (!delivery.IsSettled && delivery.TransferCount == 0)
             {
                unsettled.Add(delivery.DeliveryId, delivery);
             }

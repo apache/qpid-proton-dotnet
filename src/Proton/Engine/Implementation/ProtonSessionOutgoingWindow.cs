@@ -295,7 +295,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // For a transfer that hasn't completed but has no bytes in the final transfer write we want
          // to allow a transfer to go out with the more flag as false.
 
-         if (!delivery.IsSettled)
+         if (!delivery.IsSettled && delivery.TransferCount == 0)
          {
             unsettled.Add(delivery.DeliveryId, delivery);
          }

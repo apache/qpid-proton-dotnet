@@ -1426,42 +1426,36 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingClosedReceivers()
       {
          DoTestSessionTrackingOfReceivers(true, true, false, true);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingDetachedReceivers()
       {
          DoTestSessionTrackingOfReceivers(true, true, false, false);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingClosedReceiversRemoteGoesFirst()
       {
          DoTestSessionTrackingOfReceivers(true, true, true, true);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionStopTrackingDetachedReceiversRemoteGoesFirst()
       {
          DoTestSessionTrackingOfReceivers(true, true, true, false);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionTracksRemotelyOpenReceivers()
       {
          DoTestSessionTrackingOfReceivers(true, false, false, false);
       }
 
       [Test]
-      [Ignore("Error from test peer session tracker causes test failure")]
       public void TestSessionTracksLocallyOpenReceivers()
       {
          DoTestSessionTrackingOfReceivers(false, true, false, false);
@@ -2055,7 +2049,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestSenderCannotSendAfterUsingUpOutgoingCapacityLimit()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2189,7 +2182,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestSetSameOutgoingWindowAfterBecomingNotWritableDoesNotTriggerWritable()
       {
          // Should not become writable because two outstanding writes but low water mark remains one frame pending.
@@ -2197,7 +2189,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestExpandingOutgoingWindowAfterBecomingNotWritableUpdateSenderAsWritableOneFrameBigger()
       {
          // Should not become writable because two outstanding writes but low water mark remains one frame pending.
@@ -2303,7 +2294,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestMultiplySendersCannotSendAfterUsingUpOutgoingCapacityLimit()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2458,7 +2448,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to invalid cast error in peer due to link tracking bug")]
       public void TestReduceOutgoingWindowDoesNotStopSenderIfSomeWindowRemaining()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2638,7 +2627,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to invalid cast error in peer due to link tracking bug")]
       public void TestSenderNotifiedAfterSessionRemoteWindowOpenedAfterLocalCapacityRestored()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2856,7 +2844,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to invalid cast error in peer due to link tracking bug")]
       public void TestEngineFailedWhenSessionReceivesTransferForUnknownLink()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
