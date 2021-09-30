@@ -954,14 +954,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Delivery processing still not working")]
+      [Ignore("Assertion error that needs investigation")]
       public void TestEmittedSessionIncomingWindowOnFirstFlowNoFrameSizeOrSessionCapacitySet()
       {
          DoSessionIncomingWindowTestImpl(false, false);
       }
 
       [Test]
-      [Ignore("Delivery processing still not working")]
+      [Ignore("Assertion error that needs investigation")]
       public void TestEmittedSessionIncomingWindowOnFirstFlowWithFrameSizeButNoSessionCapacitySet()
       {
          DoSessionIncomingWindowTestImpl(true, false);
@@ -2199,7 +2199,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
+      [Ignore("Assertion in test that needs investigation")]
       public void TestDisableOutgoingWindowingAfterBecomingNotWritableUpdateSenderAsWritable()
       {
          // Should become pending since we are lifting restrictions
@@ -2500,7 +2500,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to invalid cast error in peer due to link tracking bug")]
+      [Ignore("Assertion in test that needs investigation")]
       public void TestDisableOutgoingWindowMarksSenderAsNotSendableWhenWriteStillPending()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2559,7 +2559,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to invalid cast error in peer due to link tracking bug")]
       public void TestReduceAndThenIncreaseOutgoingWindowRemembersPreviouslyPendingWrites()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2701,7 +2700,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to invalid cast error in peer due to link tracking bug")]
       public void TestSenderNotifiedAfterSessionRemoteWindowOpenedBeforeLocalCapacityRestored()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

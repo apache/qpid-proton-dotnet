@@ -2622,14 +2622,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Incoming abort processing not working or not being set correctly in peer")]
       public void TestAbortedTransferRemovedFromUnsettledListOnceSettledRemoteSettles()
       {
          DoTestAbortedTransferRemovedFromUnsettledListOnceSettled(true);
       }
 
       [Test]
-      [Ignore("Incoming abort processing not working or not being set correctly in peer")]
       public void TestAbortedTransferRemovedFromUnsettledListOnceSettledRemoteDoesNotSettle()
       {
          DoTestAbortedTransferRemovedFromUnsettledListOnceSettled(false);
@@ -2704,7 +2702,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with no update to delivery state and due to composite buffer")]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestDeliveryWithIdOmittedOnContinuationTransfers()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2878,7 +2876,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Incoming delivery processing not processing these inbound messages")]
       public void TestDeliveryIdThresholdsAndWraps()
       {
          // Check start from 0
@@ -3339,7 +3336,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      //[Ignore("Error condition matching broken in test peer")]
       public void TestDetachReceiverWithErrorCondition()
       {
          DoTestCloseOrDetachWithErrorCondition(false);
@@ -4082,7 +4078,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Disposition not arriving at event handler")]
       public void TestReceiverHonorsDeliverySetEventHandlers()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4164,14 +4159,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Disposition not arriving at event handler")]
       public void TestReceiverAbortedHandlerCalledWhenSet()
       {
          DoTestReceiverReadHandlerOrAbortHandlerCalled(true);
       }
 
       [Test]
-      [Ignore("Disposition not arriving at event handler")]
       public void TestReceiverReadHandlerCalledForAbortWhenAbortedNotSet()
       {
          DoTestReceiverReadHandlerOrAbortHandlerCalled(false);
@@ -4259,7 +4252,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Abort not arriving at event handler")]
       public void TestIncomingDeliveryReadEventSignaledWhenNoAbortedHandlerSet()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4324,7 +4316,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Second delivery event not being triggered")]
       public void TestSessionWindowOpenedAfterDeliveryRead()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4380,7 +4371,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Second delivery event not being triggered")]
       public void TestSessionWindowOpenedAfterDeliveryReadFromSplitFramedTransfer()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4449,6 +4439,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestIncomingDeliveryTracksTransferInCount()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4559,28 +4550,28 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test times out waiting for completion of script")]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndLinkIsClosed()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(true, false, false, false);
       }
 
       [Test]
-      [Ignore("Test times out waiting for completion of script")]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndSessionIsClosed()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(false, true, false, false);
       }
 
       [Test]
-      [Ignore("Test times out waiting for completion of script")]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndConnectionIsClosed()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(false, false, true, false);
       }
 
       [Test]
-      [Ignore("Test times out waiting for completion of script")]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndEngineIsShutdown()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(false, false, false, true);
@@ -4723,7 +4714,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Inbound expectation not met")]
       public void TestUnsettledCollectionDispositionsAfterReceivingTransfersThatCrossSignedIntDeliveryIdRange()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4783,7 +4773,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Inbound expectation not met")]
       public void TestWalkUnsettledAfterReceivingTransfersThatCrossUnsignedIntDeliveryIdRange()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4848,7 +4837,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Inbound expectation not met")]
       public void TestUnsettledCollectionDispositionAfterReceivingTransfersThatCrossUnsignedIntDeliveryIdRange()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4916,7 +4904,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Inbound expectation not met")]
+      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestIncomingWindowRefilledWithBytesPreviouslyReadOnAbortedTransfer()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

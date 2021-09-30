@@ -36,8 +36,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<IIncomingDelivery> deliveryUpdatedEventHandler = null;
 
       private readonly ProtonSessionIncomingWindow sessionWindow;
-      private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
-         new SplayedDictionary<uint, ProtonIncomingDelivery>();
+      private readonly LinkedSplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
+         new LinkedSplayedDictionary<uint, ProtonIncomingDelivery>();
 
       private uint? currentDeliveryId;
 
@@ -293,7 +293,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             delivery.RemotelySettled();
          }
 
-         if (payload != null)
+         if (payload != null && !transfer.Aborted)
          {
             delivery.AppendTransferPayload(payload);
          }
@@ -364,9 +364,17 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             delivery.FireDeliveryAborted();
          }
+         else if (delivery.HasDeliveryReadHandler)
+         {
+            delivery.FireDeliveryRead();
+         }
+         else if (HasDeliveryAbortedHandler)
+         {
+            deliveryAbortedEventHandler.Invoke(delivery);
+         }
          else
          {
-            deliveryAbortedEventHandler?.Invoke(delivery);
+            deliveryReadEventHandler?.Invoke(delivery);
          }
       }
 

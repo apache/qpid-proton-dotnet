@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override Transfer Performative => transfer;
 
-      public override byte[] Payload => EncodePayload();
+      public override byte[] Payload => payload ?? EncodePayload();
 
       public virtual TransferInjectAction WithHandle(uint handle)
       {

@@ -31,8 +31,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    public sealed class ProtonSender : ProtonLink<ISender>, ISender
    {
       private readonly ProtonSessionOutgoingWindow sessionWindow;
-      private readonly SplayedDictionary<uint, ProtonOutgoingDelivery> unsettled =
-         new SplayedDictionary<uint, ProtonOutgoingDelivery>();
+      private readonly LinkedSplayedDictionary<uint, ProtonOutgoingDelivery> unsettled =
+         new LinkedSplayedDictionary<uint, ProtonOutgoingDelivery>();
 
       private Action<IOutgoingDelivery> deliveryUpdatedEventHandler = null;
 

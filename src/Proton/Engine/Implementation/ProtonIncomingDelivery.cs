@@ -331,7 +331,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool HasDeliveryStateUpdatedHandler => deliveryUpdatedEventHandler != null;
 
-      internal void FireDeliveryStateUpdated() => deliveryAbortedEventHandler?.Invoke(this);
+      internal void FireDeliveryStateUpdated() => deliveryUpdatedEventHandler?.Invoke(this);
 
       #endregion
    }
