@@ -39,6 +39,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override Disposition Performative => disposition;
 
+      public DispositionInjectAction FromSender()
+      {
+         disposition.Role = Role.Sender;
+         return this;
+      }
+
+      public DispositionInjectAction FromReceiver()
+      {
+         disposition.Role = Role.Receiver;
+         return this;
+      }
+
       public DispositionInjectAction WithRole(bool role)
       {
          disposition.Role = RoleExtension.Lookup(role);
