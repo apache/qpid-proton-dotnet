@@ -114,8 +114,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
             WritePerformative(output, amqpEncoder, amqpEncoderState, envelope.Body);
 
+            remainingSpace = maxFrameSize - output.WriteOffset;
             payload.CopyInto(payload.ReadOffset, output, output.WriteOffset, remainingSpace);
             payload.ReadOffset += remainingSpace;
+            output.WriteOffset += remainingSpace;
          }
          else
          {

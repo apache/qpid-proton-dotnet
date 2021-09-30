@@ -1847,14 +1847,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with transfer sending null payload")]
       public void TestSendMultiFrameDeliveryAndSingleFrameDeliveryOnSingleSessionFromDifferentSenders()
       {
          DoMultiplexMultiFrameDeliveryOnSingleSessionOutgoingTestImpl(false);
       }
 
       [Test]
-      [Ignore("Test fails with transfer sending null payload")]
       public void TestMultipleMultiFrameDeliveriesOnSingleSessionFromDifferentSenders()
       {
          DoMultiplexMultiFrameDeliveryOnSingleSessionOutgoingTestImpl(true);
@@ -1979,7 +1977,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails due to frame decoding error on test peer")]
       public void TestMaxFrameSizeOfPeerHasEffect()
       {
          DoMaxFrameSizeTestImpl(0, 0, 5700, 1);
@@ -1987,7 +1984,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails due to frame decoding error on test peer")]
       public void TestMaxFrameSizeOutgoingFrameSizeLimitHasEffect()
       {
          DoMaxFrameSizeTestImpl(0, 512, 5700, 12);

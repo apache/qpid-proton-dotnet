@@ -193,7 +193,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             int nextByte = 0;
             while ((nextByte = input.ReadByte()) != -1)
             {
-               frameSize |= (uint)((nextByte & 0xFF) << (--multiplier * sizeof(byte)));
+               frameSize |= (uint)((nextByte & 0xFF) << (--multiplier * 8));
                if (multiplier == 0)
                {
                   break;

@@ -256,7 +256,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             while (input.IsReadable)
             {
-               frameSize |= (input.ReadUnsignedByte() << --multiplier * sizeof(byte));
+               frameSize |= (input.ReadUnsignedByte() << --multiplier * 8);
                if (multiplier == 0)
                {
                   break;
