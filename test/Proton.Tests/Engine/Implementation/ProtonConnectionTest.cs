@@ -990,7 +990,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Proton can't match type ErrorCondition for some reason")]
       public void TestCloseOrDetachWithErrorCondition()
       {
          string condition = "amqp:connection:forced";
@@ -1742,7 +1741,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with cast error from driver due to ErrorCondition matcher issue")]
       public void TestConnectionClosedWhenChannelMaxExceeded()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

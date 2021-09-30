@@ -84,6 +84,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             localState = LinkState.Active;
             uint localHandle = session.FindFreeLocalHandle(this);
             localAttach.Handle = localHandle;
+            TransitionedToLocallyOpened();
             try
             {
                TrySyncLocalStateWithRemote();
@@ -451,6 +452,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       protected abstract void HandleDecorateOfOutgoingFlow(Flow flow);
 
+      protected abstract void HandleSessionCreditStateUpdates(in ProtonSessionOutgoingWindow window);
+
+      protected abstract void HandleSessionCreditStateUpdates(in ProtonSessionIncomingWindow window);
+
       #endregion
 
       #region Link state change handlers that must be overridden by specific link implementations
@@ -786,12 +791,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       IProtonLink IProtonLink.HandleSessionCreditStateUpdate(in ProtonSessionOutgoingWindow window)
       {
-         throw new NotImplementedException();
+         HandleSessionCreditStateUpdates(window);
+         return this;
       }
 
       IProtonLink IProtonLink.HandleSessionCreditStateUpdate(in ProtonSessionIncomingWindow window)
       {
-         throw new NotImplementedException();
+         HandleSessionCreditStateUpdates(window);
+         return this;
       }
 
       #endregion

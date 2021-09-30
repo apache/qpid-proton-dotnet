@@ -3333,14 +3333,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Error condition matching broken in test peer")]
       public void TestCloseReceiverWithErrorCondition()
       {
          DoTestCloseOrDetachWithErrorCondition(true);
       }
 
       [Test]
-      [Ignore("Error condition matching broken in test peer")]
+      //[Ignore("Error condition matching broken in test peer")]
       public void TestDetachReceiverWithErrorCondition()
       {
          DoTestCloseOrDetachWithErrorCondition(false);

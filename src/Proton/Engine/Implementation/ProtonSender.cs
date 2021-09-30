@@ -237,6 +237,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          throw new InvalidOperationException("Sender end cannot process incoming transfers");
       }
 
+      protected override void HandleSessionCreditStateUpdates(in ProtonSessionOutgoingWindow window)
+      {
+         bool previousSendable = sendable;
+
+         sendable = Credit > 0 && sessionWindow.IsSendable;
+
+         if (previousSendable != sendable)
+         {
+            FireCreditStateUpdated();
+         }
+      }
+
+      protected override void HandleSessionCreditStateUpdates(in ProtonSessionIncomingWindow window)
+      {
+      }
+
       protected override void HandleDecorateOfOutgoingFlow(Flow flow)
       {
          flow.LinkCredit = Credit;

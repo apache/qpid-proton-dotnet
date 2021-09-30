@@ -1609,7 +1609,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test peer is failing to properly match ErrorCondition types")]
       public void TestCloseOrDetachWithErrorCondition()
       {
          string condition = "amqp:session:window-violation";
@@ -1913,14 +1912,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test peer matcher issue with Error Condition validation")]
       public void TestSessionEnforcesHandleMaxFromRemoteAttachOfSender()
       {
          DoTestSessionEnforcesHandleMaxFromRemoteAttach(true);
       }
 
       [Test]
-      [Ignore("Test peer matcher issue with Error Condition validation")]
       public void TestSessionEnforcesHandleMaxFromRemoteAttachOfReceiver()
       {
          DoTestSessionEnforcesHandleMaxFromRemoteAttach(false);
@@ -2108,7 +2105,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestSenderGetsUpdatedOnceSessionOutgoingWindowIsExpandedByWriteCallbacks()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2196,7 +2192,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestExpandingOutgoingWindowAfterBecomingNotWritableUpdateSenderAsWritableTwoFramesBuffer()
       {
          // Should become writable since low water mark was one but becomes two and we have only two pending.
@@ -2358,7 +2353,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Issue with test peer link tracker causing failure")]
       public void TestOnlyOneSenderNotifiedOfNewCapacityIfFirstOneUsesItUp()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2794,7 +2788,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test failure needs investigation")]
       public void TestHandleInUseErrorReturnedIfAttachWithAlreadyBoundHandleArrives()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

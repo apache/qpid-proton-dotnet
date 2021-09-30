@@ -266,7 +266,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          do
          {
-            if (unsettled.TryGetValue(first, out delivery))
+            if (unsettled.TryGetValue(index, out delivery))
             {
                if (disposition.Settled)
                {

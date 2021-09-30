@@ -2485,7 +2485,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to test peer not handling Error Condition matching")]
       public void TestSettleTransferWithRejectedWithErrorDisposition()
       {
          Rejected state = new Rejected();
@@ -3016,14 +3015,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test peer issue with matching error conditions")]
       public void TestCloseReceiverWithErrorCondition()
       {
          DoTestCloseOrDetachWithErrorCondition(true);
       }
 
       [Test]
-      [Ignore("Test peer issue with matching error conditions")]
       public void TestDetachReceiverWithErrorCondition()
       {
          DoTestCloseOrDetachWithErrorCondition(false);
@@ -4046,7 +4043,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Sender not getting updated when session revokes window values")]
       public void TestSessionRevokesIncomingWindowSetsSenderStateToNotSendableViaSessionFlow()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4121,14 +4117,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to null payload when not expected")]
       public void TestSenderOnlyWritesToSessionRemoteIncomingLimitWriteBytes()
       {
          DoTestSenderOnlyWritesToSessionRemoteIncomingLimit(false);
       }
 
       [Test]
-      [Ignore("Fails due to null payload when not expected")]
       public void TestSenderOnlyWritesToSessionRemoteIncomingLimitStreamBytes()
       {
          DoTestSenderOnlyWritesToSessionRemoteIncomingLimit(true);
@@ -4216,7 +4210,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Delivery state not updated and test fails")]
       public void TestSenderUpdateDeliveryUpdatedEventHandlerInDelivery()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4251,7 +4244,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                IOutgoingDelivery delivery = sender.Next;
                delivery.DeliveryStateUpdatedHandler((outgoing) =>
                {
-                  stateUpdated = false;
+                  stateUpdated = true;
                });
 
                delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -4434,7 +4427,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Not all deliveries receiving a dispotion update")]
       public void TestSenderReportsDeliveryUpdatedOnDispositionForMultipleTransfers()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4509,7 +4501,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Remote sender opened but not sendable after local open")]
       public void TestSenderReportsIsSendableAfterOpenedIfRemoteSendsFlowBeforeLocallyOpened()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4560,7 +4551,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to expectation of not null payload being violated")]
       public void TestWriteThatExceedConfiguredSessionIncomingCreditLimitOnTransfer()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4641,7 +4631,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to expectation of not null payload being violated")]
       public void TestWriteThatExceedsConfiguredSessionIncomingCreditLimitOnTransferFromCreditUpdatedhandler()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

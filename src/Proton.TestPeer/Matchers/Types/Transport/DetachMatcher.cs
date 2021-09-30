@@ -48,27 +48,27 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       public DetachMatcher WithError(String condition)
       {
-         return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition))));
+         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(Is.NullValue()));
       }
 
       public DetachMatcher WithError(String condition, String description)
       {
-         return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description)));
+         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description));
       }
 
       public DetachMatcher WithError(String condition, String description, IDictionary<string, object> info)
       {
-         return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(info))));
+         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description).WithInfo(info));
       }
 
       public DetachMatcher WithError(Symbol condition, String description)
       {
-         return WithError(Is.EqualTo(new ErrorCondition(condition, description)));
+         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description));
       }
 
       public DetachMatcher WithError(Symbol condition, String description, IDictionary<Symbol, object> info)
       {
-         return WithError(Is.EqualTo(new ErrorCondition(condition, description, info)));
+         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description).WithInfo(info));
       }
 
       #region Matcher based With API

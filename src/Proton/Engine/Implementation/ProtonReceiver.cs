@@ -342,6 +342,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          flow.Drain = IsDraining;
       }
 
+      protected override void HandleSessionCreditStateUpdates(in ProtonSessionOutgoingWindow window)
+      {
+      }
+
+      protected override void HandleSessionCreditStateUpdates(in ProtonSessionIncomingWindow window)
+      {
+      }
+
       #region Internal ProtonReceiver APIs
 
       internal bool HasDeliveryAbortedHandler => deliveryAbortedEventHandler != null;

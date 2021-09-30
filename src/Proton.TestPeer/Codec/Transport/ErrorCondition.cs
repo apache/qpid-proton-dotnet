@@ -108,15 +108,51 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
             return false;
          }
 
-         object described = Described;
-         object described2 = d.Described;
-         if (described == null)
+         if (d is ErrorCondition error)
          {
-            return described2 == null;
+            bool equal = true;
+
+            if (!EqualityComparer<Symbol>.Default.Equals(Condition, error.Condition))
+            {
+               equal = false;
+            }
+
+            if (equal && Description != error.Description)
+            {
+               equal = false;
+            }
+
+            if (equal && Info != null && error.Info != null && Info.Count == error.Info.Count)
+            {
+               foreach (KeyValuePair<Symbol, object> pair in Info)
+               {
+                  object value = error.Info[pair.Value];
+                  if (!EqualityComparer<object>.Default.Equals(value, pair.Value))
+                  {
+                     equal = false;
+                     break;
+                  }
+               }
+            }
+            else
+            {
+               equal = equal && (Info == null && error.Info == null);
+            }
+
+            return equal;
          }
          else
          {
-            return described.Equals(described2);
+            object described = Described;
+            object described2 = d.Described;
+            if (described == null)
+            {
+               return described2 == null;
+            }
+            else
+            {
+               return described.Equals(described2);
+            }
          }
       }
 

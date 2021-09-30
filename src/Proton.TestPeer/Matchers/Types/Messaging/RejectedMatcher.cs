@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       public RejectedMatcher WithError(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
-         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description).WithInfoMap(info));
+         return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description).WithInfo(info));
       }
 
       #region Matcher based expectations

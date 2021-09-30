@@ -25,11 +25,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 {
    public sealed class ErrorConditionMatcher : ListDescribedTypeMatcher
    {
-      public ErrorConditionMatcher() : base(0, ErrorCondition.DESCRIPTOR_CODE, ErrorCondition.DESCRIPTOR_SYMBOL)
+      public ErrorConditionMatcher() : base(Enum.GetNames(typeof(ErrorConditionField)).Length, ErrorCondition.DESCRIPTOR_CODE, ErrorCondition.DESCRIPTOR_SYMBOL)
       {
       }
 
       protected override Type DescribedTypeClassType => typeof(ErrorCondition);
+
+      protected override bool MatchesSafely(ListDescribedType item)
+      {
+         return base.MatchesSafely(item);
+      }
 
       public ErrorConditionMatcher WithCondition(string condition)
       {
@@ -46,7 +51,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          return WithDescription(Is.EqualTo(description));
       }
 
-      public ErrorConditionMatcher WithInfoMap(IDictionary<Symbol, object> info)
+      public ErrorConditionMatcher WithInfo(IDictionary<Symbol, object> info)
       {
          return WithInfo(Is.EqualTo(info));
       }
