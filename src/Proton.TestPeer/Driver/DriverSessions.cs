@@ -163,7 +163,9 @@ namespace Apache.Qpid.Proton.Test.Driver
          // assume there absolutely must be a remote session in the tracking map.
          if (localBegin.RemoteChannel != null && remoteSessions.ContainsKey((ushort)localBegin.RemoteChannel))
          {
-            localSessions.Add(localChannel, remoteSessions[(ushort)localBegin.RemoteChannel]);
+            // This will overwrite an older session that was here which can happen if the test is playing
+            // with half closed sessions and or reuse of channels in those cases.
+            localSessions[localChannel] = remoteSessions[(ushort)localBegin.RemoteChannel];
          }
 
          if (!localSessions.ContainsKey(localChannel))

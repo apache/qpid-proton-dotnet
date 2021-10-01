@@ -1791,7 +1791,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test peer issue not allowing recycle of half closed session")]
       public void TestHalfClosedSessiOnChannelRecycledIfNoOtherAvailableChannels()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
