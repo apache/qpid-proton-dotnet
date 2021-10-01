@@ -67,7 +67,20 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          set => incomingCapacity = value;
       }
 
-      public uint RemainingIncomingCapacity => incomingCapacity - incomingBytes;
+      public uint RemainingIncomingCapacity
+      {
+         get
+         {
+            if (incomingCapacity == 0 || maxFrameSize == uint.MaxValue)
+            {
+               return DEFAULT_WINDOW_SIZE;
+            }
+            else
+            {
+               return incomingCapacity - incomingBytes;
+            }
+         }
+      }
 
       /// <summary>
       /// Initialize the session level window values on the outbound Begin for the parent

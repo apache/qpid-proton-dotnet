@@ -954,14 +954,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Assertion error that needs investigation")]
       public void TestEmittedSessionIncomingWindowOnFirstFlowNoFrameSizeOrSessionCapacitySet()
       {
          DoSessionIncomingWindowTestImpl(false, false);
       }
 
       [Test]
-      [Ignore("Assertion error that needs investigation")]
       public void TestEmittedSessionIncomingWindowOnFirstFlowWithFrameSizeButNoSessionCapacitySet()
       {
          DoSessionIncomingWindowTestImpl(true, false);
@@ -2199,7 +2197,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Assertion in test that needs investigation")]
       public void TestDisableOutgoingWindowingAfterBecomingNotWritableUpdateSenderAsWritable()
       {
          // Should become pending since we are lifting restrictions
@@ -2500,7 +2497,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Assertion in test that needs investigation")]
       public void TestDisableOutgoingWindowMarksSenderAsNotSendableWhenWriteStillPending()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

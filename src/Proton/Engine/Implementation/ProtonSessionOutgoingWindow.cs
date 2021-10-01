@@ -96,7 +96,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             // If set to lower value after some writes are pending this calculation could exceed 2GB which we don't
             // want so we ensure it never exceeds that. Then limit the max value to max positive integer value and
             // hold there as it being more than that is a fairly pointless value to try and convey.
-            uint allowedWrites = outgoingWindowHighWaterMark - pendingOutgoingWrites;
+            uint allowedWrites = outgoingCapacity == 0 ? 0 : outgoingWindowHighWaterMark - pendingOutgoingWrites;
             uint remaining = allowedWrites * engine.OutboundMaxFrameSize;
 
             if (outgoingCapacity > Int32.MaxValue || remaining > Int32.MaxValue)
@@ -129,7 +129,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             outgoingWindowHighWaterMark = outgoingWindowLowWaterMark = 0;
             writeable = false;
          }
-         else if (outgoingCapacity > 0)
+         else if (outgoingCapacity < Int32.MaxValue)
          {
             // The local end is writable here if the current pending writes count is below the low water
             // mark and also if there is remote incoming window to allow more write.
