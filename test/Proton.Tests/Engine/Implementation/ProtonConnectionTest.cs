@@ -636,7 +636,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Failing test needs investigation")]
+      [Ignore("Test peer isn't handling dictionary matching properly")]
       public void TestPropertiesArePopulatedAndAccessible()
       {
          Symbol clientPropertyName = Symbol.Lookup("ClientPropertyName");

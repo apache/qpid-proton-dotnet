@@ -122,7 +122,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          bool oldWritable = writeable;
          uint maxFrameSize = engine.OutboundMaxFrameSize;
 
-         // TODO : How to disable this
          if (outgoingCapacity == 0)
          {
             // At a setting of zero outgoing writes is manually disabled until elevated again to > 0
