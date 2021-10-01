@@ -137,7 +137,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return action.WithState(new Modified());
          }
 
-         public DispositionInjectAction modified(bool failed)
+         public DispositionInjectAction Modified(bool failed)
          {
             Modified modified = new Modified();
             modified.DeliveryFailed = failed;
@@ -145,7 +145,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return action.WithState(modified);
          }
 
-         public DispositionInjectAction modified(bool failed, bool undeliverableHere)
+         public DispositionInjectAction Modified(bool failed, bool undeliverableHere)
          {
             Modified modified = new Modified();
             modified.DeliveryFailed = failed;
@@ -154,7 +154,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return action.WithState(modified);
          }
 
-         public TransactionalStateBuilder transactional()
+         public TransactionalStateBuilder Transactional()
          {
             TransactionalStateBuilder builder = new TransactionalStateBuilder(action);
             action.WithState(builder.State());
@@ -189,13 +189,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithTxnId(byte[] txnId)
          {
-            state.TxnId = txnId;
+            state.TxnId = new Binary(txnId);
             return this;
          }
 
          public TransactionalStateBuilder WithTxnId(Binary txnId)
          {
-            state.TxnId = txnId.Array;
+            state.TxnId = txnId;
             return this;
          }
 

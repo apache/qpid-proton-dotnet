@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class DeclareExpectation : TransferExpectation
    {
-      private readonly AmqpValueMatcher defaultPayloadMatcher = new AmqpValueMatcher(new Declare());
+      private readonly AmqpValueMatcher defaultPayloadMatcher = new AmqpValueMatcher(new DeclareMatcher());
 
       public DeclareExpectation(AMQPTestDriver driver) : base(driver)
       {

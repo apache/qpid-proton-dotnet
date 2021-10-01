@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
@@ -26,7 +27,7 @@ namespace Apache.Qpid.Proton.Types.Transactions
    public sealed class Declared : IDeliveryState, IOutcome, ICloneable
    {
       public static readonly ulong DescriptorCode = 0x0000000000000033UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:Declared:list");
+      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:declared:list");
 
       private IProtonBuffer txnId;
 
@@ -58,9 +59,23 @@ namespace Apache.Qpid.Proton.Types.Transactions
          return new Declared(this);
       }
 
+      public override bool Equals(object obj)
+      {
+         return obj is Declared declared &&
+                EqualityComparer<IProtonBuffer>.Default.Equals(txnId, declared.txnId) &&
+                Type == declared.Type;
+      }
+
       public bool Equals(IDeliveryState other)
       {
-         throw new NotImplementedException();
+         return other is Declared declared &&
+                EqualityComparer<IProtonBuffer>.Default.Equals(txnId, declared.txnId) &&
+                Type == declared.Type;
+      }
+
+      public override int GetHashCode()
+      {
+         return base.GetHashCode();
       }
 
       public override string ToString()

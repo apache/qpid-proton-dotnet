@@ -31,14 +31,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    {
       private readonly DischargeMatcher discharge = new DischargeMatcher();
 
-      private AmqpValueMatcher matcher;
-
       public DischargeExpectation(AMQPTestDriver driver) : base(driver)
       {
-         this.matcher = new AmqpValueMatcher(discharge);
+         WithPayload(new AmqpValueMatcher(discharge));
       }
 
-      protected override IMatcher GetExpectationMatcher() => matcher;
+      public override void HandleTransfer(uint frameSize, Transfer transfer, byte[] payload, ushort channel, AMQPTestDriver driver)
+      {
+         base.HandleTransfer(frameSize, transfer, payload, channel, driver);
+      }
 
       public override DischargeExpectation OnChannel(ushort channel)
       {

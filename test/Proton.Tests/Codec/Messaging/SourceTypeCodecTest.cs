@@ -151,6 +151,71 @@ namespace Apache.Qpid.Proton.Codec.Messaging
       }
 
       [Test]
+      public void TestSourceWithNoDefaultOutcome()
+      {
+         DoTestSourceWithNoDefaultOutcome(false);
+      }
+
+      [Test]
+      public void TestSourceWithNoDefaultOutcomeFromStream()
+      {
+         DoTestSourceWithNoDefaultOutcome(true);
+      }
+
+      private void DoTestSourceWithNoDefaultOutcome(bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         IDictionary<Symbol, object> nodeProperties = new Dictionary<Symbol, object>();
+         nodeProperties.Add(Symbol.Lookup("property-1"), "value-1");
+         nodeProperties.Add(Symbol.Lookup("property-2"), "value-2");
+         nodeProperties.Add(Symbol.Lookup("property-3"), "value-3");
+
+         IDictionary<Symbol, object> filters = new Dictionary<Symbol, object>();
+         nodeProperties.Add(Symbol.Lookup("filter-1"), "value-1");
+         nodeProperties.Add(Symbol.Lookup("filter-2"), "value-2");
+         nodeProperties.Add(Symbol.Lookup("filter-3"), "value-3");
+
+         Source value = new Source();
+         value.Address = "test";
+         value.Durable = TerminusDurability.UnsettledState;
+         value.ExpiryPolicy = TerminusExpiryPolicy.SessionEnd;
+         value.Timeout = 255u;
+         value.Dynamic = true;
+         value.DynamicNodeProperties = nodeProperties;
+         value.DistributionMode = Symbol.Lookup("mode");
+         value.Filter = filters;
+         value.Outcomes = new Symbol[] { Symbol.Lookup("ACCEPTED"), Symbol.Lookup("REJECTED") };
+         value.Capabilities = new Symbol[] { Symbol.Lookup("RELEASED"), Symbol.Lookup("MODIFIED") };
+
+         encoder.WriteObject(buffer, encoderState, value);
+
+         Source result;
+         if (fromStream)
+         {
+            result = streamDecoder.ReadObject<Source>(stream, streamDecoderState);
+         }
+         else
+         {
+            result = decoder.ReadObject<Source>(buffer, decoderState);
+         }
+
+         Assert.AreEqual("test", result.Address);
+         Assert.AreEqual(TerminusDurability.UnsettledState, result.Durable);
+         Assert.AreEqual(TerminusExpiryPolicy.SessionEnd, result.ExpiryPolicy);
+         Assert.AreEqual(255, result.Timeout);
+         Assert.AreEqual(true, result.Dynamic);
+         Assert.AreEqual(nodeProperties, result.DynamicNodeProperties);
+         Assert.AreEqual(Symbol.Lookup("mode"), result.DistributionMode);
+         Assert.AreEqual(filters, result.Filter);
+         Assert.IsNull(result.DefaultOutcome);
+
+         Assert.AreEqual(new Symbol[] { Symbol.Lookup("ACCEPTED"), Symbol.Lookup("REJECTED") }, result.Outcomes);
+         Assert.AreEqual(new Symbol[] { Symbol.Lookup("RELEASED"), Symbol.Lookup("MODIFIED") }, result.Capabilities);
+      }
+
+      [Test]
       public void TestSkipValue()
       {
          DoTestSkipValue(false);

@@ -335,7 +335,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          ISession session = connection.Session().Open();
          ISender sender = session.Sender("test").Open();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.WriteBytes(payload.Copy());
 
          peer.WaitForScriptToCompleteIgnoreErrors();

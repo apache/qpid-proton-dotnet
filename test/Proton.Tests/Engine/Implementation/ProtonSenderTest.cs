@@ -283,11 +283,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          ISession session = connection.Session().Open();
          ISender sender = session.Sender("test").Open();
 
-         Assert.IsNotNull(sender.Next);
+         Assert.IsNotNull(sender.Next());
 
          IOutgoingDelivery delivery;
 
-         Assert.Throws<InvalidOperationException>(() => delivery = sender.Next);
+         Assert.Throws<InvalidOperationException>(() => delivery = sender.Next());
 
          peer.WaitForScriptToComplete();
 
@@ -1163,7 +1163,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          sender.Open();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          Assert.IsFalse(delivery.IsAborted);
@@ -1265,7 +1265,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (handler.IsSendable)
             {
-               handler.Next.DeliveryTag = new DeliveryTag(new byte[] { 0 });
+               handler.Next().DeliveryTag = new DeliveryTag(new byte[] { 0 });
                handler.Current.WriteBytes(payload);
             }
          });
@@ -1316,7 +1316,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (handler.IsSendable)
             {
-               IOutgoingDelivery delivery = handler.Next;
+               IOutgoingDelivery delivery = handler.Next();
 
                delivery.DeliveryTagBytes = new byte[] { 0 };
                delivery.MessageFormat = 17;
@@ -1400,7 +1400,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (handler.IsSendable)
             {
-               IOutgoingDelivery delivery = handler.Next;
+               IOutgoingDelivery delivery = handler.Next();
                delivery.DeliveryTagBytes = new byte[] { 0 };
                delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
             }
@@ -1653,7 +1653,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (handler.IsSendable)
             {
-               sent = handler.Next;
+               sent = handler.Next();
                sent.DeliveryTagBytes = new byte[] { 0 };
                sent.WriteBytes(payload);
                deliverySentAfterSendable = true;
@@ -1668,7 +1668,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          sent.Disposition(Accepted.Instance, true);
 
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
 
          Assert.AreNotSame(delivery2, sent);
          delivery2.Disposition(Released.Instance, true);
@@ -1711,7 +1711,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsFalse(sender.IsSendable);
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          sender.Open();
@@ -1734,7 +1734,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          try
          {
-            IOutgoingDelivery next = sender.Next;
+            IOutgoingDelivery next = sender.Next();
             Assert.Fail("Should not be able get next after connection closed");
          }
          catch (InvalidOperationException)
@@ -1777,7 +1777,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsFalse(sender.IsSendable);
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          sender.Open();
@@ -1827,7 +1827,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          IConnection connection = engine.Start().Open();
          ISession session = connection.Session().Open();
          ISender sender = session.Sender("sender-1").Open();
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
 
          Assert.IsNotNull(delivery);
          Assert.IsTrue(sender.IsSendable);
@@ -1958,13 +1958,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
 
          IProtonBuffer messageContent1 = CreateContentBuffer(contentLength1);
-         IOutgoingDelivery delivery1 = sender1.Next;
+         IOutgoingDelivery delivery1 = sender1.Next();
          delivery1.DeliveryTagBytes = new byte[] { 1 };
          delivery1.Disposition(Accepted.Instance, true);
          delivery1.WriteBytes(messageContent1);
 
          IProtonBuffer messageContent2 = CreateContentBuffer(contentLength2);
-         IOutgoingDelivery delivery2 = sender2.Next;
+         IOutgoingDelivery delivery2 = sender2.Next();
          delivery2.DeliveryTagBytes = new byte[] { 2 };
          delivery2.Disposition(Accepted.Instance, true);
          delivery2.WriteBytes(messageContent2);
@@ -2094,7 +2094,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
 
          IProtonBuffer messageContent = CreateContentBuffer(contentLength);
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.DeliveryTagBytes = new byte[] { 1 };
          delivery.Disposition(Accepted.Instance, true);
          delivery.WriteBytes(messageContent);
@@ -2156,7 +2156,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -2225,7 +2225,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -2294,7 +2294,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -2352,7 +2352,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -2405,7 +2405,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -2418,7 +2418,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          try
          {
-            IOutgoingDelivery d = sender.Next;
+            IOutgoingDelivery d = sender.Next();
          }
          catch (InvalidOperationException)
          {
@@ -2556,7 +2556,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          IOutgoingDelivery sentDelivery = null;
          sender.CreditStateUpdateHandler(handler =>
          {
-            sentDelivery = handler.Next;
+            sentDelivery = handler.Next();
             sentDelivery.DeliveryTagBytes = new byte[] { 0 };
             sentDelivery.WriteBytes(payload);
             deliverySentAfterSendable = sender.IsSendable;
@@ -2651,7 +2651,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          bool deliverySentAfterSendable = false;
          sender.CreditStateUpdateHandler(handler =>
          {
-            sentDelivery = handler.Next;
+            sentDelivery = handler.Next();
             sentDelivery.DeliveryTagBytes = new byte[] { 0 };
             sentDelivery.WriteBytes(payload);
             deliverySentAfterSendable = sender.IsSendable;
@@ -2724,7 +2724,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          IOutgoingDelivery sentDelivery = null;
          sender.CreditStateUpdateHandler(handler =>
          {
-            sentDelivery = handler.Next;
+            sentDelivery = handler.Next();
             sentDelivery.DeliveryTagBytes = new byte[] { 0 };
             sentDelivery.WriteBytes(payload);
             deliverySentAfterSendable = sender.IsSendable;
@@ -3191,7 +3191,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (link.IsSendable)
             {
-               sentDelivery = link.Next;
+               sentDelivery = link.Next();
                sentDelivery.DeliveryTagBytes = new byte[] { 0 };
                sentDelivery.WriteBytes(payload);
                deliverySentAfterSendable = true;
@@ -3258,11 +3258,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectTransfer().WithNonNullPayload()
                               .WithDeliveryTag(new byte[] { 2 }).Accept();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(payload.Copy());
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.WriteBytes(payload.Copy());
-         IOutgoingDelivery delivery3 = sender.Next;
+         IOutgoingDelivery delivery3 = sender.Next();
          delivery3.WriteBytes(payload.Copy());
 
          peer.WaitForScriptToComplete();
@@ -3332,7 +3332,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                               .WithPayload(payloadBuffer);
          peer.ExpectDetach().WithHandle(0).Respond();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
 
          IDeliveryTag oldTag = delivery.DeliveryTag;
 
@@ -3417,7 +3417,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          for (int i = 0; i < toSend; ++i)
          {
-            IOutgoingDelivery delivery = sender.Next;
+            IOutgoingDelivery delivery = sender.Next();
 
             if (sendSettled)
             {
@@ -3486,11 +3486,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectTransfer().WithNonNullPayload()
                               .WithDeliveryTag(new byte[] { 2 });
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(payload.Copy());
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.WriteBytes(payload.Copy());
-         IOutgoingDelivery delivery3 = sender.Next;
+         IOutgoingDelivery delivery3 = sender.Next();
          delivery3.WriteBytes(payload.Copy());
 
          peer.WaitForScriptToComplete();
@@ -3587,7 +3587,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                               .WithDeliveryTag(new byte[] { 1 });
 
          IProtonBuffer messageContent1 = CreateContentBuffer(32);
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.DeliveryTagBytes = new byte[] { 1 };
          delivery1.WriteBytes(messageContent1);
 
@@ -3658,7 +3658,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -3744,7 +3744,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             senderMarkedSendable = sender.IsSendable;
          });
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -3800,7 +3800,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          ISession session = connection.Session().Open();
          ISender sender = session.Sender("sender-1").Open();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -3853,7 +3853,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             Assert.IsFalse(sender.IsSendable);
          }
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -3923,7 +3923,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsFalse(sender.IsSendable);
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
@@ -4031,7 +4031,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectDetach().WithHandle(0).Respond();
 
          // Should not generate any outgoing transfers as the delivery is not sendable
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.DeliveryTagBytes = new byte[] { 0 };
          delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
@@ -4105,7 +4105,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectDetach().WithHandle(0).Respond();
 
          // Should not generate any outgoing transfers as the delivery is not sendable
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.DeliveryTagBytes = new byte[] { 0 };
          delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
@@ -4160,7 +4160,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          ISession session = connection.Session().Open();
          ISender sender = session.Sender("sender-1").Open();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
 
          delivery.DeliveryTagBytes = new byte[] { 0 };
          if (streamBytes)
@@ -4241,7 +4241,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (link.IsSendable)
             {
-               IOutgoingDelivery delivery = sender.Next;
+               IOutgoingDelivery delivery = sender.Next();
                delivery.DeliveryStateUpdatedHandler((outgoing) =>
                {
                   stateUpdated = true;
@@ -4303,7 +4303,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          ISession session = connection.Session().Open();
          ISender sender = session.Sender("sender-1").Open();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          Assert.IsNotNull(delivery);
 
          Assert.AreEqual(0, delivery.TransferCount);
@@ -4393,15 +4393,15 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          sender.CreditStateUpdateHandler(link => link.Drained());
          sender.Open();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.DeliveryTagBytes = new byte[] { 0 };
          delivery1.WriteBytes(payload.Copy());
 
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.DeliveryTagBytes = new byte[] { 1 };
          delivery2.WriteBytes(payload.Copy());
 
-         IOutgoingDelivery delivery3 = sender.Next;
+         IOutgoingDelivery delivery3 = sender.Next();
          delivery3.DeliveryTagBytes = new byte[] { 2 };
          delivery3.WriteBytes(payload.Copy());
 
@@ -4472,11 +4472,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          sender.Open();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.DeliveryTagBytes = new byte[] { 0 };
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.DeliveryTagBytes = new byte[] { 1 };
          delivery2.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
@@ -4573,7 +4573,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Array.Fill(bytes, (byte)1);
          IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(bytes);
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.DeliveryTagBytes = new byte[] { 0 };
          Assert.AreEqual(payload.ReadableBytes, payloadOutstanding);
          delivery.WriteBytes(payload);
@@ -4653,7 +4653,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Array.Fill(bytes, (byte)1);
          IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(bytes);
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.DeliveryTagBytes = new byte[] { 0 };
          Assert.AreEqual(payload.ReadableBytes, payloadOutstanding);
          delivery.WriteBytes(payload);

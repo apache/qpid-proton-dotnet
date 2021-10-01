@@ -698,7 +698,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          if (result == null)
          {
-            throw SignalUnexpectedType(typeof(T));
+            if (typeof(T).IsValueType)
+            {
+               throw SignalUnexpectedType(typeof(T));
+            }
+            else
+            {
+               return default(T);
+            }
          }
          else if (result.GetType().IsAssignableTo(typeof(T)))
          {

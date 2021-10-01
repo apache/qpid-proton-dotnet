@@ -97,7 +97,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachExpectation WithRole(Role role)
       {
-         return WithRole(Is.EqualTo(RoleExtension.ToBooleanEncoding(role)));
+         return WithRole(Is.EqualTo(RoleExtension.ToBoolean(role)));
       }
 
       public AttachExpectation OfSender()
@@ -681,12 +681,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          this.expectation = expectation;
       }
 
-      public AttachExpectation also()
+      public AttachExpectation Also()
       {
          return expectation;
       }
 
-      public AttachExpectation and()
+      public AttachExpectation And()
       {
          return expectation;
       }
@@ -797,12 +797,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          this.expectation = expectation;
       }
 
-      public AttachExpectation also()
+      public AttachExpectation Also()
       {
          return expectation;
       }
 
-      public AttachExpectation and()
+      public AttachExpectation And()
       {
          return expectation;
       }

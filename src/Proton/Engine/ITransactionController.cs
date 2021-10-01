@@ -149,7 +149,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="handler">The delegate that will handle this event</param>
       /// <returns>This transaction controller instance</returns>
-      ITransactionController DischargeHandler(Action<ITransaction<ITransactionController>> handler);
+      ITransactionController DischargedHandler(Action<ITransaction<ITransactionController>> handler);
 
       /// <summary>
       /// Called when the transaction manager end of the link has responded to a previous

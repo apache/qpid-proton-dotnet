@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Engine
       /// delivery to be started.
       /// </summary>
       /// <exception cref="InvalidOperationException">If a current delivery is still incomplete</exception>
-      IOutgoingDelivery Next { get; }
+      IOutgoingDelivery Next();
 
       /// <summary>
       /// For each unsettled outgoing delivery that is pending in the sender apply the given

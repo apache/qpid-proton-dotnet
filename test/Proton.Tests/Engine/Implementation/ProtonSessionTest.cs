@@ -2086,9 +2086,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2147,11 +2147,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
-         IOutgoingDelivery delivery3 = sender.Next;
+         IOutgoingDelivery delivery3 = sender.Next();
          delivery3.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2247,9 +2247,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
-         IOutgoingDelivery delivery2 = sender.Next;
+         IOutgoingDelivery delivery2 = sender.Next();
          delivery2.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2332,9 +2332,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender1.Next;
+         IOutgoingDelivery delivery1 = sender1.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
-         IOutgoingDelivery delivery2 = sender2.Next;
+         IOutgoingDelivery delivery2 = sender2.Next();
          delivery2.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2389,13 +2389,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          sender1.CreditStateUpdateHandler((self) =>
          {
             creditStateUpdated++;
-            IOutgoingDelivery delivery = self.Next;
+            IOutgoingDelivery delivery = self.Next();
             delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
          });
          sender2.CreditStateUpdateHandler((self) =>
          {
             creditStateUpdated++;
-            IOutgoingDelivery delivery = self.Next;
+            IOutgoingDelivery delivery = self.Next();
             delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
          });
 
@@ -2411,9 +2411,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender1.Next;
+         IOutgoingDelivery delivery1 = sender1.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
-         IOutgoingDelivery delivery2 = sender2.Next;
+         IOutgoingDelivery delivery2 = sender2.Next();
          delivery2.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2478,7 +2478,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2536,7 +2536,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2594,7 +2594,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery1 = sender.Next;
+         IOutgoingDelivery delivery1 = sender.Next();
          delivery1.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2649,7 +2649,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          sender.CreditStateUpdateHandler((self) =>
          {
             creditStateUpdated++;
-            IOutgoingDelivery delivery = self.Next;
+            IOutgoingDelivery delivery = self.Next();
             delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
          });
 
@@ -2664,7 +2664,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();
@@ -2731,7 +2731,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             creditStateUpdated++;
             if (sender.IsSendable)
             {
-               IOutgoingDelivery delivery = self.Next;
+               IOutgoingDelivery delivery = self.Next();
                delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
             }
          });
@@ -2747,7 +2747,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          asyncIOCallbacks.Clear();
 
-         IOutgoingDelivery delivery = sender.Next;
+         IOutgoingDelivery delivery = sender.Next();
          delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
 
          peer.WaitForScriptToComplete();

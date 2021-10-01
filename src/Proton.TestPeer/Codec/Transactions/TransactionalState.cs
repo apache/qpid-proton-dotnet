@@ -50,9 +50,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
       public DeliveryStateType Type => DeliveryStateType.Transactional;
 
-      public byte[] TxnId
+      public Binary TxnId
       {
-         get => (byte[])List[((int)TransactionalStateField.TxnId)];
+         get => (Binary)List[((int)TransactionalStateField.TxnId)];
          set => List[((int)TransactionalStateField.TxnId)] = value;
       }
 

@@ -123,27 +123,24 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public IOutgoingDelivery Current => current;
 
-      public IOutgoingDelivery Next
+      public IOutgoingDelivery Next()
       {
-         get
+         CheckLinkOperable("Cannot update next delivery");
+
+         if (current != null)
          {
-            CheckLinkOperable("Cannot update next delivery");
-
-            if (current != null)
-            {
-               throw new InvalidOperationException("Current delivery is not complete and cannot be advanced.");
-            }
-            else
-            {
-               current = new ProtonOutgoingDelivery(this);
-               if (autoTagGenerator != null)
-               {
-                  current.DeliveryTag = autoTagGenerator.NextTag();
-               }
-            }
-
-            return current;
+            throw new InvalidOperationException("Current delivery is not complete and cannot be advanced.");
          }
+         else
+         {
+            current = new ProtonOutgoingDelivery(this);
+            if (autoTagGenerator != null)
+            {
+               current.DeliveryTag = autoTagGenerator.NextTag();
+            }
+         }
+
+         return current;
       }
 
       public bool HasUnsettled => unsettled.Count > 0;

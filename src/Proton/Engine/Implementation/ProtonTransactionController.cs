@@ -204,7 +204,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          protonTransaction.State = TransactionState.Declaring;
 
-         IOutgoingDelivery command = sender.Next;
+         IOutgoingDelivery command = sender.Next();
 
          command.LinkedResource = protonTransaction;
 
@@ -248,7 +248,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          commandEncoder.WriteObject(encoding.Reset(), commandEncoder.CachedEncoderState, new AmqpValue(discharge));
 
-         IOutgoingDelivery command = sender.Next;
+         IOutgoingDelivery command = sender.Next();
          command.MessageFormat = 0;
          command.LinkedResource = transaction;
          command.WriteBytes(encoding);
@@ -286,7 +286,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return this;
       }
 
-      public ITransactionController DischargeHandler(Action<ITransaction<ITransactionController>> handler)
+      public ITransactionController DischargedHandler(Action<ITransaction<ITransactionController>> handler)
       {
          dischargedEventHandler = handler;
          return this;

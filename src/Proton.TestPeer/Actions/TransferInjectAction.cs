@@ -680,13 +680,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithTxnId(byte[] txnId)
          {
-            state.TxnId = txnId;
+            state.TxnId = new Binary(txnId);
             return this;
          }
 
          public TransactionalStateBuilder WithTxnId(Binary txnId)
          {
-            state.TxnId = txnId.Array;
+            state.TxnId = txnId;
             return this;
          }
 
