@@ -106,8 +106,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       {
          receivedFields = valueMap;
 
-         // TODO : LOG.debug("About to check the fields of the section." + "\n  Received:" + valueMap + "\n  Expectations: " + fieldMatchers);
-
          foreach(KeyValuePair<object, IMatcher> entry in FieldMatchers)
          {
             IMatcher matcher = entry.Value;

@@ -25,6 +25,8 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -60,6 +62,9 @@ namespace Apache.Qpid.Proton.Test.Driver
       private uint inboundMaxFrameSize = UInt32.MaxValue;
       private uint outboundMaxFrameSize = UInt32.MaxValue;
 
+      private readonly ILoggerFactory loggerFactory = new NullLoggerFactory();
+      private readonly ILogger<AMQPTestDriver> logger;
+
       /// <summary>
       /// Holds the expectations for processing of data from the peer under test.
       /// Uses a thread safe queue to avoid contention on adding script entries
@@ -68,17 +73,24 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
 
       public AMQPTestDriver(string name, Action<Stream> frameConsumer, Func<TaskFactory> scheduler) :
-         this(name, frameConsumer, null, scheduler)
+         this(name, frameConsumer, null, scheduler, new NullLoggerFactory())
       {
       }
 
-      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Action<Exception> assertConsumer, Func<TaskFactory> scheduler)
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Func<TaskFactory> scheduler, ILoggerFactory logFactory) :
+         this(name, frameConsumer, null, scheduler, logFactory)
+      {
+      }
+
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Action<Exception> assertConsumer, Func<TaskFactory> scheduler, ILoggerFactory logFactory)
       {
          this.sessions = new DriverSessions(this);
          this.frameConsumer = frameConsumer;
          this.taskFactorySupplier = scheduler;
          this.assertionConsumer = assertConsumer;
          this.driverName = name;
+         this.loggerFactory = logFactory;
+         this.logger = loggerFactory.CreateLogger<AMQPTestDriver>();
 
          this.frameEncoder = new FrameEncoder(this);
          this.frameParser = new FrameDecoder(this);
@@ -87,6 +99,11 @@ namespace Apache.Qpid.Proton.Test.Driver
       internal DriverSessions Sessions => sessions;
 
       public string Name => driverName;
+
+      public ILoggerFactory LoggerFactory
+      {
+         get => loggerFactory;
+      }
 
       public uint InboundMaxFrameSize
       {
@@ -133,7 +150,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          // TODO : Schedule not just run
          factory.StartNew(() =>
          {
-            // TODO : LOG.trace("{} running delayed action: {}", driverName, action);
+            logger.LogTrace("{} running delayed action: {}", driverName, action);
             action.Perform(this);
          });
       }
@@ -163,12 +180,12 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             if (ex is AssertionError)
             {
-               // TODO LOG.trace("{} sending failure assertion due to: ", driverName, ex);
+               logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
                this.failureCause = (AssertionError)ex;
             }
             else
             {
-               // TODO LOG.trace("{} sending failure assertion due to: ", driverName, ex);
+               logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
                this.failureCause = new AssertionError(ex.Message, ex);
             }
 
@@ -197,16 +214,16 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// <param name="input">Stream of bytes to decode</param>
       public void Ingest(Stream input)
       {
-         // TODO : LOG.trace("{} processing new inbound buffer of size: {}", driverName, buffer.readableBytes());
+         logger.LogTrace("{} processing new inbound buffer of size: {}", driverName, input.Length - input.Position);
 
          try
          {
             // Process off all encoded frames from this buffer one at a time.
             while (input.Position < input.Length && failureCause == null)
             {
-               // TODO : LOG.trace("{} ingesting {} bytes.", driverName, buffer.readableBytes());
+               logger.LogTrace("{} ingesting {} bytes.", driverName, input.Length - input.Position);
                frameParser.Ingest(input);
-               // TODO : LOG.trace("{} ingestion completed cycle, remaining bytes in buffer: {}", driverName, buffer.readableBytes());
+               logger.LogTrace("{} ingestion completed cycle, remaining bytes in buffer: {}", driverName, input.Length - input.Position);
             }
          }
          catch (Exception e)
@@ -219,7 +236,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal void SendHeader(AMQPHeader header)
       {
-         // TODO : LOG.trace("{} Sending AMQP Header: {}", driverName, header);
+         logger.LogTrace("{} Sending AMQP Header: {}", driverName, header);
          try
          {
             frameConsumer.Invoke(new MemoryStream(header.ToArray()));
@@ -232,7 +249,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal void SendAMQPFrame(ushort channel, IDescribedType performative, byte[] payload)
       {
-         // TODO : LOG.trace("{} Sending performative: {}", driverName, performative);
+         logger.LogTrace("{} Sending performative: {}", driverName, performative);
 
          if (performative is PerformativeDescribedType)
          {
@@ -248,7 +265,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel, payload, null);
-            // TODO : LOG.trace("{} Writing out buffer {} to consumer: {}", driverName, buffer, frameConsumer);
+            logger.LogTrace("{} Writing out buffer of  size:{} to consumer: {}", driverName, stream.Length, frameConsumer);
             frameConsumer.Invoke(stream);
          }
          catch (Exception ex)
@@ -266,7 +283,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             frameParser.ResetToExpectingHeader();
          }
 
-         // TODO : LOG.trace("{} Sending sasl performative: {}", driverName, performative);
+         logger.LogTrace("{} Sending sasl performative: {}", driverName, performative);
 
          try
          {
@@ -297,7 +314,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal void SendBytes(byte[] buffer)
       {
-         // TODO : LOG.trace("{} Sending bytes from ProtonBuffer: {}", driverName, buffer);
+         logger.LogTrace("{} Sending bytes from ProtonBuffer: {}", driverName, buffer);
          try
          {
             frameConsumer.Invoke(new MemoryStream(buffer));
@@ -354,7 +371,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                   }
                   else
                   {
-                     // TODO LOG.warn(t.getMessage());
+                     logger.LogWarning(t.Message);
                      SignalFailure(t);
                      throw;
                   }
@@ -400,14 +417,14 @@ namespace Apache.Qpid.Proton.Test.Driver
                   }
                   else
                   {
-                     // TODO LOG.warn(t.getMessage());
+                     logger.LogWarning(unexpected.Message);
                      SignalFailure(unexpected);
                      throw;
                   }
                }
                catch (Exception assertion)
                {
-                  // TODO LOG.warn(assertion.getMessage());
+                  logger.LogWarning(assertion.Message);
                   SignalFailure(assertion);
                   throw;
                }
@@ -465,14 +482,14 @@ namespace Apache.Qpid.Proton.Test.Driver
                   }
                   else
                   {
-                     // TODO LOG.warn(t.getMessage());
+                     logger.LogWarning(unexpected.Message);
                      SignalFailure(unexpected);
                      throw;
                   }
                }
                catch (Exception assertion)
                {
-                  // TODO LOG.warn(assertion.getMessage());
+                  logger.LogWarning(assertion.Message);
                   SignalFailure(assertion);
                   throw;
                }

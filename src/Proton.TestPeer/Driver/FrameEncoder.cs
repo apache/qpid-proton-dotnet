@@ -32,7 +32,6 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly byte SASL_FRAME_TYPE = (byte)1;
 
       private static readonly uint AMQP_PERFORMATIVE_PAD = 512;
-      private static readonly uint FRAME_HEADER_SIZE = 8;
 
       private static readonly int FRAME_DOFF_SIZE = 2;
 

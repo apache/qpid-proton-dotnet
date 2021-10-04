@@ -21,6 +21,8 @@ using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver
@@ -148,6 +150,10 @@ namespace Apache.Qpid.Proton.Test.Driver
          public uint PerformativeCount => (uint)performatives.Count;
 
          public uint SaslPerformativeCount => (uint)saslPerformatives.Count;
+
+         public string Name => "TestFrameHandler";
+
+         public ILoggerFactory LoggerFactory => new NullLoggerFactory();
 
          public void HandleHeader(AMQPHeader header)
          {

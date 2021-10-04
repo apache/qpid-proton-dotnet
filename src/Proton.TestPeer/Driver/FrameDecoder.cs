@@ -22,6 +22,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -44,6 +45,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly FrameParserStage frameBufferingStage;
       private readonly FrameParserStage frameBodyParsingStage;
 
+      private readonly ILogger<FrameDecoder> logger;
+
       public FrameDecoder(IFrameHandler frameHandler)
       {
          this.frameHandler = frameHandler;
@@ -51,6 +54,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.frameSizeParser = new FrameSizeParsingStage(this);
          this.frameBufferingStage = new FrameBufferingStage(this);
          this.frameBodyParsingStage = new FrameBodyParsingStage(this);
+         this.logger = frameHandler.LoggerFactory.CreateLogger<FrameDecoder>();
       }
 
       /// <summary>
@@ -355,7 +359,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
             else
             {
-               // TODO LOG.trace("{} Read: CH[{}] : {} [{}]", driver.getName(), channel, HeartBeat.INSTANCE, payload);
+               decoder.logger.LogTrace("{} Read: CH[{}] : Heartbeat [{}]", frameHandler.Name, channel, payload);
                decoder.TransitionToFrameSizeParsingStage();
                frameHandler.HandleHeartbeat(frameSize, channel);
                return;
@@ -364,14 +368,14 @@ namespace Apache.Qpid.Proton.Test.Driver
             if (type == AMQP_FRAME_TYPE)
             {
                PerformativeDescribedType performative = (PerformativeDescribedType)val;
-               // TODO LOG.trace("{} Read: CH[{}] : {} [{}]", driver.getName(), channel, performative, payload);
+               decoder.logger.LogTrace("{} Read: CH[{}] : {} [{}]", frameHandler.Name, channel, performative, payload);
                decoder.TransitionToFrameSizeParsingStage();
                frameHandler.HandlePerformative(frameSize, performative, channel, payload);
             }
             else if (type == SASL_FRAME_TYPE)
             {
                SaslDescribedType performative = (SaslDescribedType)val;
-               // TODO LOG.trace("{} Read: {} [{}]", driver.getName(), performative, payload);
+               decoder.logger.LogTrace("{} Read: {} [{}]", frameHandler.Name, performative, payload);
                decoder.TransitionToFrameSizeParsingStage();
                frameHandler.HandleSaslPerformative(frameSize, performative, channel, payload);
             }

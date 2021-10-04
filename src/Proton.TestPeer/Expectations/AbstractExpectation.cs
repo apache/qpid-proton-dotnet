@@ -21,6 +21,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver.Expectations
 {
@@ -35,9 +36,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected readonly AMQPTestDriver driver;
 
+      private ILogger<AbstractExpectation<T>> logger;
+
       public AbstractExpectation(AMQPTestDriver driver)
       {
          this.driver = driver;
+         this.logger = driver.LoggerFactory.CreateLogger<AbstractExpectation<T>>();
       }
 
       public virtual AbstractExpectation<T> OnChannel(ushort channel)
@@ -69,9 +73,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected void VerifyPerformative(T performative)
       {
-         // TODO
-         // LOG.debug("About to check the fields of the performative." +
-         //          "\n  Received:" + performative + "\n  Expectations: " + getExpectationMatcher());
+         logger.LogDebug("About to check the fields of the performative." +
+                        "\n  Received:" + performative + "\n  Expectations: " + GetExpectationMatcher());
 
          MatcherAssert.AssertThat("Performative does not match expectation", performative, GetExpectationMatcher());
       }

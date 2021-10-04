@@ -17,6 +17,7 @@
 
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -36,6 +37,10 @@ namespace Apache.Qpid.Proton.Test.Driver
       uint PerformativeCount { get; }
 
       uint SaslPerformativeCount { get; }
+
+      string Name { get; }
+
+      ILoggerFactory LoggerFactory { get; }
 
       void HandleHeader(AMQPHeader header);
 

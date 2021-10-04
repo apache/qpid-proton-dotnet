@@ -99,7 +99,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public IDictionary<Symbol, object> Properties
       {
-         get => (IDictionary<Symbol, object>)List[((int)BeginField.Properties)];
+         get => SafeDictionaryConvert<Symbol, object>((int)BeginField.Properties);
          set => List[((int)BeginField.Properties)] = value;
       }
 

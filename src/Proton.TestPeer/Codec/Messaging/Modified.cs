@@ -63,13 +63,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public bool? DeliveryFailed
       {
-         get => (bool)List[((int)ModifiedField.DELIVERY_FAILED)];
+         get => (bool?)List[((int)ModifiedField.DELIVERY_FAILED)];
          set => List[((int)ModifiedField.DELIVERY_FAILED)] = value;
       }
 
       public bool? UndeliverableHere
       {
-         get => (bool)List[((int)ModifiedField.UNDELIVERABLE_HERE)];
+         get => (bool?)List[((int)ModifiedField.UNDELIVERABLE_HERE)];
          set => List[((int)ModifiedField.UNDELIVERABLE_HERE)] = value;
       }
 
