@@ -21,6 +21,7 @@ using System.IO;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Test.Driver;
+using Apache.Qpid.Proton.Types.Messaging;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
@@ -123,6 +124,16 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
 
          return ProtonByteBufferAllocator.Instance.Wrap(payload);
+      }
+
+      protected static byte[] CreateEncodedMessage(ISection body)
+      {
+         IEncoder encoder = CodecFactory.Encoder;
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         encoder.WriteObject(buffer, encoder.NewEncoderState(), body);
+         byte[] result = new byte[buffer.ReadableBytes];
+         buffer.CopyInto(0, result, 0, result.Length);
+         return result;
       }
 
       protected uint CountElements<T>(IEnumerable<T> enumerable)

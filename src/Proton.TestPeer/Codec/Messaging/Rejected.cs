@@ -77,6 +77,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
             return false;
          }
 
+         if (d is Rejected rejected && Error != null)
+         {
+            return Error.Equals(rejected.Error);
+         }
+
          object described = Described;
          object described2 = d.Described;
          if (described == null)

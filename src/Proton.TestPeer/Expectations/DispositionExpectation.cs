@@ -206,13 +206,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
          rand.NextBytes(txnId);
 
-         expectation.WithState(new Declared(txnId));
+         expectation.WithState(new DeclaredMatcher().WithTxnId(txnId));
          return expectation;
       }
 
       public DispositionExpectation Declared(byte[] txnId)
       {
-         expectation.WithState(new Declared(txnId));
+         expectation.WithState(new DeclaredMatcher().WithTxnId(txnId));
          return expectation;
       }
 

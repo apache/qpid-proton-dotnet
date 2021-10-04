@@ -66,13 +66,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          set => linkedResource = value;
       }
 
-      public ErrorCondition ErrorCondition
+      public virtual ErrorCondition ErrorCondition
       {
          get => localError;
          set => localError = value;
       }
 
-      public ErrorCondition RemoteErrorCondition
+      public virtual ErrorCondition RemoteErrorCondition
       {
          get => remoteError;
          internal set => remoteError = value;

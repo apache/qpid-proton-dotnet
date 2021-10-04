@@ -410,7 +410,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            if (localAttach.Target is Apache.Qpid.Proton.Types.Transactions.Coordinator)
+            if (remoteAttach.Target is Apache.Qpid.Proton.Types.Transactions.Coordinator)
             {
                if (session.HasTransactionManagerOpenHandler)
                {

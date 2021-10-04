@@ -29,6 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public DeclareInjectAction(AMQPTestDriver driver) : base(driver)
       {
+         WithBody().WithDescribed(new Declare());
       }
 
       public DeclareInjectAction WithDeclare(Declare declare)

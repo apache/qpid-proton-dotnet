@@ -81,6 +81,17 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public override bool IsRemotelyClosed => receiver.IsRemotelyClosedOrDetached;
 
+      public override ErrorCondition ErrorCondition
+      {
+         get => receiver.ErrorCondition;
+         set => receiver.ErrorCondition = value;
+      }
+
+      public override ErrorCondition RemoteErrorCondition
+      {
+         get => receiver.RemoteErrorCondition;
+      }
+
       public override Symbol[] OfferedCapabilities
       {
          get => receiver.OfferedCapabilities;
@@ -159,7 +170,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             throw new ArgumentException("Cannot complete declaration of a transaction from another transaction manager.");
          }
 
-         if (txnId == null || txnId.IsReadable)
+         if (txnId == null || !txnId.IsReadable)
          {
             throw new ArgumentException("Cannot declare a transaction without a transaction Id");
          }
