@@ -17,8 +17,8 @@
 
 using System;
 using System.IO;
-using Apache.Qpid.Proton.Test.Driver.Actions;
-using Apache.Qpid.Proton.Test.Driver.Utilities;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -35,9 +35,14 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly AMQPTestDriver driver;
       private Action<Stream> frameSink;
 
-      public ProtonTestConnector(Action<Stream> frameSink = null)
+      public ProtonTestConnector(in ILoggerFactory loggerFactory = null)
       {
-         this.driver = new AMQPTestDriver(PeerName, ConnectorFrameSink, null);
+         this.driver = new AMQPTestDriver(PeerName, ConnectorFrameSink, null, loggerFactory);
+      }
+
+      public ProtonTestConnector(in Action<Stream> frameSink, in ILoggerFactory loggerFactory = null)
+      {
+         this.driver = new AMQPTestDriver(PeerName, ConnectorFrameSink, null, loggerFactory);
 
          this.frameSink = frameSink;
       }

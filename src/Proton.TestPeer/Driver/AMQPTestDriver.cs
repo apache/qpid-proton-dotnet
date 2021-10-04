@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private uint inboundMaxFrameSize = UInt32.MaxValue;
       private uint outboundMaxFrameSize = UInt32.MaxValue;
 
-      private readonly ILoggerFactory loggerFactory = new NullLoggerFactory();
+      private readonly ILoggerFactory loggerFactory;
       private readonly ILogger<AMQPTestDriver> logger;
 
       /// <summary>
@@ -73,7 +73,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
 
       public AMQPTestDriver(string name, Action<Stream> frameConsumer, Func<TaskFactory> scheduler) :
-         this(name, frameConsumer, null, scheduler, new NullLoggerFactory())
+         this(name, frameConsumer, null, scheduler, NullLoggerFactory.Instance)
       {
       }
 
@@ -89,7 +89,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.taskFactorySupplier = scheduler;
          this.assertionConsumer = assertConsumer;
          this.driverName = name;
-         this.loggerFactory = logFactory;
+         this.loggerFactory = logFactory ?? NullLoggerFactory.Instance;
          this.logger = loggerFactory.CreateLogger<AMQPTestDriver>();
 
          this.frameEncoder = new FrameEncoder(this);

@@ -17,9 +17,9 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver
@@ -27,12 +27,28 @@ namespace Apache.Qpid.Proton.Test.Driver
    [TestFixture]
    public class ProtonTestConnectorTests
    {
+      private ILoggerFactory loggerFactory;
+
+      [OneTimeSetUp]
+      public void OneTimeSetup()
+      {
+         loggerFactory = LoggerFactory.Create(builder =>
+            builder.AddSimpleConsole(options =>
+            {
+               options.IncludeScopes = true;
+               options.SingleLine = true;
+               options.TimestampFormat = "hh:mm:ss ";
+            })
+         );
+      }
+
       [Test]
       public void TestCreateConnectorAndIngestFailsWhenNoExpectationsSet()
       {
          Stream frame = null; // Unused in this context as connector won't produce output
 
-         ProtonTestConnector connector = new ProtonTestConnector((outputFrame) => frame = outputFrame);
+         ProtonTestConnector connector =
+            new ProtonTestConnector((outputFrame) => frame = outputFrame, loggerFactory);
 
          Assert.IsNotNull(connector.Driver);
 
