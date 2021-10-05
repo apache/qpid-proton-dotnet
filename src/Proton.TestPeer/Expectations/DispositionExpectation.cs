@@ -76,6 +76,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return this;
       }
 
+      public DispositionExpectation FromSender()
+      {
+         WithRole(Is.EqualTo(Role.Sender.ToBoolean()));
+         return this;
+      }
+
+      public DispositionExpectation FromReceiver()
+      {
+         WithRole(Is.EqualTo(Role.Receiver.ToBoolean()));
+         return this;
+      }
+
       public DispositionExpectation WithFirst(uint first)
       {
          return WithFirst(Is.EqualTo(first));

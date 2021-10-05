@@ -24,7 +24,6 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
-using Apache.Qpid.Proton.Test.Driver.Exceptions;
 using Apache.Qpid.Proton.Test.Driver.Expectations;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
 

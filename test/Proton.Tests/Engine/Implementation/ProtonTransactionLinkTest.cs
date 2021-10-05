@@ -16,14 +16,12 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
 using Apache.Qpid.Proton.Types.Transport;
 using NUnit.Framework;
-using Is = Apache.Qpid.Proton.Test.Driver.Matchers.Is;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
 {

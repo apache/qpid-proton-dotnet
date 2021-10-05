@@ -39,6 +39,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       protected readonly IEncoder encoder = CodecFactory.DefaultEncoder;
       protected IEncoderState encoderState;
 
+      protected Random rand;
+      protected int randSeed;
+
       [OneTimeSetUp]
       public void OneTimeSetup()
       {
@@ -53,6 +56,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          name = TestContext.CurrentContext.Test.Name;
          decoderState.Reset();
          encoderState.Reset();
+
+         randSeed = Environment.TickCount;
+         rand = new Random(randSeed);
       }
 
       [TearDown]

@@ -165,6 +165,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             long bytesRead = Math.Min(payload.ReadableBytes, buffer.WritableBytes);
             payload.CopyInto(payload.ReadOffset, buffer, buffer.WriteOffset, bytesRead);
+            payload.ReadOffset += bytesRead;
             if (!payload.IsReadable)
             {
                payload = null;
@@ -188,6 +189,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             long bytesRead = Math.Min(payload.ReadableBytes, length);
             payload.CopyInto(payload.ReadOffset, target, offset, bytesRead);
+            payload.ReadOffset += bytesRead;
             if (!payload.IsReadable)
             {
                payload = null;

@@ -16,6 +16,7 @@
  */
 
 using System;
+using Moq;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
@@ -366,6 +367,75 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsNull(pipeline.First());
          Assert.IsNull(pipeline.Last());
+      }
+
+      [Test]
+      public void TestHandlerCanOptIntoAllEvents()
+      {
+         ProtonEnginePipeline pipeline = new ProtonEnginePipeline(engine);
+
+         var handler = new Mock<IEngineHandler>();
+         handler.Setup(handler => handler.HandlerAdded(It.IsAny<IEngineHandlerContext>()))
+            .Callback<IEngineHandlerContext>((ctx) =>
+            {
+               ((ProtonEngineHandlerContext)ctx).InterestMask = ProtonEngineHandlerContext.HANDLER_ALL_EVENTS;
+            });
+
+         pipeline.AddLast("read-sink", new FrameReadSinkTransportHandler());
+         pipeline.AddLast("test", handler.Object);
+         pipeline.AddLast("write-sink", new FrameWriteSinkTransportHandler());
+
+         pipeline.FireRead(HeaderEnvelope.AMQP_HEADER_ENVELOPE);
+         pipeline.FireWrite(HeaderEnvelope.AMQP_HEADER_ENVELOPE);
+
+         handler.Verify(self => self.HandlerAdded(It.IsAny<IEngineHandlerContext>()));
+         handler.Verify(self => self.HandleRead(It.IsAny<IEngineHandlerContext>(), It.IsAny<HeaderEnvelope>()));
+         handler.Verify(self => self.HandleWrite(It.IsAny<IEngineHandlerContext>(), It.IsAny<HeaderEnvelope>()));
+         handler.VerifyNoOtherCalls();
+      }
+
+      [Test]
+      public void TestHandlerCanOptOutOfReadEvents()
+      {
+         ProtonEnginePipeline pipeline = new ProtonEnginePipeline(engine);
+
+         var handler = new Mock<IEngineHandler>();
+         handler.Setup(handler => handler.HandlerAdded(It.IsAny<IEngineHandlerContext>()))
+            .Callback<IEngineHandlerContext>((ctx) =>
+            {
+               ((ProtonEngineHandlerContext)ctx).InterestMask = ProtonEngineHandlerContext.HANDLER_WRITES;
+            });
+
+         pipeline.AddLast("read-sink", new FrameReadSinkTransportHandler());
+         pipeline.AddLast("test", handler.Object);
+         pipeline.AddLast("write-sink", new FrameWriteSinkTransportHandler());
+
+         pipeline.FireRead(HeaderEnvelope.AMQP_HEADER_ENVELOPE);
+
+         handler.Verify(self => self.HandlerAdded(It.IsAny<IEngineHandlerContext>()));
+         handler.VerifyNoOtherCalls();
+      }
+
+      [Test]
+      public void TestHandlerCanOptOutOfWriteEvents()
+      {
+         ProtonEnginePipeline pipeline = new ProtonEnginePipeline(engine);
+
+         var handler = new Mock<IEngineHandler>();
+         handler.Setup(handler => handler.HandlerAdded(It.IsAny<IEngineHandlerContext>()))
+            .Callback<IEngineHandlerContext>((ctx) =>
+            {
+               ((ProtonEngineHandlerContext)ctx).InterestMask = ProtonEngineHandlerContext.HANDLER_READS;
+            });
+
+         pipeline.AddLast("read-sink", new FrameReadSinkTransportHandler());
+         pipeline.AddLast("test", handler.Object);
+         pipeline.AddLast("write-sink", new FrameWriteSinkTransportHandler());
+
+         pipeline.FireWrite(HeaderEnvelope.AMQP_HEADER_ENVELOPE);
+
+         handler.Verify(self => self.HandlerAdded(It.IsAny<IEngineHandlerContext>()));
+         handler.VerifyNoOtherCalls();
       }
    }
 }
