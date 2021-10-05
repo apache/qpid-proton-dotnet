@@ -24,8 +24,11 @@
    ],
    "settings": {
       "cSpell.words": [
+         "hmac",
+         "HMACMD",
          "Sasl",
-         "UBYTE"
+         "UBYTE",
+         "XOAUTH"
       ],
       "idf.espIdfPath": "/home/timothy/esp/esp-idf",
       "idf.pythonBinPath": "/home/timothy/.espressif/python_env/idf4.2_py3.8_env/bin/python",

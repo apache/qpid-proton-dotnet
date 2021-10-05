@@ -33,12 +33,14 @@ namespace Apache.Qpid.Proton.Test.Driver
       public void OneTimeSetup()
       {
          loggerFactory = LoggerFactory.Create(builder =>
-            builder.AddSimpleConsole(options =>
-            {
-               options.IncludeScopes = true;
-               options.SingleLine = true;
-               options.TimestampFormat = "hh:mm:ss ";
-            })
+            builder.ClearProviders()
+                   .SetMinimumLevel(LogLevel.Trace)
+                   .AddSimpleConsole(options =>
+                   {
+                      options.IncludeScopes = true;
+                      options.SingleLine = true;
+                      options.TimestampFormat = "hh:mm:ss ";
+                   })
          );
       }
 
