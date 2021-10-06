@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
          if (!sentResponse && challenge != null && challenge.ReadableBytes != 0)
          {
             byte[] challengeBytes = new byte[challenge.ReadableBytes];
-            challenge.WriteBytes(challengeBytes);
+            challenge.CopyInto(challenge.ReadOffset, challengeBytes, 0, challengeBytes.Length);
 
             HMACMD5 mac = new HMACMD5(Encoding.ASCII.GetBytes(credentials.Password));
 

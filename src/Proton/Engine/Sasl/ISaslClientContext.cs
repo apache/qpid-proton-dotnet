@@ -21,43 +21,18 @@ using Apache.Qpid.Proton.Types;
 namespace Apache.Qpid.Proton.Engine.Sasl
 {
    /// <summary>
-   /// Delegate that performs custom initialization work when the client context
-   /// has first been initialized.
-   /// </summary>
-   /// <param name="context">The SASL client context that is requesting init</param>
-   public delegate void SaslClientContextInitHandler(ISaslClientContext context);
-
-   /// <summary>
-   /// Delegate that performs the selection of the SASL mechanim the client will
-   /// use to perform authentication with the remote SASL server.
-   /// </summary>
-   /// <param name="context">The SASL client context that received the server mechanisms</param>
-   /// <param name="mechanisms">The server offered SASL mechanisms</param>
-   public delegate void SaslMechanismsHandler(ISaslClientContext context, Symbol[] mechanisms);
-
-   /// <summary>
-   /// Delegate that performs the response handling for any incoming SASL server
-   /// challenges.
-   /// </summary>
-   /// <param name="context">The SASL client context that received the server challenge</param>
-   /// <param name="challenge">The server provided challenge bytes</param>
-   public delegate void SaslChallengeHandler(ISaslClientContext context, IProtonBuffer challenge);
-
-   /// <summary>
-   /// Delegate that reacts to the final SASL server outcome event and triggers
-   /// client level state changes based on the outcome.
-   /// </summary>
-   /// <param name="context">The SASL client context that received the server outcome</param>
-   /// <param name="outcome">The SASL outcome that was provided by the server</param>
-   /// <param name="additionalData">Optional additional data provided by the server.</param>
-   public delegate void SaslOutcomeHandler(ISaslClientContext context, SaslOutcome outcome, IProtonBuffer additionalData);
-
-   /// <summary>
    /// Root context of a SASL authentication API which provides common elements
    /// used in both clients and servers.
    /// </summary>
    public interface ISaslClientContext : ISaslContext
    {
+      /// <summary>
+      /// Configures the SASL Authenticator instance that will process the incoming SASL
+      /// exchange and provide authentication information and response to challenge
+      /// requests from the remote.
+      /// </summary>
+      ISaslClientAuthenticator Authenticator { get; set; }
+
       /// <summary>
       /// Sends the AMQP Header indicating the desire for SASL negotiations to be commenced on
       /// this connection. The hosting application my wish to start SASL negotiations prior to
@@ -94,72 +69,6 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// <param name="failure">The exception that defines the cause of the failure</param>
       /// <returns>This SASL client context instance.</returns>
       ISaslClientContext SaslFailure(SaslException failure);
-
-      #region SASL Client Events
-
-      /// <summary>
-      /// Called to give the application code a clear point to initialize all the client side
-      /// expectations for the Authentication exchange.
-      /// <para/>
-      /// The application should use this event to configure the client mechanisms and other client
-      /// authentication properties.
-      /// </summary>
-      /// <remarks>
-      /// In the event that the client implementation cannot proceed with SASL authentication it
-      /// should call the SASL failed API  to signal the engine that it should transition to a
-      /// failed state.
-      /// </remarks>
-      /// <param name="handler">The handler for this event.</param>
-      /// <returns>This SASL client context instance.</returns>
-      ISaslClientContext InitializationHandler(SaslClientContextInitHandler handler);
-
-      /// <summary>
-      /// Called when a SASL mechanisms frame has arrived and its effect applied, indicating
-      /// the offered mechanisms sent by the 'server' peer. The client should respond to the
-      /// mechanisms event by selecting one from the offered list and calling the send method
-      /// for the chosen value immediately or later using the same thread that triggered this
-      /// event.
-      /// </summary>
-      /// <remarks>
-      /// In the event that the client implementation cannot proceed with SASL authentication it
-      /// should call the SASL failed API  to signal the engine that it should transition to a
-      /// failed state.
-      /// </remarks>
-      /// <param name="handler">The handler for this event.</param>
-      /// <returns>This SASL client context instance.</returns>
-      ISaslClientContext MechanismsHandler(SaslMechanismsHandler handler);
-
-      /// <summary>
-      /// Called when a SASL challenge frame has arrived and its effect applied, indicating the
-      /// challenge sent by the 'server' peer. The client should respond to the mechanisms event
-      /// by selecting one from the offered list and calling the send response method immediately
-      /// or later using the same thread that triggered this event.
-      /// </summary>
-      /// <remarks>
-      /// In the event that the client implementation cannot proceed with SASL authentication it
-      /// should call the SASL failed API  to signal the engine that it should transition to a
-      /// failed state.
-      /// </remarks>
-      /// <param name="handler">The handler for this event.</param>
-      /// <returns>This SASL client context instance.</returns>
-      ISaslClientContext ChallengeHandler(SaslChallengeHandler handler);
-
-      /// <summary>
-      /// Called when a SASL outcome frame has arrived and its effect applied, indicating the outcome and
-      /// any success additional data sent by the 'server' peer. The client can consider the SASL negotiations
-      /// complete following this event. The client should respond appropriately to the outcome whose state
-      /// can indicate that negotiations have failed and the server has not authenticated the client.
-      /// </summary>
-      /// <remarks>
-      /// In the event that the client implementation cannot proceed with SASL authentication it
-      /// should call the SASL failed API  to signal the engine that it should transition to a
-      /// failed state.
-      /// </remarks>
-      /// <param name="handler">The handler for this event.</param>
-      /// <returns>This SASL client context instance.</returns>
-      ISaslClientContext OutcomeHandler(SaslOutcomeHandler handler);
-
-      #endregion
 
    }
 }

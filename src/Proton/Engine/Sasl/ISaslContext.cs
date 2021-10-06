@@ -42,6 +42,16 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       bool IsDone { get; }
 
       /// <summary>
+      /// Provides a quick check for this context being a server context
+      /// </summary>
+      bool IsServer => Role == SaslContextRole.Server;
+
+      /// <summary>
+      /// Provides a quick check for this context being a server context
+      /// </summary>
+      bool IsClient => Role == SaslContextRole.Client;
+
+      /// <summary>
       /// Gets the outcome of the SASL authentication process.
       /// <para/>
       /// If the SASL exchange is ongoing or the SASL layer was skipped because a particular
