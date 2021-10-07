@@ -47,9 +47,11 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             case SaslMechanism.External:
                return ExternalMechanism.EXTERNAL;
             case SaslMechanism.ScramSHA512:
+               return ScramSHA512Mechanism.SCRAM_SHA_512;
             case SaslMechanism.ScramSHA256:
+               return ScramSHA256Mechanism.SCRAM_SHA_256;
             case SaslMechanism.ScramSHA1:
-               throw new NotImplementedException();
+               return ScramSHA1Mechanism.SCRAM_SHA_1;
             case SaslMechanism.CramMD5:
                return CramMD5Mechanism.CRAM_MD5;
             case SaslMechanism.Plain:
@@ -77,9 +79,11 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             case SaslMechanism.External:
                return new ExternalMechanism();
             case SaslMechanism.ScramSHA512:
+               return new ScramSHA512Mechanism();
             case SaslMechanism.ScramSHA256:
+               return new ScramSHA256Mechanism();
             case SaslMechanism.ScramSHA1:
-               throw new NotImplementedException();
+               return new ScramSHA1Mechanism();
             case SaslMechanism.CramMD5:
                return new CramMD5Mechanism();
             case SaslMechanism.Plain:
