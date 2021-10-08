@@ -46,9 +46,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public byte[] Response
+      public Binary Response
       {
-         get => (byte[])List[((int)SaslResponseField.Response)];
+         get => (Binary)List[((int)SaslResponseField.Response)];
          set => List[((int)SaslResponseField.Response)] = value;
       }
 

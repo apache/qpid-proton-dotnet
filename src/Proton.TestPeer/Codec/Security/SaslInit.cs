@@ -54,9 +54,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
          set => List[((int)SaslInitField.Mechanism)] = value;
       }
 
-      public byte[] InitialResponse
+      public Binary InitialResponse
       {
-         get => (byte[])List[((int)SaslInitField.InitialResponse)];
+         get => (Binary)List[((int)SaslInitField.InitialResponse)];
          set => List[((int)SaslInitField.InitialResponse)] = value;
       }
 

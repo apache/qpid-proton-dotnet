@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
    /// <summary>
    /// Represents the outcome of a SASL exchange.
    /// </summary>
-   public enum SaslOutcome
+   public enum SaslAuthOutcome
    {
       /// <summary>
       /// SASL Authentication succeeded.
@@ -33,42 +33,61 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// <summary>
       /// SASL Authentication failed due to bad credentials
       /// </summary>
-      SaslAuth,
+      SaslAuthFailed,
 
       /// <summary>
       /// SASL Authentication failed due to a system error.
       /// </summary>
-      SaslSys,
+      SaslSysError,
 
       /// <summary>
       /// SASL Authentication failed due to an unrecoverable error.
       /// </summary>
-      SaslPerm,
+      SaslPermError,
 
       /// <summary>
       /// SASL Authentication failed due to a temporary failure.
       /// </summary>
-      SaslTemp
+      SaslTempError
    }
 
-   public static class TerminusDurabilityExtension
+   public static class SaslAuthOutcomeConverter
    {
-      public static SaslCode ToSaslCode(this SaslOutcome outcome)
+      public static SaslCode ToSaslCode(this SaslAuthOutcome outcome)
       {
          switch (outcome)
          {
-            case SaslOutcome.SaslOk:
+            case SaslAuthOutcome.SaslOk:
                return SaslCode.Ok;
-            case SaslOutcome.SaslAuth:
+            case SaslAuthOutcome.SaslAuthFailed:
                return SaslCode.Auth;
-            case SaslOutcome.SaslSys:
+            case SaslAuthOutcome.SaslSysError:
                return SaslCode.Sys;
-            case SaslOutcome.SaslPerm:
+            case SaslAuthOutcome.SaslPermError:
                return SaslCode.SysPerm;
-            case SaslOutcome.SaslTemp:
+            case SaslAuthOutcome.SaslTempError:
                return SaslCode.SysTemp;
             default:
                throw new ArgumentException("Unknown SASL outcome type");
+         }
+      }
+
+      public static SaslAuthOutcome ToSaslAuthOutcome(this SaslCode code)
+      {
+         switch (code)
+         {
+            case SaslCode.Ok:
+               return SaslAuthOutcome.SaslOk;
+            case SaslCode.Auth:
+               return SaslAuthOutcome.SaslAuthFailed;
+            case SaslCode.Sys:
+               return SaslAuthOutcome.SaslSysError;
+            case SaslCode.SysPerm:
+               return SaslAuthOutcome.SaslPermError;
+            case SaslCode.SysTemp:
+               return SaslAuthOutcome.SaslTempError;
+            default:
+               throw new ArgumentException("Unknown SASL Code");
          }
       }
    }

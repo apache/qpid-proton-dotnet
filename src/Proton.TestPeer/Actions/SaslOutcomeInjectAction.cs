@@ -34,6 +34,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override SaslOutcome Performative => saslOutcome;
 
+      public SaslOutcomeInjectAction WithCode(byte code)
+      {
+         saslOutcome.Code = (SaslCode)code;
+         return this;
+      }
+
       public SaslOutcomeInjectAction WithCode(SaslCode code)
       {
          saslOutcome.Code = code;

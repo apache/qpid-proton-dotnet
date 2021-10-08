@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Engine.Implementation.Sasl;
+
 namespace Apache.Qpid.Proton.Engine.Implementation
 {
    public sealed class ProtonEngineFactory : IEngineFactory
@@ -31,7 +33,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          IEnginePipeline pipeline = engine.Pipeline;
 
          pipeline.AddLast(ProtonConstants.AmqpPerformativeHandler, new ProtonPerformativeHandler());
-         //pipeline.AddLast(ProtonConstants.SaslPerformativeHandler, new ProtonSaslHandler());
+         pipeline.AddLast(ProtonConstants.SaslPerformativeHandler, new ProtonSaslHandler());
          pipeline.AddLast(ProtonConstants.FrameLoggingHandler, new ProtonFrameLoggingHandler());
          pipeline.AddLast(ProtonConstants.FrameDecodingHandler, new ProtonFrameDecodingHandler());
          pipeline.AddLast(ProtonConstants.FrameEncodingHandler, new ProtonFrameEncodingHandler());

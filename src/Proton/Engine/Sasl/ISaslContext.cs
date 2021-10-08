@@ -44,12 +44,12 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// <summary>
       /// Provides a quick check for this context being a server context
       /// </summary>
-      bool IsServer => Role == SaslContextRole.Server;
+      bool IsServer { get; }
 
       /// <summary>
       /// Provides a quick check for this context being a server context
       /// </summary>
-      bool IsClient => Role == SaslContextRole.Client;
+      bool IsClient { get; }
 
       /// <summary>
       /// Gets the outcome of the SASL authentication process.
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// engine configuration allows such behavior then this method should return null to
       /// indicate no SASL outcome is available.
       /// </summary>
-      SaslOutcome Outcome { get; }
+      SaslAuthOutcome Outcome { get; }
 
       /// <summary>
       /// Returns a state enum that indicates the current operating state of the SASL
@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// to use for negotiations. If called before the client has sent its chosen mechanism
       /// this method returns null.
       /// </summary>
-      Symbol[] ChosenMechanisms { get; }
+      Symbol ChosenMechanism { get; }
 
       /// <summary>
       /// The DNS name of the host (either fully qualified or relative) that was sent to the

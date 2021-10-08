@@ -46,9 +46,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public byte[] Challenge
+      public Binary Challenge
       {
-         get => (byte[])List[((int)SaslChallengeField.Challenge)];
+         get => (Binary)List[((int)SaslChallengeField.Challenge)];
          set => List[((int)SaslChallengeField.Challenge)] = value;
       }
 

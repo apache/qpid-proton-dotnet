@@ -32,6 +32,50 @@ namespace Apache.Qpid.Proton.Utilities
       private static readonly int QuotedStringLimit = 64;
 
       /// <summary>
+      /// Given an array of string objects, convert them to a matching array of
+      /// their Symbol equivalent values.
+      /// </summary>
+      /// <param name="stringArray"></param>
+      /// <returns>A new Symbol array with values that correspond to the input stings</returns>
+      public static Symbol[] ToSymbolArray(string[] stringArray)
+      {
+         Symbol[] result = null;
+
+         if (stringArray != null)
+         {
+            result = new Symbol[stringArray.Length];
+            for (int i = 0; i < stringArray.Length; ++i)
+            {
+               result[i] = Symbol.Lookup(stringArray[i]);
+            }
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Given an array of Symbol objects, convert them to a matching array of
+      /// their string equivalent values.
+      /// </summary>
+      /// <param name="symbolArray"></param>
+      /// <returns>A new string array with values that correspond to the input Symbols</returns>
+      public static string[] ToStringArray(Symbol[] symbolArray)
+      {
+         string[] result = null;
+
+         if (symbolArray != null)
+         {
+            result = new string[symbolArray.Length];
+            for (int i = 0; i < symbolArray.Length; ++i)
+            {
+               result[i] = symbolArray[i].ToString();
+            }
+         }
+
+         return result;
+      }
+
+      /// <summary>
       /// Converts an enumeration of string values into a set of Symbol values.
       /// </summary>
       /// <param name="strings">an enumeration of string values</param>
@@ -43,7 +87,7 @@ namespace Apache.Qpid.Proton.Utilities
          if (strings != null)
          {
             result = new HashSet<Symbol>();
-            foreach(string value in strings)
+            foreach (string value in strings)
             {
                result.Add(Symbol.Lookup(value));
             }
@@ -68,7 +112,7 @@ namespace Apache.Qpid.Proton.Utilities
          if (symbols != null)
          {
             result = new HashSet<string>();
-            foreach(Symbol value in symbols)
+            foreach (Symbol value in symbols)
             {
                result.Add(value.ToString());
             }

@@ -16,8 +16,6 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Engine.Sasl;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
@@ -34,12 +32,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public EngineSaslState SaslState => EngineSaslState.None;
 
-      public SaslOutcome? SaslOutcome => Sasl.SaslOutcome.SaslOk;
+      public SaslAuthOutcome? SaslOutcome => Engine.Sasl.SaslAuthOutcome.SaslOk;
 
       public uint MaxFrameSize
       {
          get => MinMaxSaslFrameSize;
-         set {}
+         set { }
+      }
+
+      public ISaslClientContext Client()
+      {
+         throw new InvalidOperationException("Engine not configured with a SASL layer");
+      }
+
+      public ISaslServerContext Server()
+      {
+         throw new InvalidOperationException("Engine not configured with a SASL layer");
       }
    }
 }

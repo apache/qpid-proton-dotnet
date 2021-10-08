@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       private readonly SaslMechanismSelector selector;
       private readonly ISaslCredentialsProvider credentials;
 
-      private Action<SaslOutcome, IProtonBuffer> saslCompleteHandler;
+      private Action<SaslAuthOutcome, IProtonBuffer> saslCompleteHandler;
       private IMechanism chosenMechanism;
 
       /// <summary>
@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// </summary>
       /// <param name="saslCompleteEventHandler">Handler for the SASL complete event</param>
       /// <returns>This authenticator instance.</returns>
-      public SaslAuthenticator SaslComplete(Action<SaslOutcome> saslCompleteEventHandler)
+      public SaslAuthenticator SaslComplete(Action<SaslAuthOutcome> saslCompleteEventHandler)
       {
          this.saslCompleteHandler = (outcome, _) => saslCompleteEventHandler?.Invoke(outcome);
          return this;
@@ -90,7 +90,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// </summary>
       /// <param name="saslCompleteEventHandler">Handler for the SASL complete event</param>
       /// <returns>This authenticator instance.</returns>
-      public SaslAuthenticator SaslComplete(Action<SaslOutcome, IProtonBuffer> saslCompleteEventHandler)
+      public SaslAuthenticator SaslComplete(Action<SaslAuthOutcome, IProtonBuffer> saslCompleteEventHandler)
       {
          this.saslCompleteHandler = saslCompleteEventHandler;
          return this;
@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
          context.SendResponse(response);
       }
 
-      public void HandleSaslOutcome(ISaslClientContext context, SaslOutcome outcome, IProtonBuffer additional)
+      public void HandleSaslOutcome(ISaslClientContext context, SaslAuthOutcome outcome, IProtonBuffer additional)
       {
          try
          {

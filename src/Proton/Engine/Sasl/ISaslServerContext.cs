@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// <param name="outcome">The SASL Authentication outcome to send</param>
       /// <param name="additional">Optional additional data to send</param>
       /// <returns>This SASL server context instance.</returns>
-      ISaslServerContext SendOutcome(SaslOutcome outcome, IProtonBuffer additional);
+      ISaslServerContext SendOutcome(SaslAuthOutcome outcome, IProtonBuffer additional);
 
       /// <summary>
       /// Allows the server implementation to fail the SASL negotiation process due to some

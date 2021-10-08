@@ -36,13 +36,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public SaslResponseInjectAction WithResponse(byte[] response)
       {
-         saslResponse.Response = response;
+         saslResponse.Response = new Binary(response);
          return this;
       }
 
       public SaslResponseInjectAction WithResponse(Binary response)
       {
-         saslResponse.Response = response.Array;
+         saslResponse.Response = response;
          return this;
       }
    }

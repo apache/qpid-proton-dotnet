@@ -22,6 +22,28 @@ namespace Apache.Qpid.Proton.Engine
    public interface IEngineSaslDriver
    {
       /// <summary>
+      /// Configure this IEngineSaslDriver to operate in client mode and return the
+      /// associated ISaslClientContext instance that should be used to complete the
+      /// SASL negotiation with the server end.
+      /// </summary>
+      /// <returns>A SASL Client context instance</returns>
+      /// <exception cref="InvalidOperationException">
+      /// If the engine is in server mode or has not been configured with SASL support.
+      /// </exception>
+      ISaslClientContext Client();
+
+      /// <summary>
+      /// Configure this IEngineSaslDriver to operate in server mode and return the
+      /// associated ISaslServerContext instance that should be used to complete the
+      /// SASL negotiation with the client end.
+      /// </summary>
+      /// <returns>A SASL Server context instance</returns>
+      /// <exception cref="InvalidOperationException">
+      /// If the engine is in client mode or has not been configured with SASL support.
+      /// </exception>
+      ISaslServerContext Server();
+
+      /// <summary>
       /// Returns a SaslState that indicates the current operating state of the SASL
       /// negotiation process or conversely if no SASL layer is configured this method
       /// should return the disabled state. This method must never return a null result.
@@ -35,7 +57,7 @@ namespace Apache.Qpid.Proton.Engine
       /// particular engine configuration allows such behavior then this method
       /// should return null to indicate no SASL outcome is available.
       /// </summary>
-      SaslOutcome? SaslOutcome { get; }
+      SaslAuthOutcome? SaslOutcome { get; }
 
       /// <summary>
       /// Provides access to the SASL drivers configured max frame size value, the

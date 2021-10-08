@@ -36,13 +36,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public SaslChallengeInjectAction WithChallenge(byte[] challenge)
       {
-         saslChallenge.Challenge = challenge;
+         saslChallenge.Challenge = new Binary(challenge);
          return this;
       }
 
       public SaslChallengeInjectAction WithChallenge(Binary challenge)
       {
-         saslChallenge.Challenge = challenge.Array;
+         saslChallenge.Challenge = challenge;
          return this;
       }
    }

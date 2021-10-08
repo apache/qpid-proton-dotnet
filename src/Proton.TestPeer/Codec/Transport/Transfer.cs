@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport

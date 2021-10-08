@@ -88,7 +88,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// <param name="context">The client context handling the SASL exchange</param>
       /// <param name="outcome">The SASL outcome provided by the server peer</param>
       /// <param name="additional">Optional additional data provided by the server</param>
-      void HandleSaslOutcome(ISaslClientContext context, SaslOutcome outcome, IProtonBuffer additional);
+      void HandleSaslOutcome(ISaslClientContext context, SaslAuthOutcome outcome, IProtonBuffer additional);
 
    }
 }
