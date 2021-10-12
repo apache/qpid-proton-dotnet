@@ -243,7 +243,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
             this.server = server;
          }
 
-         public void handleMechanisms(SaslMechanisms saslMechanisms, IEngineHandlerContext context)
+         public void HandleMechanisms(SaslMechanisms saslMechanisms, IEngineHandlerContext context)
          {
             if (!server.mechanismsSent)
             {
@@ -257,12 +257,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
             }
          }
 
-         public void handleInit(SaslInit saslInit, IEngineHandlerContext context)
+         public void HandleInit(SaslInit saslInit, IEngineHandlerContext context)
          {
             throw new ProtocolViolationException("Unexpected SASL Init Frame write attempted on SASL Server.");
          }
 
-         public void handleChallenge(SaslChallenge saslChallenge, IEngineHandlerContext context)
+         public void HandleChallenge(SaslChallenge saslChallenge, IEngineHandlerContext context)
          {
             if (server.headerWritten && server.mechanismsSent && !server.responseRequired)
             {
@@ -275,12 +275,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
             }
          }
 
-         public void handleResponse(SaslResponse saslResponse, IEngineHandlerContext context)
+         public void HandleResponse(SaslResponse saslResponse, IEngineHandlerContext context)
          {
             throw new ProtocolViolationException("Unexpected SASL Response Frame write attempted on SASL Server.");
          }
 
-         public void handleOutcome(SaslOutcome saslOutcome, IEngineHandlerContext context)
+         public void HandleOutcome(SaslOutcome saslOutcome, IEngineHandlerContext context)
          {
             if (server.headerWritten && server.mechanismsSent && !server.responseRequired)
             {

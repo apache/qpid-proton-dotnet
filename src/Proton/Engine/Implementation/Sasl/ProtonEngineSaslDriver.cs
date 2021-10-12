@@ -60,11 +60,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
          {
             if (SaslState == EngineSaslState.Idle)
             {
-               if (maxFrameSize < MIN_MAX_SASL_FRAME_SIZE)
+               if (value < MIN_MAX_SASL_FRAME_SIZE)
                {
                   throw new ArgumentOutOfRangeException("Cannot set a max frame size lower than: " + MIN_MAX_SASL_FRAME_SIZE);
                }
-               else if (maxFrameSize > Int32.MaxValue)
+               else if (value > Int32.MaxValue)
                {
                   throw new ArgumentOutOfRangeException("Cannot set a max frame size larger than: " + Int32.MaxValue);
                }
