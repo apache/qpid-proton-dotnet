@@ -29,6 +29,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
    /// </summary>
    public sealed class ProtonDefaultSaslClientAuthenticator : ISaslClientAuthenticator
    {
+      public static readonly ProtonDefaultSaslClientAuthenticator Instance = new ProtonDefaultSaslClientAuthenticator();
+
       private readonly Symbol ANONYMOUS = Symbol.Lookup("ANONYMOUS");
 
       public void HandleSaslChallenge(ISaslClientContext context, IProtonBuffer challenge)

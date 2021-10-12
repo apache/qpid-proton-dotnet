@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
    /// </summary>
    public sealed class ProtonSaslClientContext : ProtonSaslContext, ISaslClientContext
    {
-      private ISaslClientAuthenticator authenticator;
+      private ISaslClientAuthenticator authenticator = ProtonDefaultSaslClientAuthenticator.Instance;
 
       private readonly ClientHeaderReadContext clientHeaderReadContext;
       private readonly ClientHeaderWriteContext clientHeaderWriteContext;

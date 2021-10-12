@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
          byte[] authPrefix = Encoding.ASCII.GetBytes("auth=Bearer ");
          byte[] data = new byte[usernameBytes.Length + passwordBytes.Length + 20];
 
-         Array.Copy(userPrefix, 0, data, 1, 5);
+         Array.Copy(userPrefix, 0, data, 0, 5);
          Array.Copy(usernameBytes, 0, data, 5, usernameBytes.Length);
 
          data[5 + usernameBytes.Length] = 1;

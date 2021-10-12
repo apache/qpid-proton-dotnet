@@ -158,7 +158,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails with NPE")]
       public void TestDefaultClientSaslMismatchBetweenClientAndServer()
       {
          IEngine engine = IEngineFactory.Proton.CreateEngine();
@@ -190,7 +189,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test failres due to apparent issue in test peer comparison of expectation data")]
       public void TestSaslXOauth2Connection()
       {
          IEngine engine = IEngineFactory.Proton.CreateEngine();

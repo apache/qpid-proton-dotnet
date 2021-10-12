@@ -132,10 +132,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
 
       internal void HandleEngineStarting(ProtonEngine engine)
       {
-         if (context != null)
-         {
-            context.HandleContextInitialization(engine);
-         }
+         context?.HandleContextInitialization(engine);
       }
 
       internal ProtonSaslContext SaslContext => context;
