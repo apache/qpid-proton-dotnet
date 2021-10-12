@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Engine
       /// pooled before new non-pooled values are created when a request arrives but all the
       /// current elements are on loan.
       /// </summary>
-      int MaxPoolSize => maxPoolSize;
+      public int MaxPoolSize => maxPoolSize;
 
       /// <summary>
       /// Request to borrow a pooled object or create a new non-pooled instance if no pooled
