@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private bool remotelySettled;
 
       private IProtonBuffer payload;
-      private ProtonCompositeBuffer aggregate;
+      private IProtonCompositeBuffer aggregate;
 
       private ProtonAttachments attachments;
       private object linkedResource;
@@ -314,10 +314,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             IProtonBuffer previous = payload;
 
-            payload = aggregate = new ProtonCompositeBuffer();
-
-            aggregate.Append(previous);
-            aggregate.Append(buffer);
+            payload = aggregate = IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, previous, buffer);
          }
 
          return this;

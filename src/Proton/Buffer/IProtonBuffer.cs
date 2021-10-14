@@ -241,8 +241,6 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">a starting index which is increment after each call</param>
       /// <param name="processor">The delegate that will receive the components</param>
       /// <returns>The number of components processed or negative if stopped early.</returns>
-      // int ForEachReadableComponent(in int index, in ReadableComponentProcessor processor);
-
       int ForEachReadableComponent(in int index, in Func<int, IReadableComponent, bool> processor);
 
       /// <summary>
@@ -257,8 +255,6 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="index">a starting index which is increment after each call</param>
       /// <param name="processor">The delegate that will receive the components</param>
       /// <returns>The number of components processed or negative if stopped early.</returns>
-      // int ForEachWritableComponent(in int index, in WritableComponentProcessor processor);
-
       int ForEachWritableComponent(in int index, in Func<int, IWritableComponent, bool> processor);
 
    }
