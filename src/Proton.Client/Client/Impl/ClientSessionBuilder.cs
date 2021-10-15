@@ -29,6 +29,7 @@ namespace Apache.Qpid.Proton.Client.Impl
    /// </summary>
    internal class ClientSessionBuilder
    {
+      private readonly AtomicInteger sessionCounter = new AtomicInteger();
       private readonly ClientConnection connection;
       private readonly ConnectionOptions connectionOptions;
 
@@ -42,12 +43,55 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public SessionOptions DefaultSessionOptions => GetOrCreateDefaultSessionOptions();
 
+      public ClientSession Session(SessionOptions sessionOptions)
+      {
+         SessionOptions options = sessionOptions != null ? sessionOptions : GetOrCreateDefaultSessionOptions();
+         string sessionId = NextSessionId();
+         Engine.ISession protonSession = CreateSession(connection.ProtonConnection, options);
+
+         return new ClientSession(connection, options, sessionId, protonSession);
+      }
+
+    public ClientStreamSession StreamSession(SessionOptions sessionOptions)
+     {
+         SessionOptions options = sessionOptions != null ? sessionOptions : GetOrCreateDefaultSessionOptions();
+         string sessionId = NextSessionId();
+         Engine.ISession protonSession = CreateSession(connection.ProtonConnection, options);
+
+        return new ClientStreamSession(connection, options, sessionId, protonSession);
+    }
+
+      public static Engine.ISession RecreateSession(ClientConnection connection, Engine.ISession previousSession, SessionOptions options)
+      {
+         Engine.ISession session = connection.ProtonConnection.Session();
+
+         session.IncomingCapacity = options.IncomingCapacity;
+         session.OutgoingCapacity = options.OutgoingCapacity;
+
+         return session;
+      }
+
+      private static Engine.ISession CreateSession(Engine.IConnection connection, SessionOptions options)
+      {
+         Engine.ISession session = connection.Session();
+
+         session.IncomingCapacity = options.IncomingCapacity;
+         session.OutgoingCapacity = options.OutgoingCapacity;
+
+         return session;
+      }
+
+      private String NextSessionId()
+      {
+         return connection.ConnectionId + ":" + sessionCounter.IncrementAndGet();
+      }
+
       private SessionOptions GetOrCreateDefaultSessionOptions()
       {
          SessionOptions sessionOptions = defaultSessionOptions;
          if (sessionOptions == null)
          {
-            lock(connectionOptions)
+            lock (connectionOptions)
             {
                sessionOptions = defaultSessionOptions;
                if (sessionOptions == null)

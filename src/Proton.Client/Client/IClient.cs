@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Client
       /// or check in periodically to see if the operation has finished.
       /// </summary>
       /// <returns>A task that aggregates the wait for all connections to close.</returns>
-      Task<IClient> Close();
+      Task<IClient> CloseAsync();
 
       /// <summary>
       /// Creates a new connection to the designated remote host on the provided port. The connection

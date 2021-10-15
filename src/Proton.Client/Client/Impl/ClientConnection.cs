@@ -30,15 +30,14 @@ namespace Apache.Qpid.Proton.Client.Impl
       private readonly ClientSessionBuilder sessionBuilder;
       private readonly string connectionId;
       private readonly ReconnectLocationPool reconnectPool = new ReconnectLocationPool();
+      private readonly AtomicBoolean closed = new AtomicBoolean();
 
-      private Proton.Engine.IEngine engine;
-      private Proton.Engine.IConnection connection;
+      private Engine.IEngine engine;
+      private Engine.IConnection connection;
       private Exception failureCause;
       private long totalConnections;
       private long reconnectAttempts;
       private long nextReconnectDelay = -1;
-
-      private bool disposedValue;
 
       internal ClientConnection(ClientInstance client, string host, int port, ConnectionOptions options)
       {
@@ -67,6 +66,10 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public void Close()
       {
+         if (closed.CompareAndSet(false, true))
+         {
+
+         }
          throw new System.NotImplementedException();
       }
 
@@ -82,9 +85,18 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public void Dispose()
       {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         System.GC.SuppressFinalize(this);
+         try
+         {
+            Close();
+         }
+         catch (Exception)
+         {
+            // TODO Log something helpful
+         }
+         finally
+         {
+            System.GC.SuppressFinalize(this);
+         }
       }
 
       public Task<IConnection> CloseAsync(IErrorCondition error)
@@ -192,24 +204,11 @@ namespace Apache.Qpid.Proton.Client.Impl
          throw new System.NotImplementedException();
       }
 
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            disposedValue = true;
-         }
-      }
-
       #region Internal Connection API
 
       internal string ConnectionId => throw new NotImplementedException();
+
+      internal Engine.IConnection ProtonConnection => connection;
 
       internal ConnectionOptions Options => options;
 

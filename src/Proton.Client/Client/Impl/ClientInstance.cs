@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Utilities;
 
@@ -32,9 +31,8 @@ namespace Apache.Qpid.Proton.Client.Impl
       private readonly ConnectionOptions defaultConnectionOptions = new ConnectionOptions();
       private readonly IDictionary<string, ClientConnection> connections = new Dictionary<string, ClientConnection>();
       private readonly string clientUniqueId = CONTAINER_ID_GENERATOR.GenerateId();
-
-      private int connectionCounter;
-      private bool disposedValue;
+      private readonly AtomicInteger CONNECTION_COUNTER = new AtomicInteger();
+      private readonly AtomicBoolean closed = new AtomicBoolean();
 
       public string ContainerId => throw new System.NotImplementedException();
 
@@ -43,11 +41,20 @@ namespace Apache.Qpid.Proton.Client.Impl
          this.options = options;
       }
 
-      public Task<IClient> Close()
+      public void Close()
       {
-         lock(connections)
-         {
+         // TODO Try and determine a real exception to return other than the aggregated one.
+         CloseAsync().Wait();
+      }
 
+      public Task<IClient> CloseAsync()
+      {
+         if (closed.CompareAndSet(false, true))
+         {
+            lock (connections)
+            {
+
+            }
          }
 
          throw new System.NotImplementedException();
@@ -55,14 +62,23 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public void Dispose()
       {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         System.GC.SuppressFinalize(this);
+         try
+         {
+            Close();
+         }
+         catch (Exception)
+         {
+            // TODO Log something helpful
+         }
+         finally
+         {
+            System.GC.SuppressFinalize(this);
+         }
       }
 
       public IConnection Connect(string host, int port)
       {
-         lock(connections)
+         lock (connections)
          {
             CheckClosed();
             return AddConnection(new ClientConnection(this, host, port, defaultConnectionOptions)).Connect();
@@ -71,7 +87,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public IConnection Connect(string host, int port, ConnectionOptions options)
       {
-         lock(connections)
+         lock (connections)
          {
             CheckClosed();
             return AddConnection(new ClientConnection(this, host, port, new ConnectionOptions(options))).Connect();
@@ -80,7 +96,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public IConnection Connect(string host)
       {
-         lock(connections)
+         lock (connections)
          {
             CheckClosed();
             return AddConnection(new ClientConnection(this, host, -1, defaultConnectionOptions)).Connect();
@@ -89,31 +105,16 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public IConnection Connect(string host, ConnectionOptions options)
       {
-         lock(connections)
+         lock (connections)
          {
             CheckClosed();
             return AddConnection(new ClientConnection(this, host, -1, new ConnectionOptions(options))).Connect();
          }
       }
 
-      protected virtual void Dispose(bool disposing)
-      {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            disposedValue = true;
-         }
-      }
-
       private void CheckClosed()
       {
-         if (disposedValue)
+         if (closed)
          {
             throw new InvalidOperationException("Cannot create new connections, the Client has been closed.");
          }
@@ -127,7 +128,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       internal string NextConnectionId()
       {
-         return clientUniqueId + ":" + Interlocked.Increment(ref connectionCounter);
+         return clientUniqueId + ":" + CONNECTION_COUNTER.IncrementAndGet();
       }
    }
 }

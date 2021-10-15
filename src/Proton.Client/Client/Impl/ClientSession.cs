@@ -27,8 +27,8 @@ namespace Apache.Qpid.Proton.Client.Impl
       private readonly SessionOptions options;
       private readonly ClientConnection connection;
       private readonly string sessionId;
+      private readonly AtomicBoolean closed = new AtomicBoolean();
 
-      private bool disposedValue;
       private Engine.ISession protonSession;
       private Exception failureCause;
 
@@ -59,7 +59,27 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       public void Close()
       {
+         if (closed.CompareAndSet(false, true))
+         {
+
+         }
          throw new NotImplementedException();
+      }
+
+      public void Dispose()
+      {
+         try
+         {
+            Close();
+         }
+         catch (Exception)
+         {
+            // TODO Log something helpful
+         }
+         finally
+         {
+            System.GC.SuppressFinalize(this);
+         }
       }
 
       public void Close(IErrorCondition error)
@@ -82,57 +102,57 @@ namespace Apache.Qpid.Proton.Client.Impl
          throw new NotImplementedException();
       }
 
-      public ISender OpenAnonymousSender()
+      public virtual ISender OpenAnonymousSender()
       {
          throw new NotImplementedException();
       }
 
-      public ISender OpenAnonymousSender(SenderOptions options)
+      public virtual ISender OpenAnonymousSender(SenderOptions options)
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenDurableReceiver(string address, string subscriptionName)
+      public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName)
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
+      public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenDynamicReceiver()
+      public virtual IReceiver OpenDynamicReceiver()
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenDynamicReceiver(ReceiverOptions options)
+      public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options)
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
+      public virtual IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenReceiver(string address)
+      public virtual IReceiver OpenReceiver(string address)
       {
          throw new NotImplementedException();
       }
 
-      public IReceiver OpenReceiver(string address, ReceiverOptions options)
+      public virtual IReceiver OpenReceiver(string address, ReceiverOptions options)
       {
          throw new NotImplementedException();
       }
 
-      public ISender OpenSender(string address)
+      public virtual ISender OpenSender(string address)
       {
          throw new NotImplementedException();
       }
 
-      public ISender OpenSender(string address, SenderOptions options)
+      public virtual ISender OpenSender(string address, SenderOptions options)
       {
          throw new NotImplementedException();
       }
@@ -142,33 +162,22 @@ namespace Apache.Qpid.Proton.Client.Impl
          throw new NotImplementedException();
       }
 
-      protected virtual void Dispose(bool disposing)
+      protected void CheckClosedOrFailed()
       {
-         if (!disposedValue)
+         if (IsClosed())
          {
-            if (disposing)
-            {
-               // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            disposedValue = true;
+            //TODO throw new ClientIllegalStateException("The Session was explicitly closed", failureCause);
+            throw new InvalidOperationException("The Session was explicitly closed", failureCause);
+         }
+         else if (failureCause != null)
+         {
+            throw failureCause;
          }
       }
 
-      // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-      // ~ClientSession()
-      // {
-      //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-      //     Dispose(disposing: false);
-      // }
-
-      public void Dispose()
+      internal bool IsClosed()
       {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
+         return closed;
       }
    }
 }
