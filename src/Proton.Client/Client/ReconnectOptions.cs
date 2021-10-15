@@ -101,7 +101,7 @@ namespace Apache.Qpid.Proton.Client
       /// available from these options.  The returned collection is read-only amd the
       /// provided collection is copied in this options own collection.
       /// </summary>
-      ICollection<ReconnectLocation> ReconnectLocations
+      public IEnumerable<ReconnectLocation> ReconnectLocations
       {
          get { return reconnectLocations.AsReadOnly(); }
          set
@@ -115,44 +115,44 @@ namespace Apache.Qpid.Proton.Client
       /// Controls how often the client will log a message indicating that a reconnection is
       /// being attempted.  The default is to log every 10 connection attempts.
       /// </summary>
-      int WarnAfterReconnectAttempts { get; set; } = DEFAULT_WARN_AFTER_RECONNECT_ATTEMPTS;
+      public int WarnAfterReconnectAttempts { get; set; } = DEFAULT_WARN_AFTER_RECONNECT_ATTEMPTS;
 
       /// <summary>
       /// For a client that has never connected to a remote peer before this option controls
       /// how many attempts are made to connect before reporting the connection as failed.
       /// The default behavior is to use the value of maxReconnectAttempts.
       /// </summary>
-      int MaxInitialConnectionAttempts { get; set; } = INFINITE;
+      public int MaxInitialConnectionAttempts { get; set; } = INFINITE;
 
       /// <summary>
       /// The number of reconnection attempts allowed before reporting the connection as failed
       /// to the client.  The default is no limit or (-1).
       /// </summary>
-      int MaxReconnectAttempts { get; set; } = INFINITE;
+      public int MaxReconnectAttempts { get; set; } = INFINITE;
 
       /// <summary>
       /// Controls the delay between successive reconnection attempts, defaults to 10 milliseconds.
       /// If the back off option is not enabled this value remains constant.
       /// </summary>
-      int ReconnectDelay { get; set; } = DEFAULT_RECONNECT_DELAY;
+      public int ReconnectDelay { get; set; } = DEFAULT_RECONNECT_DELAY;
 
       /// <summary>
       /// The maximum time that the client will wait before attempting a reconnect. This value is
       /// only used when the back off feature is enabled to ensure that the delay does not grow too
       /// large. Defaults to 30 seconds as the max time between successive connection attempts.
       /// </summary>
-      int MaxReconnectDelay { get; set; } = DEFAULT_MAX_RECONNECT_DELAY;
+      public int MaxReconnectDelay { get; set; } = DEFAULT_MAX_RECONNECT_DELAY;
 
       /// <summary>
       /// Controls whether the time between reconnection attempts should grow based on a configured
       /// multiplier. This option defaults to true.
       /// </summary>
-      bool UseReconnectBackOff { get; set; } = DEFAULT_USE_RECONNECT_BACKOFF;
+      public bool UseReconnectBackOff { get; set; } = DEFAULT_USE_RECONNECT_BACKOFF;
 
       /// <summary>
       /// The multiplier used to grow the reconnection delay value, defaults to 2.0d.
       /// </summary>
-      double ReconnectBackOffMultiplier { get; set; } = DEFAULT_RECONNECT_BACKOFF_MULTIPLIER;
+      public double ReconnectBackOffMultiplier { get; set; } = DEFAULT_RECONNECT_BACKOFF_MULTIPLIER;
 
    }
 }

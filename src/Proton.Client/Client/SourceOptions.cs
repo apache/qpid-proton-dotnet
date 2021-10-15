@@ -44,22 +44,22 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The distribution mode to set for the source configuration.
       /// </summary>
-      DistributionMode? DistributionMode { get; set; }
+      public DistributionMode? DistributionMode { get; set; }
 
       /// <summary>
       /// The filters that are assigned to the source configuration.
       /// </summary>
-      IDictionary<string, string> Filters { get; set; }
+      public IDictionary<string, string> Filters { get; set; }
 
       /// <summary>
       /// The default outcome to assign to the source configuration.
       /// </summary>
-      IDeliveryState DefaultOutcome { get; set; }
+      public IDeliveryState DefaultOutcome { get; set; }
 
       /// <summary>
       /// The supported outcomes that are assigned to the source configuration.
       /// </summary>
-      IDeliveryState.State[] Outcomes { get; set; }
+      public IDeliveryState.State[] Outcomes { get; set; }
 
       /// <summary>
       /// Clone this options instance, changes to the cloned options are not reflected

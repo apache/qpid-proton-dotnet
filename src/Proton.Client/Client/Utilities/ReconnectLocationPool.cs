@@ -130,6 +130,27 @@ namespace Apache.Qpid.Proton.Client.Utilities
       }
 
       /// <summary>
+      /// Adds the given enumeration of locations to this pool, filtering for duplicates.
+      /// </summary>
+      /// <param name="locations">The enumeration of locations to be added to the pool</param>
+      /// <returns>This reconnect locations pool</returns>
+      public ReconnectLocationPool AddAll(IEnumerable<ReconnectLocation> locations)
+      {
+         lock (entries)
+         {
+            foreach (ReconnectLocation location in locations)
+            {
+               if (!entries.Contains(location))
+               {
+                  entries.AddLast(location);
+               }
+            }
+         }
+
+         return this;
+      }
+
+      /// <summary>
       /// Adds the given location to this pool at the front if it is not already contained within.
       /// </summary>
       /// <param name="location">The new location to be added to the pool</param>
