@@ -15,30 +15,18 @@
  * limitations under the License.
  */
 
-using System.Collections.Generic;
-
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
-   /// An immutable error condition that carries information that aids in
-   /// determining the factors that lead to the error.
+   /// Enumeration of possible delivery state types which can be allied
+   /// as outcome to an incoming or outgoing delivery.
    /// </summary>
-   public interface IErrorCondition
+   public enum DeliveryStateType
    {
-      /// <summary>
-      /// Indicates the type of error that this condition conveys
-      /// </summary>
-      string Condition { get; }
-
-      /// <summary>
-      /// A description of the condition that resulted in this error.
-      /// </summary>
-      string Description { get; }
-
-      /// <summary>
-      /// Optional supplementary information that aids in processing this error.
-      /// </summary>
-      IReadOnlyDictionary<string, object> Info { get; }
-
+      Accepted,
+      Rejected,
+      Modified,
+      Released,
+      Transactional
    }
 }

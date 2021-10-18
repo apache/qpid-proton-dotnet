@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The set of supported outcomes on the remote source node.
       /// </summary>
-      ISet<IDeliveryState.State> Outcomes { get; }
+      ISet<DeliveryStateType> Outcomes { get; }
 
       /// <summary>
       /// The set of capabilities assigned on the remote source node.

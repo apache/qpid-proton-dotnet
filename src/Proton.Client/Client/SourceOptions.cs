@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The supported outcomes that are assigned to the source configuration.
       /// </summary>
-      public IDeliveryState.State[] Outcomes { get; set; }
+      public DeliveryStateType[] Outcomes { get; set; }
 
       /// <summary>
       /// Clone this options instance, changes to the cloned options are not reflected
@@ -81,7 +81,7 @@ namespace Apache.Qpid.Proton.Client
 
          if (Outcomes != null)
          {
-            IDeliveryState.State[] outcomes = new IDeliveryState.State[Outcomes.Length];
+            DeliveryStateType[] outcomes = new DeliveryStateType[Outcomes.Length];
             Array.Copy(Outcomes, outcomes, Outcomes.Length);
             other.Outcomes = outcomes;
          }

@@ -15,27 +15,15 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
 namespace Apache.Qpid.Proton.Client
 {
    public interface IDeliveryState
    {
-      enum State
-      {
-         Accepted,
-         Rejected,
-         Modified,
-         Released,
-         Transactional
-      }
-
       /// <summary>
       /// Returns an enumeration value which indicates what type of DeliveryState
       /// this instance represents.
       /// </summary>
-      State Type { get; }
+      DeliveryStateType Type { get; }
 
       /// <summary>
       /// Quick access to determine if the state value indicates the delivery was accepted.
