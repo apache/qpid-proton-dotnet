@@ -22,7 +22,9 @@ using Apache.Qpid.Proton.Types;
 namespace Apache.Qpid.Proton.Client.Impl
 {
    /// <summary>
-   ///
+   /// Client error condition implementation which serves as a layer over the proton
+   /// based version allowing for external implementations and mapping to / from
+   /// Symbol types which the client tries not to expose.
    /// </summary>
    public sealed class ClientErrorCondition : IErrorCondition
    {
@@ -42,6 +44,22 @@ namespace Apache.Qpid.Proton.Client.Impl
 
          error = new Types.Transport.ErrorCondition(
             Symbol.Lookup(condition.Condition), condition.Description, ClientConversionSupport.ToSymbolKeyedMap(condition.Info));
+      }
+
+      /// <summary>
+      /// Wraps a Proton ErrorCondition in a client error condition instance to present to
+      /// the user in a managed way.
+      /// </summary>
+      /// <param name="condition"></param>
+      /// <exception cref="ArgumentNullException"></exception>
+      internal ClientErrorCondition(Types.Transport.ErrorCondition condition)
+      {
+         if (condition == null)
+         {
+            throw new ArgumentNullException("The error condition value cannot be null");
+         }
+
+         error = condition;
       }
 
       /// <summary>

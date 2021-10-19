@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Client.Impl
    {
       private readonly Dictionary<Symbol, object> redirect;
 
-      internal ClientRedirect(IDictionary<Symbol, object> redirect)
+      internal ClientRedirect(IEnumerable<KeyValuePair<Symbol, object>> redirect)
       {
          this.redirect = new Dictionary<Symbol, object>(redirect);
       }
