@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The node properties assigned to a dynamically created source node.
       /// </summary>
-      IDictionary<string, object> DynamicNodeProperties { get; }
+      IReadOnlyDictionary<string, object> DynamicNodeProperties { get; }
 
       /// <summary>
       /// The distribution mode of the remote source node.
@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The collection of filters that are configured on the source node.
       /// </summary>
-      IDictionary<string, object> Filters { get; }
+      IReadOnlyDictionary<string, object> Filters { get; }
 
       /// <summary>
       /// The default outcome that is assigned on the remote source node.
@@ -72,12 +72,12 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The set of supported outcomes on the remote source node.
       /// </summary>
-      ISet<DeliveryStateType> Outcomes { get; }
+      IReadOnlyCollection<DeliveryStateType> Outcomes { get; }
 
       /// <summary>
       /// The set of capabilities assigned on the remote source node.
       /// </summary>
-      ISet<string> Capabilities { get; }
+      IReadOnlyCollection<string> Capabilities { get; }
 
    }
 }

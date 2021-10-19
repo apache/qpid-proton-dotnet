@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Terminus never expires
       /// </summary>
-      None
+      Never
 
    }
 }

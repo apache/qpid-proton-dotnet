@@ -33,7 +33,14 @@ namespace Apache.Qpid.Proton.Client
       /// prior to transfer over the link, and subsequently to the ARCHIVED state when the transfer
       /// is settled with a successful outcome.
       /// </summary>
-      Move
+      Move,
+
+      /// <summary>
+      /// When used to set a value to send to the remote this value implies that nothing should be
+      /// configured out the outgoing configuration and when returned from a read of some remote
+      /// resource this value indicates that the remote sent no value for the distribution mode.
+      /// </summary>
+      None
 
    }
 }

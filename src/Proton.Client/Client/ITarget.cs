@@ -53,12 +53,12 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The node properties assigned to a dynamically created target node.
       /// </summary>
-      IDictionary<string, object> DynamicNodeProperties { get; }
+      IReadOnlyDictionary<string, object> DynamicNodeProperties { get; }
 
       /// <summary>
       /// The set of capabilities assigned on the remote target node.
       /// </summary>
-      ISet<string> Capabilities { get; }
+      IReadOnlyCollection<string> Capabilities { get; }
 
    }
 }

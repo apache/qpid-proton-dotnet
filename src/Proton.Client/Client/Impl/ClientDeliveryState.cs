@@ -176,7 +176,19 @@ namespace Apache.Qpid.Proton.Client.Impl
 
    internal static class OutcomeExtensions
    {
-      public static IDeliveryState FromProtonType(this Types.Messaging.IOutcome outcome)
+      public static DeliveryStateType ToDeliveryStateType(this Symbol outcome)
+      {
+         try
+         {
+            return Enum.Parse<DeliveryStateType>(outcome.ToString(), true);
+         }
+         catch (Exception)
+         {
+            throw new ArgumentException("Cannot map outcome name to unknown Proton DeliveryState.Type");
+         }
+      }
+
+      public static IDeliveryState ToClientDeliveryState(this Types.Messaging.IOutcome outcome)
       {
          if (outcome == null)
          {
@@ -206,7 +218,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
    internal static class DeliveryStateExtensions
    {
-      public static IDeliveryState FromProtonType(this Types.Transport.IDeliveryState deliveryState)
+      public static IDeliveryState ToClientDeliveryState(this Types.Transport.IDeliveryState deliveryState)
       {
          if (deliveryState == null)
          {
