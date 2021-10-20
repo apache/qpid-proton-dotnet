@@ -16,7 +16,9 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Collections;
+using Apache.Qpid.Proton.Client.Impl;
+using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -37,7 +39,7 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>a new message instance with an empty body.</returns>
       static IMessage<T> Create()
       {
-         return null;  // TODO
+         return ClientMessage<T>.Create();
       }
 
       /// <summary>
@@ -46,7 +48,7 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>a new message instance with the provided body.</returns>
       static IMessage<T> Create(T value)
       {
-         return null;  // TODO
+         return ClientMessage<T>.Create(new AmqpValue(value));
       }
 
       /// <summary>
@@ -57,7 +59,7 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>a new message instance with the provided body.</returns>
       static IMessage<byte[]> Create(byte[] value)
       {
-         return null;  // TODO
+         return ClientMessage<byte[]>.Create(new Data(value));
       }
 
       /// <summary>
@@ -65,11 +67,10 @@ namespace Apache.Qpid.Proton.Client
       /// as an AMQP Sequence section that carries the provided list entries.
       /// </summary>
       /// <param name="value">The list to wrap in the AMQP message body</param>
-      /// <typeparam name="E">The type that the message list body will be</typeparam>
       /// <returns>a new message instance with the provided body.</returns>
-      static IMessage<IList<E>> Create<E>(IList<E> value)
+      static IMessage<IList> Create<E>(IList value)
       {
-         return null;  // TODO
+         return ClientMessage<IList>.Create(new AmqpSequence(value));
       }
 
       /// <summary>
@@ -77,12 +78,10 @@ namespace Apache.Qpid.Proton.Client
       /// as an AMQP Value section that carries the provided map entries.
       /// </summary>
       /// <param name="value">The map to wrap in the AMQP message body</param>
-      /// <typeparam name="K">The type that the message dictionary keys body will be</typeparam>
-      /// <typeparam name="V">The type that the message dictionary values body will be</typeparam>
       /// <returns>a new message instance with the provided body.</returns>
-      static IMessage<IDictionary<K, V>> Create<K, V>(IDictionary<K, V> value)
+      static IMessage<IDictionary> Create<K, V>(IDictionary value)
       {
-         return null;  // TODO
+         return ClientMessage<IDictionary>.Create(new AmqpValue(value));
       }
 
       #endregion
@@ -256,12 +255,12 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// An absolute time when this message is considered to be expired.
       /// </summary>
-      uint AbsoluteExpiryTime { get; set; }
+      ulong AbsoluteExpiryTime { get; set; }
 
       /// <summary>
       /// An absolute time when this message was created.
       /// </summary>
-      uint CreationTime { get; set; }
+      ulong CreationTime { get; set; }
 
       /// <summary>
       /// Identifies the group the message belongs to.
@@ -287,7 +286,7 @@ namespace Apache.Qpid.Proton.Client
       /// Checks if the message carries any annotations.
       /// </summary>
       /// <returns>true if the message instance carries any annotations</returns>
-      bool HasAnnotations();
+      bool HasAnnotations { get; }
 
       /// <summary>
       /// Query the message to determine if the message carries the given annotation
@@ -310,8 +309,8 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="key">The whose value is being added or updated</param>
       /// <param name="value">The value to store with the given key</param>
-      /// <returns>the previous value stored with this key or null if none present</returns>
-      object SetAnnotation(string key, object value);
+      /// <returns>This message instance</returns>
+      IMessage<T> SetAnnotation(string key, object value);
 
       /// <summary>
       /// Removes the given annotation from the message if present and returns the value
@@ -326,7 +325,7 @@ namespace Apache.Qpid.Proton.Client
       /// message.
       /// </summary>
       /// <param name="consumer">Function that will be called for each annotation</param>
-      void ForEachAnnotation(Func<string, object> consumer);
+      IMessage<T> ForEachAnnotation(Action<string, object> consumer);
 
       #endregion
 
@@ -336,7 +335,7 @@ namespace Apache.Qpid.Proton.Client
       /// Checks if the message carries any message properties.
       /// </summary>
       /// <returns>true if the message instance carries any propties</returns>
-      bool HashProperties();
+      bool HasProperties { get; }
 
       /// <summary>
       /// Query the message to determine if the message carries the given property.
@@ -358,8 +357,8 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="key">The whose value is being added or updated</param>
       /// <param name="value">The value to store with the given key</param>
-      /// <returns>the previous value stored with this key or null if none present</returns>
-      object SetProperty(string key, object value);
+      /// <returns>This message object instance</returns>
+      IMessage<T> SetProperty(string key, object value);
 
       /// <summary>
       /// Removes the given property from the message if present and returns the value
@@ -374,21 +373,11 @@ namespace Apache.Qpid.Proton.Client
       /// message.
       /// </summary>
       /// <param name="consumer"></param>
-      void ForEachProperty(Func<string, object> consumer);
+      IMessage<T> ForEachProperty(Action<string, object> consumer);
 
       #endregion
 
       #region AMQP Message body access
-
-      /// <summary>
-      /// Returns true if the message allows reading of the message body.
-      /// </summary>
-      bool IsBodyReadable { get; }
-
-      /// <summary>
-      /// Returns true if the message allows writing of the message body.
-      /// </summary>
-      bool IsBodyWritable { get; }
 
       /// <summary>
       /// Access the body of this message. Depending on the current state of the message
@@ -407,7 +396,7 @@ namespace Apache.Qpid.Proton.Client
       /// Checks if the message carries any footers.
       /// </summary>
       /// <returns>true if the message instance carries any footers</returns>
-      bool HasFooters();
+      bool HasFooters { get; }
 
       /// <summary>
       /// Query the message to determine if the message carries the given footer entry.
@@ -429,8 +418,8 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="key">The whose value is being added or updated</param>
       /// <param name="value">The value to store with the given key</param>
-      /// <returns>the previous value stored with this key or null if none present</returns>
-      object SetFooter(string key, object value);
+      /// <returns>This message object instance</returns>
+      IMessage<T> SetFooter(string key, object value);
 
       /// <summary>
       /// Removes the given property from the message if present and returns the value
@@ -445,7 +434,7 @@ namespace Apache.Qpid.Proton.Client
       /// message.
       /// </summary>
       /// <param name="consumer"></param>
-      void ForEachFooter(Func<string, object> consumer);
+      IMessage<T> ForEachFooter(Action<string, object> consumer);
 
       #endregion
 

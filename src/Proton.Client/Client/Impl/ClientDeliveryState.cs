@@ -174,20 +174,8 @@ namespace Apache.Qpid.Proton.Client.Impl
 
    #region Extension types for Proton and Client delivery state types
 
-   internal static class OutcomeExtensions
+   internal static class DeliveryStateExtensions
    {
-      public static DeliveryStateType ToDeliveryStateType(this Symbol outcome)
-      {
-         try
-         {
-            return Enum.Parse<DeliveryStateType>(outcome.ToString(), true);
-         }
-         catch (Exception)
-         {
-            throw new ArgumentException("Cannot map outcome name to unknown Proton DeliveryState.Type");
-         }
-      }
-
       public static IDeliveryState ToClientDeliveryState(this Types.Messaging.IOutcome outcome)
       {
          if (outcome == null)
@@ -214,10 +202,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
          throw new ArgumentException("Cannot map to unknown Proton Outcome to a client delivery state: " + outcome);
       }
-   }
 
-   internal static class DeliveryStateExtensions
-   {
       public static IDeliveryState ToClientDeliveryState(this Types.Transport.IDeliveryState deliveryState)
       {
          if (deliveryState == null)
@@ -276,6 +261,18 @@ namespace Apache.Qpid.Proton.Client.Impl
                default:
                   throw new InvalidOperationException("Client does not support the given Delivery State type: " + state.Type);
             }
+         }
+      }
+
+      public static DeliveryStateType ToDeliveryStateType(this Symbol outcome)
+      {
+         try
+         {
+            return Enum.Parse<DeliveryStateType>(outcome?.ToString(), true);
+         }
+         catch (Exception)
+         {
+            throw new ArgumentException("Cannot map outcome name to unknown Proton DeliveryState.Type");
          }
       }
    }

@@ -96,20 +96,20 @@ namespace Apache.Qpid.Proton.Client
       /// Sets the body section instances to use when encoding this message. The value set
       /// replaces any existing sections assigned to this message through the add body sections
       /// API or the singular body set method.  Calling the set method with a null or empty
-      /// collection is equivalent to calling the clear body sections method. The passed collection
-      /// is copied and changes to it following calls to this method are not reflected in the
-      /// collection contained in this message.
+      /// enumerable is equivalent to calling the clear body sections method. The values from the
+      /// passed enumerable are copied and changes to it following calls to this method are not
+      /// reflected in the collection contained in this message.
       /// </summary>
       /// <param name="sections">The collection of body sections to assign to this message</param>
       /// <returns>This advanced message instance.</returns>
-      IAdvancedMessage<T> SetBodySections(ICollection<ISection> section);
+      IAdvancedMessage<T> SetBodySections(IEnumerable<ISection> section);
 
       /// <summary>
-      /// Create and return an unmodifiable read-only collection that contains the section instances
+      /// Create and return an unmodifiable read-only view that contains the section instances
       /// currently assigned to this message.
       /// </summary>
       /// <returns>a read-only view of the sections in this message's body</returns>
-      ICollection<ISection> GetBodySections();
+      IEnumerable<ISection> GetBodySections();
 
       /// <summary>
       /// Clears all currently set body sections from this message instance.
@@ -122,7 +122,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="consumer">Function to invoke for each section in the message</param>
       /// <returns>This advanced message instance.</returns>
-      IAdvancedMessage<T> ForEachBodySection(Func<ISection> consumer);
+      IAdvancedMessage<T> ForEachBodySection(Action<ISection> consumer);
 
       /// <summary>
       /// Encodes the advanced message for transmission by the client. The provided delivery

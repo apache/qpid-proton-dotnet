@@ -22,6 +22,7 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Client.Utilities
 {
+   [TestFixture, Timeout(20000)]
    public class FifoMessageQueueTests
    {
       [Test, Timeout(20000)]
