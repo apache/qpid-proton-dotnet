@@ -18,84 +18,137 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Client.Exceptions;
+using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
+   /// <summary>
+   /// Client inbound delivery API that wraps the proton resources and
+   /// provides API to operate on them.
+   /// </summary>
    public class ClientDelivery : IDelivery
    {
-      private bool disposedValue;
+      private readonly ClientReceiver receiver;
+      private readonly IIncomingDelivery delivery;
+      private readonly IProtonBuffer payload;
 
-      public IReceiver Receiver => throw new NotImplementedException();
+      private DeliveryAnnotations deliveryAnnotations;
+      private ClientMessage<object> cachedMessage;
+      private Stream rawInputStream;
 
-      public uint MessageFormat => throw new NotImplementedException();
-
-      public Stream RawInputStream => throw new NotImplementedException();
-
-      public IDictionary<string, object> Annotations => throw new NotImplementedException();
-
-      public bool Settled => throw new NotImplementedException();
-
-      public IDeliveryState State => throw new NotImplementedException();
-
-      public bool RemoteSettled => throw new NotImplementedException();
-
-      public IDeliveryState RemoteState => throw new NotImplementedException();
-
-      public IDelivery Accept()
+      internal ClientDelivery(ClientReceiver receiver, IIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         this.receiver = receiver;
+         this.delivery = delivery;
+         this.delivery.LinkedResource = this;
+         this.payload = delivery.ReadAll();
+      }
+
+      public IReceiver Receiver => receiver;
+
+      public uint MessageFormat => delivery.MessageFormat;
+
+      public bool Settled => delivery.IsSettled;
+
+      public IDeliveryState State => delivery.State?.ToClientDeliveryState();
+
+      public bool RemoteSettled => delivery.IsRemotelySettled;
+
+      public IDeliveryState RemoteState => delivery.RemoteState?.ToClientDeliveryState();
+
+      public IDictionary<string, object> Annotations
+      {
+         get
+         {
+            Message(); // Ensure decode has occurred.
+
+            return ClientConversionSupport.ToStringKeyedMap(deliveryAnnotations?.Value);
+         }
+      }
+
+      public Stream RawInputStream
+      {
+         get
+         {
+            if (cachedMessage != null)
+            {
+               throw new ClientIllegalStateException("Cannot access Delivery InputStream API after requesting an Message");
+            }
+
+            if (rawInputStream == null)
+            {
+               rawInputStream = new ProtonBufferInputStream(payload);
+            }
+
+            return rawInputStream;
+         }
+      }
+
+      public IMessage<object> Message()
+      {
+         if (rawInputStream != null)
+         {
+            throw new ClientIllegalStateException("Cannot access Delivery Annotations API after requesting an InputStream");
+         }
+
+         IMessage<object> message = (IMessage<object>)cachedMessage;
+         if (message == null && payload.IsReadable)
+         {
+            message = (IMessage<object>)(cachedMessage = ClientMessageSupport.DecodeMessage(payload, SetDeliveryAnnotations));
+         }
+
+         return message;
       }
 
       public IDelivery Disposition(IDeliveryState state, bool settled)
       {
-         throw new NotImplementedException();
-      }
-
-      public IMessage<T> Message<T>()
-      {
-         throw new NotImplementedException();
-      }
-
-      public IDelivery Modified(bool deliveryFailed, bool undeliverableHere)
-      {
-         throw new NotImplementedException();
-      }
-
-      public IDelivery Reject(string condition, string description)
-      {
-         throw new NotImplementedException();
-      }
-
-      public IDelivery Release()
-      {
-         throw new NotImplementedException();
+         receiver.Disposition(delivery, state?.AsProtonType(), settled);
+         return this;
       }
 
       public IDelivery Settle()
       {
-         throw new NotImplementedException();
+         receiver.Disposition(delivery, null, true);
+         return this;
       }
 
-      protected virtual void Dispose(bool disposing)
+      public IDelivery Accept()
       {
-         if (!disposedValue)
-         {
-            if (disposing)
-            {
-               // TODO: dispose managed state (managed objects)
-            }
-
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-            // TODO: set large fields to null
-            disposedValue = true;
-         }
+         receiver.Disposition(delivery, Accepted.Instance, true);
+         return this;
       }
 
-      public void Dispose()
+      public IDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-         Dispose(disposing: true);
-         GC.SuppressFinalize(this);
+         receiver.Disposition(delivery, new Modified(deliveryFailed, undeliverableHere), true);
+         return this;
       }
+
+      public IDelivery Reject(string condition, string description)
+      {
+         receiver.Disposition(delivery, new Rejected(new ErrorCondition(condition, description)), true);
+         return this;
+      }
+
+      public IDelivery Release()
+      {
+         receiver.Disposition(delivery, Released.Instance, true);
+         return this;
+      }
+
+      #region Internal API for client objects
+
+      internal IIncomingDelivery ProtonDelivery => delivery;
+
+      internal void SetDeliveryAnnotations(DeliveryAnnotations annotations)
+      {
+         this.deliveryAnnotations = annotations;
+      }
+
+      #endregion
    }
 }

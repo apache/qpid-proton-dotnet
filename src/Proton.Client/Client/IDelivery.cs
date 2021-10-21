@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.IO;
 using System.Collections.Generic;
 
@@ -24,7 +23,7 @@ namespace Apache.Qpid.Proton.Client
    /// <summary>
    /// A single AMQP delivery tracker instance.
    /// </summary>
-   public interface IDelivery : IDisposable
+   public interface IDelivery
    {
       /// <summary>
       /// Returns the parent receiver instance where this delivery arrived.
@@ -51,7 +50,7 @@ namespace Apache.Qpid.Proton.Client
       /// </remarks>
       /// <typeparam name="T">Body type of the message</typeparam>
       /// <returns>the decoded message from the delivery payload</returns>
-      IMessage<T> Message<T>();
+      IMessage<object> Message();
 
       /// <summary>
       /// Create and return an read-only Stream that reads the raw payload bytes of the

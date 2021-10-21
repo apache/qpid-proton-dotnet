@@ -154,18 +154,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Message Decoding support API
 
-      public static IMessage<object> DecodeMessage(IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
+      public static ClientMessage<object> DecodeMessage(IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
       {
          return DecodeMessage(DEFAULT_DECODER, DEFAULT_DECODER.NewDecoderState(), buffer, daConsumer);
       }
 
-      public static IMessage<object> DecodeMessage(IDecoder decoder, IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
+      public static ClientMessage<object> DecodeMessage(IDecoder decoder, IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
       {
          return DecodeMessage(decoder, decoder.NewDecoderState(), buffer, daConsumer);
       }
 
-      public static IMessage<object> DecodeMessage(IDecoder decoder, IDecoderState decoderState,
-                                                   IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
+      public static ClientMessage<object> DecodeMessage(IDecoder decoder, IDecoderState decoderState,
+                                                        IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
       {
 
          ClientMessage<object> message = new ClientMessage<object>();

@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Client
    /// <summary>
    /// A single AMQP delivery tracker instance.
    /// </summary>
-   public interface ITracker : IDisposable
+   public interface ITracker
    {
       /// <summary>
       /// Returns the parent sender instance that sent the delivery that is now being tacked.
