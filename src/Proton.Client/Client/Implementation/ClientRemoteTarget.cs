@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Types.Messaging;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
    /// Client source wrapper that exposes a readonly view of a proton

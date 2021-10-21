@@ -17,7 +17,7 @@
 
 using System.Threading;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Threading
 {
    /// <summary>
    /// Simple Atomic abstraction around the long type to make atomic

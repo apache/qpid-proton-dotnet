@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
    /// Client implementation of a delivery state mapping to the proton types

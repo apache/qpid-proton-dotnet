@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-using Apache.Qpid.Proton.Client.Impl;
+using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client.Exceptions
 {

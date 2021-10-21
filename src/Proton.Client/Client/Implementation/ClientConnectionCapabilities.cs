@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Types;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
    /// Tracks available known capabilities for the connection to allow the client

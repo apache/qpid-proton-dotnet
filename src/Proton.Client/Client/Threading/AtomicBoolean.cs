@@ -17,7 +17,7 @@
 
 using System.Threading;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Threading
 {
    /// <summary>
    /// Provides a boolean value that may be updated and read atomically.

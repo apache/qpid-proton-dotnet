@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Types;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    // TODO
    /// <summary>

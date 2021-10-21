@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    public class ClientMessage<T> : IAdvancedMessage<T>
    {

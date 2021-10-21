@@ -18,7 +18,6 @@
 using System;
 using System.Threading;
 using System.Collections.Generic;
-using Apache.Qpid.Proton.Client.Impl;
 
 namespace Apache.Qpid.Proton.Client.Utilities
 {

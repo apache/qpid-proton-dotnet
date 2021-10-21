@@ -18,8 +18,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Threading;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    // TODO
    public class ClientSession : ISession

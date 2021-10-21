@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    public static class ClientMessageSupport
    {

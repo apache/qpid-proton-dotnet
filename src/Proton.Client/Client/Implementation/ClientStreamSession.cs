@@ -18,7 +18,7 @@
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Client.Exceptions;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    public sealed class ClientStreamSession : ClientSession
    {

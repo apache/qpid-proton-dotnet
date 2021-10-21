@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using Apache.Qpid.Proton.Types;
 using System.Text;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    [TestFixture, Timeout(20000)]
    public class ClientMessageTest

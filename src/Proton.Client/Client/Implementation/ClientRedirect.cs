@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Types;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
    /// Support class that houses the information and API needed to process

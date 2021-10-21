@@ -23,7 +23,7 @@ using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transactions;
 using Apache.Qpid.Proton.Types.Transport;
 
-namespace Apache.Qpid.Proton.Client.Impl
+namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
    /// Exception support API for creating or passing through client
