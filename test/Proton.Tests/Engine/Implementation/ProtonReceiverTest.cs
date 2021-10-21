@@ -2299,8 +2299,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Data section1 = decoder.ReadObject<Data>(payload, decoderState);
          Data section2 = decoder.ReadObject<Data>(payload, decoderState);
 
-         IProtonBuffer data1 = section1.Value;
-         IProtonBuffer data2 = section2.Value;
+         IProtonBuffer data1 = section1.Buffer;
+         IProtonBuffer data2 = section2.Buffer;
 
          IProtonBuffer combined = ProtonByteBufferAllocator.Instance.Allocate(encoded.Length);
 
@@ -3945,7 +3945,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             Assert.IsNotNull(body);
             Assert.IsTrue(body is Data);
             Data payload = (Data)body;
-            Assert.AreEqual(bytes.Length, payload.Value.ReadableBytes);
+            Assert.AreEqual(bytes.Length, payload.Buffer.ReadableBytes);
             decoderState.Reset();
          }
          catch (Exception ex)

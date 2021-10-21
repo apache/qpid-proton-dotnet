@@ -232,7 +232,7 @@ namespace Apache.Qpid.Proton.Client.Impl
       public object GetAnnotation(string key)
       {
          object annotation = null;
-         messageAnnotations?.Value.TryGetValue(Symbol.Lookup(key), out annotation);
+         messageAnnotations?.Value?.TryGetValue(Symbol.Lookup(key), out annotation);
          return annotation;
       }
 
@@ -272,7 +272,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
       #region Application Properties Access API
 
-      public bool HasProperties => applicationProperties?.Value.Count > 0;
+      public bool HasProperties => applicationProperties?.Value?.Count > 0;
 
       public bool HasProperty(string key)
       {
@@ -282,7 +282,7 @@ namespace Apache.Qpid.Proton.Client.Impl
       public object GetProperty(string key)
       {
          object property = null;
-         applicationProperties?.Value.TryGetValue(key, out property);
+         applicationProperties?.Value?.TryGetValue(key, out property);
          return property;
       }
 
@@ -332,7 +332,7 @@ namespace Apache.Qpid.Proton.Client.Impl
       public object GetFooter(string key)
       {
          object result = null;
-         footer?.Value.TryGetValue(Symbol.Lookup(key), out result);
+         footer?.Value?.TryGetValue(Symbol.Lookup(key), out result);
          return result;
       }
 
@@ -437,7 +437,7 @@ namespace Apache.Qpid.Proton.Client.Impl
 
          if (body == null && bodySections == null)
          {
-            body = (IBodySection<T>)section;
+            body = (ISection)section;
          }
          else
          {

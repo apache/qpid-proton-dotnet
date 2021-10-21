@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
          foreach (Data value in (Data[])values)
          {
-            IProtonBuffer binary = value.Value;
+            IProtonBuffer binary = value.Buffer;
             buffer.EnsureWritable(sizeof(int) + binary.ReadableBytes);
             buffer.WriteInt((int) binary.ReadableBytes);
 
@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
          buffer.WriteUnsignedByte((byte)Data.DescriptorCode);
 
-         state.Encoder.WriteBinary(buffer, state, ((Data)value).Value);
+         state.Encoder.WriteBinary(buffer, state, ((Data)value).Buffer);
       }
    }
 }

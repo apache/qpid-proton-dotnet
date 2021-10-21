@@ -19,14 +19,42 @@ using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
-   public sealed class Data : IBodySection<IProtonBuffer>
+   public sealed class Data : IBodySection<byte[]>
    {
       public static readonly ulong DescriptorCode = 0x0000000000000075UL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:data:binary");
 
       public SectionType Type => SectionType.Data;
+      public IProtonBuffer payload;
 
-      public IProtonBuffer Value { get; set; }
+      public byte[] Value
+      {
+         get
+         {
+            byte[] result = null;
+
+            if (payload?.IsReadable ?? false)
+            {
+               result = new byte[payload.ReadableBytes];
+               payload.CopyInto(payload.ReadOffset, result, 0, result.LongLength);
+            }
+
+            return result;
+         }
+         set
+         {
+            this.payload = value != null ? ProtonByteBufferAllocator.Instance.Wrap(value) : null;
+         }
+      }
+
+      /// <summary>
+      /// Provides a reference to the underlying proton buffer for this Data section
+      /// </summary>
+      public IProtonBuffer Buffer
+      {
+         get => payload;
+         set => payload = value;
+      }
 
       public Data() : base()
       {
@@ -36,20 +64,20 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
          if (value != null)
          {
-            Value = ProtonByteBufferAllocator.Instance.Wrap(value);
+            payload = ProtonByteBufferAllocator.Instance.Wrap(value);
          }
       }
 
       public Data(IProtonBuffer value) : this()
       {
-         Value = value;
+         payload = value;
       }
 
       public Data(Data other) : this()
       {
-         if (other.Value != null)
+         if (other.Buffer != null)
          {
-            Value = other.Value?.Copy();
+            payload = other.Buffer?.Copy();
          }
       }
 
@@ -65,14 +93,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override string ToString()
       {
-         return "Data{ " + Value + " }";
+         return "Data{ " + Buffer + " }";
       }
 
       public override int GetHashCode()
       {
          const int prime = 31;
          int result = 1;
-         result = prime * result + ((Value == null) ? 0 : Value.GetHashCode());
+         result = prime * result + ((Buffer == null) ? 0 : Buffer.GetHashCode());
          return result;
       }
 
@@ -84,7 +112,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((Data) other);
+            return Equals((Data)other);
          }
       }
 
@@ -98,14 +126,23 @@ namespace Apache.Qpid.Proton.Types.Messaging
          {
             return false;
          }
-         else if (Value == null && other.Value == null)
+         else if (Value == null && other.Buffer == null)
          {
             return true;
          }
          else
          {
-            return Value == null ? false : Value.Equals(other.Value);
+            return Buffer == null ? false : Buffer.Equals(other.Buffer);
          }
+      }
+
+      /// <summary>
+      /// Implicit cast operator for Data section to a byte array.
+      /// </summary>
+      /// <param name="data">The Data section that is being cast</param>
+      public static implicit operator byte[](Data data)
+      {
+         return data.Value;
       }
    }
 }
