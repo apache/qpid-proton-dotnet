@@ -86,7 +86,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public string Description => error?.Description;
 
-      public IReadOnlyDictionary<string, object> Info => ClientConversionSupport.ToStringKeyedMap(error?.Info);
+      public IReadOnlyDictionary<string, object> Info =>
+         ClientConversionSupport.ToStringKeyedMap(error?.Info) ?? new Dictionary<string, object>();
 
       /// <summary>
       /// Provides internal client access to the wrapped proton type

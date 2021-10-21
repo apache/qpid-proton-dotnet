@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -42,7 +39,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// </summary>
       public bool DeliveryDelaySupported => delayedDeliverySupported;
 
-      public ClientConnectionCapabilities DetermineCapabilities(Engine.IConnection connection)
+      internal ClientConnectionCapabilities DetermineCapabilities(Engine.IConnection connection)
       {
          Symbol[] desired = connection.DesiredCapabilities;
          Symbol[] offered = connection.RemoteOfferedCapabilities;

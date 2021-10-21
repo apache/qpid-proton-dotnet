@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -40,5 +41,17 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       IReadOnlyDictionary<string, object> Info { get; }
 
+      /// <summary>
+      /// Create an error condition object using the supplied values. The condition string
+      /// cannot be null however the other attribute can.
+      /// </summary>
+      /// <param name="condition">The string error condition symbolic name</param>
+      /// <param name="description">Description of the error</param>
+      /// <param name="info">Optional dictionary containing addition error information</info>
+      /// <returns></returns>
+      static IErrorCondition Create(string condition, string description, IDictionary<string, object> info = null)
+      {
+         return new ClientErrorCondition(condition, description, info);
+      }
    }
 }
