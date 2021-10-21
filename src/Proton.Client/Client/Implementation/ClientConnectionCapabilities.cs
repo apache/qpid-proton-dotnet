@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// </summary>
       public bool DeliveryDelaySupported => delayedDeliverySupported;
 
-      internal ClientConnectionCapabilities DetermineCapabilities(Engine.IConnection connection)
+      public ClientConnectionCapabilities DetermineCapabilities(Engine.IConnection connection)
       {
          Symbol[] desired = connection.DesiredCapabilities;
          Symbol[] offered = connection.RemoteOfferedCapabilities;
