@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -25,6 +26,8 @@ namespace Apache.Qpid.Proton.Client
    /// </summary>
    public class SourceOptions : TerminusOptions, ICloneable
    {
+      public static readonly IDeliveryState DefaultReceiverOutcome = new ClientModified(true, false);
+
       /// <summary>
       /// Creates a default SourceOptions instance.
       /// </summary>

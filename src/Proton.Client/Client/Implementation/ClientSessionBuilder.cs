@@ -20,7 +20,6 @@ using Apache.Qpid.Proton.Client.Threading;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
    /// <summary>
    /// The session builder is used by client connection instances to create
    /// AMQP sessions and wrap those within a client session instance.

@@ -275,6 +275,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new ArgumentException("Cannot map outcome name to unknown Proton DeliveryState.Type");
          }
       }
+
+      public static Symbol ToSymbolicType(this DeliveryStateType type)
+      {
+         return Symbol.Lookup(type.ToString().ToUpper());
+      }
    }
 
    #endregion

@@ -176,9 +176,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      #region Internal client session API
+
+      internal string SessionId => sessionId;
+
+      internal Engine.ISession ProtonSession => protonSession;
+
       internal bool IsClosed()
       {
          return closed;
       }
+
+      internal SessionOptions Options => options;
+
+      #endregion
    }
 }

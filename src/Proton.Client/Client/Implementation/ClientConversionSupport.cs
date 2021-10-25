@@ -43,6 +43,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
+      public static Symbol[] ToSymbolArray(DeliveryStateType[] stateTypeArray)
+      {
+         Symbol[] result = null;
+
+         if (stateTypeArray != null)
+         {
+            result = new Symbol[stateTypeArray.Length];
+            for (int i = 0; i < stateTypeArray.Length; ++i)
+            {
+               result[i] = stateTypeArray[i].ToSymbolicType();
+            }
+         }
+
+         return result;
+      }
+
       public static string[] ToStringArray(Symbol[] symbolArray)
       {
          string[] result = null;
@@ -59,14 +75,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      public static Dictionary<Symbol, object> ToSymbolKeyedMap(IEnumerable<KeyValuePair<string, object>> stringsMap)
+      public static Dictionary<Symbol, object> ToSymbolKeyedMap<V>(IEnumerable<KeyValuePair<string, V>> stringsMap)
       {
          Dictionary<Symbol, object> result;
 
          if (stringsMap != null)
          {
             result = new Dictionary<Symbol, object>();
-            foreach (KeyValuePair<string, object> entry in stringsMap)
+            foreach (KeyValuePair<string, V> entry in stringsMap)
             {
                result.Add(Symbol.Lookup(entry.Key), entry.Value);
             }
@@ -79,14 +95,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      public static Dictionary<string, Object> ToStringKeyedMap(IEnumerable<KeyValuePair<Symbol, object>> symbolMap)
+      public static Dictionary<string, Object> ToStringKeyedMap<V>(IEnumerable<KeyValuePair<Symbol, V>> symbolMap)
       {
          Dictionary<string, Object> result;
 
          if (symbolMap != null)
          {
             result = new Dictionary<string, object>();
-            foreach (KeyValuePair<Symbol, object> entry in symbolMap)
+            foreach (KeyValuePair<Symbol, V> entry in symbolMap)
             {
                result.Add(entry.Key.ToString(), entry.Value);
             }
@@ -97,6 +113,53 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
 
          return result;
+      }
+
+      public static Symbol AsProtonType(this DistributionMode mode)
+      {
+         switch (mode)
+         {
+            case DistributionMode.Copy:
+               return ClientConstants.COPY;
+            case DistributionMode.Move:
+               return ClientConstants.MOVE;
+            case DistributionMode.None:
+               return null;
+         }
+
+         throw new ArgumentException("Cannot convert unknown distribution mode: " + mode);
+      }
+
+      public static Types.Messaging.TerminusDurability AsProtonType(this DurabilityMode mode)
+      {
+         switch (mode)
+         {
+            case DurabilityMode.Configuration:
+               return Types.Messaging.TerminusDurability.Configuration;
+            case DurabilityMode.None:
+               return Types.Messaging.TerminusDurability.None;
+            case DurabilityMode.UnsettledState:
+               return Types.Messaging.TerminusDurability.UnsettledState;
+         }
+
+         throw new ArgumentException("Cannot convert unknown durability mode: " + mode);
+      }
+
+      public static Types.Messaging.TerminusExpiryPolicy AsProtonType(this ExpiryPolicy policy)
+      {
+         switch (policy)
+         {
+            case ExpiryPolicy.ConnectionClose:
+               return Types.Messaging.TerminusExpiryPolicy.ConnectionClose;
+            case ExpiryPolicy.LinkClose:
+               return Types.Messaging.TerminusExpiryPolicy.LinkDetach;
+            case ExpiryPolicy.Never:
+               return Types.Messaging.TerminusExpiryPolicy.Never;
+            case ExpiryPolicy.SessionClose:
+               return Types.Messaging.TerminusExpiryPolicy.SessionEnd;
+         }
+
+         throw new ArgumentException("Cannot convert unknown expiry policy: " + policy);
       }
    }
 }
