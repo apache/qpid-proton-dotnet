@@ -18,6 +18,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Exceptions;
+using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -27,27 +30,105 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientReceiver : IReceiver
    {
-      public IClient Client => throw new NotImplementedException();
+      private readonly ReceiverOptions options;
+      private readonly ClientSession session;
+      private readonly string receiverId;
+      private readonly FifoDeliveryQueue<IIncomingDelivery> messageQueue;
+      private readonly AtomicBoolean closed = new AtomicBoolean();
+      private ClientException failureCause;
 
-      public IConnection Connection => throw new NotImplementedException();
+      private Engine.IReceiver protonReceiver;
 
-      public ISession Session => throw new NotImplementedException();
+      private volatile ISource remoteSource;
+      private volatile ITarget remoteTarget;
+
+      internal ClientReceiver(ClientSession session, ReceiverOptions options, String receiverId, Engine.IReceiver receiver)
+      {
+         this.options = options;
+         this.session = session;
+         this.receiverId = receiverId;
+         this.protonReceiver = receiver;
+         this.protonReceiver.LinkedResource = this;
+
+         if (options.CreditWindow > 0)
+         {
+            protonReceiver.AddCredit(options.CreditWindow);
+         }
+
+         messageQueue = new FifoDeliveryQueue<IIncomingDelivery>();
+         messageQueue.Start();
+      }
+
+      public IClient Client => session.Client;
+
+      public IConnection Connection => session.Connection;
+
+      public ISession Session => session;
 
       public Task<IReceiver> OpenTask => throw new NotImplementedException();
 
-      public string Address => throw new NotImplementedException();
+      public string Address
+      {
+         get
+         {
+            if (IsDynamic)
+            {
+               WaitForOpenToComplete();
+               return protonReceiver.RemoteSource?.Address;
+            }
+            else
+            {
+               return protonReceiver.Source?.Address;
+            }
+         }
+      }
 
-      public ISource Source => throw new NotImplementedException();
+      public ISource Source
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return remoteSource;
+         }
+      }
 
-      public ITarget Target => throw new NotImplementedException();
+      public ITarget Target
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return remoteTarget;
+         }
+      }
 
-      public IDictionary<string, object> Properties => throw new NotImplementedException();
+      public IReadOnlyDictionary<string, object> Properties
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringKeyedMap(protonReceiver.RemoteProperties);
+         }
+      }
 
-      public ICollection<string> OfferedCapabilities => throw new NotImplementedException();
+      public IReadOnlyCollection<string> OfferedCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonReceiver.OfferedCapabilities);
+         }
+      }
 
-      public ICollection<string> DesiredCapabilities => throw new NotImplementedException();
+      public IReadOnlyCollection<string> DesiredCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonReceiver.DesiredCapabilities);
+         }
+      }
 
-      public int QueuedDeliveries => throw new NotImplementedException();
+      public int QueuedDeliveries => messageQueue.Count;
 
       public IReceiver AddCredit(int credit)
       {
@@ -119,10 +200,29 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
+      #region Internal Receiver API
+
       internal void Disposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
          // TODO CheckClosedOrFailed();
          // asyncApplyDisposition(delivery, state, settle);
       }
+
+      internal String ReceiverId => receiverId;
+
+      internal bool IsClosed => closed;
+
+      internal bool IsDynamic => protonReceiver.Source?.Dynamic ?? false;
+
+      #endregion
+
+      #region Private Receiver Implementation
+
+      private void WaitForOpenToComplete()
+      {
+         // TODO
+      }
+
+      #endregion
    }
 }

@@ -61,9 +61,9 @@ namespace Apache.Qpid.Proton.Client
       /// mechanisms will be considered however in some cases certain mechanisms are not enabled
       /// unless the user manually specifies them at the exclusion of all other mechanisms.
       /// </summary>
-      public ISet<string> AllowedMechanisms
+      public IReadOnlyCollection<string> AllowedMechanisms
       {
-         get { return new HashSet<string>(allowedMechanisms); }
+         get { return allowedMechanisms; }
       }
 
       /// <summary>

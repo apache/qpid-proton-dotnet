@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
@@ -60,7 +59,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IDeliveryState RemoteState => delivery.RemoteState?.ToClientDeliveryState();
 
-      public IDictionary<string, object> Annotations
+      public IReadOnlyDictionary<string, object> Annotations
       {
          get
          {

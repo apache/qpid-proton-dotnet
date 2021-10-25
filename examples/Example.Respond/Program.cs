@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          IDelivery request = receiver.Receive(TimeSpan.FromSeconds(60));
          if (request != null)
          {
-            IMessage<string> received = request.Message<string>();
+            IMessage<object> received = request.Message();
             Console.WriteLine("Received message with body: " + received.Body);
 
             String replyAddress = received.ReplyTo;

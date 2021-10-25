@@ -18,6 +18,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Exceptions;
+using Apache.Qpid.Proton.Client.Threading;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -26,25 +28,97 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientSender : ISender
    {
-      public IClient Client => throw new NotImplementedException();
+      protected readonly AtomicBoolean closed = new AtomicBoolean();
+      protected ClientException failureCause;
 
-      public IConnection Connection => throw new NotImplementedException();
+      protected readonly SenderOptions options;
+      protected readonly ClientSession session;
+      protected readonly string senderId;
+      protected readonly bool sendsSettled;
+      protected Engine.ISender protonSender;
+      protected Action<ISender> senderRemotelyClosedHandler;
 
-      public ISession Session => throw new NotImplementedException();
+      protected volatile ISource remoteSource;
+      protected volatile ITarget remoteTarget;
+
+      internal ClientSender(ClientSession session, SenderOptions options, string senderId, Engine.ISender protonSender)
+      {
+         this.options = new SenderOptions(options);
+         this.session = session;
+         this.senderId = senderId;
+         this.protonSender = protonSender;
+         this.protonSender.LinkedResource = this;
+         this.sendsSettled = protonSender.SenderSettleMode == Types.Transport.SenderSettleMode.Settled;
+      }
+
+      public IClient Client => session.Client;
+
+      public IConnection Connection => session.Connection;
+
+      public ISession Session => session;
 
       public Task<ISender> OpenTask => throw new NotImplementedException();
 
-      public string Address => throw new NotImplementedException();
+      public string Address
+      {
+         get
+         {
+            if (IsDynamic)
+            {
+               WaitForOpenToComplete();
+               return (protonSender.RemoteTerminus as ITarget)?.Address;
+            }
+            else
+            {
+               return protonSender.Target?.Address;
+            }
+         }
+      }
 
-      public ISource Source => throw new NotImplementedException();
+      public ISource Source
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return remoteSource;
+         }
+      }
 
-      public ITarget Target => throw new NotImplementedException();
+      public ITarget Target
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return remoteTarget;
+         }
+      }
 
-      public IDictionary<string, object> Properties => throw new NotImplementedException();
+      public IReadOnlyDictionary<string, object> Properties
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringKeyedMap(protonSender.RemoteProperties);
+         }
+      }
 
-      public ICollection<string> OfferedCapabilities => throw new NotImplementedException();
+      public IReadOnlyCollection<string> OfferedCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonSender.OfferedCapabilities);
+         }
+      }
 
-      public ICollection<string> DesiredCapabilities => throw new NotImplementedException();
+      public IReadOnlyCollection<string> DesiredCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonSender.DesiredCapabilities);
+         }
+      }
 
       public void Close()
       {
@@ -110,5 +184,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          throw new NotImplementedException();
       }
+
+      #region Internal Receiver API
+
+      internal string SenderId => senderId;
+
+      internal bool IsClosed => closed;
+
+      internal bool IsDynamic => protonSender.Target?.Dynamic ?? false;
+
+      #endregion
+
+      #region Private Receiver Implementation
+
+      private void WaitForOpenToComplete()
+      {
+         // TODO
+      }
+
+      #endregion
    }
 }

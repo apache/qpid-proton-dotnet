@@ -70,7 +70,7 @@ namespace Apache.Qpid.Proton.Client
       /// methods and excludes use of the RawInputStream method of the delivery object. Calling
       /// the RawInputStream method after calling this method throws ClientIllegalStateException.
       /// </summary>
-      IDictionary<string, object> Annotations { get; }
+      IReadOnlyDictionary<string, object> Annotations { get; }
 
       /// <summary>
       /// Accepts and settles this delivery.

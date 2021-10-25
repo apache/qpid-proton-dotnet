@@ -116,7 +116,7 @@ namespace Apache.Qpid.Proton.Client
       /// To disable credit windowing and allow the client application to control the credit on the receiver
       /// link the credit window value should be set to zero.
       /// </summary>
-      public int CreditWindow { get; set; } = 10;
+      public uint CreditWindow { get; set; } = 10;
 
       /// <summary>
       /// Configures the delivery mode used by receivers created using these options. By default
@@ -166,7 +166,7 @@ namespace Apache.Qpid.Proton.Client
       /// Configures a collection of property values that are sent to the remote upon opening
       /// a new receiver.
       /// </summary>
-      public IDictionary<string, object> Properties { get; set; }
+      public IReadOnlyDictionary<string, object> Properties { get; set; }
 
    }
 }

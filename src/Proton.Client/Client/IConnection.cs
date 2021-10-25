@@ -341,7 +341,7 @@ namespace Apache.Qpid.Proton.Client
       /// carries the remote properties.  If the remote provides no properties this method will
       /// return null.
       /// </summary>
-      IDictionary<string, object> Properties { get; }
+      IReadOnlyDictionary<string, object> Properties { get; }
 
       /// <summary>
       /// Returns the offered capabilities that the remote provided upon successfully opening the
@@ -349,7 +349,7 @@ namespace Apache.Qpid.Proton.Client
       /// response which carries the remote offered capabilities. If the remote provides no offered
       /// capabilities this method will return null.
       /// </summary>
-      ICollection<string> OfferedCapabilities { get; }
+      IReadOnlyCollection<string> OfferedCapabilities { get; }
 
       /// <summary>
       /// Returns the desired capabilities that the remote provided upon successfully opening the
@@ -357,7 +357,7 @@ namespace Apache.Qpid.Proton.Client
       /// response which carries the remote desired capabilities. If the remote provides no desired
       /// capabilities this method will return null.
       /// </summary>
-      ICollection<string> DesiredCapabilities { get; }
+      IReadOnlyCollection<string> DesiredCapabilities { get; }
 
    }
 }

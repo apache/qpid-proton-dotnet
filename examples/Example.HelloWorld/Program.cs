@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          sender.Send(IMessage<String>.Create("Hello World"));
 
          IDelivery delivery = receiver.Receive();
-         IMessage<String> received = delivery.Message<String>();
+         IMessage<object> received = delivery.Message();
          Console.WriteLine("Received message with body: " + received.Body);
       }
    }

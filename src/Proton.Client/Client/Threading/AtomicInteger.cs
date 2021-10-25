@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Client.Threading
    /// operations on integer types simpler to manage in code. The default
    /// value of this type is zero.
    /// </summary>
-   internal class AtomicInteger
+   public class AtomicInteger
    {
       private volatile int value;
 

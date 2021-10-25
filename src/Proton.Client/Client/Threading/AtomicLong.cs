@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Client.Threading
    /// operations on long types simpler to manage in code. The default
    /// value of this type is zero.
    /// </summary>
-   internal class AtomicLong
+   public class AtomicLong
    {
       private long value;
 

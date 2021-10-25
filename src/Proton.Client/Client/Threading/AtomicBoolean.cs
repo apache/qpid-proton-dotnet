@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Client.Threading
    /// <summary>
    /// Provides a boolean value that may be updated and read atomically.
    /// </summary>
-   internal class AtomicBoolean
+   public class AtomicBoolean
    {
       private int value;
 

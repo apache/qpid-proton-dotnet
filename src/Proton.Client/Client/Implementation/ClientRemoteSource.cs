@@ -16,7 +16,6 @@
  */
 
 using System.Collections.Generic;
-using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation

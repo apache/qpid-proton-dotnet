@@ -101,7 +101,7 @@ namespace Apache.Qpid.Proton.Client
       /// available from these options.  The returned collection is read-only amd the
       /// provided collection is copied in this options own collection.
       /// </summary>
-      public IEnumerable<ReconnectLocation> ReconnectLocations
+      public IReadOnlyCollection<ReconnectLocation> ReconnectLocations
       {
          get { return reconnectLocations.AsReadOnly(); }
          set

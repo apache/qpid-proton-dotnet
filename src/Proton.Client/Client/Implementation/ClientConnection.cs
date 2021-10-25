@@ -57,11 +57,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public Task<IConnection> OpenTask => throw new System.NotImplementedException();
 
-      public IDictionary<string, object> Properties => throw new System.NotImplementedException();
+      public IReadOnlyDictionary<string, object> Properties => throw new System.NotImplementedException();
 
-      public ICollection<string> OfferedCapabilities => throw new System.NotImplementedException();
+      public IReadOnlyCollection<string> OfferedCapabilities => throw new System.NotImplementedException();
 
-      public ICollection<string> DesiredCapabilities => throw new System.NotImplementedException();
+      public IReadOnlyCollection<string> DesiredCapabilities => throw new System.NotImplementedException();
 
       #endregion
 
