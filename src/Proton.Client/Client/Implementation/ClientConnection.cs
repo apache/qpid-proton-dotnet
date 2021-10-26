@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
 using Apache.Qpid.Proton.Client.Utilities;
 
@@ -34,7 +35,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly AtomicBoolean closed = new AtomicBoolean();
 
       private Engine.IEngine engine;
-      private Engine.IConnection connection;
+      private Engine.IConnection protonConnection;
       private Exception failureCause;
       private long totalConnections;
       private long reconnectAttempts;
@@ -57,11 +58,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public Task<IConnection> OpenTask => throw new System.NotImplementedException();
 
-      public IReadOnlyDictionary<string, object> Properties => throw new System.NotImplementedException();
+      public IReadOnlyDictionary<string, object> Properties
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringKeyedMap(protonConnection.RemoteProperties);
+         }
+      }
 
-      public IReadOnlyCollection<string> OfferedCapabilities => throw new System.NotImplementedException();
+      public IReadOnlyCollection<string> OfferedCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonConnection.RemoteDesiredCapabilities);
+         }
+      }
 
-      public IReadOnlyCollection<string> DesiredCapabilities => throw new System.NotImplementedException();
+      public IReadOnlyCollection<string> DesiredCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonConnection.RemoteDesiredCapabilities);
+         }
+      }
 
       #endregion
 
@@ -107,115 +129,152 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISender DefaultSender()
       {
+         CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
       public ISession DefaultSession()
       {
-         throw new System.NotImplementedException();
-      }
-
-      public ISender OpenAnonymousSender()
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public ISender OpenAnonymousSender(SenderOptions options)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenDurableReceiver(string address, string subscriptionName)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenDynamicReceiver()
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenDynamicReceiver(ReceiverOptions options)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenReceiver(string address)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public IReceiver OpenReceiver(string address, ReceiverOptions options)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public ISender OpenSender(string address)
-      {
-         throw new System.NotImplementedException();
-      }
-
-      public ISender OpenSender(string address, SenderOptions options)
-      {
+         CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
       public ISession OpenSession()
       {
-         throw new System.NotImplementedException();
+         return OpenSession(null);
       }
 
       public ISession OpenSession(SessionOptions options)
       {
+         CheckClosedOrFailed();
+         throw new System.NotImplementedException();
+      }
+
+      public ISender OpenAnonymousSender()
+      {
+         return OpenAnonymousSender(null);
+      }
+
+      public ISender OpenAnonymousSender(SenderOptions options)
+      {
+         CheckClosedOrFailed();
+         throw new System.NotImplementedException();
+      }
+
+      public IReceiver OpenDurableReceiver(string address, string subscriptionName)
+      {
+         return OpenDurableReceiver(address, subscriptionName, null);
+      }
+
+      public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
+      {
+         CheckClosedOrFailed();
+         throw new System.NotImplementedException();
+      }
+
+      public IReceiver OpenDynamicReceiver()
+      {
+         return OpenDynamicReceiver(null, null);
+      }
+
+      public IReceiver OpenDynamicReceiver(ReceiverOptions options)
+      {
+         return OpenDynamicReceiver(null, options);
+      }
+
+      public IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
+      {
+         CheckClosedOrFailed();
+         throw new System.NotImplementedException();
+      }
+
+      public IReceiver OpenReceiver(string address)
+      {
+         return OpenReceiver(address, null);
+      }
+
+      public IReceiver OpenReceiver(string address, ReceiverOptions options)
+      {
+         CheckClosedOrFailed();
+         throw new System.NotImplementedException();
+      }
+
+      public ISender OpenSender(string address)
+      {
+         return OpenSender(address, null);
+      }
+
+      public ISender OpenSender(string address, SenderOptions options)
+      {
+         CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
       public IStreamReceiver OpenStreamReceiver(string address)
       {
-         throw new System.NotImplementedException();
+         return OpenStreamReceiver(address, null);
       }
 
       public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options)
       {
+         CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
       public IStreamSender OpenStreamSender(string address)
       {
-         throw new System.NotImplementedException();
+         return OpenStreamSender(address, null);
       }
 
       public IStreamSender OpenStreamSender(string address, StreamSenderOptions options)
       {
+         CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
       public ITracker Send<T>(IMessage<T> message)
       {
+         CheckClosedOrFailed();
          throw new System.NotImplementedException();
+      }
+
+      public override string ToString()
+      {
+         return "ClientConnection:[" + ConnectionId + "]";
       }
 
       #region Internal Connection API
 
-      internal string ConnectionId => throw new NotImplementedException();
+      internal string ConnectionId => connectionId;
 
-      internal Engine.IConnection ProtonConnection => connection;
+      internal Engine.IConnection ProtonConnection => protonConnection;
 
       internal ConnectionOptions Options => options;
 
       internal ClientConnection Connect()
       {
          throw new NotImplementedException();
+      }
+
+      internal void CheckClosedOrFailed()
+      {
+         if (closed)
+         {
+            throw new ClientIllegalStateException("The Connection was explicitly closed", failureCause);
+         }
+         else if (failureCause != null)
+         {
+            throw failureCause;
+         }
+      }
+
+      #endregion
+
+      #region private connection utility methods
+
+      private void WaitForOpenToComplete()
+      {
+         // TODO
       }
 
       #endregion
