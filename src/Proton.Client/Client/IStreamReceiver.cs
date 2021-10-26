@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Client
       new IStreamDelivery TryReceive();
 
       /// <inheritdoc cref="IReceiver.AddCredit(int)"/>
-      new IStreamDelivery AddCredit(int credit);
+      new IStreamReceiver AddCredit(int credit);
 
    }
 }

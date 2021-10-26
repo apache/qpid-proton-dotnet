@@ -86,18 +86,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return new ClientReceiver(session, options, receiverId, protonReceiver);
       }
 
-      //TODO
-      // public ClientStreamReceiver StreamReceiver(String address, StreamReceiverOptions receiverOptions)
-      // {
-      //    StreamReceiverOptions options = receiverOptions != null ? receiverOptions : GetDefaultStreamReceiverOptions();
-      //    string receiverId = NextReceiverId();
-      //    Engine.IReceiver protonReceiver = CreateReceiver(address, options, receiverId);
+      public ClientStreamReceiver StreamReceiver(string address, StreamReceiverOptions receiverOptions)
+      {
+         StreamReceiverOptions options = receiverOptions != null ? receiverOptions : GetDefaultStreamReceiverOptions();
+         string receiverId = NextReceiverId();
+         Engine.IReceiver protonReceiver = CreateReceiver(address, options, receiverId);
 
-      //    protonReceiver.Source = CreateSource(address, options));
-      //    protonReceiver.Target = CreateTarget(address, options));
+         protonReceiver.Source = CreateSource(address, options);
+         protonReceiver.Target = CreateTarget(address, options);
 
-      //    return new ClientStreamReceiver(session, options, receiverId, protonReceiver);
-      // }
+         return new ClientStreamReceiver(session, options, receiverId, protonReceiver);
+      }
 
       public static Engine.IReceiver RecreateReceiver(ClientSession session, Engine.IReceiver previousReceiver, ReceiverOptions options)
       {
