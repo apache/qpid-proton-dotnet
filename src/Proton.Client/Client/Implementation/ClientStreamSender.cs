@@ -20,18 +20,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   /// <summary>
-   /// TODO
-   /// </summary>
-   public sealed class ClientSender : ISender
+   // TODO
+   public sealed class ClientStreamSender : IStreamSender
    {
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private ClientException failureCause;
 
-      private readonly SenderOptions options;
+      private readonly StreamSenderOptions options;
       private readonly ClientSession session;
       private readonly string senderId;
       private readonly bool sendsSettled;
@@ -41,9 +40,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private volatile ISource remoteSource;
       private volatile ITarget remoteTarget;
 
-      internal ClientSender(ClientSession session, SenderOptions options, string senderId, Engine.ISender protonSender)
+      internal ClientStreamSender(ClientSession session, StreamSenderOptions options, string senderId, Engine.ISender protonSender)
       {
-         this.options = new SenderOptions(options);
+         this.options = new StreamSenderOptions(options);
          this.session = session;
          this.senderId = senderId;
          this.protonSender = protonSender;
@@ -120,6 +119,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      public IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations = null)
+      {
+         CheckClosedOrFailed();
+         DeliveryAnnotations annotations = null;
+
+         if (deliveryAnnotations != null)
+         {
+            annotations = new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations));
+         }
+
+         throw new NotImplementedException();
+      }
+
       public void Close()
       {
          throw new NotImplementedException();
@@ -185,7 +197,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      #region Internal Sender API
+      #region Internal Stream Sender API
 
       internal string SenderId => senderId;
 
@@ -196,6 +208,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
       #endregion
 
       #region Private Receiver Implementation
+
+      private void CheckClosedOrFailed()
+      {
+         if (IsClosed)
+         {
+            throw new ClientIllegalStateException("The Stream Sender was explicitly closed", failureCause);
+         }
+         else if (failureCause != null)
+         {
+            throw failureCause;
+         }
+      }
 
       private void WaitForOpenToComplete()
       {

@@ -33,18 +33,9 @@ namespace Apache.Qpid.Proton.Client
       /// at a time so any successive calls to begin a new streaming message will throw an error
       /// to indicate that the previous instance has not yet been completed.
       /// </summary>
+      /// <param name="deliveryAnnotations">The optional delivery annotations to transmit with the message</param>
       /// <returns>This stream sender instance</returns>
-      IStreamSenderMessage BeginMessage();
-
-      /// <summary>
-      /// Creates and returns a new streamable message that can be used by the caller to perform
-      /// streaming sends of large message payload data.  Only one streamed message can be active
-      /// at a time so any successive calls to begin a new streaming message will throw an error
-      /// to indicate that the previous instance has not yet been completed.
-      /// </summary>
-      /// <param name="deliveryAnnotations">The delivery annotations to transmit with the message</param>
-      /// <returns>This stream sender instance</returns>
-      IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations);
+      IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations = null);
 
    }
 }
