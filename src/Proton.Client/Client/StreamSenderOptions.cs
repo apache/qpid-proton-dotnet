@@ -34,6 +34,12 @@ namespace Apache.Qpid.Proton.Client
       public static readonly uint DEFAULT_PENDING_WRITES_BUFFER_SIZE = SessionOptions.DEFAULT_SESSION_OUTGOING_CAPACITY;
 
       /// <summary>
+      /// Defines the default minimum size that the context write buffer will allocate
+      /// which drives the interval auto flushing of written data for this context.
+      /// </summary>
+      public static readonly uint MIN_BUFFER_SIZE_LIMIT = 256;
+
+      /// <summary>
       /// Creates a default stream sender options instance.
       /// </summary>
       public StreamSenderOptions() : base()

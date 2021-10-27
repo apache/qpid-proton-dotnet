@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -174,6 +175,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
       internal bool IsClosed => closed;
 
       internal bool IsDynamic => protonSender.Target?.Dynamic ?? false;
+
+      internal Engine.ISender ProtonSender => protonSender;
+
+      internal StreamSenderOptions Options => options;
+
+      internal void Disposition(IOutgoingDelivery delivery, Types.Transport.IDeliveryState state, bool settled)
+      {
+         CheckClosedOrFailed();
+         // TODO
+         //   executor.execute(() -> {
+         //       delivery.disposition(state, settled);
+         //   });
+      }
 
       #endregion
 

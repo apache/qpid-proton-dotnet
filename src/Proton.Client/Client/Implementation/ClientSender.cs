@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -163,9 +164,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal bool IsDynamic => protonSender.Target?.Dynamic ?? false;
 
+      internal SenderOptions Options => options;
+
+      internal void Disposition(IOutgoingDelivery delivery, Types.Transport.IDeliveryState state, bool settled)
+      {
+         CheckClosedOrFailed();
+         // TODO
+         //   executor.execute(() -> {
+         //       delivery.disposition(state, settled);
+         //   });
+      }
+
       #endregion
 
       #region Private Receiver Implementation
+
+      private void CheckClosedOrFailed()
+      {
+         if (IsClosed)
+         {
+            throw new ClientIllegalStateException("The Sender was explicitly closed", failureCause);
+         }
+         else if (failureCause != null)
+         {
+            throw failureCause;
+         }
+      }
 
       private void WaitForOpenToComplete()
       {
