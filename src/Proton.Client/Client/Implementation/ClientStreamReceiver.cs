@@ -199,30 +199,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      #region Hidden methods from IReceiver that have analogues here
-
-      IReceiver IReceiver.AddCredit(int credit)
-      {
-         return this.AddCredit(credit);
-      }
-
-      IDelivery IReceiver.Receive()
-      {
-         return this.Receive();
-      }
-
-      IDelivery IReceiver.Receive(TimeSpan timeout)
-      {
-         return this.Receive(timeout);
-      }
-
-      IDelivery IReceiver.TryReceive()
-      {
-         return this.TryReceive();
-      }
-
-      #endregion
-
       #region Internal Receiver API
 
       internal void Disposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)

@@ -62,5 +62,28 @@ namespace Apache.Qpid.Proton.Client
       /// <inheritdoc cref="IReceiver.AddCredit(int)"/>
       new IStreamReceiver AddCredit(int credit);
 
+      #region Defaults for hidden IReceiver APIs
+
+      IReceiver IReceiver.AddCredit(int credit)
+      {
+         return this.AddCredit(credit);
+      }
+
+      IDelivery IReceiver.Receive()
+      {
+         return this.Receive();
+      }
+
+      IDelivery IReceiver.Receive(TimeSpan timeout)
+      {
+         return this.Receive(timeout);
+      }
+
+      IDelivery IReceiver.TryReceive()
+      {
+         return this.TryReceive();
+      }
+
+      #endregion
    }
 }

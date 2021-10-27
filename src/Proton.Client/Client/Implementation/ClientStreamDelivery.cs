@@ -92,47 +92,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      #region Hidden methods from IDelivery implemented here
-
-      IReceiver IDelivery.Receiver => receiver;
-
-      IDelivery IDelivery.Accept()
-      {
-         throw new NotImplementedException();
-      }
-
-      IDelivery IDelivery.Disposition(IDeliveryState state, bool settled)
-      {
-         throw new NotImplementedException();
-      }
-
-      IMessage<object> IDelivery.Message()
-      {
-         throw new NotImplementedException();
-      }
-
-      IDelivery IDelivery.Modified(bool deliveryFailed, bool undeliverableHere)
-      {
-         throw new NotImplementedException();
-      }
-
-      IDelivery IDelivery.Reject(string condition, string description)
-      {
-         throw new NotImplementedException();
-      }
-
-      IDelivery IDelivery.Release()
-      {
-         throw new NotImplementedException();
-      }
-
-      IDelivery IDelivery.Settle()
-      {
-         throw new NotImplementedException();
-      }
-
-      #endregion
-
       #region Internal Stream Delivery API
 
       internal IIncomingDelivery ProtonDelivery => protonDelivery;

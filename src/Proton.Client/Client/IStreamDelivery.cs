@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+using System;
+using System.IO;
+
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
@@ -47,5 +50,48 @@ namespace Apache.Qpid.Proton.Client
 
       /// <inheritdoc cref="IDelivery.Settle"/>
       new IStreamDelivery Settle();
+
+      #region Defaults methods for hidden IDelivery methods
+
+      IReceiver IDelivery.Receiver => this.Receiver;
+
+      IDelivery IDelivery.Accept()
+      {
+         return this.Accept();
+      }
+
+      IDelivery IDelivery.Disposition(IDeliveryState state, bool settled)
+      {
+         return this.Disposition(state, settled);
+      }
+
+      IMessage<object> IDelivery.Message()
+      {
+         // TODO
+         throw new InvalidOperationException("Cannot conert to base IMessage from stream receiver version");
+      }
+
+      IDelivery IDelivery.Modified(bool deliveryFailed, bool undeliverableHere)
+      {
+         return this.Modified(deliveryFailed, undeliverableHere);
+      }
+
+      IDelivery IDelivery.Reject(string condition, string description)
+      {
+         return this.Reject(condition, description);
+      }
+
+      IDelivery IDelivery.Release()
+      {
+         return this.Release();
+      }
+
+      IDelivery IDelivery.Settle()
+      {
+         return this.Settle();
+      }
+
+      #endregion
+
    }
 }

@@ -47,5 +47,40 @@ namespace Apache.Qpid.Proton.Client
       /// <inheritdoc cref="ITracker.AwaitAccepted(TimeSpan)"/>
       new IStreamTracker AwaitAccepted(TimeSpan timeout);
 
+      #region Defaults methods for hidden ITracer APIs
+
+      ISender ITracker.Sender => this.Sender;
+
+      ITracker ITracker.Settle()
+      {
+         return this.Settle();
+      }
+
+      ITracker ITracker.Disposition(IDeliveryState state, bool settle)
+      {
+         return this.Disposition(state, settle);
+      }
+
+      ITracker ITracker.AwaitSettlement()
+      {
+         return this.AwaitSettlement();
+      }
+
+      ITracker ITracker.AwaitSettlement(TimeSpan timeout)
+      {
+         return this.AwaitSettlement(timeout);
+      }
+
+      ITracker ITracker.AwaitAccepted()
+      {
+         return this.AwaitAccepted();
+      }
+
+      ITracker ITracker.AwaitAccepted(TimeSpan timeout)
+      {
+         return this.AwaitAccepted(timeout);
+      }
+
+      #endregion
    }
 }
