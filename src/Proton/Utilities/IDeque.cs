@@ -37,6 +37,18 @@ namespace Apache.Qpid.Proton.Utilities
    /// <typeparam name="T">The type that is carried in this collection</typeparam>
    public interface IDeque<T> : ICollection<T>, IEnumerable<T>, IReadOnlyCollection<T>, IEnumerable, ICollection
    {
+      /// <summary>
+      /// Returns true if the double ended queue is currently empty. This method provides
+      /// an optimized means of checking for empty in this collection type where otherwise
+      /// the count propertry might be used which could require a calculation on each call
+      /// to determine the current element count.
+      /// </summary>
+      bool IsEmpty { get; }
+
+      void AddFirst(T value);
+
+      void AddLast(T value);
+
       bool TryAddFirst(T value);
 
       bool TryAddLast(T value);

@@ -26,9 +26,30 @@ namespace Apache.Qpid.Proton.Utilities
    /// The backing array will grow as necessary to support usage. This collection is not thread-safe.
    /// Null elements are prohibited in this collection.
    /// </summary>
-   /// <typeparam name="T"></typeparam>
+   /// <typeparam name="T">The type that is stored in this double ended queue implementation</typeparam>
    public sealed class ArrayDeque<T> : IDeque<T>
    {
+      public const int DefaultInitialSize = 16;
+
+      private T[] elements;
+      private int head;
+      private int tail;
+
+      public ArrayDeque(int size = DefaultInitialSize)
+      {
+         // TODO
+      }
+
+      public ArrayDeque(IEnumerable<T> elements) : this()
+      {
+         foreach (T element in elements)
+         {
+            AddLast(element);
+         }
+      }
+
+      public bool IsEmpty => head == tail;
+
       public int Count => throw new NotImplementedException();
 
       public bool IsReadOnly => throw new NotImplementedException();
@@ -38,6 +59,16 @@ namespace Apache.Qpid.Proton.Utilities
       public object SyncRoot => throw new NotImplementedException();
 
       public void Add(T item)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void AddFirst(T value)
+      {
+         throw new NotImplementedException();
+      }
+
+      public void AddLast(T value)
       {
          throw new NotImplementedException();
       }
@@ -58,11 +89,6 @@ namespace Apache.Qpid.Proton.Utilities
       }
 
       public void CopyTo(Array array, int index)
-      {
-         throw new NotImplementedException();
-      }
-
-      public IEnumerator<T> GetEnumerator()
       {
          throw new NotImplementedException();
       }
@@ -102,9 +128,47 @@ namespace Apache.Qpid.Proton.Utilities
          throw new NotImplementedException();
       }
 
+      public IEnumerator<T> GetEnumerator()
+      {
+         return new ArrayDequeEnumerator(this);
+      }
+
       IEnumerator IEnumerable.GetEnumerator()
       {
-         throw new NotImplementedException();
+         return new ArrayDequeEnumerator(this);
       }
+
+      #region ArrayDeque enumerator implementation
+
+      private class ArrayDequeEnumerator : IEnumerator<T>
+      {
+         private ArrayDeque<T> parent;
+
+         public ArrayDequeEnumerator(ArrayDeque<T> parent)
+         {
+            this.parent = parent;
+         }
+
+         public T Current => throw new NotImplementedException();
+
+         object IEnumerator.Current => throw new NotImplementedException();
+
+         public void Dispose()
+         {
+            throw new NotImplementedException();
+         }
+
+         public bool MoveNext()
+         {
+            throw new NotImplementedException();
+         }
+
+         public void Reset()
+         {
+            throw new NotImplementedException();
+         }
+      }
+
+      #endregion
    }
 }
