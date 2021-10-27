@@ -44,16 +44,8 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// connection resources.
       /// </summary>
-      void Close();
-
-      /// <summary>
-      /// Initiates a close of the connection and awaits a response from the remote that
-      /// indicates completion of the close operation. If the response from the remote
-      /// exceeds the configure close timeout the method returns after cleaning up the
-      /// connection resources.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      void Close(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      void Close(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a close of the connection and a Task that allows the caller to await
@@ -61,30 +53,8 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the connection will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      Task<IConnection> CloseAsync();
-
-      /// <summary>
-      /// Initiates a close of the connection and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the close
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the connection will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      Task<IConnection> CloseAsync(IErrorCondition error);
-
-      /// <summary>
-      /// Creates a receiver used to consume messages from the given node address.  The
-      /// returned receiver will be configured using default options and will take its timeout
-      /// configuration values from those specified in the parent connection.
-      ///
-      /// The returned receiver may not have been opened on the remote when it is returned.  Some
-      /// methods of the receiver can block until the remote fully opens the receiver, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// receiver and using it to await the completion of the receiver open.
-      /// </summary>
-      /// <param name="address">The address of the node the receiver attaches to</param>
-      /// <returns>A new receiver instance</returns>
-      IReceiver OpenReceiver(string address);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<IConnection> CloseAsync(IErrorCondition error = null);
 
       /// <summary>
       /// Creates a receiver used to consume messages from the given node address.  The
@@ -96,24 +66,9 @@ namespace Apache.Qpid.Proton.Client
       /// receiver and using it to await the completion of the receiver open.
       /// </summary>
       /// <param name="address">The address of the node the receiver attaches to</param>
-      /// <param name="options">The receiver options to use for configuration</param>
+      /// <param name="options">Optional receiver options to use for configuration</param>
       /// <returns>A new receiver instance</returns>
-      IReceiver OpenReceiver(string address, ReceiverOptions options);
-
-      /// <summary>
-      /// Creates a receiver used to consume messages from the given node address.  The
-      /// returned receiver will be configured using default options and will take its timeout
-      /// configuration values from those specified in the parent connection.
-      ///
-      /// The returned receiver may not have been opened on the remote when it is returned.  Some
-      /// methods of the receiver can block until the remote fully opens the receiver, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// receiver and using it to await the completion of the receiver open.
-      /// </summary>
-      /// <param name="address">The address of the node the receiver attaches to</param>
-      /// <param name="subscriptionName">The subscription name to use for the receiver</param>
-      /// <returns>A new receiver instance</returns>
-      IReceiver OpenDurableReceiver(string address, string subscriptionName);
+      IReceiver OpenReceiver(string address, ReceiverOptions options = null);
 
       /// <summary>
       /// Creates a receiver used to consume messages from the given node address.  The
@@ -126,22 +81,9 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="address">The address of the node the receiver attaches to</param>
       /// <param name="subscriptionName">The subscription name to use for the receiver</param>
-      /// <param name="options">The receiver options to use for configuration</param>
+      /// <param name="options">Optional receiver options to use for configuration</param>
       /// <returns>A new receiver instance</returns>
-      IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options);
-
-      /// <summary>
-      /// Creates a dynamic receiver used to consume messages from the dynamically generated node.
-      /// on the remote. The returned receiver will be configured using default options and will take
-      /// its timeout configuration values from those specified in the parent connection.
-      ///
-      /// The returned receiver may not have been opened on the remote when it is returned.  Some
-      /// methods of the receiver can block until the remote fully opens the receiver, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// receiver and using it to await the completion of the receiver open.
-      /// </summary>
-      /// <returns>A new receiver instance</returns>
-      IReceiver OpenDynamicReceiver();
+      IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null);
 
       /// <summary>
       /// Creates a dynamic receiver used to consume messages from the dynamically generated node.
@@ -152,37 +94,10 @@ namespace Apache.Qpid.Proton.Client
       /// wait for the remote to respond to the open request by obtaining the open task from the
       /// receiver and using it to await the completion of the receiver open.
       /// </summary>
-      /// <param name="options">The receiver options to use for configuration</param>
+      /// <param name="options">Optional receiver options to use for configuration</param>
+      /// <param name="dynamicNodeProperties">Optional properties to assign to the node create</param>
       /// <returns>A new receiver instance</returns>
-      IReceiver OpenDynamicReceiver(ReceiverOptions options);
-
-      /// <summary>
-      /// Creates a dynamic receiver used to consume messages from the dynamically generated node.
-      /// on the remote. The returned receiver will be configured using the provided options.
-      ///
-      /// The returned receiver may not have been opened on the remote when it is returned.  Some
-      /// methods of the receiver can block until the remote fully opens the receiver, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// receiver and using it to await the completion of the receiver open.
-      /// </summary>
-      /// <param name="dynamicNodeProperties">The properties to assign to the node create</param>
-      /// <param name="options">The receiver options to use for configuration</param>
-      /// <returns>A new receiver instance</returns>
-      IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options);
-
-      /// <summary>
-      /// Creates a stream receiver used to consume large messages from the given node address.
-      /// The returned receiver will be configured using default options and will take its timeout
-      /// configuration values from those specified in the parent connection.
-      ///
-      /// The returned receiver may not have been opened on the remote when it is returned.  Some
-      /// methods of the receiver can block until the remote fully opens the receiver, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// receiver and using it to await the completion of the receiver open.
-      /// </summary>
-      /// <param name="address">The address of the node the receiver attaches to</param>
-      /// <returns>A new receiver instance</returns>
-      IStreamReceiver OpenStreamReceiver(string address);
+      IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null);
 
       /// <summary>
       /// Creates a stream receiver used to consume large messages from the given node address.
@@ -194,9 +109,9 @@ namespace Apache.Qpid.Proton.Client
       /// receiver and using it to await the completion of the receiver open.
       /// </summary>
       /// <param name="address">The address of the node the receiver attaches to</param>
-      /// <param name="options">The receiver options to use for configuration</param>
+      /// <param name="options">Optional receiver options to use for configuration</param>
       /// <returns>A new receiver instance</returns>
-      IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options);
+      IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options = null);
 
       /// <summary>
       /// Returns the default anonymous sender used by this connection for all send calls from the
@@ -208,20 +123,6 @@ namespace Apache.Qpid.Proton.Client
 
       /// <summary>
       /// Creates a sender used to send messages to the given node address.  The returned sender
-      /// will be configured using default options and will take its timeout configuration values
-      /// from those specified in the parent connection.
-      ///
-      /// The returned sender may not have been opened on the remote when it is returned.  Some
-      /// methods of the sender can block until the remote fully opens the sender, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// sender and using it to await the completion of the sender open.
-      /// </summary>
-      /// <param name="address">The address of the node the sender attaches to</param>
-      /// <returns>A new sender instance.</returns>
-      ISender OpenSender(string address);
-
-      /// <summary>
-      /// Creates a sender used to send messages to the given node address.  The returned sender
       /// will be configured using configuration options provided.
       ///
       /// The returned sender may not have been opened on the remote when it is returned.  Some
@@ -230,23 +131,9 @@ namespace Apache.Qpid.Proton.Client
       /// sender and using it to await the completion of the sender open.
       /// </summary>
       /// <param name="address">The address of the node the sender attaches to</param>
-      /// <param name="options">The sender options to use for configuration</param>
+      /// <param name="options">Optional sender options to use for configuration</param>
       /// <returns>A new sender instance.</returns>
-      ISender OpenSender(string address, SenderOptions options);
-
-      /// <summary>
-      /// Creates a stream sender used to send large messages to the given node address. The
-      /// returned sender will be configured using default options and will take its timeout
-      /// configuration values from those specified in the parent connection.
-      ///
-      /// The returned sender may not have been opened on the remote when it is returned. Some
-      /// methods of the sender can block until the remote fully opens the sender, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// sender and using it to await the completion of the sender open.
-      /// </summary>
-      /// <param name="address">The address of the node the sender attaches to</param>
-      /// <returns>A new sender instance.</returns>
-      IStreamSender OpenStreamSender(string address);
+      ISender OpenSender(string address, SenderOptions options = null);
 
       /// <summary>
       /// Creates a stream sender used to send large messages to the given node address. The
@@ -258,23 +145,9 @@ namespace Apache.Qpid.Proton.Client
       /// sender and using it to await the completion of the sender open.
       /// </summary>
       /// <param name="address">The address of the node the sender attaches to</param>
-      /// <param name="options">The stream sender options to use for configuration</param>
+      /// <param name="options">Optional stream sender options to use for configuration</param>
       /// <returns>A new sender instance.</returns>
-      IStreamSender OpenStreamSender(string address, StreamSenderOptions options);
-
-      /// <summary>
-      /// Creates a anonymous sender used to send messages to the "anonymous relay" on the
-      /// remote. Each message sent must include a "to" address for the remote to route the
-      /// message. The returned sender will be configured using default options and will take
-      /// its timeout configuration values from those specified in the parent connection.
-      ///
-      /// The returned sender may not have been opened on the remote when it is returned. Some
-      /// methods of the sender can block until the remote fully opens the sender, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// sender and using it to await the completion of the sender open.
-      /// </summary>
-      /// <returns>A new sender instance.</returns>
-      ISender OpenAnonymousSender();
+      IStreamSender OpenStreamSender(string address, StreamSenderOptions options = null);
 
       /// <summary>
       /// Creates a anonymous sender used to send messages to the "anonymous relay" on the
@@ -286,9 +159,9 @@ namespace Apache.Qpid.Proton.Client
       /// wait for the remote to respond to the open request by obtaining the open task from the
       /// sender and using it to await the completion of the sender open.
       /// </summary>
-      /// <param name="options">The sender options to use for configuration</param>
+      /// <param name="options">Optional sender options to use for configuration</param>
       /// <returns>A new sender instance.</returns>
-      ISender OpenAnonymousSender(SenderOptions options);
+      ISender OpenAnonymousSender(SenderOptions options = null);
 
       /// <summary>
       /// Returns the default session instance that is used by this Connection to create the
@@ -300,19 +173,6 @@ namespace Apache.Qpid.Proton.Client
 
       /// <summary>
       /// Creates a new session instance for use by the client application. The returned
-      /// session will be configured using default options and will take its timeout
-      /// configuration values from those specified in the parent connection.
-      ///
-      /// The returned session may not have been opened on the remote when it is returned. Some
-      /// methods of the session can block until the remote fully opens the session, the user can
-      /// wait for the remote to respond to the open request by obtaining the open task from the
-      /// session and using it to await the completion of the session open.
-      /// </summary>
-      /// <returns>A new session instance.</returns>
-      ISession OpenSession();
-
-      /// <summary>
-      /// Creates a new session instance for use by the client application. The returned
       /// session will be configured using the provided session options.
       ///
       /// The returned session may not have been opened on the remote when it is returned. Some
@@ -320,9 +180,9 @@ namespace Apache.Qpid.Proton.Client
       /// wait for the remote to respond to the open request by obtaining the open task from the
       /// session and using it to await the completion of the session open.
       /// </summary>
-      /// <param name="options">The session options to use for configuration</param>
+      /// <param name="options">Optional session options to use for configuration</param>
       /// <returns>A new session instance.</returns>
-      ISession OpenSession(SessionOptions options);
+      ISession OpenSession(SessionOptions options = null);
 
       /// <summary>
       /// Sends the given message using the connection scoped default sender instance. The

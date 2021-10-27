@@ -54,16 +54,8 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// receiver resources.
       /// </summary>
-      void Close();
-
-      /// <summary>
-      /// Initiates a close of the receiver and awaits a response from the remote that
-      /// indicates completion of the close operation. If the response from the remote
-      /// exceeds the configure close timeout the method returns after cleaning up the
-      /// receiver resources.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      void Close(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      void Close(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a detach of the receiver and awaits a response from the remote that
@@ -71,16 +63,8 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// receiver resources.
       /// </summary>
-      void Detach();
-
-      /// <summary>
-      /// Initiates a detach of the receiver and awaits a response from the remote that
-      /// indicates completion of the detach operation. If the response from the remote
-      /// exceeds the configure close timeout the method returns after cleaning up the
-      /// receiver resources.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      void Detach(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      void Detach(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a close of the receiver and a Task that allows the caller to await
@@ -88,16 +72,8 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the receiver will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      Task<IReceiver> CloseAsync();
-
-      /// <summary>
-      /// Initiates a close of the receiver and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the close
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the receiver will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      Task<IReceiver> CloseAsync(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<IReceiver> CloseAsync(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a detach of the receiver and a Task that allows the caller to await
@@ -105,16 +81,8 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the receiver will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      Task<ISender> DetachAsync();
-
-      /// <summary>
-      /// Initiates a detach of the receiver and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the detach
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the receiver will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      Task<ISender> DetachAsync(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<ISender> DetachAsync(IErrorCondition error = null);
 
       /// <summary>
       /// Returns the address that the receiver instance will send message objects to. The value

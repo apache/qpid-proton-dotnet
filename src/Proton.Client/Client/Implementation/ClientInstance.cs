@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientInstance(ClientOptions options)
       {
-         this.options = options;
+         this.options = (ClientOptions)(options?.Clone() ?? new ClientOptions());
       }
 
       public void Close()
@@ -77,16 +77,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public IConnection Connect(string host, int port)
-      {
-         lock (connections)
-         {
-            CheckClosed();
-            return AddConnection(new ClientConnection(this, host, port, defaultConnectionOptions)).Connect();
-         }
-      }
-
-      public IConnection Connect(string host, int port, ConnectionOptions options)
+      public IConnection Connect(string host, int port, ConnectionOptions options = null)
       {
          lock (connections)
          {
@@ -95,16 +86,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public IConnection Connect(string host)
-      {
-         lock (connections)
-         {
-            CheckClosed();
-            return AddConnection(new ClientConnection(this, host, -1, defaultConnectionOptions)).Connect();
-         }
-      }
-
-      public IConnection Connect(string host, ConnectionOptions options)
+      public IConnection Connect(string host, ConnectionOptions options = null)
       {
          lock (connections)
          {

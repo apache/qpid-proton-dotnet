@@ -58,15 +58,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      public void Close()
-      {
-         if (closed.CompareAndSet(false, true))
-         {
-
-         }
-         throw new NotImplementedException();
-      }
-
       public void Dispose()
       {
          try
@@ -83,17 +74,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public void Close(IErrorCondition error)
+      public void Close(IErrorCondition error = null)
       {
+         if (closed.CompareAndSet(false, true))
+         {
+
+         }
+
          throw new NotImplementedException();
       }
 
-      public Task<ISession> CloseAsync()
-      {
-         throw new NotImplementedException();
-      }
-
-      public Task<ISession> CloseAsync(IErrorCondition error)
+      public Task<ISession> CloseAsync(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
@@ -103,57 +94,27 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      public virtual ISender OpenAnonymousSender()
+      public virtual ISender OpenAnonymousSender(SenderOptions options = null)
       {
          throw new NotImplementedException();
       }
 
-      public virtual ISender OpenAnonymousSender(SenderOptions options)
+      public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
          throw new NotImplementedException();
       }
 
-      public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName)
+      public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          throw new NotImplementedException();
       }
 
-      public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
+      public virtual IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
          throw new NotImplementedException();
       }
 
-      public virtual IReceiver OpenDynamicReceiver()
-      {
-         throw new NotImplementedException();
-      }
-
-      public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options)
-      {
-         throw new NotImplementedException();
-      }
-
-      public virtual IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
-      {
-         throw new NotImplementedException();
-      }
-
-      public virtual IReceiver OpenReceiver(string address)
-      {
-         throw new NotImplementedException();
-      }
-
-      public virtual IReceiver OpenReceiver(string address, ReceiverOptions options)
-      {
-         throw new NotImplementedException();
-      }
-
-      public virtual ISender OpenSender(string address)
-      {
-         throw new NotImplementedException();
-      }
-
-      public virtual ISender OpenSender(string address, SenderOptions options)
+      public virtual ISender OpenSender(string address, SenderOptions options = null)
       {
          throw new NotImplementedException();
       }

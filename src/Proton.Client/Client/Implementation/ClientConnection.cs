@@ -87,21 +87,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #endregion
 
-      public void Close()
-      {
-         if (closed.CompareAndSet(false, true))
-         {
-
-         }
-         throw new System.NotImplementedException();
-      }
-
-      public void Close(IErrorCondition error)
+      public void Close(IErrorCondition error = null)
       {
          throw new System.NotImplementedException();
       }
 
-      public Task<IConnection> CloseAsync()
+      public Task<IConnection> CloseAsync(IErrorCondition error = null)
       {
          throw new System.NotImplementedException();
       }
@@ -122,11 +113,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public Task<IConnection> CloseAsync(IErrorCondition error)
-      {
-         throw new System.NotImplementedException();
-      }
-
       public ISender DefaultSender()
       {
          CheckClosedOrFailed();
@@ -139,34 +125,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new System.NotImplementedException();
       }
 
-      public ISession OpenSession()
-      {
-         return OpenSession(null);
-      }
-
-      public ISession OpenSession(SessionOptions options)
+      public ISession OpenSession(SessionOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
-      public ISender OpenAnonymousSender()
-      {
-         return OpenAnonymousSender(null);
-      }
-
-      public ISender OpenAnonymousSender(SenderOptions options)
+      public ISender OpenAnonymousSender(SenderOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
-      public IReceiver OpenDurableReceiver(string address, string subscriptionName)
-      {
-         return OpenDurableReceiver(address, subscriptionName, null);
-      }
-
-      public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
+      public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
@@ -177,56 +148,31 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return OpenDynamicReceiver(null, null);
       }
 
-      public IReceiver OpenDynamicReceiver(ReceiverOptions options)
-      {
-         return OpenDynamicReceiver(null, options);
-      }
-
-      public IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
+      public IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
-      public IReceiver OpenReceiver(string address)
-      {
-         return OpenReceiver(address, null);
-      }
-
-      public IReceiver OpenReceiver(string address, ReceiverOptions options)
+      public IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
-      public ISender OpenSender(string address)
-      {
-         return OpenSender(address, null);
-      }
-
-      public ISender OpenSender(string address, SenderOptions options)
+      public ISender OpenSender(string address, SenderOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
-      public IStreamReceiver OpenStreamReceiver(string address)
-      {
-         return OpenStreamReceiver(address, null);
-      }
-
-      public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options)
+      public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();
       }
 
-      public IStreamSender OpenStreamSender(string address)
-      {
-         return OpenStreamSender(address, null);
-      }
-
-      public IStreamSender OpenStreamSender(string address, StreamSenderOptions options)
+      public IStreamSender OpenStreamSender(string address, StreamSenderOptions options = null)
       {
          CheckClosedOrFailed();
          throw new System.NotImplementedException();

@@ -54,16 +54,8 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// sender resources.
       /// </summary>
-      void Close();
-
-      /// <summary>
-      /// Initiates a close of the sender and awaits a response from the remote that
-      /// indicates completion of the close operation. If the response from the remote
-      /// exceeds the configure close timeout the method returns after cleaning up the
-      /// sender resources.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      void Close(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      void Close(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a detach of the sender and awaits a response from the remote that
@@ -71,16 +63,8 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// sender resources.
       /// </summary>
-      void Detach();
-
-      /// <summary>
-      /// Initiates a detach of the sender and awaits a response from the remote that
-      /// indicates completion of the detach operation. If the response from the remote
-      /// exceeds the configure close timeout the method returns after cleaning up the
-      /// sender resources.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      void Detach(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      void Detach(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a close of the sender and a Task that allows the caller to await
@@ -88,16 +72,8 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the sender will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      Task<ISender> CloseAsync();
-
-      /// <summary>
-      /// Initiates a close of the sender and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the close
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the sender will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      Task<ISender> CloseAsync(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<ISender> CloseAsync(IErrorCondition error = null);
 
       /// <summary>
       /// Initiates a detach of the sender and a Task that allows the caller to await
@@ -105,16 +81,8 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the sender will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      Task<ISender> DetachAsync();
-
-      /// <summary>
-      /// Initiates a detach of the sender and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the detach
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the sender will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">The error condition to convery to the remote</param>
-      Task<ISender> DetachAsync(IErrorCondition error);
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<ISender> DetachAsync(IErrorCondition error = null);
 
       /// <summary>
       /// Returns the address that the sender instance will send message objects to. The value
@@ -189,28 +157,9 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <typeparam name="T">The type that describes the message body</typeparam>
       /// <param name="message">The message object that will be sent</param>
-      /// <returns>A Tracker for the sent message</returns>
-      ITracker Send<T>(IMessage<T> message);
-
-      /// <summary>
-      /// Send the given message immediately if there is credit available or blocks if the link
-      /// has not yet been granted credit. If a send timeout has been configured then this method
-      /// will throw a timed out error after that if the message cannot be sent.
-      /// </summary>
-      /// <typeparam name="T">The type that describes the message body</typeparam>
-      /// <param name="message">The message object that will be sent</param>
       /// <param name="deliveryAnnotations">Optional delivery annotation to include with the message</param>
       /// <returns>A Tracker for the sent message</returns>
-      ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations);
-
-      /// <summary>
-      /// Send the given message if credit is available or returns null if no credit has been
-      /// granted to the link at the time of the send attempt.
-      /// </summary>
-      /// <typeparam name="T">The type that describes the message body</typeparam>
-      /// <param name="message">The message object that will be sent</param>
-      /// <returns>A Tracker for the sent message</returns>
-      ITracker TrySend<T>(IMessage<T> message);
+      ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
 
       /// <summary>
       /// Send the given message if credit is available or returns null if no credit has been
@@ -220,7 +169,7 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="message">The message object that will be sent</param>
       /// <param name="deliveryAnnotations">Optional delivery annotation to include with the message</param>
       /// <returns>A Tracker for the sent message or null if no credit to send is available</returns>
-      ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations);
+      ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
 
    }
 }

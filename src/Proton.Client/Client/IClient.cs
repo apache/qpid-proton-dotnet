@@ -17,6 +17,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -27,24 +28,14 @@ namespace Apache.Qpid.Proton.Client
    public interface IClient : IDisposable
    {
       /// <summary>
-      /// Create a new IClient instance using the Proton default implementation and configured
-      /// with a set of default client options.
-      /// </summary>
-      /// <returns>a new client instance using the default Proton implementation.</returns>
-      static IClient Create()
-      {
-         return null;
-      }
-
-      /// <summary>
       /// Creates a new IClient instance using the Proton default implementation which has been
       /// configured using the provided client options.
       /// </summary>
-      /// <param name="options">The options to use to configure the new client instance.</param>
+      /// <param name="options">Optional options to use to configure the new client instance.</param>
       /// <returns>a new client instance using the default Proton implementation.</returns>
-      static IClient Create(ClientOptions options)
+      static IClient Create(ClientOptions options = null)
       {
-         return null;
+         return new ClientInstance(options);
       }
 
       /// <summary>
@@ -62,39 +53,22 @@ namespace Apache.Qpid.Proton.Client
 
       /// <summary>
       /// Creates a new connection to the designated remote host on the provided port. The connection
-      /// is configured using default connection options.
-      /// </summary>
-      /// <param name="host">The remote host this connection should connect to</param>
-      /// <param name="port">The port on the remote host where the connection is established</param>
-      /// <returns>A new connection that connects to the given host and port</returns>
-      IConnection Connect(string host, int port);
-
-      /// <summary>
-      /// Creates a new connection to the designated remote host on the provided port. The connection
       /// is configured using the provided connection options.
       /// </summary>
       /// <param name="host">The remote host this connection should connect to</param>
       /// <param name="port">The port on the remote host where the connection is established</param>
-      /// <param name="options">The connection options to use to configure the connection</param>
+      /// <param name="options">Optional connection options to use to configure the connection</param>
       /// <returns>A new connection that connects to the given host and port</returns>
-      IConnection Connect(string host, int port, ConnectionOptions options);
-
-      /// <summary>
-      /// Creates a new connection to the designated remote host on the default AMQP port. The connection
-      /// is configured using default connection options.
-      /// </summary>
-      /// <param name="host">The remote host this connection should connect to</param>
-      /// <returns>A new connection that connects to the given host</returns>
-      IConnection Connect(string host);
+      IConnection Connect(string host, int port, ConnectionOptions options = null);
 
       /// <summary>
       /// Creates a new connection to the designated remote host on the default AMQP port. The connection
       /// is configured using the provided connection options.
       /// </summary>
       /// <param name="host">The remote host this connection should connect to</param>
-      /// <param name="options">The connection options to use to configure the connection</param>
+      /// <param name="options">Optional connection options to use to configure the connection</param>
       /// <returns>A new connection that connects to the given host</returns>
-      IConnection Connect(string host, ConnectionOptions options);
+      IConnection Connect(string host, ConnectionOptions options = null);
 
    }
 }

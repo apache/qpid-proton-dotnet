@@ -108,7 +108,7 @@ namespace Apache.Qpid.Proton.Client
          }
          else
          {
-            return null; // TODO ClientMessageSupport.convertMessage(this);
+            return ClientMessageSupport.ConvertMessage(this);
          }
       }
 

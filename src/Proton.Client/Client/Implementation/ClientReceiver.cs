@@ -135,42 +135,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      public void Close()
+      public void Close(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
 
-      public void Close(IErrorCondition error)
+      public Task<IReceiver> CloseAsync(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
 
-      public Task<IReceiver> CloseAsync()
+      public void Detach(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
 
-      public Task<IReceiver> CloseAsync(IErrorCondition error)
-      {
-         throw new NotImplementedException();
-      }
-
-      public void Detach()
-      {
-         throw new NotImplementedException();
-      }
-
-      public void Detach(IErrorCondition error)
-      {
-         throw new NotImplementedException();
-      }
-
-      public Task<ISender> DetachAsync()
-      {
-         throw new NotImplementedException();
-      }
-
-      public Task<ISender> DetachAsync(IErrorCondition error)
+      public Task<ISender> DetachAsync(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }

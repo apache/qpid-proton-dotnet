@@ -120,42 +120,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public void Close()
+      public void Close(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
 
-      public void Close(IErrorCondition error)
+      public Task<ISender> CloseAsync(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
 
-      public Task<ISender> CloseAsync()
+      public void Detach(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
 
-      public Task<ISender> CloseAsync(IErrorCondition error)
-      {
-         throw new NotImplementedException();
-      }
-
-      public void Detach()
-      {
-         throw new NotImplementedException();
-      }
-
-      public void Detach(IErrorCondition error)
-      {
-         throw new NotImplementedException();
-      }
-
-      public Task<ISender> DetachAsync()
-      {
-         throw new NotImplementedException();
-      }
-
-      public Task<ISender> DetachAsync(IErrorCondition error)
+      public Task<ISender> DetachAsync(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
@@ -165,22 +145,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      public ITracker Send<T>(IMessage<T> message)
+      public ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
          throw new NotImplementedException();
       }
 
-      public ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations)
-      {
-         throw new NotImplementedException();
-      }
-
-      public ITracker TrySend<T>(IMessage<T> message)
-      {
-         throw new NotImplementedException();
-      }
-
-      public ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations)
+      public ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
          throw new NotImplementedException();
       }

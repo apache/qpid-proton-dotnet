@@ -27,67 +27,31 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
       }
 
-      public override IReceiver OpenDurableReceiver(string address, string subscriptionName)
+      public override IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
       }
 
-      public override IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options)
+      public override IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
       }
 
-      public override IReceiver OpenDynamicReceiver()
+      public override IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
       }
 
-      public override IReceiver OpenDynamicReceiver(ReceiverOptions options)
-      {
-         CheckClosedOrFailed();
-         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
-      }
-
-      public override IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions options)
-      {
-         CheckClosedOrFailed();
-         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
-      }
-
-      public override IReceiver OpenReceiver(string address)
-      {
-         CheckClosedOrFailed();
-         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
-      }
-
-      public override IReceiver OpenReceiver(string address, ReceiverOptions options)
-      {
-         CheckClosedOrFailed();
-         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
-      }
-
-      public override ISender OpenSender(string address)
+      public override ISender OpenSender(string address, SenderOptions options = null)
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
       }
 
-      public override ISender OpenSender(string address, SenderOptions options)
-      {
-         CheckClosedOrFailed();
-         throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
-      }
-
-      public override ISender OpenAnonymousSender()
-      {
-         CheckClosedOrFailed();
-         throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
-      }
-
-      public override ISender OpenAnonymousSender(SenderOptions options)
+      public override ISender OpenAnonymousSender(SenderOptions options = null)
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
