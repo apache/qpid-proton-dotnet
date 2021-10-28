@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientReceiverBuilder receiverBuilder;
 
       private Engine.ISession protonSession;
-      private Exception failureCause;
+      private ClientException failureCause;
 
       public ClientSession(ClientConnection connection, SessionOptions options, string sessionId, Engine.ISession session)
       {
@@ -131,7 +131,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       protected void CheckClosedOrFailed()
       {
-         if (IsClosed())
+         if (IsClosed)
          {
             throw new ClientIllegalStateException("The Session was explicitly closed", failureCause);
          }
@@ -147,10 +147,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal Engine.ISession ProtonSession => protonSession;
 
-      internal bool IsClosed()
-      {
-         return closed;
-      }
+      internal bool IsClosed => closed;
 
       internal SessionOptions Options => options;
 
@@ -238,6 +235,34 @@ namespace Apache.Qpid.Proton.Client.Implementation
          // TODO
       }
 
+      private void ImmediateSessionShutdown(ClientException failureCause)
+      {
+         if (this.failureCause == null)
+         {
+            this.failureCause = failureCause;
+         }
+
+         try
+         {
+            protonSession.Close();
+         }
+         catch (Exception)
+         {
+         }
+
+         // TODO
+         // if (failureCause != null)
+         // {
+         //    openFuture.failed(failureCause);
+         // }
+         // else
+         // {
+         //    openFuture.complete(this);
+         // }
+
+         // closeFuture.complete(this);
+      }
+
       #endregion
 
       #region Session Proton event handling API
@@ -259,12 +284,56 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleRemoteClose(Engine.ISession session)
       {
-         throw new NotImplementedException();
+         if (session.IsLocallyOpen)
+         {
+            ImmediateSessionShutdown(ClientExceptionSupport.ConvertToSessionClosedException(session.RemoteErrorCondition));
+         }
+         else
+         {
+            ImmediateSessionShutdown(failureCause);
+         }
       }
 
       private void HandleEngineShutdown(Engine.IEngine engine)
       {
-         throw new NotImplementedException();
+         // If the connection has an engine that is running then it is going to attempt
+         // reconnection and we want to recover by creating a new Session that will be
+         // opened once the remote has been recovered.
+         if (!connection.ProtonEngine.IsShutdown)
+         {
+            // No local close processing needed but we should try and let the session
+            // clean up any resources it can by closing it.
+            protonSession.LocalCloseHandler(null);
+            protonSession.Close();
+            protonSession = ConfigureSession(ClientSessionBuilder.RecreateSession(connection, protonSession, options));
+
+            Open();
+         }
+         else
+         {
+            Engine.IConnection connection = engine.Connection;
+
+            ClientException failureCause;
+
+            if (connection.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(connection.RemoteErrorCondition);
+            }
+            else if (engine.FailureCause != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(engine.FailureCause);
+            }
+            else if (!IsClosed)
+            {
+               failureCause = new ClientConnectionRemotelyClosedException("Remote closed without a specific error condition");
+            }
+            else
+            {
+               failureCause = null;
+            }
+
+            ImmediateSessionShutdown(failureCause);
+         }
       }
 
       #endregion
