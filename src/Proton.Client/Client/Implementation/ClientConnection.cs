@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
-      private Exception failureCause;
+      private AtomicReference<Exception> failureCause = new AtomicReference<Exception>();
       private ClientSession connectionSession;
       private ClientSender connectionSender;
       private long totalConnections;
@@ -218,10 +218,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             return this;
          }
-         catch (Exception)
+         catch (Exception ex)
          {
             closed.Set(true);
-            // TODO FAILURE_CAUSE_UPDATER.compareAndSet(this, null, ClientExceptionSupport.createOrPassthroughFatal(ex));
+            failureCause.CompareAndSet(null, ClientExceptionSupport.CreateOrPassthroughFatal(ex));
             // TODO openFuture.failed(failureCause);
             // TODO closeFuture.complete(this);
             // TODO ioContext.shutdown();
@@ -361,9 +361,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          // TODO
       }
 
-      private void FailConnection(ClientIOException failureCause)
+      private void FailConnection(ClientIOException cause)
       {
-         // TODO FAILURE_CAUSE_UPDATER.compareAndSet(this, null, failureCause);
+         failureCause.CompareAndSet(null, cause);
 
          try
          {
