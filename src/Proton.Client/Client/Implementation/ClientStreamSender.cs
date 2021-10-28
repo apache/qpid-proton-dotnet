@@ -180,6 +180,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal StreamSenderOptions Options => options;
 
+      internal ClientStreamSender Open()
+      {
+         // TODO
+
+         return this;
+      }
+
       internal void Disposition(IOutgoingDelivery delivery, Types.Transport.IDeliveryState state, bool settled)
       {
          CheckClosedOrFailed();

@@ -200,6 +200,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal bool IsClosed => closed;
 
+      internal bool HasOpened => false; // TODO
+
       internal Engine.IConnection ProtonConnection => protonConnection;
 
       internal ConnectionOptions Options => options;

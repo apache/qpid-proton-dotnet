@@ -25,8 +25,8 @@ using Apache.Qpid.Proton.Types.Transport;
 namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
-   /// The session builder is used by client connection instances to create
-   /// AMQP sessions and wrap those within a client session instance.
+   /// The receiver builder is used by client session instances to create
+   /// AMQP receivers and wrap those within a client receiver instance.
    /// </summary>
    internal class ClientReceiverBuilder
    {

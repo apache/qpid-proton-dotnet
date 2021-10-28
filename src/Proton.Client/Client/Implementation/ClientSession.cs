@@ -30,6 +30,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientConnection connection;
       private readonly string sessionId;
       private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly ClientSenderBuilder senderBuilder;
+      private readonly ClientReceiverBuilder receiverBuilder;
 
       private Engine.ISession protonSession;
       private Exception failureCause;
@@ -40,6 +42,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.connection = connection;
          this.protonSession = session;
          this.sessionId = sessionId;
+         this.senderBuilder = new ClientSenderBuilder(this);
+         this.receiverBuilder = new ClientReceiverBuilder(this);
       }
 
       public IClient Client => throw new NotImplementedException();
@@ -152,8 +156,115 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientSession Open()
       {
-         // TODO
+         protonSession.LocalOpenHandler(HandleLocalOpen)
+                      .LocalCloseHandler(HandleLocalClose)
+                      .OpenHandler(HandleRemoteOpen)
+                      .CloseHandler(HandleRemoteClose)
+                      .EngineShutdownHandler(HandleEngineShutdown);
+
+         try
+         {
+            protonSession.Open();
+         }
+         catch (Exception)
+         {
+            // Connection is responding to all engine failed errors
+         }
+
          return this;
+      }
+
+      ClientReceiver InternalOpenReceiver(string address, ReceiverOptions receiverOptions)
+      {
+         return receiverBuilder.Receiver(address, receiverOptions).Open();
+      }
+
+      ClientStreamReceiver InternalOpenStreamReceiver(string address, StreamReceiverOptions receiverOptions)
+      {
+         return receiverBuilder.StreamReceiver(address, receiverOptions).Open();
+      }
+
+      ClientReceiver InternalOpenDurableReceiver(string address, string subscriptionName, ReceiverOptions receiverOptions)
+      {
+         return receiverBuilder.DurableReceiver(address, subscriptionName, receiverOptions).Open();
+      }
+
+      ClientReceiver InternalOpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions receiverOptions)
+      {
+         return receiverBuilder.DynamicReceiver(dynamicNodeProperties, receiverOptions).Open();
+      }
+
+      ClientSender InternalOpenSender(string address, SenderOptions senderOptions)
+      {
+         return senderBuilder.Sender(address, senderOptions).Open();
+      }
+
+      ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions)
+      {
+         // When the connection is opened we are ok to check that the anonymous relay is supported
+         // and open the sender if so, otherwise we need to wait.
+         if (connection.HasOpened)
+         {
+            connection.CheckAnonymousRelaySupported();
+            return senderBuilder.AnonymousSender(senderOptions).Open();
+         }
+         else
+         {
+            return senderBuilder.AnonymousSender(senderOptions);
+         }
+      }
+
+      ClientStreamSender InternalOpenStreamSender(string address, StreamSenderOptions senderOptions)
+      {
+         return senderBuilder.StreamSender(address, senderOptions).Open();
+      }
+
+      #endregion
+
+      #region Session private API
+
+      private Engine.ISession ConfigureSession(Engine.ISession protonSession)
+      {
+         protonSession.LinkedResource = this;
+         protonSession.OfferedCapabilities = ClientConversionSupport.ToSymbolArray(options.OfferedCapabilities);
+         protonSession.DesiredCapabilities = ClientConversionSupport.ToSymbolArray(options.DesiredCapabilities);
+         protonSession.Properties = ClientConversionSupport.ToSymbolKeyedMap(options.Properties);
+
+         return protonSession;
+      }
+
+      private void WaitForOpenToComplete()
+      {
+         // TODO
+      }
+
+      #endregion
+
+      #region Session Proton event handling API
+
+      private void HandleLocalOpen(Engine.ISession session)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleLocalClose(Engine.ISession session)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleRemoteOpen(Engine.ISession session)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleRemoteClose(Engine.ISession session)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleEngineShutdown(Engine.IEngine engine)
+      {
+         throw new NotImplementedException();
       }
 
       #endregion

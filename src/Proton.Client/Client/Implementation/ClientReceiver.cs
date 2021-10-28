@@ -182,6 +182,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Internal Receiver API
 
+      internal ClientReceiver Open()
+      {
+         // TODO
+
+         return this;
+      }
+
       internal void Disposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
          // TODO CheckClosedOrFailed();
