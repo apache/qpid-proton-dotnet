@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -128,8 +129,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (IsClosed())
          {
-            //TODO throw new ClientIllegalStateException("The Session was explicitly closed", failureCause);
-            throw new InvalidOperationException("The Session was explicitly closed", failureCause);
+            throw new ClientIllegalStateException("The Session was explicitly closed", failureCause);
          }
          else if (failureCause != null)
          {
@@ -149,6 +149,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       internal SessionOptions Options => options;
+
+      internal ClientSession Open()
+      {
+         // TODO
+         return this;
+      }
 
       #endregion
    }

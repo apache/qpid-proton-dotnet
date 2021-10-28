@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public SessionOptions DefaultSessionOptions => GetOrCreateDefaultSessionOptions();
 
-      public ClientSession Session(SessionOptions sessionOptions)
+      public ClientSession Session(SessionOptions sessionOptions = null)
       {
          SessionOptions options = sessionOptions != null ? sessionOptions : GetOrCreateDefaultSessionOptions();
          string sessionId = NextSessionId();
@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return new ClientSession(connection, options, sessionId, protonSession);
       }
 
-    public ClientStreamSession StreamSession(SessionOptions sessionOptions)
+    public ClientStreamSession StreamSession(SessionOptions sessionOptions = null)
      {
          SessionOptions options = sessionOptions != null ? sessionOptions : GetOrCreateDefaultSessionOptions();
          string sessionId = NextSessionId();

@@ -115,6 +115,56 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
+      /// <summary>
+      /// Converts an enumeration of string values into a set of Symbol values.
+      /// </summary>
+      /// <param name="strings">an enumeration of string values</param>
+      /// <returns>a set of Symbol value that match the input strings</returns>
+      public static ISet<Symbol> ToSymbolSet(in IEnumerable<string> strings)
+      {
+         ISet<Symbol> result;
+
+         if (strings != null)
+         {
+            result = new HashSet<Symbol>();
+            foreach (string value in strings)
+            {
+               result.Add(Symbol.Lookup(value));
+            }
+         }
+         else
+         {
+            result = null;
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Converts an enumeration of Symbol values into a set of string values.
+      /// </summary>
+      /// <param name="symbols">an enumeration of Symbol values</param>
+      /// <returns>a set of string value that match the input Symbols</returns>
+      public static ISet<string> ToStringSet(in IEnumerable<Symbol> symbols)
+      {
+         ISet<string> result;
+
+         if (symbols != null)
+         {
+            result = new HashSet<string>();
+            foreach (Symbol value in symbols)
+            {
+               result.Add(value.ToString());
+            }
+         }
+         else
+         {
+            result = null;
+         }
+
+         return result;
+      }
+
       public static Symbol AsProtonType(this DistributionMode mode)
       {
          switch (mode)

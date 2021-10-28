@@ -63,5 +63,12 @@ namespace Apache.Qpid.Proton.Client.Exceptions
       {
          this.temporary = temporary;
       }
+
+      /// <summary>
+      /// Returns true if the SASL failure indicated that it was a temporary failure and
+      /// may resolve after future retries.
+      /// </summary>
+      public bool IsTemporaryFailure => temporary;
+
    }
 }

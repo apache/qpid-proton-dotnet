@@ -229,12 +229,12 @@ namespace Apache.Qpid.Proton.Client
       /// Controls if the client will attempt to trigger the AMQP engine to trace
       /// all incoming and outgoing frames via the logger.
       /// </summary>
-      bool TraceFrames { get; set; }
+      public bool TraceFrames { get; set; }
 
       /// <summary>
       /// Configuration of the I/O layer options.
       /// </summary>
-      TransportOptions TransportOptions { get; } = new TransportOptions();
+      public TransportOptions TransportOptions { get; } = new TransportOptions();
 
       /// <summary>
       /// Quick access to enable and disable SSL for newly created connections that
