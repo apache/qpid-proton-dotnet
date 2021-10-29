@@ -196,6 +196,21 @@ namespace Apache.Qpid.Proton.Client.Implementation
          //   });
       }
 
+      internal void Abort(IOutgoingDelivery delivery, ClientStreamTracker tracker)
+      {
+         throw new NotImplementedException();
+      }
+
+      internal IStreamTracker SendMessage<E>(ClientStreamSenderMessage context, IAdvancedMessage<E> message)
+      {
+         throw new NotImplementedException();
+      }
+
+      internal void Complete(IOutgoingDelivery delivery, ClientStreamTracker tracker)
+      {
+         throw new NotImplementedException();
+      }
+
       #endregion
 
       #region Private Receiver Implementation

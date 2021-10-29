@@ -37,6 +37,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          // TODO this.remoteSettlementFuture = sender.session().getFutureFactory().createFuture();
       }
 
+      internal Engine.IOutgoingDelivery ProtonDelivery => delivery;
+
       public IStreamSender Sender => sender;
 
       public bool Settled => delivery.IsSettled;
