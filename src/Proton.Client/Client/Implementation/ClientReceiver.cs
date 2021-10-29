@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
@@ -26,14 +27,16 @@ using Apache.Qpid.Proton.Engine;
 namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
-   /// TODO
+   /// Client receiver implementation which provides a wrapper around the proton
+   /// receiver link and processes incoming deliveries with options for queueing
+   /// with a credit window.
    /// </summary>
    public class ClientReceiver : IReceiver
    {
       private readonly ReceiverOptions options;
       private readonly ClientSession session;
       private readonly string receiverId;
-      private readonly FifoDeliveryQueue<IIncomingDelivery> messageQueue;
+      private readonly FifoDeliveryQueue<ClientDelivery> messageQueue;
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private ClientException failureCause;
 
@@ -55,7 +58,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             protonReceiver.AddCredit(options.CreditWindow);
          }
 
-         messageQueue = new FifoDeliveryQueue<IIncomingDelivery>();
+         messageQueue = new FifoDeliveryQueue<ClientDelivery>();
          messageQueue.Start();
       }
 
@@ -167,24 +170,81 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IDelivery Receive()
       {
-         throw new NotImplementedException();
+         return Receive(TimeSpan.MaxValue);
       }
 
       public IDelivery Receive(TimeSpan timeout)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+
+         try
+         {
+            ClientDelivery delivery = messageQueue.Dequeue(timeout);
+            if (delivery != null)
+            {
+               if (options.AutoAccept)
+               {
+                  delivery.Disposition(ClientAccepted.Instance, options.AutoSettle);
+               }
+               else
+               {
+                  AsyncReplenishCreditIfNeeded();
+               }
+
+               return delivery;
+            }
+
+            CheckClosedOrFailed();
+
+            return null;
+         }
+         catch (ThreadInterruptedException e)
+         {
+            throw new ClientException("Receive wait interrupted", e);
+         }
       }
 
       public IDelivery TryReceive()
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+
+         IDelivery delivery = messageQueue.DequeueNoWait();
+         if (delivery != null)
+         {
+            if (options.AutoAccept)
+            {
+               delivery.Disposition(ClientAccepted.Instance, options.AutoSettle);
+            }
+            else
+            {
+               AsyncReplenishCreditIfNeeded();
+            }
+         }
+         else
+         {
+            CheckClosedOrFailed();
+         }
+
+         return delivery;
       }
 
       #region Internal Receiver API
 
       internal ClientReceiver Open()
       {
-         // TODO
+         protonReceiver.LocalOpenHandler(HandleLocalOpen)
+                       .LocalCloseHandler(HandleLocalCloseOrDetach)
+                       .LocalDetachHandler(HandleLocalCloseOrDetach)
+                       .OpenHandler(HandleRemoteOpen)
+                       .CloseHandler(HandleRemoteCloseOrDetach)
+                       .DetachHandler(HandleRemoteCloseOrDetach)
+                       .ParentEndpointClosedHandler(HandleParentEndpointClosed)
+                       .DeliveryStateUpdatedHandler(HandleDeliveryStateRemotelyUpdated)
+                       .DeliveryReadHandler(HandleDeliveryReceived)
+                       .DeliveryAbortedHandler(HandleDeliveryAborted)
+                       .CreditStateUpdateHandler(HandleReceiverCreditUpdated)
+                       .EngineShutdownHandler(HandleEngineShutdown)
+                       .Open();
 
          return this;
       }
@@ -205,9 +265,121 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Private Receiver Implementation
 
+      private void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
+      {
+         // TODO
+         //   executor.execute(() -> {
+         //       session.getTransactionContext().disposition(delivery, state, settle);
+         //       ReplenishCreditIfNeeded();
+         //   });
+      }
+
+      private void ReplenishCreditIfNeeded()
+      {
+         uint creditWindow = options.CreditWindow;
+         if (creditWindow > 0)
+         {
+            uint currentCredit = protonReceiver.Credit;
+            if (currentCredit <= creditWindow * 0.5)
+            {
+               uint potentialPrefetch = currentCredit + (uint)messageQueue.Count;
+
+               if (potentialPrefetch <= creditWindow * 0.7)
+               {
+                  uint additionalCredit = creditWindow - potentialPrefetch;
+
+                  // TODO LOG.trace("Consumer granting additional credit: {}", additionalCredit);
+                  try
+                  {
+                     protonReceiver.AddCredit(additionalCredit);
+                  }
+                  catch (Exception)
+                  {
+                     // TODO LOG.debug("Error caught during credit top-up", ex);
+                  }
+               }
+            }
+         }
+      }
+
+      private void AsyncReplenishCreditIfNeeded()
+      {
+         uint creditWindow = options.CreditWindow;
+         if (creditWindow > 0)
+         {
+            // TODO executor.execute(() -> replenishCreditIfNeeded());
+         }
+      }
+
+      private void CheckClosedOrFailed()
+      {
+         if (IsClosed)
+         {
+            throw new ClientIllegalStateException("The Receiver was explicitly closed", failureCause);
+         }
+         else if (failureCause != null)
+         {
+            throw failureCause;
+         }
+      }
+
       private void WaitForOpenToComplete()
       {
          // TODO
+      }
+
+      #endregion
+
+      #region Proton Receiver lifecycle event handlers
+
+      private void HandleLocalOpen(Engine.IReceiver receiver)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleLocalCloseOrDetach(Engine.IReceiver receiver)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleRemoteOpen(Engine.IReceiver receiver)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleRemoteCloseOrDetach(Engine.IReceiver receiver)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleParentEndpointClosed(Engine.IReceiver receiver)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleEngineShutdown(Engine.IEngine engine)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleDeliveryReceived(IIncomingDelivery delivery)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleDeliveryAborted(IIncomingDelivery delivery)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleDeliveryStateRemotelyUpdated(IIncomingDelivery delivery)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleReceiverCreditUpdated(Engine.IReceiver receiver)
+      {
+         throw new NotImplementedException();
       }
 
       #endregion

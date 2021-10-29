@@ -171,32 +171,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
-      ClientReceiver InternalOpenReceiver(string address, ReceiverOptions receiverOptions)
+      internal ClientReceiver InternalOpenReceiver(string address, ReceiverOptions receiverOptions)
       {
          return receiverBuilder.Receiver(address, receiverOptions).Open();
       }
 
-      ClientStreamReceiver InternalOpenStreamReceiver(string address, StreamReceiverOptions receiverOptions)
+      internal ClientStreamReceiver InternalOpenStreamReceiver(string address, StreamReceiverOptions receiverOptions)
       {
          return receiverBuilder.StreamReceiver(address, receiverOptions).Open();
       }
 
-      ClientReceiver InternalOpenDurableReceiver(string address, string subscriptionName, ReceiverOptions receiverOptions)
+      internal ClientReceiver InternalOpenDurableReceiver(string address, string subscriptionName, ReceiverOptions receiverOptions)
       {
          return receiverBuilder.DurableReceiver(address, subscriptionName, receiverOptions).Open();
       }
 
-      ClientReceiver InternalOpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions receiverOptions)
+      internal ClientReceiver InternalOpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions receiverOptions)
       {
          return receiverBuilder.DynamicReceiver(dynamicNodeProperties, receiverOptions).Open();
       }
 
-      ClientSender InternalOpenSender(string address, SenderOptions senderOptions)
+      internal ClientSender InternalOpenSender(string address, SenderOptions senderOptions)
       {
          return senderBuilder.Sender(address, senderOptions).Open();
       }
 
-      ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions)
+      internal ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions)
       {
          // When the connection is opened we are ok to check that the anonymous relay is supported
          // and open the sender if so, otherwise we need to wait.
@@ -211,7 +211,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      ClientStreamSender InternalOpenStreamSender(string address, StreamSenderOptions senderOptions)
+      internal ClientStreamSender InternalOpenStreamSender(string address, StreamSenderOptions senderOptions)
       {
          return senderBuilder.StreamSender(address, senderOptions).Open();
       }

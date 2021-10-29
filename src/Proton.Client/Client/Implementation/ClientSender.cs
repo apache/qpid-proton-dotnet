@@ -164,11 +164,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal bool IsDynamic => protonSender.Target?.Dynamic ?? false;
 
+      internal bool IsAnonymous => protonSender.Target.Address == null;
+
+      internal bool IsSendingSettled => sendsSettled;
+
       internal SenderOptions Options => options;
 
       internal ClientSender Open()
       {
-         // TODO
+         protonSender.LocalOpenHandler(HandleLocalOpen)
+                     .LocalCloseHandler(HandleLocalCloseOrDetach)
+                     .LocalDetachHandler(HandleLocalCloseOrDetach)
+                     .OpenHandler(HandleRemoteOpen)
+                     .CloseHandler(HandleRemoteCloseOrDetach)
+                     .DetachHandler(HandleRemoteCloseOrDetach)
+                     .ParentEndpointClosedHandler(HandleParentEndpointClosed)
+                     .CreditStateUpdateHandler(HandleCreditStateUpdated)
+                     .EngineShutdownHandler(HandleEngineShutdown)
+                     .Open();
 
          return this;
       }
@@ -182,9 +195,28 @@ namespace Apache.Qpid.Proton.Client.Implementation
          //   });
       }
 
+      void HandleUpdateAnonymousRelayNotSupported()
+      {
+         if (IsAnonymous && protonSender.LinkState == LinkState.Idle)
+         {
+            ImmediateLinkShutdown(new ClientUnsupportedOperationException(
+               "Anonymous relay support not available from this connection"));
+         }
+      }
+
       #endregion
 
       #region Private Receiver Implementation
+
+      private ITracker CreateTracker(IOutgoingDelivery delivery)
+      {
+         return new ClientTracker(this, delivery);
+      }
+
+      private ITracker CreateNoOpTracker()
+      {
+         return new ClientNoOpTracker(this);
+      }
 
       private void CheckClosedOrFailed()
       {
@@ -201,6 +233,187 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private void WaitForOpenToComplete()
       {
          // TODO
+      }
+
+      private void ImmediateLinkShutdown(ClientException failureCause)
+      {
+         if (this.failureCause == null)
+         {
+            this.failureCause = failureCause;
+         }
+
+         try
+         {
+            if (protonSender.IsRemotelyDetached)
+            {
+               protonSender.Detach();
+            }
+            else
+            {
+               protonSender.Close();
+            }
+         }
+         catch (Exception)
+         {
+            // Ignore
+         }
+
+         FailPendingUnsettledAndBlockedSends(
+            failureCause ?? new ClientResourceRemotelyClosedException("The sender link has closed"));
+
+         // TODO
+         // if (failureCause != null)
+         // {
+         //    openFuture.failed(failureCause);
+         // }
+         // else
+         // {
+         //    openFuture.complete(this);
+         // }
+
+         // closeFuture.complete(this);
+      }
+
+      private void FailPendingUnsettledAndBlockedSends(ClientException cause)
+      {
+         // Cancel all settlement futures for in-flight sends passing an appropriate error to the future
+         foreach (IOutgoingDelivery delivery in protonSender.Unsettled)
+         {
+            try
+            {
+               ClientTracker tracker = delivery.LinkedResource as ClientTracker;
+               // TODO tracker.SettlementTask.Failed(cause);
+            }
+            catch (Exception)
+            {
+            }
+         }
+
+         // TODO
+         // Cancel all blocked sends passing an appropriate error to the future
+         //   blocked.removeIf((held) -> {
+         //       held.failed(cause);
+         //       return true;
+         //   });
+      }
+
+      #endregion
+
+      #region Proton Sender lifecycle envent handlers
+
+      private void HandleLocalOpen(Engine.ISender sender)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleLocalCloseOrDetach(Engine.ISender sender)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleRemoteOpen(Engine.ISender sender)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleRemoteCloseOrDetach(Engine.ISender sender)
+      {
+         if (sender.IsLocallyOpen)
+         {
+            try
+            {
+               senderRemotelyClosedHandler.Invoke(this);
+            }
+            catch (Exception) { }
+
+            ImmediateLinkShutdown(ClientExceptionSupport.ConvertToLinkClosedException(
+                sender.RemoteErrorCondition, "Sender remotely closed without explanation from the remote"));
+         }
+         else
+         {
+            ImmediateLinkShutdown(failureCause);
+         }
+      }
+
+      private void HandleParentEndpointClosed(Engine.ISender sender)
+      {
+         // Don't react if engine was shutdown and parent closed as a result instead wait to get the
+         // shutdown notification and respond to that change.
+         if (sender.Engine.IsRunning)
+         {
+            ClientException failureCause;
+
+            if (sender.Connection.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(sender.Connection.RemoteErrorCondition);
+            }
+            else if (sender.Session.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToSessionClosedException(sender.Session.RemoteErrorCondition);
+            }
+            else if (sender.Engine.FailureCause != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(sender.Engine.FailureCause);
+            }
+            else if (!IsClosed)
+            {
+               failureCause = new ClientResourceRemotelyClosedException("Remote closed without a specific error condition");
+            }
+            else
+            {
+               failureCause = null;
+            }
+
+            ImmediateLinkShutdown(failureCause);
+         }
+      }
+
+      private void HandleCreditStateUpdated(Engine.ISender sender)
+      {
+         throw new NotImplementedException();
+      }
+
+      private void HandleEngineShutdown(Engine.IEngine engine)
+      {
+         if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
+         {
+            protonSender.LocalCloseHandler(null);
+            protonSender.LocalDetachHandler(null);
+            protonSender.Close();
+            if (protonSender.HasUnsettled)
+            {
+               FailPendingUnsettledAndBlockedSends(
+                   new ClientConnectionRemotelyClosedException("Connection failed and send result is unknown"));
+            }
+            protonSender = ClientSenderBuilder.RecreateSender(session, protonSender, options);
+            protonSender.LinkedResource = this;
+
+            Open();
+         }
+         else
+         {
+            Engine.IConnection connection = engine.Connection;
+            ClientException failureCause;
+
+            if (connection.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(connection.RemoteErrorCondition);
+            }
+            else if (engine.FailureCause != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(engine.FailureCause);
+            }
+            else if (!IsClosed)
+            {
+               failureCause = new ClientConnectionRemotelyClosedException("Remote closed without a specific error condition");
+            }
+            else
+            {
+               failureCause = null;
+            }
+
+            ImmediateLinkShutdown(failureCause);
+         }
       }
 
       #endregion
