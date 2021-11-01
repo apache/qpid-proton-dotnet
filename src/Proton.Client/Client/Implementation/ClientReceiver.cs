@@ -328,6 +328,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          // TODO
       }
 
+      private void ImmediateLinkShutdown(ClientException failureCause)
+      {
+         // TODO
+      }
+
       #endregion
 
       #region Proton Receiver lifecycle event handlers
@@ -339,17 +344,61 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalCloseOrDetach(Engine.IReceiver receiver)
       {
-         throw new NotImplementedException();
+         messageQueue.Stop();  // Ensure blocked receivers are all unblocked.
+
+         // If not yet remotely closed we only wait for a remote close if the engine isn't
+         // already failed and we have successfully opened the sender without a timeout.
+         if (!receiver.Engine.IsShutdown && failureCause == null && receiver.IsRemotelyOpen)
+         {
+            long timeout = options.CloseTimeout;
+
+            if (timeout > 0)
+            {
+               // TODO session.ScheduleRequestTimeout(closeFuture, timeout, ()->
+               //    new ClientOperationTimedOutException("receiver close timed out waiting for remote to respond");
+            }
+         }
+         else
+         {
+            ImmediateLinkShutdown(failureCause);
+         }
       }
 
       private void HandleRemoteOpen(Engine.IReceiver receiver)
       {
-         throw new NotImplementedException();
+         // Check for deferred close pending and hold completion if so
+         if (receiver.RemoteSource != null)
+         {
+            remoteSource = new ClientRemoteSource(receiver.RemoteSource);
+
+            if (receiver.RemoteTerminus != null)
+            {
+               remoteTarget = new ClientRemoteTarget((Types.Messaging.Target)receiver.RemoteTerminus);
+            }
+
+            ReplenishCreditIfNeeded();
+
+            // TODO
+            // openFuture.complete(this);
+            //LOG.trace("Receiver opened successfully: {}", receiverId);
+         }
+         else
+         {
+            // TODO LOG.debug("Receiver opened but remote signalled close is pending: {}", receiverId);
+         }
       }
 
       private void HandleRemoteCloseOrDetach(Engine.IReceiver receiver)
       {
-         throw new NotImplementedException();
+         if (receiver.IsLocallyOpen)
+         {
+            ImmediateLinkShutdown(ClientExceptionSupport.ConvertToLinkClosedException(
+                receiver.RemoteErrorCondition, "Receiver remotely closed without explanation from the remote"));
+         }
+         else
+         {
+            ImmediateLinkShutdown(failureCause);
+         }
       }
 
       private void HandleParentEndpointClosed(Engine.IReceiver receiver)
@@ -359,17 +408,84 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleEngineShutdown(Engine.IEngine engine)
       {
-         throw new NotImplementedException();
+         if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
+         {
+            uint previousCredit = protonReceiver.Credit + (uint)messageQueue.Count;
+
+            messageQueue.Clear();  // Prefetched messages should be discarded.
+
+            // TODO
+            // if (drainingFuture != null)
+            // {
+            //    drainingFuture.complete(this);
+            //    if (drainingTimeout != null)
+            //    {
+            //       drainingTimeout.cancel(false);
+            //       drainingTimeout = null;
+            //    }
+            // }
+
+            protonReceiver.LocalCloseHandler(null);
+            protonReceiver.LocalDetachHandler(null);
+            protonReceiver.Close();
+            protonReceiver = ClientReceiverBuilder.RecreateReceiver(session, protonReceiver, options);
+            protonReceiver.LinkedResource = this;
+            protonReceiver.AddCredit(previousCredit);
+
+            Open();
+         }
+         else
+         {
+            Engine.IConnection connection = engine.Connection;
+
+            ClientException failureCause;
+
+            if (connection.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(connection.RemoteErrorCondition);
+            }
+            else if (engine.FailureCause != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(engine.FailureCause);
+            }
+            else if (!IsClosed)
+            {
+               failureCause = new ClientConnectionRemotelyClosedException("Remote closed without a specific error condition");
+            }
+            else
+            {
+               failureCause = null;
+            }
+
+            ImmediateLinkShutdown(failureCause);
+         }
       }
 
       private void HandleDeliveryReceived(IIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         // TODO LOG.trace("Delivery data was received: {}", delivery);
+
+         if (delivery.DefaultDeliveryState == null)
+         {
+            delivery.DefaultDeliveryState = Types.Messaging.Released.Instance;
+         }
+
+         if (!delivery.IsPartial)
+         {
+            // TODO LOG.trace("{} has incoming Message(s).", this);
+            messageQueue.Enqueue(new ClientDelivery(this, delivery));
+         }
+         else
+         {
+            delivery.ClaimAvailableBytes();
+         }
       }
 
       private void HandleDeliveryAborted(IIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         // TODO LOG.trace("Delivery data was aborted: {}", delivery);
+         delivery.Settle();
+         ReplenishCreditIfNeeded();
       }
 
       private void HandleDeliveryStateRemotelyUpdated(IIncomingDelivery delivery)
