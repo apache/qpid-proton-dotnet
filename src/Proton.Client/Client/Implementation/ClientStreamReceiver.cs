@@ -31,6 +31,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientSession session;
       private readonly string receiverId;
       private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly TaskCompletionSource<IReceiver> openFuture = new TaskCompletionSource<IReceiver>();
+      private readonly TaskCompletionSource<IStreamReceiver> closeFuture = new TaskCompletionSource<IStreamReceiver>();
 
       private Engine.IReceiver protonReceiver;
       private ClientException failureCause;
@@ -57,7 +59,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession Session => session;
 
-      public Task<IReceiver> OpenTask => throw new NotImplementedException();
+      public Task<IReceiver> OpenTask => openFuture.Task;
 
       public string Address
       {
@@ -226,7 +228,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void WaitForOpenToComplete()
       {
-         // TODO
+         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
+         {
+            try
+            {
+               openFuture.Task.Wait();
+            }
+            catch (Exception e)
+            {
+               throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+         }
       }
 
       #endregion

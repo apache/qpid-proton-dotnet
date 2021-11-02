@@ -35,6 +35,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientSession session;
       private readonly string senderId;
       private readonly bool sendsSettled;
+      private readonly TaskCompletionSource<IStreamSender> openFuture = new TaskCompletionSource<IStreamSender>();
+      private readonly TaskCompletionSource<IStreamSender> closeFuture = new TaskCompletionSource<IStreamSender>();
+
       private Engine.ISender protonSender;
       private Action<ISender> senderRemotelyClosedHandler;
 
@@ -229,7 +232,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void WaitForOpenToComplete()
       {
-         // TODO
+         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
+         {
+            try
+            {
+               openFuture.Task.Wait();
+            }
+            catch (Exception e)
+            {
+               throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+         }
       }
 
       #endregion

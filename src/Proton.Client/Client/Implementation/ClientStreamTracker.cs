@@ -17,6 +17,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -25,6 +26,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    {
       private readonly ClientStreamSender sender;
       private readonly IOutgoingDelivery delivery;
+      private readonly TaskCompletionSource<IStreamTracker> remoteSettlementFuture = new TaskCompletionSource<IStreamTracker>();
 
       private volatile bool remotelySettled;
       private volatile IDeliveryState remoteDeliveryState;
@@ -34,7 +36,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.sender = sender;
          this.delivery = delivery;
          this.delivery.DeliveryStateUpdatedHandler(ProcessDeliveryUpdated);
-         // TODO this.remoteSettlementFuture = sender.session().getFutureFactory().createFuture();
       }
 
       internal Engine.IOutgoingDelivery ProtonDelivery => delivery;
@@ -61,7 +62,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (settle)
             {
-               // TODO remoteSettlementFuture.complete(this);
+               remoteSettlementFuture.SetResult(this);
             }
          }
 
@@ -76,7 +77,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          finally
          {
-            // TODO remoteSettlementFuture.complete(this);
+            remoteSettlementFuture.SetResult(this);
          }
 
          return this;
@@ -84,22 +85,101 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamTracker AwaitAccepted()
       {
-         throw new NotImplementedException();
+         try
+         {
+            if (Settled && !RemoteSettled)
+            {
+               return this;
+            }
+            else
+            {
+               remoteSettlementFuture.Task.Wait();
+
+               if (RemoteState != null && RemoteState.Accepted)
+               {
+                  return this;
+               }
+               else
+               {
+                  throw new ClientDeliveryStateException("Remote did not accept the sent message", RemoteState);
+               }
+            }
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
       }
 
       public IStreamTracker AwaitAccepted(TimeSpan timeout)
       {
-         throw new NotImplementedException();
+         try
+         {
+            if (Settled && !RemoteSettled)
+            {
+               return this;
+            }
+            else
+            {
+               if (remoteSettlementFuture.Task.Wait(timeout))
+               {
+                  if (RemoteState != null && RemoteState.Accepted)
+                  {
+                     return this;
+                  }
+                  else
+                  {
+                     throw new ClientDeliveryStateException("Remote did not accept the sent message", RemoteState);
+                  }
+               }
+               else
+               {
+                  throw new ClientOperationTimedOutException("Timed out waiting for remote Accepted outcome");
+               }
+            }
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
       }
 
       public IStreamTracker AwaitSettlement()
       {
-         throw new NotImplementedException();
+         try
+         {
+            if (Settled)
+            {
+               return this;
+            }
+
+            return remoteSettlementFuture.Task.Result;
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
       }
 
       public IStreamTracker AwaitSettlement(TimeSpan timeout)
       {
-         throw new NotImplementedException();
+         try
+         {
+            if (Settled)
+            {
+               return this;
+            }
+            else if (!remoteSettlementFuture.Task.Wait(timeout))
+            {
+               throw new ClientOperationTimedOutException("Timed out waiting for remote settlement");
+            }
+
+            return this;
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
       }
 
       #region Private tracker APIs
@@ -111,7 +191,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (delivery.IsRemotelySettled)
          {
-            // TODO remoteSettlementFuture.complete(this);
+            remoteSettlementFuture.SetResult(this);
          }
 
          if (sender.Options.AutoSettle && delivery.IsRemotelySettled)

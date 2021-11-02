@@ -38,8 +38,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly string receiverId;
       private readonly FifoDeliveryQueue<ClientDelivery> messageQueue;
       private readonly AtomicBoolean closed = new AtomicBoolean();
-      private ClientException failureCause;
+      private readonly TaskCompletionSource<IReceiver> openFuture = new TaskCompletionSource<IReceiver>();
+      private readonly TaskCompletionSource<IReceiver> closeFuture = new TaskCompletionSource<IReceiver>();
 
+      private TaskCompletionSource<IReceiver> drainingFuture;
+
+      private ClientException failureCause;
       private Engine.IReceiver protonReceiver;
 
       private volatile ISource remoteSource;
@@ -68,7 +72,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession Session => session;
 
-      public Task<IReceiver> OpenTask => throw new NotImplementedException();
+      public Task<IReceiver> OpenTask => openFuture.Task;
 
       public string Address
       {
@@ -325,7 +329,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void WaitForOpenToComplete()
       {
-         // TODO
+         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
+         {
+            try
+            {
+               openFuture.Task.Wait();
+            }
+            catch (Exception e)
+            {
+               throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+         }
       }
 
       private void ImmediateLinkShutdown(ClientException failureCause)
@@ -378,8 +392,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             ReplenishCreditIfNeeded();
 
+            openFuture.SetResult(this);
+
             // TODO
-            // openFuture.complete(this);
             //LOG.trace("Receiver opened successfully: {}", receiverId);
          }
          else

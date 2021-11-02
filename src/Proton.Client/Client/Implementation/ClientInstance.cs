@@ -35,6 +35,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly AtomicInteger CONNECTION_COUNTER = new AtomicInteger();
       private readonly AtomicBoolean closed = new AtomicBoolean();
 
+      private readonly Lazy<TaskCompletionSource<IClient>> closeTask = new Lazy<TaskCompletionSource<IClient>>();
+
       public string ContainerId => throw new System.NotImplementedException();
 
       internal ClientInstance(ClientOptions options)
@@ -44,8 +46,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public void Close()
       {
-         // TODO Try and determine a real exception to return other than the aggregated one.
-         CloseAsync().Wait();
+         try
+         {
+            CloseAsync().Wait();
+         }
+         catch (Exception)
+         {
+            // TODO Log error and return
+         }
       }
 
       public Task<IClient> CloseAsync()
@@ -58,7 +66,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
 
-         throw new System.NotImplementedException();
+         return closeTask.Value.Task;
       }
 
       public void Dispose()
@@ -70,10 +78,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          catch (Exception)
          {
             // TODO Log something helpful
-         }
-         finally
-         {
-            System.GC.SuppressFinalize(this);
          }
       }
 

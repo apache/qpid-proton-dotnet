@@ -36,8 +36,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientSession session;
       private readonly string senderId;
       private readonly bool sendsSettled;
+      private readonly TaskCompletionSource<ISender> openFuture = new TaskCompletionSource<ISender>();
+      private readonly TaskCompletionSource<ISender> closeFuture = new TaskCompletionSource<ISender>();
+
       private Engine.ISender protonSender;
-      private Action<ISender> senderRemotelyClosedHandler;
+      private Action<ClientSender> senderRemotelyClosedHandler;
 
       private volatile ISource remoteSource;
       private volatile ITarget remoteTarget;
@@ -195,7 +198,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
          //   });
       }
 
-      void HandleUpdateAnonymousRelayNotSupported()
+      internal ClientSender SenderRemotelyClosedHandler(Action<ClientSender> handler)
+      {
+         this.senderRemotelyClosedHandler = handler;
+         return this;
+      }
+
+      internal void HandleUpdateAnonymousRelayNotSupported()
       {
          if (IsAnonymous && protonSender.LinkState == LinkState.Idle)
          {
@@ -232,7 +241,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void WaitForOpenToComplete()
       {
-         // TODO
+         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
+         {
+            try
+            {
+               openFuture.Task.Wait();
+            }
+            catch (Exception e)
+            {
+               throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+         }
       }
 
       private void ImmediateLinkShutdown(ClientException failureCause)
@@ -261,17 +280,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          FailPendingUnsettledAndBlockedSends(
             failureCause ?? new ClientResourceRemotelyClosedException("The sender link has closed"));
 
-         // TODO
-         // if (failureCause != null)
-         // {
-         //    openFuture.failed(failureCause);
-         // }
-         // else
-         // {
-         //    openFuture.complete(this);
-         // }
+         if (failureCause != null)
+         {
+            openFuture.SetException(failureCause);
+         }
+         else
+         {
+            openFuture.SetResult(this);
+         }
 
-         // closeFuture.complete(this);
+         closeFuture.SetResult(this);
       }
 
       private void FailPendingUnsettledAndBlockedSends(ClientException cause)

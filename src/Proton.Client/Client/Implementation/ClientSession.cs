@@ -23,15 +23,22 @@ using Apache.Qpid.Proton.Client.Threading;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
+   /// <summary>
+   /// Client session that wraps a proton session instance and provides the higher level
+   /// clint API for managing links and creating session scoped transaction instances.
+   /// </summary>
    public class ClientSession : ISession
    {
+      private static readonly IClientTransactionContext NoOpTransactionContext = new ClientNoOpTransactionContext();
+
       private readonly SessionOptions options;
       private readonly ClientConnection connection;
       private readonly string sessionId;
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private readonly ClientSenderBuilder senderBuilder;
       private readonly ClientReceiverBuilder receiverBuilder;
+      private readonly TaskCompletionSource<ISession> openFuture = new TaskCompletionSource<ISession>();
+      private readonly TaskCompletionSource<ISession> closeFuture = new TaskCompletionSource<ISession>();
 
       private Engine.ISession protonSession;
       private ClientException failureCause;
@@ -46,23 +53,38 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.receiverBuilder = new ClientReceiverBuilder(this);
       }
 
-      public IClient Client => throw new NotImplementedException();
+      public IClient Client => connection.Client;
 
-      public IConnection Connection => throw new NotImplementedException();
+      public IConnection Connection => connection;
 
-      public Task<ISession> OpenTask => throw new NotImplementedException();
+      public Task<ISession> OpenTask => openFuture.Task;
 
-      public IReadOnlyDictionary<string, object> Properties => throw new NotImplementedException();
-
-      public IReadOnlyCollection<string> OfferedCapabilities => throw new NotImplementedException();
-
-      public IReadOnlyCollection<string> DesiredCapabilities => throw new NotImplementedException();
-
-      public ISession BeginTransaction()
+      public IReadOnlyDictionary<string, object> Properties
       {
-         throw new NotImplementedException();
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringKeyedMap(protonSession.RemoteProperties);
+         }
       }
 
+      public IReadOnlyCollection<string> OfferedCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonSession.RemoteOfferedCapabilities);
+         }
+      }
+
+      public IReadOnlyCollection<string> DesiredCapabilities
+      {
+         get
+         {
+            WaitForOpenToComplete();
+            return ClientConversionSupport.ToStringArray(protonSession.RemoteDesiredCapabilities);
+         }
+      }
       public void Dispose()
       {
          try
@@ -73,28 +95,20 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             // TODO Log something helpful
          }
-         finally
-         {
-            System.GC.SuppressFinalize(this);
-         }
       }
 
       public void Close(IErrorCondition error = null)
       {
-         if (closed.CompareAndSet(false, true))
+         try
          {
-
+            CloseAsync(error).Wait();
          }
-
-         throw new NotImplementedException();
+         catch (Exception)
+         {
+         }
       }
 
       public Task<ISession> CloseAsync(IErrorCondition error = null)
-      {
-         throw new NotImplementedException();
-      }
-
-      public ISession CommitTransaction()
       {
          throw new NotImplementedException();
       }
@@ -124,12 +138,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
+      public ISession BeginTransaction()
+      {
+         throw new NotImplementedException();
+      }
+
+      public ISession CommitTransaction()
+      {
+         throw new NotImplementedException();
+      }
+
       public ISession RollbackTransaction()
       {
          throw new NotImplementedException();
       }
 
-      protected void CheckClosedOrFailed()
+      #region Internal client session API
+
+      internal void CheckClosedOrFailed()
       {
          if (IsClosed)
          {
@@ -140,8 +166,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw failureCause;
          }
       }
-
-      #region Internal client session API
 
       internal string SessionId => sessionId;
 
@@ -196,7 +220,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return senderBuilder.Sender(address, senderOptions).Open();
       }
 
-      internal ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions)
+      internal ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions = null)
       {
          // When the connection is opened we are ok to check that the anonymous relay is supported
          // and open the sender if so, otherwise we need to wait.
@@ -232,7 +256,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void WaitForOpenToComplete()
       {
-         // TODO
+         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
+         {
+            try
+            {
+               openFuture.Task.Wait();
+            }
+            catch (Exception e)
+            {
+               throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+         }
       }
 
       private void ImmediateSessionShutdown(ClientException failureCause)
@@ -250,17 +284,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
          }
 
-         // TODO
-         // if (failureCause != null)
-         // {
-         //    openFuture.failed(failureCause);
-         // }
-         // else
-         // {
-         //    openFuture.complete(this);
-         // }
+         if (failureCause != null)
+         {
+            openFuture.SetException(failureCause);
+         }
+         else
+         {
+            openFuture.SetResult(this);
+         }
 
-         // closeFuture.complete(this);
+         closeFuture.SetResult(this);
       }
 
       #endregion
@@ -279,7 +312,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleRemoteOpen(Engine.ISession session)
       {
-         throw new NotImplementedException();
+         openFuture.SetResult(this);
+         // LOG.trace("Session:{} opened successfully.", id());
+
+         foreach (Engine.ISender sender in protonSession.Senders)
+         {
+            if (!sender.IsLocallyOpen)
+            {
+               // TODO Client Stream sender not accounted for yet
+               ClientSender clientSender = (ClientSender)sender.LinkedResource;
+               if (connection.IsAnonymousRelaySupported)
+               {
+                  clientSender.Open();
+               }
+               else
+               {
+                  clientSender.HandleUpdateAnonymousRelayNotSupported();
+               }
+            }
+         }
       }
 
       private void HandleRemoteClose(Engine.ISession session)

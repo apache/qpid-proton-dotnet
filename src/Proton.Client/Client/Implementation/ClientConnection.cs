@@ -40,6 +40,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ReconnectLocationPool reconnectPool = new ReconnectLocationPool();
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private readonly ClientConnectionCapabilities capabilities = new ClientConnectionCapabilities();
+      private readonly TaskCompletionSource<IConnection> openFuture = new TaskCompletionSource<IConnection>();
+      private readonly TaskCompletionSource<IConnection> closeFuture = new TaskCompletionSource<IConnection>();
 
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
@@ -65,7 +67,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IClient Client => client;
 
-      public Task<IConnection> OpenTask => throw new System.NotImplementedException();
+      public Task<IConnection> OpenTask => openFuture.Task;
 
       public IReadOnlyDictionary<string, object> Properties
       {
@@ -98,7 +100,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public void Close(IErrorCondition error = null)
       {
-         throw new System.NotImplementedException();
+         try
+         {
+            CloseAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<IConnection> CloseAsync(IErrorCondition error = null)
@@ -200,7 +208,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal bool IsClosed => closed;
 
-      internal bool HasOpened => false; // TODO
+      internal bool HasOpened => openFuture.Task.IsCompleted;
 
       internal Engine.IEngine ProtonEngine => protonConnection.Engine;
 
@@ -226,8 +234,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             closed.Set(true);
             failureCause.CompareAndSet(null, ClientExceptionSupport.CreateOrPassthroughFatal(ex));
-            // TODO openFuture.failed(failureCause);
-            // TODO closeFuture.complete(this);
+            openFuture.SetException(failureCause);
+            closeFuture.SetResult(this);
             // TODO ioContext.shutdown();
 
             throw failureCause;
@@ -245,6 +253,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw failureCause;
          }
       }
+
+      internal bool IsAnonymousRelaySupported => capabilities.AnonymousRelaySupported;
 
       internal void CheckAnonymousRelaySupported()
       {
@@ -360,9 +370,45 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return connectionSession ?? (connectionSession = sessionBuilder.Session().Open());
       }
 
+      private ClientSender LazyCreateConnectionSender()
+      {
+         if (connectionSender == null)
+         {
+            if (openFuture.Task.IsCompleted)
+            {
+               CheckAnonymousRelaySupported();
+            }
+
+            connectionSender = LazyCreateConnectionSession().InternalOpenAnonymousSender();
+            connectionSender.SenderRemotelyClosedHandler(sender =>
+            {
+               try
+               {
+                  sender.CloseAsync();
+               }
+               catch (Exception) { }
+
+               // Clear the old closed sender, a lazy create needs to construct a new sender.
+               connectionSender = null;
+            });
+         }
+
+         return connectionSender;
+      }
+
       private void WaitForOpenToComplete()
       {
-         // TODO
+         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
+         {
+            try
+            {
+               openFuture.Task.Wait();
+            }
+            catch (Exception e)
+            {
+               throw failureCause.Value ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+         }
       }
 
       private void FailConnection(ClientIOException cause)
@@ -381,11 +427,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception) { }
 
+         openFuture.SetException(failureCause);
+         closeFuture.SetResult(this);
+
          // TODO
-
-         // openFuture.failed(failureCause);
-         // closeFuture.complete(this);
-
          // LOG.warn("Connection {} has failed due to: {}", ConnectionId, failureCause != null ?
          //          failureCause.GetType().Name + " -> " + failureCause.Message : "No failure details provided.");
 
