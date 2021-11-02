@@ -82,7 +82,7 @@ namespace Apache.Qpid.Proton.Client
       /// the receiver will be cleaned up and the Task signalled indicating completion.
       /// </summary>
       /// <param name="error">Optional error condition to convery to the remote</param>
-      Task<ISender> DetachAsync(IErrorCondition error = null);
+      Task<IReceiver> DetachAsync(IErrorCondition error = null);
 
       /// <summary>
       /// Returns the address that the receiver instance will send message objects to. The value

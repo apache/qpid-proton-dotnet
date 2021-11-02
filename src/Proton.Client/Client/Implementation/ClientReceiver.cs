@@ -157,7 +157,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new NotImplementedException();
       }
 
-      public Task<ISender> DetachAsync(IErrorCondition error = null)
+      public Task<IReceiver> DetachAsync(IErrorCondition error = null)
       {
          throw new NotImplementedException();
       }
