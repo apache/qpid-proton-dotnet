@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Apache.Qpid.Proton.Utilities
 {
@@ -29,18 +30,23 @@ namespace Apache.Qpid.Proton.Utilities
    /// <typeparam name="T">The type that is stored in this double ended queue implementation</typeparam>
    public sealed class ArrayDeque<T> : IDeque<T>
    {
+      public readonly object sync = new object();
+
       public const int DefaultInitialSize = 16;
+      public const int AtLeastOne = 1;
 
       private T[] elements;
       private int head;
       private int tail;
 
-      public ArrayDeque(int size = DefaultInitialSize)
+      private int count;
+
+      public ArrayDeque(uint size = DefaultInitialSize)
       {
-         // TODO
+         elements = new T[size == DefaultInitialSize ? size : ((size == Int32.MaxValue ? Int32.MaxValue : size + 1))];
       }
 
-      public ArrayDeque(IEnumerable<T> elements) : this()
+      public ArrayDeque(IEnumerable<T> elements) : this((uint)elements.Count())
       {
          foreach (T element in elements)
          {
@@ -50,27 +56,43 @@ namespace Apache.Qpid.Proton.Utilities
 
       public bool IsEmpty => head == tail;
 
-      public int Count => throw new NotImplementedException();
+      public int Count => count;
 
-      public bool IsReadOnly => throw new NotImplementedException();
+      public bool IsReadOnly => false;
 
-      public bool IsSynchronized => throw new NotImplementedException();
+      public bool IsSynchronized => false;
 
-      public object SyncRoot => throw new NotImplementedException();
+      public object SyncRoot => sync;
+
+      public void AddFirst(T item)
+      {
+         if (item == null)
+         {
+            throw new ArgumentNullException("Values added to an array deque cannot be null");
+         }
+
+         T[] localElements = this.elements;
+         localElements[head = CircularReduce(head, localElements.Length)] = item;
+
+         if (++count == localElements.Length)
+         {
+            EnsureAdditionalCapacity(AtLeastOne);
+         }
+      }
+
+      public void AddLast(T item)
+      {
+         if (item == null)
+         {
+            throw new ArgumentNullException("Values added to an array deque cannot be null");
+         }
+
+         throw new NotImplementedException();
+      }
 
       public void Add(T item)
       {
-         throw new NotImplementedException();
-      }
-
-      public void AddFirst(T value)
-      {
-         throw new NotImplementedException();
-      }
-
-      public void AddLast(T value)
-      {
-         throw new NotImplementedException();
+         AddLast(item);
       }
 
       public void Clear()
@@ -137,6 +159,24 @@ namespace Apache.Qpid.Proton.Utilities
       {
          return new ArrayDequeEnumerator(this);
       }
+
+      #region array element access and updates
+
+      private void EnsureAdditionalCapacity(int atLeast)
+      {
+
+      }
+
+      private static int CircularReduce(int i, int length) {
+         if (--i < 0)
+         {
+            i = length - 1;
+         }
+
+         return i;
+      }
+
+      #endregion
 
       #region ArrayDeque enumerator implementation
 
