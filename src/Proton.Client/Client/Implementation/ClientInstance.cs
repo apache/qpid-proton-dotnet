@@ -23,7 +23,12 @@ using Apache.Qpid.Proton.Client.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
+   /// <summary>
+   /// The client type servers as a container of connections and provides a
+   /// means of closing all open connection in a single operation which can
+   /// be performed synchronously or provides a Task type that allows a caller
+   /// to be notified once all connections have been closed.
+   /// </summary>
    public class ClientInstance : IClient
    {
       private static readonly IdGenerator CONTAINER_ID_GENERATOR = new IdGenerator();
@@ -52,7 +57,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception)
          {
-            // TODO Log error and return
          }
       }
 
@@ -62,7 +66,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             lock (connections)
             {
-
+               foreach(KeyValuePair<string, ClientConnection> connection in connections)
+               {
+                  connection.Value.CloseAsync();
+               }
             }
          }
 
@@ -77,7 +84,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception)
          {
-            // TODO Log something helpful
          }
       }
 
@@ -111,6 +117,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          connections.Add(connection.ConnectionId, connection);
          return connection;
+      }
+
+      internal void UnregisterClosedConnection(ClientConnection connection)
+      {
+         lock(connections)
+         {
+            connections.Remove(connection.ConnectionId);
+            if (closed && connections.Count == 0)
+            {
+               closeTask.Value.SetResult(this);
+            }
+         }
       }
 
       internal string NextConnectionId()

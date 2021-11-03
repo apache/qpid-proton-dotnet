@@ -268,21 +268,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Proton Engine and Connection event handlers
 
-      private void HandleEngineOutput(IProtonBuffer buffer, Action ioComplete)
-      {
-         // TODO
-      }
-
-      private void HandleEngineShutdown(Engine.IEngine engine)
-      {
-         // TODO
-      }
-
-      private void HandleEngineFailure(Engine.IEngine engine)
-      {
-         // TODO
-      }
-
       private void HandleLocalOpen(Engine.IConnection connection)
       {
          // TODO
@@ -300,7 +285,121 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleRemoteClose(Engine.IConnection connection)
       {
+         // When the connection is already locally closed this implies the application requested
+         // a close of this connection so this is normal, if not then the remote is closing for
+         // some reason and we should react as if the connection has failed which we will determine
+         // in the local close handler based on state.
+         if (connection.IsLocallyClosed)
+         {
+            try
+            {
+               connection.Engine.Shutdown();
+            }
+            catch (Exception)
+            {
+               //LOG.debug("Unexpected exception thrown from engine shutdown: ", ignore);
+            }
+         }
+         else
+         {
+            try
+            {
+               connection.Close();
+            }
+            catch (Exception)
+            {
+               // Engine handlers will ensure we close down if not already locally closed.
+            }
+         }
+      }
+
+      private void HandleEngineOutput(IProtonBuffer buffer, Action ioComplete)
+      {
          // TODO
+      }
+
+      /// <summary>
+      /// Handle normal engine shutdown which should only happen when the connection is closed
+      /// by the user, all other cases should lead to engine failed event first which will deal
+      /// with reconnect cases and avoid this event unless reconnect cannot proceed.
+      /// </summary>
+      /// <param name="engine"></param>
+      private void HandleEngineShutdown(Engine.IEngine engine)
+      {
+         // Only handle this on normal shutdown failure will perform its own controlled shutdown
+         // and or reconnection logic which this method should avoid interfering with.
+         if (engine.FailureCause == null)
+         {
+            try
+            {
+               protonConnection.Close();
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+               // TODO transport.close();
+            }
+            catch (Exception)
+            {
+            }
+
+            client.UnregisterClosedConnection(this);
+
+            openFuture.SetResult(this);
+            closeFuture.SetResult(this);
+         }
+      }
+
+      private void HandleEngineFailure(Engine.IEngine engine)
+      {
+         ClientIOException failureCause;
+
+         if (engine.Connection.RemoteErrorCondition != null)
+         {
+            failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(engine.Connection.RemoteErrorCondition);
+         }
+         else if (engine.FailureCause != null)
+         {
+            failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(engine.FailureCause);
+         }
+         else
+         {
+            failureCause = new ClientConnectionRemotelyClosedException("Unknown error led to connection disconnect");
+         }
+
+         // TODO LOG.trace("Engine reports failure with error: {}", failureCause.getMessage());
+
+         if (IsReconnectAllowed(failureCause))
+         {
+            // TODO LOG.info("Connection {} interrupted to server: {}:{}", getId(), transport.getHost(), transport.getPort());
+            // TODO SubmitDisconnectionEvent(options.interruptedHandler(), transport.getHost(), transport.getPort(), failureCause);
+
+            // Initial configuration validation happens here, if this step fails then the
+            // user most likely configured something incorrect or that violates some constraint
+            // like an invalid SASL mechanism etc.
+            try
+            {
+               ReconnectLocation remoteLocation = reconnectPool.Next.Value;
+
+               InitializeProtonResources(remoteLocation);
+               ScheduleReconnect(remoteLocation);
+            }
+            catch (ClientException initError)
+            {
+               FailConnection(ClientExceptionSupport.CreateOrPassthroughFatal(initError));
+            }
+            finally
+            {
+               engine.Shutdown();
+            }
+         }
+         else
+         {
+            FailConnection(failureCause);
+         }
       }
 
       #endregion
