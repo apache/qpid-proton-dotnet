@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="beginFuture">The Task that awaits the result of starting the new transaction</param>
       /// <returns>This transaction context instance</returns>
       /// <exception cref="ClientIllegalStateException">If an error occurs due to the transaction state</exception>
-      IClientTransactionContext Begin(Task<ISession> beginFuture);
+      IClientTransactionContext Begin(TaskCompletionSource<ISession> beginFuture);
 
       /// <summary>
       /// Commits the current transaction if one is active and is not failed into a roll-back only state.
@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="startNew">Should the context immediately initiate a new transaction</param>
       /// <returns>This transaction context instance</returns>
       /// <exception cref="ClientIllegalStateException">If an error occurs due to the transaction state</exception>
-      IClientTransactionContext Commit(Task<ISession> commitFuture, bool startNew);
+      IClientTransactionContext Commit(TaskCompletionSource<ISession> commitFuture, bool startNew);
 
       /// <summary>
       /// Rolls back the current transaction if one is active.
@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="startNew">Should the context immediately initiate a new transaction</param>
       /// <returns>This transaction context instance</returns>
       /// <exception cref="ClientIllegalStateException">If an error occurs due to the transaction state</exception>
-      IClientTransactionContext Rollback(Task<ISession> rollbackFuture, bool startNew);
+      IClientTransactionContext Rollback(TaskCompletionSource<ISession> rollbackFuture, bool startNew);
 
       /// <summary>
       /// Returns true if the context is hosting an active transaction

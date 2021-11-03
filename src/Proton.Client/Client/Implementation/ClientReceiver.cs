@@ -429,16 +429,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             messageQueue.Clear();  // Prefetched messages should be discarded.
 
-            // TODO
-            // if (drainingFuture != null)
-            // {
-            //    drainingFuture.complete(this);
-            //    if (drainingTimeout != null)
-            //    {
-            //       drainingTimeout.cancel(false);
-            //       drainingTimeout = null;
-            //    }
-            // }
+            if (drainingFuture != null)
+            {
+               drainingFuture.TrySetResult(this);
+               // if (drainingTimeout != null)
+               // {
+               //    drainingTimeout.cancel(false);
+               //    drainingTimeout = null;
+               // }
+            }
 
             protonReceiver.LocalCloseHandler(null);
             protonReceiver.LocalDetachHandler(null);

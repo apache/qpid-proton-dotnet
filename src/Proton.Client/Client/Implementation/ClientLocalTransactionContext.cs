@@ -15,35 +15,43 @@
  * limitations under the License.
  */
 
+using System;
 using System.Threading.Tasks;
-using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
-   /// A pass-through transaction context that is used when a session is operating
-   /// without any active transactional state.
+   /// A local transaction based context for AMQP transactional sessions.
    /// </summary>
-   internal sealed class ClientNoOpTransactionContext : IClientTransactionContext
+   internal sealed class ClientLocalTransactionContext : IClientTransactionContext
    {
+      private readonly ClientSession session;
+
+      // TODO tie into proton transaction contexts
+
+      public ClientLocalTransactionContext(ClientSession session)
+      {
+         this.session = session;
+      }
+
       public bool IsInTransaction => false;
 
       public bool IsRollbackOnly => false;
 
       public IClientTransactionContext Begin(TaskCompletionSource<ISession> beginFuture)
       {
-         throw new ClientIllegalStateException("Cannot begin from a no-op transaction context");
+         throw new NotImplementedException();
       }
 
       public IClientTransactionContext Commit(TaskCompletionSource<ISession> commitFuture, bool startNew)
       {
-         throw new ClientIllegalStateException("Cannot commit from a no-op transaction context");
+         throw new NotImplementedException();
       }
 
       public IClientTransactionContext Rollback(TaskCompletionSource<ISession> rollbackFuture, bool startNew)
       {
-         throw new ClientIllegalStateException("Cannot roll back from a no-op transaction context");
+         throw new NotImplementedException();
       }
 
       public IClientTransactionContext Send(ClientOutgoingEnvelope envelope, Types.Transport.IDeliveryState state, bool settled)

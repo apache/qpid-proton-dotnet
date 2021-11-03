@@ -240,9 +240,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
                CheckClosedOrFailed();
                if (txnContext == NoOpTransactionContext)
                {
-                  //txnContext = new ClientLocalTransactionContext(this);
+                  txnContext = new ClientLocalTransactionContext(this);
                }
-               // TODO txnContext.Begin(beginFuture);
+               txnContext.Begin(beginFuture);
             }
             catch (Exception error)
             {
@@ -263,7 +263,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             try
             {
                CheckClosedOrFailed();
-               // TODO txnContext.Commit(commitFuture, false);
+               txnContext.Commit(commitFuture, false);
             }
             catch (Exception error)
             {
@@ -284,7 +284,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             try
             {
                CheckClosedOrFailed();
-               // TODO txnContext.Rollback(rollbackFuture, false);
+               txnContext.Rollback(rollbackFuture, false);
             }
             catch (Exception error)
             {
