@@ -234,8 +234,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             closed.Set(true);
             failureCause.CompareAndSet(null, ClientExceptionSupport.CreateOrPassthroughFatal(ex));
-            openFuture.SetException(failureCause);
-            closeFuture.SetResult(this);
+            _ = openFuture.TrySetException(failureCause);
+            _ = closeFuture.TrySetResult(this);
             // TODO ioContext.shutdown();
 
             throw failureCause;
@@ -262,6 +262,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             throw new ClientUnsupportedOperationException("Anonymous relay support not available from this connection");
          }
+      }
+
+      internal void Execute(Action action)
+      {
+         // TODO Add task to work list
+      }
+
+      internal void Schedule(Action action, TimeSpan delay)
+      {
+         // TODO Add task to work list
+      }
+
+      internal TaskCompletionSource<T> Request<T>(Object requestor, TaskCompletionSource<T> request)
+      {
+         // TODO : Wait for completion or fail later via tracking map
+         return request;
       }
 
       #endregion
@@ -348,8 +364,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             client.UnregisterClosedConnection(this);
 
-            openFuture.SetResult(this);
-            closeFuture.SetResult(this);
+            _ = openFuture.TrySetResult(this);
+            _ = closeFuture.TrySetResult(this);
          }
       }
 
@@ -526,8 +542,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception) { }
 
-         openFuture.SetException(failureCause);
-         closeFuture.SetResult(this);
+         _ = openFuture.TrySetException(failureCause);
+         _ = closeFuture.TrySetResult(this);
 
          // TODO
          // LOG.warn("Connection {} has failed due to: {}", ConnectionId, failureCause != null ?

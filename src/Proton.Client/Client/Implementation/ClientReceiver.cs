@@ -392,7 +392,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             ReplenishCreditIfNeeded();
 
-            openFuture.SetResult(this);
+            _ = openFuture.TrySetResult(this);
 
             // TODO
             //LOG.trace("Receiver opened successfully: {}", receiverId);

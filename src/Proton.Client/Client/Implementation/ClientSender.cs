@@ -282,14 +282,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (failureCause != null)
          {
-            openFuture.SetException(failureCause);
+            _ = openFuture.TrySetException(failureCause);
          }
          else
          {
-            openFuture.SetResult(this);
+            _ = openFuture.TrySetResult(this);
          }
 
-         closeFuture.SetResult(this);
+         _ = closeFuture.TrySetResult(this);
       }
 
       private void FailPendingUnsettledAndBlockedSends(ClientException cause)

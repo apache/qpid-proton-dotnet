@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Client.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -31,6 +32,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
    {
       private static readonly IClientTransactionContext NoOpTransactionContext = new ClientNoOpTransactionContext();
 
+      private const long INFINITE = -1;
+
       private readonly SessionOptions options;
       private readonly ClientConnection connection;
       private readonly string sessionId;
@@ -40,6 +43,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly TaskCompletionSource<ISession> openFuture = new TaskCompletionSource<ISession>();
       private readonly TaskCompletionSource<ISession> closeFuture = new TaskCompletionSource<ISession>();
 
+      private IClientTransactionContext txnContext = NoOpTransactionContext;
       private Engine.ISession protonSession;
       private ClientException failureCause;
 
@@ -93,7 +97,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception)
          {
-            // TODO Log something helpful
          }
       }
 
@@ -110,47 +113,186 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public Task<ISession> CloseAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
-      }
-
-      public virtual ISender OpenAnonymousSender(SenderOptions options = null)
-      {
-         throw new NotImplementedException();
+         return DoClose(error);
       }
 
       public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         Objects.RequireNonNull(address, "Cannot create a durable receiver with a null address");
+         Objects.RequireNonNull(address, "Cannot create a durable receiver with a null subscription name");
+
+         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               _ = createReceiver.TrySetResult(InternalOpenDurableReceiver(address, subscriptionName, options));
+            }
+            catch (Exception error)
+            {
+               _ = createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, createReceiver).Task.Result;
       }
 
       public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               _ = createReceiver.TrySetResult(InternalOpenDynamicReceiver(dynamicNodeProperties, options));
+            }
+            catch (Exception error)
+            {
+               _ = createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, createReceiver).Task.Result;
       }
 
       public virtual IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
+
+         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               _ = createReceiver.TrySetResult(InternalOpenReceiver(address, options));
+            }
+            catch (Exception error)
+            {
+               _ = createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, createReceiver).Task.Result;
+      }
+
+      public virtual ISender OpenAnonymousSender(SenderOptions options = null)
+      {
+         CheckClosedOrFailed();
+         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               _ = createSender.TrySetResult(InternalOpenAnonymousSender(options));
+            }
+            catch (Exception error)
+            {
+               _ = createSender.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, createSender).Task.Result;
       }
 
       public virtual ISender OpenSender(string address, SenderOptions options = null)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         Objects.RequireNonNull(address, "Cannot create a sender with a null address");
+
+         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               _ = createSender.TrySetResult(InternalOpenSender(address, options));
+            }
+            catch (Exception error)
+            {
+               _ = createSender.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, createSender).Task.Result;
       }
 
       public ISession BeginTransaction()
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<ISession> beginFuture = new TaskCompletionSource<ISession>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               if (txnContext == NoOpTransactionContext)
+               {
+                  //txnContext = new ClientLocalTransactionContext(this);
+               }
+               // TODO txnContext.Begin(beginFuture);
+            }
+            catch (Exception error)
+            {
+               _ = beginFuture.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, beginFuture).Task.Result;
       }
 
       public ISession CommitTransaction()
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<ISession> commitFuture = new TaskCompletionSource<ISession>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               // TODO txnContext.Commit(commitFuture, false);
+            }
+            catch (Exception error)
+            {
+               _ = commitFuture.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, commitFuture).Task.Result;
       }
 
       public ISession RollbackTransaction()
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<ISession> rollbackFuture = new TaskCompletionSource<ISession>();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               // TODO txnContext.Rollback(rollbackFuture, false);
+            }
+            catch (Exception error)
+            {
+               _ = rollbackFuture.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return connection.Request(this, rollbackFuture).Task.Result;
       }
 
       #region Internal client session API
@@ -193,6 +335,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
 
          return this;
+      }
+
+      internal void ScheduleRequestTimeout<T>(TaskCompletionSource<T> request, long timeout, Func<ClientException> errorSupplier)
+      {
+         if (timeout != INFINITE)
+         {
+            connection.Schedule(() =>
+               _ = request.TrySetException(errorSupplier.Invoke()), TimeSpan.FromMilliseconds(timeout));
+         }
+         else
+         {
+            // TODO return null;
+         }
       }
 
       internal ClientReceiver InternalOpenReceiver(string address, ReceiverOptions receiverOptions)
@@ -244,6 +399,34 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Session private API
 
+      private Task<ISession> DoClose(IErrorCondition error)
+      {
+         if (closed.CompareAndSet(false, true))
+         {
+            // Already closed by failure or shutdown so no need to
+            if (!closeFuture.Task.IsCompleted)
+            {
+               connection.Execute(() =>
+               {
+                  if (protonSession.IsLocallyOpen)
+                  {
+                     try
+                     {
+                        protonSession.ErrorCondition = ClientErrorCondition.AsProtonErrorCondition(error);
+                        protonSession.Close();
+                     }
+                     catch (Exception)
+                     {
+                        // Allow engine error handler to deal with this
+                     }
+                  }
+               });
+            }
+         }
+
+         return closeFuture.Task;
+      }
+
       private Engine.ISession ConfigureSession(Engine.ISession protonSession)
       {
          protonSession.LinkedResource = this;
@@ -286,14 +469,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (failureCause != null)
          {
-            openFuture.SetException(failureCause);
+            _ = openFuture.TrySetException(failureCause);
          }
          else
          {
-            openFuture.SetResult(this);
+            _ = openFuture.TrySetResult(this);
          }
 
-         closeFuture.SetResult(this);
+         _ = closeFuture.TrySetResult(this);
       }
 
       #endregion
@@ -302,12 +485,37 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalOpen(Engine.ISession session)
       {
-         throw new NotImplementedException();
+         if (options.OpenTimeout > 0)
+         {
+            connection.Schedule(() =>
+            {
+               if (!openFuture.Task.IsCompleted)
+               {
+                  ImmediateSessionShutdown(
+                     new ClientOperationTimedOutException("Session open timed out waiting for remote to respond"));
+               }
+            }, TimeSpan.FromMilliseconds(options.OpenTimeout));
+         }
       }
 
       private void HandleLocalClose(Engine.ISession session)
       {
-         throw new NotImplementedException();
+         // If not yet remotely closed we only wait for a remote close if the engine isn't
+         // already failed and we have successfully opened the session without a timeout.
+         if (session.IsRemotelyOpen && failureCause == null && !session.Engine.IsShutdown)
+         {
+            long timeout = options.CloseTimeout;
+
+            if (timeout > 0)
+            {
+               ScheduleRequestTimeout(closeFuture, timeout, () =>
+                   new ClientOperationTimedOutException("Session close timed out waiting for remote to respond"));
+            }
+         }
+         else
+         {
+            ImmediateSessionShutdown(failureCause);
+         }
       }
 
       private void HandleRemoteOpen(Engine.ISession session)
