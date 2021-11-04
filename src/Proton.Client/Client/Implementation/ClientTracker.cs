@@ -180,6 +180,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      #region Internal tracker APIs
+
+      internal void FailSettlementTask(ClientException cause)
+      {
+         _ = remoteSettlementFuture.TrySetException(cause);
+      }
+
+      #endregion
+
       #region Private tracker APIs
 
       private void ProcessDeliveryUpdated(IOutgoingDelivery delivery)

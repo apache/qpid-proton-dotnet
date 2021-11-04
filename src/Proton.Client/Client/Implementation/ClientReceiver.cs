@@ -344,7 +344,51 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void ImmediateLinkShutdown(ClientException failureCause)
       {
+         if (this.failureCause == null)
+         {
+            this.failureCause = failureCause;
+         }
+
+         try
+         {
+            if (protonReceiver.IsRemotelyDetached)
+            {
+               protonReceiver.Detach();
+            }
+            else
+            {
+               protonReceiver.Close();
+            }
+         }
+         catch (Exception)
+         {
+         }
+
+         if (failureCause != null)
+         {
+            openFuture.TrySetException(failureCause);
+            if (drainingFuture != null)
+            {
+               drainingFuture.TrySetException(failureCause);
+            }
+         }
+         else
+         {
+            openFuture.TrySetResult(this);
+            if (drainingFuture != null)
+            {
+               drainingFuture.TrySetException(new ClientResourceRemotelyClosedException("The Receiver has been closed"));
+            }
+         }
+
          // TODO
+         // if (drainingTimeout != null)
+         // {
+         //    drainingTimeout.cancel(false);
+         //    drainingTimeout = null;
+         // }
+
+         closeFuture.TrySetResult(this);
       }
 
       #endregion
@@ -418,7 +462,35 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleParentEndpointClosed(Engine.IReceiver receiver)
       {
-         throw new NotImplementedException();
+         // Don't react if engine was shutdown and parent closed as a result instead wait to get the
+         // shutdown notification and respond to that change.
+         if (receiver.Engine.IsRunning)
+         {
+            ClientException failureCause;
+
+            if (receiver.Connection.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(receiver.Connection.RemoteErrorCondition);
+            }
+            else if (receiver.Session.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToSessionClosedException(receiver.Session.RemoteErrorCondition);
+            }
+            else if (receiver.Engine.FailureCause != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(receiver.Engine.FailureCause);
+            }
+            else if (!IsClosed)
+            {
+               failureCause = new ClientResourceRemotelyClosedException("Remote closed without a specific error condition");
+            }
+            else
+            {
+               failureCause = null;
+            }
+
+            ImmediateLinkShutdown(failureCause);
+         }
       }
 
       private void HandleEngineShutdown(Engine.IEngine engine)
@@ -491,6 +563,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          else
          {
+            // The receiver doesn't return a delivery until it has been
+            // completely received, and to ensure that happens we need to
+            // claim the partially received bytes so that the session window
+            // can be reopened if need be and more delivery portions can
+            // then arrive.
             delivery.ClaimAvailableBytes();
          }
       }
@@ -504,12 +581,26 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleDeliveryStateRemotelyUpdated(IIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         // TODO LOG.trace("Delivery remote state was updated: {}", delivery);
       }
 
       private void HandleReceiverCreditUpdated(Engine.IReceiver receiver)
       {
-         throw new NotImplementedException();
+         // TODO LOG.trace("Receiver credit update by remote: {}", receiver);
+
+         if (drainingFuture != null)
+         {
+            if (receiver.Credit == 0)
+            {
+               drainingFuture.TrySetResult(this);
+               // TODO
+               // if (drainingTimeout != null)
+               // {
+               //    drainingTimeout.cancel(false);
+               //    drainingTimeout = null;
+               // }
+            }
+         }
       }
 
       #endregion

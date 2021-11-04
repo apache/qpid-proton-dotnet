@@ -299,8 +299,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             try
             {
-               ClientTracker tracker = delivery.LinkedResource as ClientTracker;
-               // TODO tracker.SettlementTask.Failed(cause);
+               ((ClientTracker)delivery.LinkedResource).FailSettlementTask(cause);
             }
             catch (Exception)
             {
@@ -321,17 +320,55 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalOpen(Engine.ISender sender)
       {
-         throw new NotImplementedException();
+         if (options.OpenTimeout > 0)
+         {
+            session.Schedule(() =>
+            {
+               if (!openFuture.Task.IsCompleted)
+               {
+                  ImmediateLinkShutdown(new ClientOperationTimedOutException("Sender open timed out waiting for remote to respond"));
+               }
+            }, TimeSpan.FromMilliseconds(options.OpenTimeout));
+         }
       }
 
       private void HandleLocalCloseOrDetach(Engine.ISender sender)
       {
-         throw new NotImplementedException();
+         // If not yet remotely closed we only wait for a remote close if the engine isn't
+         // already failed and we have successfully opened the sender without a timeout.
+         if (!sender.Engine.IsShutdown && failureCause == null && sender.IsRemotelyOpen)
+         {
+            if (options.CloseTimeout > 0)
+            {
+               session.ScheduleRequestTimeout(closeFuture, options.CloseTimeout, () =>
+                  new ClientOperationTimedOutException("Sender close timed out waiting for remote to respond"));
+            }
+         }
+         else
+         {
+            ImmediateLinkShutdown(failureCause);
+         }
       }
 
       private void HandleRemoteOpen(Engine.ISender sender)
       {
-         throw new NotImplementedException();
+         // Check for deferred close pending and hold completion if so
+         if (sender.RemoteTerminus != null)
+         {
+            remoteSource = new ClientRemoteSource(sender.RemoteSource);
+
+            if (sender.RemoteTerminus != null)
+            {
+               remoteTarget = new ClientRemoteTarget(sender.RemoteTerminus as Types.Messaging.Target);
+            }
+
+            _ = openFuture.TrySetResult(this);
+            // TODO LOG.trace("Sender opened successfully");
+         }
+         else
+         {
+            // TODO LOG.debug("Sender opened but remote signalled close is pending: ", sender);
+         }
       }
 
       private void HandleRemoteCloseOrDetach(Engine.ISender sender)

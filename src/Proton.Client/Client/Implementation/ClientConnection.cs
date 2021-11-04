@@ -122,73 +122,246 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception)
          {
-            // TODO Log something helpful
          }
       }
 
       public ISender DefaultSender()
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         TaskCompletionSource<ISender> defaultSender = new TaskCompletionSource<ISender>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               defaultSender.TrySetResult(LazyCreateConnectionSender());
+            }
+            catch (Exception error)
+            {
+               defaultSender.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, defaultSender).Task.Result;
       }
 
       public ISession DefaultSession()
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         TaskCompletionSource<ISession> defaultSession = new TaskCompletionSource<ISession>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               defaultSession.TrySetResult(LazyCreateConnectionSession());
+            }
+            catch (Exception error)
+            {
+               defaultSession.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, defaultSession).Task.Result;
       }
 
       public ISession OpenSession(SessionOptions options = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
-      }
+         TaskCompletionSource<ISession> createSession = new TaskCompletionSource<ISession>();
 
-      public ISender OpenAnonymousSender(SenderOptions options = null)
-      {
-         CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               createSession.TrySetResult(sessionBuilder.Session(options).Open());
+            }
+            catch (Exception error)
+            {
+               createSession.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createSession).Task.Result;
       }
 
       public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
-      }
+         Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
+         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
 
-      public IReceiver OpenDynamicReceiver()
-      {
-         return OpenDynamicReceiver(null, null);
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               createReceiver.TrySetResult(LazyCreateConnectionSession().InternalOpenDurableReceiver(address, subscriptionName, options));
+            }
+            catch (Exception error)
+            {
+               createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createReceiver).Task.Result;
       }
 
       public IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               createReceiver.TrySetResult(LazyCreateConnectionSession().InternalOpenDynamicReceiver(dynamicNodeProperties, options));
+            }
+            catch (Exception error)
+            {
+               createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createReceiver).Task.Result;
       }
 
       public IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
+         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               createReceiver.TrySetResult(LazyCreateConnectionSession().InternalOpenReceiver(address, options));
+            }
+            catch (Exception error)
+            {
+               createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createReceiver).Task.Result;
+      }
+
+      public ISender OpenAnonymousSender(SenderOptions options = null)
+      {
+         CheckClosedOrFailed();
+         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               createSender.TrySetResult(LazyCreateConnectionSession().InternalOpenAnonymousSender(options));
+            }
+            catch (Exception error)
+            {
+               createSender.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createSender).Task.Result;
       }
 
       public ISender OpenSender(string address, SenderOptions options = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         Objects.RequireNonNull(address, "Cannot create a sender with a null address");
+         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               createSender.TrySetResult(LazyCreateConnectionSession().InternalOpenSender(address, options));
+            }
+            catch (Exception error)
+            {
+               createSender.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createSender).Task.Result;
       }
 
       public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         TaskCompletionSource<IStreamReceiver> createReceiver = new TaskCompletionSource<IStreamReceiver>();
+
+         Execute(() =>
+         {
+            try
+            {
+               uint sessionCapacity = StreamReceiverOptions.DEFAULT_READ_BUFFER_SIZE;
+               if (options != null)
+               {
+                  sessionCapacity = options.ReadBufferSize / 2;
+               }
+
+               // Session capacity cannot be smaller than one frame size so we adjust to the lower bound
+               sessionCapacity = Math.Max(sessionCapacity, protonConnection.MaxFrameSize);
+
+               CheckClosedOrFailed();
+               SessionOptions sessionOptions = new SessionOptions(sessionBuilder.DefaultSessionOptions);
+               sessionOptions.IncomingCapacity = sessionCapacity;
+               ClientStreamSession session = (ClientStreamSession)sessionBuilder.StreamSession(sessionOptions).Open();
+               createReceiver.TrySetResult(session.InternalOpenStreamReceiver(address, options));
+            }
+            catch (Exception error)
+            {
+               createReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createReceiver).Task.Result;
       }
 
       public IStreamSender OpenStreamSender(string address, StreamSenderOptions options = null)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         Objects.RequireNonNull(address, "Cannot create a sender with a null address");
+         TaskCompletionSource<IStreamSender> createSender = new TaskCompletionSource<IStreamSender>();
+
+         Execute(() =>
+         {
+            try
+            {
+               uint sessionCapacity = StreamSenderOptions.DEFAULT_PENDING_WRITES_BUFFER_SIZE;
+               if (options != null)
+               {
+                  sessionCapacity = options.PendingWriteBufferSize;
+               }
+
+               // Session capacity cannot be smaller than one frame size so we adjust to the lower bound
+               sessionCapacity = Math.Max(sessionCapacity, protonConnection.MaxFrameSize);
+
+               CheckClosedOrFailed();
+               SessionOptions sessionOptions = new SessionOptions(sessionBuilder.DefaultSessionOptions);
+               sessionOptions.OutgoingCapacity = sessionCapacity;
+
+               ClientStreamSession session = (ClientStreamSession)sessionBuilder.StreamSession(sessionOptions).Open();
+               createSender.TrySetResult(session.InternalOpenStreamSender(address, options));
+            }
+            catch (Exception error)
+            {
+               createSender.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, createSender).Task.Result;
       }
 
       public ITracker Send<T>(IMessage<T> message)
@@ -286,17 +459,85 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalOpen(Engine.IConnection connection)
       {
-         // TODO
+         // TODO connection.TickAuto(Scheduler);
+
+         if (options.OpenTimeout > 0)
+         {
+            Schedule(() =>
+            {
+               if (!openFuture.Task.IsCompleted)
+               {
+                  // Ensure a close write is attempted and then force failure regardless
+                  // as we don't expect the remote to respond given it hasn't done so yet.
+                  try
+                  {
+                     connection.Close();
+                  }
+                  catch (Exception) { }
+
+                  connection.Engine.EngineFailed(new ClientOperationTimedOutException(
+                      "Connection Open timed out waiting for remote to open"));
+               }
+            }, TimeSpan.FromMilliseconds(options.OpenTimeout));
+         }
       }
 
       private void HandleLocalClose(Engine.IConnection connection)
       {
-         // TODO
+         if (connection.IsRemotelyClosed)
+         {
+            ClientException failureCause;
+
+            if (engine.Connection.RemoteErrorCondition != null)
+            {
+               failureCause = ClientExceptionSupport.ConvertToConnectionClosedException(connection.RemoteErrorCondition);
+            }
+            else
+            {
+               failureCause = new ClientConnectionRemotelyClosedException("Unknown error led to connection disconnect");
+            }
+
+            try
+            {
+               connection.Engine.EngineFailed(failureCause);
+            }
+            catch (Exception)
+            {
+            }
+         }
+         else if (!engine.IsShutdown || !engine.IsFailed)
+         {
+            // Ensure engine gets shut down and future completed if remote doesn't respond.
+            Schedule(() =>
+            {
+               try
+               {
+                  connection.Engine.Shutdown();
+               }
+               catch (Exception)
+               {
+               }
+            }, TimeSpan.FromMilliseconds(options.CloseTimeout));
+         }
       }
 
       private void HandleRemoteOpen(Engine.IConnection connection)
       {
-         // TODO
+         ConnectionEstablished();
+         capabilities.DetermineCapabilities(connection);
+
+         if (totalConnections == 1)
+         {
+            // TODO LOG.info("Connection {} connected to server: {}:{}", getId(), transport.getHost(), transport.getPort());
+            // TODO SubmitConnectionEvent(options.connectedHandler(), transport.getHost(), transport.getPort(), null);
+         }
+         else
+         {
+            // TODO LOG.info("Connection {} reconnected to server: {}:{}", getId(), transport.getHost(), transport.getPort());
+            // TODO SubmitConnectionEvent(options.reconnectedHandler(), transport.getHost(), transport.getPort(), null);
+         }
+
+         openFuture.TrySetResult(this);
       }
 
       private void HandleRemoteClose(Engine.IConnection connection)

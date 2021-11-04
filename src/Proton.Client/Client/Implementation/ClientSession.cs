@@ -317,6 +317,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal SessionOptions Options => options;
 
+      internal void Execute(Action action) => connection.Execute(action);
+
+      internal void Schedule(Action action, TimeSpan delay) => connection.Schedule(action, delay);
+
       internal ClientSession Open()
       {
          protonSession.LocalOpenHandler(HandleLocalOpen)
