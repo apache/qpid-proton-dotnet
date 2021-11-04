@@ -48,9 +48,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// </summary>
       /// <param name="state">The delivery state to apply</param>
       /// <param name="settled">The settlement value to apply</param>
-      public void SendPayload(Types.Transport.IDeliveryState state, bool settled)
+      public ClientOutgoingEnvelope SendPayload(Types.Transport.IDeliveryState state, bool settled)
       {
          // TODO
+         return this;
       }
+
+      public ClientOutgoingEnvelope Discard()
+      {
+         // TODO
+         return this;
+      }
+
    }
 }

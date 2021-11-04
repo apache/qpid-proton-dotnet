@@ -28,8 +28,15 @@ namespace Apache.Qpid.Proton.Types.Transactions
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:transactional-state:list");
 
       private IProtonBuffer txnId;
+      private IOutcome outcome;
 
       public TransactionalState() : base() { }
+
+      public TransactionalState(IProtonBuffer txnId, IOutcome outcome = null) : this()
+      {
+         this.txnId = txnId;
+         this.outcome = outcome;
+      }
 
       public TransactionalState(TransactionalState other) : this()
       {
@@ -53,7 +60,11 @@ namespace Apache.Qpid.Proton.Types.Transactions
          }
       }
 
-      public IOutcome Outcome { get; set; }
+      public IOutcome Outcome
+      {
+         get => outcome;
+         set => outcome = value;
+      }
 
       public override int GetHashCode()
       {
