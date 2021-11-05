@@ -22,6 +22,7 @@ using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Codec.Decoders;
+using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
@@ -45,8 +46,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private Footer footer;
 
       private StreamState currentState = StreamState.IDLE;
-      private Stream bodyStream; // TODO temporary variable definition
-      // TODO private MessageBodyInputStream bodyStream;
+      private MessageBodyInputStream bodyStream;
 
       internal ClientStreamReceiverMessage(ClientStreamReceiver receiver, ClientStreamDelivery delivery, Stream deliveryStream)
       {
@@ -218,7 +218,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Internal Delivery Annotations access for use by the managing delivery object
 
-      internal DeliveryAnnotations DeliveryAnnotations => EnsureStreamDecodedTo(StreamState.DELIVERY_ANNOTATIONS_READ).deliveryAnnotations;
+      internal DeliveryAnnotations DeliveryAnnotations =>
+         EnsureStreamDecodedTo(StreamState.DELIVERY_ANNOTATIONS_READ).deliveryAnnotations;
 
       #endregion
 
@@ -487,12 +488,324 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          while (currentState < desiredState)
          {
-            // TODO
+            try
+            {
+               IStreamTypeDecoder decoder;
+               try
+               {
+                  decoder = protonDecoder.ReadNextTypeDecoder(deliveryStream, decoderState);
+               }
+               catch (DecodeEOFException)
+               {
+                  currentState = StreamState.FOOTER_READ;
+                  break;
+               }
+
+               Type typeClass = decoder.DecodesType;
+               if (typeClass == typeof(Header))
+               {
+                  header = (Header)decoder.ReadValue(deliveryStream, decoderState);
+                  currentState = StreamState.HEADER_READ;
+               }
+               else if (typeClass == typeof(DeliveryAnnotations))
+               {
+                  deliveryAnnotations = (DeliveryAnnotations)decoder.ReadValue(deliveryStream, decoderState);
+                  currentState = StreamState.DELIVERY_ANNOTATIONS_READ;
+               }
+               else if (typeClass == typeof(MessageAnnotations))
+               {
+                  annotations = (MessageAnnotations)decoder.ReadValue(deliveryStream, decoderState);
+                  currentState = StreamState.MESSAGE_ANNOTATIONS_READ;
+               }
+               else if (typeClass == typeof(Properties))
+               {
+                  properties = (Properties)decoder.ReadValue(deliveryStream, decoderState);
+                  currentState = StreamState.PROPERTIES_READ;
+               }
+               else if (typeClass == typeof(ApplicationProperties))
+               {
+                  applicationProperties = (ApplicationProperties)decoder.ReadValue(deliveryStream, decoderState);
+                  currentState = StreamState.APPLICATION_PROPERTIES_READ;
+               }
+               else if (typeClass == typeof(AmqpSequence))
+               {
+                  currentState = StreamState.BODY_READABLE;
+                  if (bodyStream == null)
+                  {
+                     bodyStream = new AmqpSequenceInputStream(this);
+                  }
+               }
+               else if (typeClass == typeof(AmqpValue))
+               {
+                  currentState = StreamState.BODY_READABLE;
+                  if (bodyStream == null)
+                  {
+                     bodyStream = new AmqpValueInputStream(this);
+                  }
+               }
+               else if (typeClass == typeof(Data))
+               {
+                  currentState = StreamState.BODY_READABLE;
+                  if (bodyStream == null)
+                  {
+                     bodyStream = new DataSectionInputStream(this);
+                  }
+               }
+               else if (typeClass == typeof(Footer))
+               {
+                  footer = (Footer)decoder.ReadValue(deliveryStream, decoderState);
+                  currentState = StreamState.FOOTER_READ;
+               }
+               else
+               {
+                  throw new ClientMessageFormatViolationException("Incoming message carries unknown Section");
+               }
+            }
+            catch (Exception ex) when (ex is ClientMessageFormatViolationException || ex is DecodeException)
+            {
+               currentState = StreamState.DECODE_ERROR;
+               if (deliveryStream != null)
+               {
+                  try
+                  {
+                     deliveryStream.Close();
+                  }
+                  catch (IOException)
+                  {
+                  }
+               }
+
+               // TODO: At the moment there is no automatic rejection or release etc
+               //       of the delivery.  The user is expected to apply a disposition in
+               //       response to this error that initiates the desired outcome.  We
+               //       could look to add auto settlement with a configured outcome in
+               //       the future.
+
+               throw ClientExceptionSupport.CreateNonFatalOrPassthrough(ex);
+            }
          }
 
          return this;
       }
 
       #endregion
+
+      #region Message Body Input Stream implementation
+
+      internal abstract class MessageBodyInputStream : Stream
+      {
+         protected readonly Stream rawInputStream;
+         protected readonly ClientStreamReceiverMessage message;
+
+         protected bool closed;
+         protected uint remainingSectionBytes = 0;
+
+         public MessageBodyInputStream(ClientStreamReceiverMessage message)
+         {
+            this.message = message;
+            this.rawInputStream = message.deliveryStream;
+         }
+
+         public override bool CanRead => true;
+
+         public override bool CanSeek => rawInputStream.CanSeek;
+
+         public override bool CanWrite => false;
+
+         public override long Length => rawInputStream.Length;
+
+         public override long Position
+         {
+            get => rawInputStream.Position;
+            set => rawInputStream.Position = value;
+         }
+
+         public abstract Type BodyTypeClass { get; }
+
+         public override void Close()
+         {
+            try
+            {
+               // This will check is another body section is present or if there was a footer and if
+               // a Footer is present it will be decoded and the message payload should be fully consumed
+               // at that point.  Otherwise the underlying raw InputStream will handle the task of
+               // discarding pending bytes for the message to ensure the receiver does not still on
+               // waiting for session window to be opened.
+               if (remainingSectionBytes == 0)
+               {
+                  message.EnsureStreamDecodedTo(StreamState.FOOTER_READ);
+               }
+            }
+            catch (ClientException e)
+            {
+               throw new IOException("Caught error while attempting to advance past remaining message body", e);
+            }
+            finally
+            {
+               closed = true;
+               rawInputStream.Close();
+               base.Close();
+            }
+         }
+
+         public override void Flush()
+         {
+         }
+
+         public override int ReadByte()
+         {
+            CheckClosed();
+
+            while (true)
+            {
+               if (remainingSectionBytes == 0 && !TryMoveToNextBodySection())
+               {
+                  return -1;  // Cannot read any further.
+               }
+               else
+               {
+                  remainingSectionBytes--;
+                  return rawInputStream.ReadByte();
+               }
+            }
+         }
+
+         public override int Read(byte[] buffer, int offset, int count)
+         {
+            CheckClosed();
+
+            int bytesRead = 0;
+
+            while (bytesRead != count)
+            {
+               if (remainingSectionBytes == 0 && !TryMoveToNextBodySection())
+               {
+                  bytesRead = bytesRead > 0 ? bytesRead : -1;
+                  break; // We are at the end of the body sections
+               }
+
+               int readChunk = (int)Math.Min(remainingSectionBytes, count - bytesRead);
+               int actualRead = rawInputStream.Read(buffer, offset + bytesRead, readChunk);
+
+               if (actualRead > 0)
+               {
+                  bytesRead += actualRead;
+                  remainingSectionBytes -= (uint)actualRead;
+               }
+            }
+
+            return bytesRead;
+         }
+
+         public override long Seek(long offset, SeekOrigin origin)
+         {
+            return rawInputStream.Seek(offset, origin);
+         }
+
+         public override void SetLength(long value)
+         {
+            throw new NotSupportedException();
+         }
+
+         public override void Write(byte[] buffer, int offset, int count)
+         {
+            throw new NotSupportedException();
+         }
+
+         protected void CheckClosed()
+         {
+            if (closed)
+            {
+               throw new IOException("Stream was closed previously");
+            }
+         }
+
+         protected abstract void ValidateAndScanNextSection();
+
+         protected bool TryMoveToNextBodySection()
+         {
+            try
+            {
+               if (message.currentState != StreamState.FOOTER_READ)
+               {
+                  message.currentState = StreamState.BODY_PENDING;
+                  message.EnsureStreamDecodedTo(StreamState.BODY_READABLE);
+                  if (message.currentState == StreamState.BODY_READABLE)
+                  {
+                     ValidateAndScanNextSection();
+                     return true;
+                  }
+               }
+
+               return false;
+            }
+            catch (ClientException e)
+            {
+               throw new IOException(e.Message, e);
+            }
+         }
+      }
+
+      internal class DataSectionInputStream : MessageBodyInputStream
+      {
+         public DataSectionInputStream(ClientStreamReceiverMessage message) : base(message)
+         {
+         }
+
+         public override Type BodyTypeClass => typeof(Data);
+
+         protected override void ValidateAndScanNextSection()
+         {
+            IStreamTypeDecoder typeDecoder =
+               message.protonDecoder.ReadNextTypeDecoder(rawInputStream, message.decoderState);
+
+            if (typeDecoder.DecodesType == typeof(IProtonBuffer))
+            {
+               // LOG.trace("Data Section of size {} ready for read.", remainingSectionBytes);
+               IBinaryTypeDecoder binaryDecoder = (IBinaryTypeDecoder)typeDecoder;
+               remainingSectionBytes = (uint)binaryDecoder.ReadSize(rawInputStream, message.decoderState);
+            }
+            else if (typeDecoder.DecodesType == typeof(void))
+            {
+               // Null body in the Data section which can be skipped.
+               // LOG.trace("Data Section with no Binary payload read and skipped.");
+               remainingSectionBytes = 0;
+            }
+            else
+            {
+               throw new DecodeException("Unknown payload in body of Data Section encoding.");
+            }
+         }
+      }
+
+      internal class AmqpSequenceInputStream : MessageBodyInputStream
+      {
+         public AmqpSequenceInputStream(ClientStreamReceiverMessage message) : base(message)
+         {
+         }
+
+         public override Type BodyTypeClass => typeof(System.Collections.IList);
+
+         protected override void ValidateAndScanNextSection()
+         {
+            throw new DecodeException("Cannot read the payload of an AMQP Sequence payload.");
+         }
+      }
+
+      internal class AmqpValueInputStream : MessageBodyInputStream
+      {
+         public AmqpValueInputStream(ClientStreamReceiverMessage message) : base(message)
+         {
+         }
+
+         public override Type BodyTypeClass => typeof(void);
+
+         protected override void ValidateAndScanNextSection()
+         {
+            throw new DecodeException("Cannot read the payload of an AMQP Value payload.");
+         }
+      }
    }
+
+   #endregion
 }
