@@ -202,6 +202,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal bool IsDynamic => protonReceiver.Source?.Dynamic ?? false;
 
+      internal Exception FailureCause => failureCause;
+
+      internal StreamReceiverOptions ReceiverOptions => options;
+
       #endregion
 
       #region Private Receiver Implementation

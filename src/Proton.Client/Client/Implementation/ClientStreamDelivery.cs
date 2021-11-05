@@ -18,16 +18,31 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Client.Exceptions;
+using Apache.Qpid.Proton.Client.Threading;
 using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
+   /// <summary>
+   /// The stream delivery type manages the underlying state of an incoming
+   /// streaming message delivery and provides the stream type used to read
+   /// and block for reads when not all requested message data has arrived.
+   /// The delivery will also manage settlement of a streaming delivery and
+   /// apply receiver configuration rules like auto settlement to the delivery
+   /// as incoming portions of the message arrive.
+   /// </summary>
    public class ClientStreamDelivery : IStreamDelivery
    {
       private readonly ClientStreamReceiver receiver;
       private readonly IIncomingDelivery protonDelivery;
 
       private ClientStreamReceiverMessage message;
+      private Stream rawInputStream;
       // TODO private RawDeliveryInputStream rawInputStream;
 
       internal ClientStreamDelivery(ClientStreamReceiver receiver, IIncomingDelivery protonDelivery)
@@ -43,53 +58,101 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamReceiver Receiver => receiver;
 
-      public uint MessageFormat => throw new NotImplementedException();
+      public bool Aborted => protonDelivery.IsAborted;
 
-      public Stream RawInputStream => throw new NotImplementedException();
+      public bool Completed => !protonDelivery.IsPartial;
 
-      public IReadOnlyDictionary<string, object> Annotations => throw new NotImplementedException();
+      public uint MessageFormat => protonDelivery.MessageFormat;
 
-      public bool Settled => throw new NotImplementedException();
+      public bool Settled => protonDelivery.IsSettled;
 
-      public IDeliveryState State => throw new NotImplementedException();
+      public IDeliveryState State => protonDelivery.State?.ToClientDeliveryState();
 
-      public bool RemoteSettled => throw new NotImplementedException();
+      public bool RemoteSettled => protonDelivery.IsRemotelySettled;
 
-      public IDeliveryState RemoteState => throw new NotImplementedException();
+      public IDeliveryState RemoteState => protonDelivery.RemoteState.ToClientDeliveryState();
 
-      public IStreamDelivery Accept()
+      public IReadOnlyDictionary<string, object> Annotations
       {
-         throw new NotImplementedException();
+         get
+         {
+            if (rawInputStream != null && message == null)
+            {
+               throw new ClientIllegalStateException("Cannot access Delivery Annotations API after requesting an InputStream");
+            }
+
+            return ClientConversionSupport.ToStringKeyedMap(
+               ((ClientStreamReceiverMessage)Message()).DeliveryAnnotations?.Value);
+         }
       }
 
-      public IStreamDelivery Disposition(IDeliveryState state, bool settled)
+      public Stream RawInputStream
       {
-         throw new NotImplementedException();
+         get
+         {
+            if (message != null)
+            {
+               throw new ClientIllegalStateException("Cannot access Delivery InputStream API after requesting an Message");
+            }
+
+            if (rawInputStream == null)
+            {
+               rawInputStream = new RawDeliveryInputStream(this);
+            }
+
+            return rawInputStream;
+         }
       }
 
       public IStreamReceiverMessage Message()
       {
-         throw new NotImplementedException();
+         if (rawInputStream != null && message == null)
+         {
+            throw new ClientIllegalStateException("Cannot access Delivery Message API after requesting an InputStream");
+         }
+
+         if (message == null)
+         {
+            // TODO message = new ClientStreamReceiverMessage(receiver, this, rawInputStream = new RawDeliveryInputStream());
+         }
+
+         return message;
+      }
+
+      public IStreamDelivery Accept()
+      {
+         receiver.Disposition(protonDelivery, Accepted.Instance, true);
+         return this;
+      }
+
+      public IStreamDelivery Disposition(IDeliveryState state, bool settled)
+      {
+         receiver.Disposition(protonDelivery, state?.AsProtonType(), true);
+         return this;
       }
 
       public IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         throw new NotImplementedException();
+         receiver.Disposition(protonDelivery, new Modified(deliveryFailed, undeliverableHere), true);
+         return this;
       }
 
       public IStreamDelivery Reject(string condition, string description)
       {
-         throw new NotImplementedException();
+         receiver.Disposition(protonDelivery, new Rejected(new ErrorCondition(condition, description)), true);
+         return this;
       }
 
       public IStreamDelivery Release()
       {
-         throw new NotImplementedException();
+         receiver.Disposition(protonDelivery, Released.Instance, true);
+         return this;
       }
 
       public IStreamDelivery Settle()
       {
-         throw new NotImplementedException();
+         receiver.Disposition(protonDelivery, null, true);
+         return this;
       }
 
       #region Internal Stream Delivery API
@@ -108,6 +171,206 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private void HandleDeliveryAborted(IIncomingDelivery delivery)
       {
          throw new NotImplementedException();
+      }
+
+      #endregion
+
+      #region Raw incoming byte stream message
+
+      private class RawDeliveryInputStream : Stream
+      {
+         private readonly AtomicBoolean closed = false;
+         private readonly ClientStreamDelivery delivery;
+         private readonly ClientStreamReceiver receiver;
+         private readonly ClientConnection connection;
+         private readonly Engine.IIncomingDelivery protonDelivery;
+         private readonly IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
+
+         private TaskCompletionSource<int> readRequest;
+
+         public RawDeliveryInputStream(ClientStreamDelivery delivery)
+         {
+            this.delivery = delivery;
+            this.receiver = delivery.receiver;
+            this.protonDelivery = delivery.protonDelivery;
+            this.connection = (ClientConnection)delivery.receiver.Session.Connection;
+         }
+
+         public override bool CanRead => true;
+
+         public override bool CanSeek => true;
+
+         public override bool CanWrite => false;
+
+         public override long Length => throw new NotImplementedException();
+
+         public override long Position
+         {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+         }
+
+         public override void Close()
+         {
+            if (closed.CompareAndSet(false, true))
+            {
+               try
+               {
+
+               }
+               finally
+               {
+                  base.Close();
+               }
+            }
+         }
+
+         public override void Flush()
+         {
+            throw new NotImplementedException();
+         }
+
+         public override int Read(byte[] buffer, int offset, int count)
+         {
+            throw new NotImplementedException();
+         }
+
+         public override long Seek(long offset, SeekOrigin origin)
+         {
+            throw new NotImplementedException();
+         }
+
+         public override void SetLength(long value)
+         {
+            throw new NotSupportedException("Cannot set length an a message delivery incoming bytes stream");
+         }
+
+         public override void Write(byte[] buffer, int offset, int count)
+         {
+            throw new NotSupportedException("Cannot write to an a message delivery incoming bytes stream");
+         }
+
+         #region Delivery event handlers
+
+         private void HandleDeliveryRead(IIncomingDelivery delivery)
+         {
+            if (closed)
+            {
+               // Clear any pending data to expand session window if not yet complete
+               _ = delivery.ReadAll();
+            }
+            else
+            {
+               // An input stream is awaiting some more incoming bytes, check to see if
+               // the delivery had a non-empty transfer frame and provide them.
+               if (readRequest != null)
+               {
+                  if (delivery.Available > 0)
+                  {
+                     buffer.Append(protonDelivery.ReadAll());
+                     readRequest.TrySetResult((int)buffer.ReadableBytes);
+                     readRequest = null;
+                  }
+                  else if (!delivery.IsPartial)
+                  {
+                     AutoAcceptDeliveryIfNecessary();
+                     readRequest.TrySetResult(-1);
+                     readRequest = null;
+                  }
+               }
+            }
+         }
+
+         private void HandleDeliveryAborted(IIncomingDelivery delivery)
+         {
+            readRequest?.TrySetException(new ClientDeliveryAbortedException("The remote sender has aborted this delivery"));
+
+            delivery.Settle();
+         }
+
+         private void HandleReceiverClosed(ClientStreamReceiver receiver)
+         {
+            readRequest?.TrySetException(new ClientResourceRemotelyClosedException("The receiver link has been remotely closed."));
+         }
+
+         #endregion
+
+         #region Private APIs for internal Stream use
+
+         private int RequestMoreData()
+         {
+            TaskCompletionSource<int> request = new TaskCompletionSource<int>();
+
+            try
+            {
+               connection.Execute(() =>
+               {
+                  if (protonDelivery.Receiver.IsLocallyClosedOrDetached)
+                  {
+                     request.TrySetException(new ClientException("Cannot read from delivery due to link having been closed"));
+                  }
+                  else if (protonDelivery.Available > 0)
+                  {
+                     buffer.Append(protonDelivery.ReadAll());
+                     request.TrySetResult((int)buffer.ReadableBytes);
+                  }
+                  else if (protonDelivery.IsAborted)
+                  {
+                     request.TrySetException(new ClientDeliveryAbortedException("The remote sender has aborted this delivery"));
+                  }
+                  else if (!protonDelivery.IsPartial)
+                  {
+                     AutoAcceptDeliveryIfNecessary();
+                     request.TrySetResult(-1);
+                  }
+                  else
+                  {
+                     readRequest = request;
+                  }
+               });
+
+               return connection.Request(receiver, request).Task.Result;
+            }
+            catch (Exception e)
+            {
+               throw new IOException("Error reading requested data", e);
+            }
+         }
+
+         private void AutoAcceptDeliveryIfNecessary()
+         {
+            if (receiver.ReceiverOptions.AutoAccept && !protonDelivery.IsSettled)
+            {
+               if (!buffer.IsReadable && protonDelivery.Available == 0 &&
+                   (protonDelivery.IsAborted || !protonDelivery.IsPartial))
+               {
+
+                  try
+                  {
+                     receiver.Disposition(protonDelivery, Accepted.Instance, receiver.ReceiverOptions.AutoSettle);
+                  }
+                  catch (Exception)
+                  {
+                     // TODO : LOG.trace("Caught error while attempting to auto accept the fully read delivery.", error);
+                  }
+               }
+            }
+         }
+
+         private void CheckStreamStateIsValid()
+         {
+            if (closed)
+            {
+               throw new IOException("The InputStream has been explicitly closed");
+            }
+
+            if (receiver.IsClosed)
+            {
+               throw new IOException("Underlying receiver has closed", receiver.FailureCause);
+            }
+         }
+
+         #endregion
       }
 
       #endregion

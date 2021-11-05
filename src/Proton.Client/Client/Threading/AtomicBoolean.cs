@@ -76,5 +76,10 @@ namespace Apache.Qpid.Proton.Client.Threading
       {
          return atomicBool.Value;
       }
+
+      public static implicit operator AtomicBoolean(bool value)
+      {
+         return new AtomicBoolean(value);
+      }
    }
 }

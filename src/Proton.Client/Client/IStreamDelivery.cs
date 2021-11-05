@@ -51,6 +51,19 @@ namespace Apache.Qpid.Proton.Client
       /// <inheritdoc cref="IDelivery.Settle"/>
       new IStreamDelivery Settle();
 
+      /// <summary>
+      /// Returns true if the remote has aborted this incoming streaming delivery and
+      /// no more bytes are available for read from the remote.
+      /// </summary>
+      bool Aborted { get; }
+
+      /// <summary>
+      /// Returns true if the remote has completed the send of all portions of the streaming
+      /// delivery payload and there are no more incoming bytes expected or allowed for this
+      /// delivery.
+      /// </summary>
+      bool Completed { get; }
+
       #region Defaults methods for hidden IDelivery methods
 
       IReceiver IDelivery.Receiver => this.Receiver;
