@@ -18,6 +18,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Apache.Qpid.Proton.Buffer
 {
@@ -32,30 +34,40 @@ namespace Apache.Qpid.Proton.Buffer
       /// Limit capcity to a value that might still allow for a non-composite
       /// buffer copy of this buffer to be made if requested.
       /// </summary>
-      private static readonly int MAX_CAPACITY = Int32.MaxValue;
+      private static readonly long MAX_CAPACITY = Int32.MaxValue;
 
-      private readonly List<IProtonBuffer> buffers = new List<IProtonBuffer>();
-      private readonly List<int> indexTracker = new List<int>();
+      private static readonly IProtonBuffer[] EMPTY_BUFFER_ARRAY = new IProtonBuffer[0];
+
       private readonly SplitBufferAccessor splitBufferAccessor;
 
-      private int readOffset;
-      private int writeOffset;
-      private int capacity;
+      private IProtonBuffer[] buffers;
+      private long[] indexTracker;
+
+      private long readOffset;
+      private long writeOffset;
+      private long capacity;
 
       /// <summary>
       /// Before any read or write the composite must determine an index into the
       /// chosen buffer to be read or written to where that operation should start.
       /// </summary>
-      private int nextComputedAccessIndex;
+      private long nextComputedAccessIndex;
 
-      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator)
+      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator) : this(allocator, EMPTY_BUFFER_ARRAY)
       {
-         this.splitBufferAccessor = new SplitBufferAccessor(this);
       }
 
-      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator, IEnumerable<IProtonBuffer> buffers) : this(allocator)
+      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator, IEnumerable<IProtonBuffer> buffers)
       {
-         // TODO Process incoming buffers
+         if (allocator == null)
+         {
+            throw new ArgumentNullException("Cannot create a composite buffer with a null allocator");
+         }
+
+         this.buffers = FilterIncomingBuffers(buffers);
+         this.splitBufferAccessor = new SplitBufferAccessor(this);
+
+         ComputeOffsetsAndIndexes();
       }
 
       #region Basic Buffer information and state APIs
@@ -73,13 +85,33 @@ namespace Apache.Qpid.Proton.Buffer
       public long ReadOffset
       {
          get => readOffset;
-         set => throw new NotImplementedException();
+         set
+         {
+            _ = PrepareForRead(value, 0);
+            long remaining = value;
+            foreach (IProtonBuffer buffer in buffers)
+            {
+               buffer.ReadOffset = Math.Min(buffer.Capacity, remaining);
+               remaining = Math.Max(0, remaining - buffer.Capacity);
+            }
+            this.writeOffset = value;
+         }
       }
 
       public long WriteOffset
       {
          get => writeOffset;
-         set => throw new NotImplementedException();
+         set
+         {
+            CheckWriteBounds(value, 0);
+            long remaining = value;
+            foreach (IProtonBuffer buffer in buffers)
+            {
+               buffer.WriteOffset = Math.Min(buffer.Capacity, remaining);
+               remaining = Math.Max(0, remaining - buffer.Capacity);
+            }
+            this.writeOffset = value;
+         }
       }
 
       public uint ComponentCount
@@ -162,7 +194,15 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IEnumerable<IProtonBuffer> DecomposeBuffer()
       {
-         throw new NotImplementedException();
+         IProtonBuffer[] result = buffers;
+
+         // Clear state such that this buffer appears empty.
+         this.buffers = EMPTY_BUFFER_ARRAY;
+         this.readOffset = 0;
+         this.writeOffset = 0;
+         this.nextComputedAccessIndex = -1;
+
+         return result;
       }
 
       public IProtonBuffer Copy()
@@ -217,237 +257,260 @@ namespace Apache.Qpid.Proton.Buffer
 
       public bool GetBoolean(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(byte)).GetBoolean(nextComputedAccessIndex);
       }
 
       public sbyte GetByte(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(byte)).GetByte(nextComputedAccessIndex);
       }
 
       public char GetChar(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(char)).GetChar(nextComputedAccessIndex);
       }
 
       public double GetDouble(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(double)).GetDouble(nextComputedAccessIndex);
       }
 
       public float GetFloat(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(float)).GetFloat(nextComputedAccessIndex);
       }
 
       public short GetShort(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(short)).GetShort(nextComputedAccessIndex);
       }
 
       public int GetInt(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(int)).GetInt(nextComputedAccessIndex);
       }
 
       public long GetLong(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(long)).GetLong(nextComputedAccessIndex);
       }
 
       public byte GetUnsignedByte(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(byte)).GetUnsignedByte(nextComputedAccessIndex);
       }
 
       public ushort GetUnsignedShort(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(ushort)).GetUnsignedShort(nextComputedAccessIndex);
       }
 
       public uint GetUnsignedInt(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(int)).GetUnsignedInt(nextComputedAccessIndex);
       }
 
       public ulong GetUnsignedLong(long index)
       {
-         throw new NotImplementedException();
+         return PrepareForRead(readOffset, sizeof(ulong)).GetUnsignedLong(nextComputedAccessIndex);
       }
 
       public bool ReadBoolean()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(byte)).ReadBoolean();
       }
 
       public sbyte ReadByte()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(byte)).ReadByte();
       }
 
       public char ReadChar()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(char)).ReadChar();
       }
 
       public double ReadDouble()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(double)).ReadDouble();
       }
 
       public float ReadFloat()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(float)).ReadFloat();
       }
 
       public short ReadShort()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(short)).ReadShort();
       }
 
       public int ReadInt()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(int)).ReadInt();
       }
 
       public long ReadLong()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(long)).ReadLong();
       }
 
       public byte ReadUnsignedByte()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(byte)).ReadUnsignedByte();
       }
 
       public ushort ReadUnsignedShort()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(ushort)).ReadUnsignedShort();
       }
 
       public uint ReadUnsignedInt()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(uint)).ReadUnsignedInt();
       }
 
       public ulong ReadUnsignedLong()
       {
-         throw new NotImplementedException();
+         return PrepareForRead(sizeof(ulong)).ReadUnsignedLong();
       }
 
       public IProtonBuffer SetBoolean(long index, bool value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(byte)).SetBoolean(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetByte(long index, sbyte value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(byte)).SetByte(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetChar(long index, char value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(char)).SetChar(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetDouble(long index, double value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(double)).SetDouble(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetFloat(long index, float value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(float)).SetFloat(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetShort(long index, short value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(short)).SetShort(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetInt(long index, int value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(int)).SetInt(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetLong(long index, long value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(long)).SetLong(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetUnsignedByte(long index, byte value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(byte)).SetUnsignedByte(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetUnsignedShort(long index, ushort value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(short)).SetUnsignedShort(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetUnsignedInt(long index, uint value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(uint)).SetUnsignedInt(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer SetUnsignedLong(long index, ulong value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(index, sizeof(ulong)).SetUnsignedLong(nextComputedAccessIndex, value);
+         return this;
       }
 
       public IProtonBuffer WriteBoolean(bool value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(byte)).WriteBoolean(value);
+         return this;
       }
 
       public IProtonBuffer WriteByte(sbyte value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(byte)).WriteByte(value);
+         return this;
       }
 
       public IProtonBuffer WriteDouble(double value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(double)).WriteDouble(value);
+         return this;
       }
 
       public IProtonBuffer WriteFloat(float value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(float)).WriteFloat(value);
+         return this;
       }
 
       public IProtonBuffer WriteShort(short value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(short)).WriteFloat(value);
+         return this;
       }
 
       public IProtonBuffer WriteInt(int value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(int)).WriteInt(value);
+         return this;
       }
 
       public IProtonBuffer WriteLong(long value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(long)).WriteLong(value);
+         return this;
       }
 
       public IProtonBuffer WriteUnsignedByte(byte value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(byte)).WriteUnsignedByte(value);
+         return this;
       }
 
       public IProtonBuffer WriteUnsignedShort(ushort value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(ushort)).WriteUnsignedShort(value);
+         return this;
       }
 
       public IProtonBuffer WriteUnsignedInt(uint value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(uint)).WriteUnsignedInt(value);
+         return this;
       }
 
       public IProtonBuffer WriteUnsignedLong(ulong value)
       {
-         throw new NotImplementedException();
+         PrepareForWrite(sizeof(ulong)).WriteUnsignedLong(value);
+         return this;
       }
 
       public IProtonBuffer WriteBytes(byte[] source)
@@ -506,25 +569,134 @@ namespace Apache.Qpid.Proton.Buffer
 
       #region Internal composite buffer APIs
 
-      private int SearchIndexTracker(int index)
+      private static IProtonBuffer[] FilterIncomingBuffers(IEnumerable<IProtonBuffer> buffers)
       {
-         int i = indexTracker.BinarySearch(index);
+         // First we need to filter all empty buffers from the input as they don't add anything to
+         // the body of a composite buffer and then we need to flatten any composite buffers into
+         // our internal view to avoid composites of composite which could allow an overflow on
+         // the compsoed size which we should be proactively trying to prevent.
+         IProtonBuffer[] composite = buffers.Where(IsNotAnEmptyBuffer)
+                                            .SelectMany(FlattenedCompositeBuffers)
+                                            .ToArray();
+
+         IProtonBuffer[] distinct = composite.Distinct(IdentityComparator.Instance).ToArray();
+
+         if (composite.Count() != distinct.Count())
+         {
+            throw new ArgumentException("Cannot construct a composite buffer from equal buffer instances");
+         }
+
+         return composite;
+      }
+
+      private static bool IsNotAnEmptyBuffer(IProtonBuffer buffer) => buffer.Capacity > 0;
+
+      private static IEnumerable<IProtonBuffer> FlattenedCompositeBuffers(IProtonBuffer buffer)
+      {
+         if (IProtonCompositeBuffer.IsComposite(buffer))
+         {
+            return ((IProtonCompositeBuffer)buffer).DecomposeBuffer();
+         }
+         else
+         {
+            return new IProtonBuffer[] { buffer };
+         }
+      }
+
+      private void ComputeOffsetsAndIndexes()
+      {
+         long writeOffset = 0;
+         long readOffset = 0;
+
+         // Compute read offset and write offsets into the provided buffers and check
+         // invariants such as no read or write gaps etc.
+         if (buffers.Length > 0)
+         {
+            bool writeLimitHit = false;
+            bool readLimitHit = false;
+
+            foreach (IProtonBuffer buffer in buffers)
+            {
+               if (buffer.WritableBytes == 0)
+               {
+                  writeOffset += buffer.Capacity;
+               }
+               else if (!writeLimitHit)
+               {
+                  writeOffset += buffer.WriteOffset;
+                  writeLimitHit = true;
+               }
+               else if (buffer.WriteOffset != 0)
+               {
+                  throw new ArgumentOutOfRangeException(
+                     "Cannot compose the given buffers due to gap in writeable portion of span");
+               }
+            }
+            foreach (IProtonBuffer buffer in buffers)
+            {
+               if (buffer.ReadableBytes == 0 && buffer.WritableBytes == 0)
+               {
+                  readOffset += buffer.Capacity;
+               }
+               else if (!readLimitHit)
+               {
+                  readOffset += buffer.ReadOffset;
+                  readLimitHit = true;
+               }
+               else if (buffer.ReadOffset != 0)
+               {
+                  throw new ArgumentOutOfRangeException(
+                     "Cannot compose the given buffers due to gap in readable portion of span");
+               }
+            }
+
+            if (readOffset > writeOffset)
+            {
+               throw new ArgumentOutOfRangeException(
+                  "Composed buffers resulted in read offset ahead of write offset");
+            }
+         }
+
+         this.readOffset = readOffset;
+         this.writeOffset = writeOffset;
+         this.indexTracker = new long[buffers.Length];
+
+         long capacity = 0;
+         for (int i = 0; i < buffers.Length; ++i)
+         {
+            indexTracker[i] = capacity;
+            capacity += buffers[i].Capacity;
+         }
+
+         if (capacity > MAX_CAPACITY)
+         {
+            throw new ArgumentOutOfRangeException(string.Format(
+               "Cannot create a buffer with combined capacity greater than {0} " +
+               "due to array copy constraints. Input buffers capacity was : {1}", MAX_CAPACITY, capacity));
+         }
+
+         this.capacity = capacity;
+      }
+
+      private long SearchIndexTracker(long index)
+      {
+         long i = Array.BinarySearch(indexTracker, index);
          return i < 0 ? -(i + 2) : i;
       }
 
-      private IProtonBufferAccessors ChooseBuffer(int index, int size)
+      private IProtonBufferAccessors ChooseBuffer(long index, long size)
       {
-         int i = SearchIndexTracker(index);
+         long i = SearchIndexTracker(index);
 
          // When the read and write offsets are at the end of the buffer they
          // will be equal to the number of tracked buffers and we return null
          // as no read or write operation can occur in this state.
-         if (i == buffers.Count)
+         if (i == buffers.Length)
          {
             return null;
          }
 
-         int off = index - indexTracker[i];
+         long off = index - indexTracker[i];
          IProtonBuffer candidate = buffers[i];
 
          // Space available in the selected buffer to accommodate the
@@ -534,7 +706,7 @@ namespace Apache.Qpid.Proton.Buffer
          // across two or more buffers.
          if (off + size <= candidate.Capacity)
          {
-            nextComputedAccessIndex = off;
+            nextComputedAccessIndex = (int)off;
             return candidate;
          }
          else
@@ -544,7 +716,13 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
-      private void CheckReadBounds(int index, int size)
+      private IProtonBufferAccessors ChooseBufferForDirectOperation(long index)
+      {
+         long bufferIndex = SearchIndexTracker(index);
+         return buffers[bufferIndex];
+      }
+
+      private void CheckReadBounds(long index, long size)
       {
          if (index < 0 || writeOffset < index + size)
          {
@@ -552,7 +730,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
-      private void CheckGetBounds(int index, int size)
+      private void CheckGetBounds(long index, long size)
       {
          if (index < 0 || capacity < index + size)
          {
@@ -560,7 +738,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
-      private void CheckWriteBounds(int index, int size)
+      private void CheckWriteBounds(long index, long size)
       {
          if (index < 0 || capacity < index + size)
          {
@@ -568,10 +746,72 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
-      private Exception IndexOutOfBounds(int index, bool write)
+      private Exception IndexOutOfBounds(long index, bool write)
       {
          return new ArgumentOutOfRangeException(
             "Index " + index + " is out of bounds: [read 0 to " + writeOffset + ", write 0 to " + capacity + "].");
+      }
+
+      private IProtonBufferAccessors PrepareForRead(int size)
+      {
+         IProtonBufferAccessors buf = PrepareForRead(readOffset, size);
+         readOffset += size;
+         return buf;
+      }
+
+      private IProtonBufferAccessors PrepareForRead(long index, long size)
+      {
+         // This method either returns the correct buffer for the given index
+         // which has enough remaining readable bytes to fulfill the request
+         // or it returns the split buffer accessor and configures the object
+         // state such that it can produce a read of the requested bytes across
+         // more than one contained buffer.
+         CheckReadBounds(index, size);
+         return ChooseBuffer(index, size);
+      }
+
+      private IProtonBufferAccessors PrepareForWrite(long size)
+      {
+         var buf = PrepareForWrite(writeOffset, size);
+         writeOffset += size;
+         return buf;
+      }
+
+      private IProtonBufferAccessors PrepareForWrite(long index, long size)
+      {
+         // This method either returns the correct buffer for the given index
+         // which has enough remaining writable bytes to fulfill the request
+         // or it returns the split buffer accessor and configures the object
+         // state such that it can produce a write of the requested bytes across
+         // more than one contained buffer.
+         CheckWriteBounds(index, size);
+         return ChooseBuffer(index, size);
+      }
+
+      #endregion
+
+      #region Direct access API used by the split buffer accessor
+
+      private byte DirectRead()
+      {
+         IProtonBufferAccessors accessor = ChooseBufferForDirectOperation(nextComputedAccessIndex++);
+         return accessor.ReadUnsignedByte();
+      }
+
+      private void DirectWrite(byte value)
+      {
+         IProtonBufferAccessors accessor = ChooseBufferForDirectOperation(nextComputedAccessIndex++);
+         accessor.WriteUnsignedByte(value);
+      }
+
+      private void SetDirect(long index, byte value)
+      {
+         ChooseBuffer(index, 1).SetUnsignedByte(nextComputedAccessIndex, value);
+      }
+
+      private byte GetDirect(long index)
+      {
+         return ChooseBuffer(index, 1).GetUnsignedByte(nextComputedAccessIndex);
       }
 
       #endregion
@@ -584,9 +824,9 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       private class SplitBufferAccessor : IProtonBufferAccessors
       {
-         private readonly IProtonBuffer buffer;
+         private readonly ProtonCompositeBuffer buffer;
 
-         public SplitBufferAccessor(IProtonBuffer buffer)
+         public SplitBufferAccessor(ProtonCompositeBuffer buffer)
          {
             this.buffer = buffer;
          }
@@ -687,28 +927,28 @@ namespace Apache.Qpid.Proton.Buffer
 
          public ushort GetUnsignedShort(long index)
          {
-            return (ushort)(buffer.GetUnsignedByte(index) << 8 |
-                            buffer.GetUnsignedByte(index + 1));
+            return (ushort)(Get(index) << 8 |
+                            Get(index + 1));
          }
 
          public uint GetUnsignedInt(long index)
          {
-            return (uint)(buffer.GetUnsignedByte(index) << 24 |
-                          buffer.GetUnsignedByte(index + 1) << 16 |
-                          buffer.GetUnsignedByte(index + 2) << 8 |
-                          buffer.GetUnsignedByte(index + 3));
+            return (uint)(Get(index) << 24 |
+                          Get(index + 1) << 16 |
+                          Get(index + 2) << 8 |
+                          Get(index + 3));
          }
 
          public ulong GetUnsignedLong(long index)
          {
-            return (ulong)(buffer.GetUnsignedByte(index) << 56 |
-                           buffer.GetUnsignedByte(index + 1) << 48 |
-                           buffer.GetUnsignedByte(index + 2) << 40 |
-                           buffer.GetUnsignedByte(index + 3) << 32 |
-                           buffer.GetUnsignedByte(index + 4) << 24 |
-                           buffer.GetUnsignedByte(index + 5) << 16 |
-                           buffer.GetUnsignedByte(index + 6) << 8 |
-                           buffer.GetUnsignedByte(index + 7));
+            return (ulong)(Get(index) << 56 |
+                           Get(index + 1) << 48 |
+                           Get(index + 2) << 40 |
+                           Get(index + 3) << 32 |
+                           Get(index + 4) << 24 |
+                           Get(index + 5) << 16 |
+                           Get(index + 6) << 8 |
+                           Get(index + 7));
          }
 
          public char ReadChar()
@@ -743,28 +983,27 @@ namespace Apache.Qpid.Proton.Buffer
 
          public ushort ReadUnsignedShort()
          {
-            return (ushort)(buffer.ReadUnsignedByte() << 8 |
-                            buffer.ReadUnsignedByte());
+            return (ushort)(Read() << 8 | Read());
          }
 
          public uint ReadUnsignedInt()
          {
-            return (uint)(buffer.ReadUnsignedByte() << 24 |
-                          buffer.ReadUnsignedByte() << 16 |
-                          buffer.ReadUnsignedByte() << 8 |
-                          buffer.ReadUnsignedByte());
+            return (uint)(Read() << 24 |
+                          Read() << 16 |
+                          Read() << 8 |
+                          Read());
          }
 
          public ulong ReadUnsignedLong()
          {
-            return (uint)(buffer.ReadUnsignedByte() << 56 |
-                          buffer.ReadUnsignedByte() << 48 |
-                          buffer.ReadUnsignedByte() << 40 |
-                          buffer.ReadUnsignedByte() << 32 |
-                          buffer.ReadUnsignedByte() << 24 |
-                          buffer.ReadUnsignedByte() << 16 |
-                          buffer.ReadUnsignedByte() << 8 |
-                          buffer.ReadUnsignedByte());
+            return (uint)(Read() << 56 |
+                          Read() << 48 |
+                          Read() << 40 |
+                          Read() << 32 |
+                          Read() << 24 |
+                          Read() << 16 |
+                          Read() << 8 |
+                          Read());
          }
 
          public IProtonBuffer SetChar(long index, char value)
@@ -799,32 +1038,32 @@ namespace Apache.Qpid.Proton.Buffer
 
          public IProtonBuffer SetUnsignedShort(long index, ushort value)
          {
-            buffer.SetUnsignedByte(index, (byte)(value >> 8));
-            buffer.SetUnsignedByte(index + 1, (byte)(value >> 0));
+            Set(index, (byte)(value >> 8));
+            Set(index + 1, (byte)(value >> 0));
 
             return buffer;
          }
 
          public IProtonBuffer SetUnsignedInt(long index, uint value)
          {
-            buffer.SetUnsignedByte(index, (byte)(value >> 24));
-            buffer.SetUnsignedByte(index + 1, (byte)(value >> 16));
-            buffer.SetUnsignedByte(index + 2, (byte)(value >> 8));
-            buffer.SetUnsignedByte(index + 3, (byte)(value >> 0));
+            Set(index, (byte)(value >> 24));
+            Set(index + 1, (byte)(value >> 16));
+            Set(index + 2, (byte)(value >> 8));
+            Set(index + 3, (byte)(value >> 0));
 
             return buffer;
          }
 
          public IProtonBuffer SetUnsignedLong(long index, ulong value)
          {
-            buffer.SetUnsignedByte(index, (byte)(value >> 56));
-            buffer.SetUnsignedByte(index + 1, (byte)(value >> 48));
-            buffer.SetUnsignedByte(index + 2, (byte)(value >> 40));
-            buffer.SetUnsignedByte(index + 3, (byte)(value >> 32));
-            buffer.SetUnsignedByte(index + 4, (byte)(value >> 24));
-            buffer.SetUnsignedByte(index + 5, (byte)(value >> 16));
-            buffer.SetUnsignedByte(index + 6, (byte)(value >> 8));
-            buffer.SetUnsignedByte(index + 7, (byte)(value >> 0));
+            Set(index, (byte)(value >> 56));
+            Set(index + 1, (byte)(value >> 48));
+            Set(index + 2, (byte)(value >> 40));
+            Set(index + 3, (byte)(value >> 32));
+            Set(index + 4, (byte)(value >> 24));
+            Set(index + 5, (byte)(value >> 16));
+            Set(index + 6, (byte)(value >> 8));
+            Set(index + 7, (byte)(value >> 0));
 
             return buffer;
          }
@@ -856,34 +1095,73 @@ namespace Apache.Qpid.Proton.Buffer
 
          public IProtonBuffer WriteUnsignedShort(ushort value)
          {
-            buffer.WriteUnsignedByte((byte)(value >> 8));
-            buffer.WriteUnsignedByte((byte)(value >> 0));
+            Write((byte)(value >> 8));
+            Write((byte)(value >> 0));
 
             return buffer;
          }
 
          public IProtonBuffer WriteUnsignedInt(uint value)
          {
-            buffer.WriteUnsignedByte((byte)(value >> 24));
-            buffer.WriteUnsignedByte((byte)(value >> 16));
-            buffer.WriteUnsignedByte((byte)(value >> 8));
-            buffer.WriteUnsignedByte((byte)(value >> 0));
+            Write((byte)(value >> 24));
+            Write((byte)(value >> 16));
+            Write((byte)(value >> 8));
+            Write((byte)(value >> 0));
 
             return buffer;
          }
 
          public IProtonBuffer WriteUnsignedLong(ulong value)
          {
-            buffer.WriteUnsignedByte((byte)(value >> 56));
-            buffer.WriteUnsignedByte((byte)(value >> 48));
-            buffer.WriteUnsignedByte((byte)(value >> 40));
-            buffer.WriteUnsignedByte((byte)(value >> 32));
-            buffer.WriteUnsignedByte((byte)(value >> 24));
-            buffer.WriteUnsignedByte((byte)(value >> 16));
-            buffer.WriteUnsignedByte((byte)(value >> 8));
-            buffer.WriteUnsignedByte((byte)(value >> 0));
+            Write((byte)(value >> 56));
+            Write((byte)(value >> 48));
+            Write((byte)(value >> 40));
+            Write((byte)(value >> 32));
+            Write((byte)(value >> 24));
+            Write((byte)(value >> 16));
+            Write((byte)(value >> 8));
+            Write((byte)(value >> 0));
 
             return buffer;
+         }
+
+         private void Write(byte value)
+         {
+            buffer.DirectWrite(value);
+         }
+
+         private byte Read()
+         {
+            return buffer.DirectRead();
+         }
+
+         private void Set(long index, byte value)
+         {
+            buffer.SetDirect(index, value);
+         }
+
+         private byte Get(long index)
+         {
+            return buffer.GetDirect(index);
+         }
+      }
+
+      #endregion
+
+      #region Simple Equality Comparator that only uses reference equality for buffers
+
+      private sealed class IdentityComparator : IEqualityComparer<IProtonBuffer>
+      {
+         public static readonly IdentityComparator Instance = new IdentityComparator();
+
+         public bool Equals(IProtonBuffer x, IProtonBuffer y)
+         {
+            return Object.ReferenceEquals(x, y);
+         }
+
+         public int GetHashCode([DisallowNull] IProtonBuffer obj)
+         {
+            return obj.GetHashCode();
          }
       }
 
