@@ -39,6 +39,7 @@ namespace Apache.Qpid.Proton.Buffer
       private static readonly IProtonBuffer[] EMPTY_BUFFER_ARRAY = new IProtonBuffer[0];
 
       private readonly SplitBufferAccessor splitBufferAccessor;
+      private readonly IProtonBufferAllocator allocator;
 
       private IProtonBuffer[] buffers;
       private long[] indexTracker;
@@ -64,6 +65,7 @@ namespace Apache.Qpid.Proton.Buffer
             throw new ArgumentNullException("Cannot create a composite buffer with a null allocator");
          }
 
+         this.allocator = allocator;
          this.buffers = FilterIncomingBuffers(buffers);
          this.splitBufferAccessor = new SplitBufferAccessor(this);
 
@@ -207,12 +209,45 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Copy()
       {
-         throw new NotImplementedException();
+         return Copy(ReadOffset, ReadableBytes);
       }
 
       public IProtonBuffer Copy(long index, long length)
       {
-         throw new NotImplementedException();
+         ProtonBufferSupport.CheckLength(length);
+         CheckGetBounds(index, length);
+
+         IProtonBuffer choice = (IProtonBuffer)ChooseBuffer(index, 0);
+         IProtonBuffer[] copies;
+
+         if (length > 0)
+         {
+            copies = new IProtonBuffer[buffers.Length];
+            long offset = nextComputedAccessIndex;
+            long remaining = length;
+            long i;
+            long j = 0;
+            for (i = SearchIndexTracker(index); remaining > 0; i++)
+            {
+               IProtonBuffer source = buffers[i];
+               long available = source.Capacity - offset;
+               copies[j++] = source.Copy(offset, Math.Min(remaining, available));
+               remaining -= available;
+               offset = 0;
+            }
+
+            // Compact the copies array now to what we actually used
+            IProtonBuffer[] result = new IProtonBuffer[j];
+            Array.Copy(copies, result, j);
+            copies = result;
+         }
+         else
+         {
+            // Specialize for length == 0, since we must copy from at least one constituent buffer.
+            copies = new IProtonBuffer[] { choice.Copy(nextComputedAccessIndex, 0) };
+         }
+
+         return new ProtonCompositeBuffer(allocator, copies);
       }
 
       public IProtonBuffer CopyInto(long srcPos, byte[] dest, long destPos, long length)
@@ -227,6 +262,16 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer EnsureWritable(long amount)
       {
+         if (amount < 0)
+         {
+            throw new ArgumentOutOfRangeException("Growth amount must be greater than zero");
+         }
+
+         if (WritableBytes >= amount)
+         {
+            return this;
+         }
+
          throw new NotImplementedException();
       }
 
@@ -242,17 +287,59 @@ namespace Apache.Qpid.Proton.Buffer
 
       public bool Equals(IProtonBuffer other)
       {
-         throw new NotImplementedException();
+         return ProtonBufferSupport.Equals(this, other);
+      }
+
+      public override int GetHashCode()
+      {
+         return ProtonBufferSupport.GetHashCode(this);
       }
 
       public int ForEachReadableComponent(in int index, in Func<int, IReadableComponent, bool> processor)
       {
-         throw new NotImplementedException();
+         CheckReadBounds(ReadOffset, Math.Max(1, ReadableBytes));
+         int visited = 0;
+         foreach (IProtonBuffer buffer in buffers)
+         {
+            if (buffer.ReadableBytes > 0)
+            {
+               int count = buffer.ForEachReadableComponent(visited + index, processor);
+               if (count > 0)
+               {
+                  visited += count;
+               }
+               else
+               {
+                  visited = -visited + count;
+                  break;
+               }
+            }
+         }
+         return visited;
       }
 
       public int ForEachWritableComponent(in int index, in Func<int, IWritableComponent, bool> processor)
       {
-         throw new NotImplementedException();
+         CheckWriteBounds(WriteOffset, Math.Max(1, WritableBytes));
+         int visited = 0;
+         foreach (IProtonBuffer buffer in buffers)
+         {
+            if (buffer.WritableBytes > 0)
+            {
+               int count = buffer.ForEachWritableComponent(visited + index, processor);
+               if (count > 0)
+               {
+                  visited += count;
+               }
+               else
+               {
+                  visited = -visited + count;
+                  break;
+               }
+            }
+         }
+
+         return visited;
       }
 
       public bool GetBoolean(long index)
@@ -794,22 +881,20 @@ namespace Apache.Qpid.Proton.Buffer
 
       private byte DirectRead()
       {
-         IProtonBufferAccessors accessor = ChooseBufferForDirectOperation(nextComputedAccessIndex++);
-         return accessor.ReadUnsignedByte();
+         return ChooseBufferForDirectOperation(nextComputedAccessIndex++).ReadUnsignedByte();
       }
 
       private void DirectWrite(byte value)
       {
-         IProtonBufferAccessors accessor = ChooseBufferForDirectOperation(nextComputedAccessIndex++);
-         accessor.WriteUnsignedByte(value);
+         ChooseBufferForDirectOperation(nextComputedAccessIndex++).WriteUnsignedByte(value);
       }
 
-      private void SetDirect(long index, byte value)
+      private void DirectSet(long index, byte value)
       {
          ChooseBuffer(index, 1).SetUnsignedByte(nextComputedAccessIndex, value);
       }
 
-      private byte GetDirect(long index)
+      private byte DirectGet(long index)
       {
          return ChooseBuffer(index, 1).GetUnsignedByte(nextComputedAccessIndex);
       }
@@ -1137,12 +1222,12 @@ namespace Apache.Qpid.Proton.Buffer
 
          private void Set(long index, byte value)
          {
-            buffer.SetDirect(index, value);
+            buffer.DirectSet(index, value);
          }
 
          private byte Get(long index)
          {
-            return buffer.GetDirect(index);
+            return buffer.DirectGet(index);
          }
       }
 
