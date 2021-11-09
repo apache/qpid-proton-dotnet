@@ -162,5 +162,36 @@ namespace Apache.Qpid.Proton.Buffer
 
          return hashCode;
       }
+
+      /// <summary>
+      /// Compares the remaining content of the first buffer with the remaining content of the second
+      /// buffer, which must not be null. Each byte is compared in turn as an unsigned value, returning
+      /// upon the first difference. If no difference is found before the end of one buffer, the shorter
+      /// buffer is considered less than the other, or else if the same length then they are considered
+      /// equal.
+      /// </summary>
+      /// <param name="bufferA">The first buffer</param>
+      /// <param name="bufferB">The second buffer</param>
+      /// <returns>an interger value indicating the relative difference between to buffers</returns>
+      public static int Compare(IProtonBuffer bufferA, IProtonBuffer bufferB)
+      {
+         Statics.RequireNonNull(bufferA, "a");
+         Statics.RequireNonNull(bufferB, "b");
+
+         long length = bufferA.ReadOffset + Math.Min(bufferA.ReadableBytes, bufferB.ReadableBytes);
+
+         for (long i = bufferA.ReadOffset, j = bufferB.ReadOffset; i < length; i++, j++)
+         {
+            int cmp = bufferA.GetUnsignedByte(i).CompareTo(bufferB.GetUnsignedByte(j));
+            if (cmp != 0)
+            {
+               return cmp;
+            }
+         }
+
+         long compared = (bufferA.ReadableBytes - bufferB.ReadableBytes);
+
+         return compared < 0 ? -1 : (compared > 0 ? 1 : 0);
+      }
    }
 }

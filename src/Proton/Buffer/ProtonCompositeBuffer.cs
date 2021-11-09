@@ -54,6 +54,10 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       private long nextComputedAccessIndex;
 
+      internal ProtonCompositeBuffer() : this(ProtonByteBufferAllocator.Instance, EMPTY_BUFFER_ARRAY)
+      {
+      }
+
       internal ProtonCompositeBuffer(IProtonBufferAllocator allocator) : this(allocator, EMPTY_BUFFER_ARRAY)
       {
       }
@@ -96,7 +100,7 @@ namespace Apache.Qpid.Proton.Buffer
                buffer.ReadOffset = Math.Min(buffer.Capacity, remaining);
                remaining = Math.Max(0, remaining - buffer.Capacity);
             }
-            this.writeOffset = value;
+            this.readOffset = value;
          }
       }
 
@@ -282,7 +286,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public int CompareTo(IProtonBuffer other)
       {
-         throw new NotImplementedException();
+         return ProtonBufferSupport.Compare(this, other);
       }
 
       public bool Equals(IProtonBuffer other)

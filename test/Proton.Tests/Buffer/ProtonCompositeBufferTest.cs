@@ -99,5 +99,66 @@ namespace Apache.Qpid.Proton.Buffer
       }
 
       #endregion
+
+      #region Composite buffer read indexed tests
+
+      [Test]
+      public void TestManipulateReadIndexWithOneArrayAtCreateTime()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+         DoTestManipulateReadIndexWithOneArrayAppended(
+            IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, buffer));
+      }
+
+      [Ignore("Append not implemented")]
+      [Test]
+      public void TestManipulateReadIndexWithOneArrayAppended()
+      {
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+         DoTestManipulateReadIndexWithOneArrayAppended(buffer);
+      }
+
+      private void DoTestManipulateReadIndexWithOneArrayAppended(IProtonCompositeBuffer buffer)
+      {
+         Assert.AreEqual(10, buffer.Capacity);
+         Assert.AreEqual(10, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         buffer.ReadOffset = 5;
+         Assert.AreEqual(5, buffer.ReadOffset);
+
+         buffer.ReadOffset = 6;
+         Assert.AreEqual(6, buffer.ReadOffset);
+
+         buffer.ReadOffset = 10;
+         Assert.AreEqual(10, buffer.ReadOffset);
+
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadOffset = 11);
+      }
+
+      #endregion
+
+      #region Proton abstract buffer tests API implementation
+
+      // protected override IProtonBuffer AllocateBuffer(int initialCapacity)
+      // {
+      //    IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Allocate(initialCapacity);
+      //    return IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, wrapped);
+      // }
+
+      // protected override IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
+      // {
+      //    IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Allocate(initialCapacity, maxCapacity);
+      //    return IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, wrapped);
+      // }
+
+      // protected override IProtonBuffer WrapBuffer(byte[] array)
+      // {
+      //    IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Wrap(array);
+      //    return IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, wrapped);
+      // }
+
+      #endregion
    }
 }
