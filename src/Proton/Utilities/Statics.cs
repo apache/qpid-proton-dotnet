@@ -26,6 +26,22 @@ namespace Apache.Qpid.Proton.Utilities
    public static class Statics
    {
       /// <summary>
+      /// Creates and returns a copy of the input array with either a truncated
+      /// view if the length value passed is less than the input array length or
+      /// padded with default values for entries beyond the original array length.
+      /// </summary>
+      /// <typeparam name="T">The type of array this method is copying</typeparam>
+      /// <param name="original">The original array to copy</param>
+      /// <param name="newLength">The length of the new array to return</param>
+      /// <returns>The copy or the original array with the specified length</returns>
+      public static T[] CopyOf<T>(T[] original, int newLength)
+      {
+         T[] theCopy = new T[newLength];
+         Array.ConstrainedCopy(original, 0, theCopy, 0, Math.Min(original.Length, theCopy.Length));
+         return theCopy;
+      }
+
+      /// <summary>
       /// Checks if the given value is greater than zero and throws an exception if not.
       /// </summary>
       /// <param name="value">The value to check</param>

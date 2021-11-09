@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Diagnostics.CodeAnalysis;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Buffer
 {
@@ -190,7 +191,42 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonCompositeBuffer Append(IProtonBuffer buffer)
       {
-         throw new NotImplementedException();
+         Statics.RequireNonNull(buffer, "Appended buffer cannot be null");
+
+         if (buffer.Capacity == 0)
+         {
+            return this; // Filter buffers that offer nothing for this composite.
+         }
+
+         long newCapacity = capacity + buffer.Capacity;
+         CheckIsValidBufferSize(newCapacity);
+         IProtonBuffer[] restorable = this.buffers; // Save in case of errors
+         try
+         {
+            if (IProtonCompositeBuffer.IsComposite(buffer))
+            {
+               throw new NotImplementedException();
+            }
+            else
+            {
+               foreach (IProtonBuffer candidate in buffers)
+               {
+                  if (object.ReferenceEquals(candidate, buffer))
+                  {
+                     throw new ArgumentException("Cannot add a duplicate buffer to a composite buffer");
+                  }
+               }
+               AppendValidatedBuffer(buffer);
+            }
+         }
+         catch (Exception error)
+         {
+            // Put buffer into safe state following failed add.
+            this.buffers = restorable;
+            throw error;
+         }
+
+         return this;
       }
 
       public IProtonBuffer Compact()
@@ -877,6 +913,27 @@ namespace Apache.Qpid.Proton.Buffer
          // more than one contained buffer.
          CheckWriteBounds(index, size);
          return ChooseBuffer(index, size);
+      }
+
+      private static void CheckIsValidBufferSize(long size)
+      {
+         if (size < 0)
+         {
+            throw new ArgumentOutOfRangeException("Buffer capacity must not be negative, but was " + size + '.');
+         }
+         // We use max array size because on-heap buffers will be backed by byte-arrays.
+         if (size > MAX_CAPACITY)
+         {
+            throw new ArgumentOutOfRangeException(
+               "Buffer capacity cannot be greater than " + MAX_CAPACITY + ", but was " + size + '.');
+         }
+      }
+
+      private void AppendValidatedBuffer(IProtonBuffer extension)
+      {
+         buffers = Statics.CopyOf(buffers, buffers.Length + 1);
+         buffers[buffers.Length - 1] = extension;
+         ComputeOffsetsAndIndexes();
       }
 
       #endregion

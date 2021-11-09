@@ -110,7 +110,6 @@ namespace Apache.Qpid.Proton.Buffer
             IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, buffer));
       }
 
-      [Ignore("Append not implemented")]
       [Test]
       public void TestManipulateReadIndexWithOneArrayAppended()
       {
