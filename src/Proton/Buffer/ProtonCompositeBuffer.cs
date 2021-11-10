@@ -219,11 +219,11 @@ namespace Apache.Qpid.Proton.Buffer
                AppendValidatedBuffer(buffer);
             }
          }
-         catch (Exception error)
+         catch (Exception)
          {
             // Put buffer into safe state following failed add.
             this.buffers = restorable;
-            throw error;
+            throw;
          }
 
          return this;
@@ -384,62 +384,62 @@ namespace Apache.Qpid.Proton.Buffer
 
       public bool GetBoolean(long index)
       {
-         return PrepareForRead(readOffset, sizeof(byte)).GetBoolean(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(byte)).GetBoolean(nextComputedAccessIndex);
       }
 
       public sbyte GetByte(long index)
       {
-         return PrepareForRead(readOffset, sizeof(byte)).GetByte(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(byte)).GetByte(nextComputedAccessIndex);
       }
 
       public char GetChar(long index)
       {
-         return PrepareForRead(readOffset, sizeof(char)).GetChar(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(char)).GetChar(nextComputedAccessIndex);
       }
 
       public double GetDouble(long index)
       {
-         return PrepareForRead(readOffset, sizeof(double)).GetDouble(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(double)).GetDouble(nextComputedAccessIndex);
       }
 
       public float GetFloat(long index)
       {
-         return PrepareForRead(readOffset, sizeof(float)).GetFloat(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(float)).GetFloat(nextComputedAccessIndex);
       }
 
       public short GetShort(long index)
       {
-         return PrepareForRead(readOffset, sizeof(short)).GetShort(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(short)).GetShort(nextComputedAccessIndex);
       }
 
       public int GetInt(long index)
       {
-         return PrepareForRead(readOffset, sizeof(int)).GetInt(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(int)).GetInt(nextComputedAccessIndex);
       }
 
       public long GetLong(long index)
       {
-         return PrepareForRead(readOffset, sizeof(long)).GetLong(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(long)).GetLong(nextComputedAccessIndex);
       }
 
       public byte GetUnsignedByte(long index)
       {
-         return PrepareForRead(readOffset, sizeof(byte)).GetUnsignedByte(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(byte)).GetUnsignedByte(nextComputedAccessIndex);
       }
 
       public ushort GetUnsignedShort(long index)
       {
-         return PrepareForRead(readOffset, sizeof(ushort)).GetUnsignedShort(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(ushort)).GetUnsignedShort(nextComputedAccessIndex);
       }
 
       public uint GetUnsignedInt(long index)
       {
-         return PrepareForRead(readOffset, sizeof(int)).GetUnsignedInt(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(int)).GetUnsignedInt(nextComputedAccessIndex);
       }
 
       public ulong GetUnsignedLong(long index)
       {
-         return PrepareForRead(readOffset, sizeof(ulong)).GetUnsignedLong(nextComputedAccessIndex);
+         return PrepareForRead(index, sizeof(ulong)).GetUnsignedLong(nextComputedAccessIndex);
       }
 
       public bool ReadBoolean()
@@ -739,19 +739,19 @@ namespace Apache.Qpid.Proton.Buffer
          // invariants such as no read or write gaps etc.
          if (buffers.Length > 0)
          {
-            bool writeLimitHit = false;
-            bool readLimitHit = false;
+            bool unwrittenBufferEnforced = false;
+            bool unreadBufferEnforced = false;
 
             foreach (IProtonBuffer buffer in buffers)
             {
-               if (buffer.WritableBytes == 0)
+               if (buffer.WritableBytes == 0 && !unwrittenBufferEnforced)
                {
                   writeOffset += buffer.Capacity;
                }
-               else if (!writeLimitHit)
+               else if (!unwrittenBufferEnforced)
                {
                   writeOffset += buffer.WriteOffset;
-                  writeLimitHit = true;
+                  unwrittenBufferEnforced = true;
                }
                else if (buffer.WriteOffset != 0)
                {
@@ -761,14 +761,14 @@ namespace Apache.Qpid.Proton.Buffer
             }
             foreach (IProtonBuffer buffer in buffers)
             {
-               if (buffer.ReadableBytes == 0 && buffer.WritableBytes == 0)
+               if (!unreadBufferEnforced && buffer.ReadableBytes == 0 && buffer.WritableBytes == 0)
                {
                   readOffset += buffer.Capacity;
                }
-               else if (!readLimitHit)
+               else if (!unreadBufferEnforced)
                {
                   readOffset += buffer.ReadOffset;
-                  readLimitHit = true;
+                  unreadBufferEnforced = true;
                }
                else if (buffer.ReadOffset != 0)
                {

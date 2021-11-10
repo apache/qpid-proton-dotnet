@@ -686,30 +686,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public override int GetHashCode()
       {
-         long readable = ReadableBytes;
-         long readableInt32 = readable >> 2;
-         long remainingBytes = readable & 3;
-
-         int hash = 1;
-         long position = ReadOffset;
-
-         for (long i = readableInt32; i > 0; i--)
-         {
-            hash = 31 * hash + GetInt(position);
-            position += sizeof(int);
-         }
-
-         for (long i = remainingBytes; i > 0; i--)
-         {
-            hash = 31 * hash + GetByte(position++);
-         }
-
-         if (hash == 0)
-         {
-            hash = 1;
-         }
-
-         return hash;
+         return ProtonBufferSupport.GetHashCode(this);
       }
 
       public override bool Equals(object other)
@@ -726,46 +703,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public bool Equals(IProtonBuffer other)
       {
-         if (other == null)
-         {
-            return false;
-         }
-
-         if (this.ReadableBytes != other.ReadableBytes)
-         {
-            return false;
-         }
-
-         long readable = ReadableBytes;
-         long longCount = readable >> 3;
-         long byteCount = readable & 7;
-
-         long positionSelf = ReadOffset;
-         long positionOther = other.ReadOffset;
-
-         for (long i = longCount; i > 0; i--)
-         {
-            if (GetLong(positionSelf) != other.GetLong(positionOther))
-            {
-               return false;
-            }
-
-            positionSelf += sizeof(long);
-            positionOther += sizeof(long);
-         }
-
-         for (long i = byteCount; i > 0; i--)
-         {
-            if (GetByte(positionSelf) != other.GetByte(positionOther))
-            {
-               return false;
-            }
-
-            positionSelf++;
-            positionOther++;
-         }
-
-         return true;
+         return ProtonBufferSupport.Equals(this, other);
       }
 
       public string ToString(Encoding encoding)
