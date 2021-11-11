@@ -26,6 +26,7 @@ using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -336,13 +337,62 @@ namespace Apache.Qpid.Proton.Client.Implementation
             return result;
          }
 
-         public override int Read(byte[] buffer, int offset, int count)
+         public override int Read(byte[] target, int offset, int length)
          {
-            throw new NotImplementedException();
+            CheckStreamStateIsValid();
+
+            Statics.CheckFromIndexSize(offset, length, (int)buffer.ReadableBytes);
+
+            int remaining = length;
+            int bytesRead = 0;
+
+            if (length <= 0)
+            {
+               return 0;
+            }
+
+            while (remaining > 0)
+            {
+               if (buffer.IsReadable)
+               {
+                  if (buffer.ReadableBytes < remaining)
+                  {
+                     int readTarget = (int)buffer.ReadableBytes;
+                     buffer.CopyInto(buffer.ReadOffset, target, offset + bytesRead, buffer.ReadableBytes);
+                     buffer.ReadOffset = buffer.WriteOffset;
+                     bytesRead += readTarget;
+                     remaining -= readTarget;
+                  }
+                  else
+                  {
+                     buffer.CopyInto(buffer.ReadOffset, target, offset + bytesRead, remaining);
+                     buffer.ReadOffset += remaining;
+                     bytesRead += remaining;
+                     remaining = 0;
+                  }
+
+                  TryReleaseReadBuffers();
+               }
+               else if (RequestMoreData() < 0)
+               {
+                  return bytesRead > 0 ? bytesRead : -1;
+               }
+            }
+
+            return bytesRead;
          }
 
          public override long Seek(long offset, SeekOrigin origin)
          {
+            switch(origin)
+            {
+               // TODO
+               case SeekOrigin.Begin:
+               case SeekOrigin.Current:
+               case SeekOrigin.End:
+                  break;
+            }
+
             throw new NotImplementedException();
          }
 

@@ -106,6 +106,48 @@ namespace Apache.Qpid.Proton.Utilities
       }
 
       /// <summary>
+      /// Checks if the range specified by the provided index + the size of the
+      /// range provided is within the provided length.  The method consideres the
+      /// index as being within the range specified and considers zero as a value
+      /// that lies within the range of valid lengths.
+      /// </summary>
+      /// <param name="index">The index where the operation will begin</param>
+      /// <param name="size">The size of the range that defines the operation</param>
+      /// <param name="length">The available length of the target of the operation</param>
+      /// <returns>The given index if the operation is deemed valid.</returns>
+      public static int CheckFromIndexSize(int index, int size, int length)
+      {
+         if ((length | index | size) < 0 || size > (length - index))
+         {
+            throw new ArgumentOutOfRangeException(string.Format(
+               "The given range specied by index {0} + size {1} is outside the specified region length {2}",
+               index, size, length));
+         }
+         return index;
+      }
+
+      /// <summary>
+      /// Checks if the range specified by the provided index + the size of the
+      /// range provided is within the provided length.  The method consideres the
+      /// index as being within the range specified and considers zero as a value
+      /// that lies within the range of valid lengths.
+      /// </summary>
+      /// <param name="index">The index where the operation will begin</param>
+      /// <param name="size">The size of the range that defines the operation</param>
+      /// <param name="length">The available length of the target of the operation</param>
+      /// <returns>The given index if the operation is deemed valid.</returns>
+      public static long CheckFromIndexSize(long index, long size, long length)
+      {
+         if ((length | index | size) < 0 || size > (length - index))
+         {
+            throw new ArgumentOutOfRangeException(string.Format(
+               "The given range specied by index {0} + size {1} is outside the specified region length {2}",
+               index, size, length));
+         }
+         return index;
+      }
+
+      /// <summary>
       /// Used to check for a method argument being null when the precondition
       /// states that it should not be, the method provides for the user to supply
       /// a nessage to use when throwing an Argument null exception if the value
