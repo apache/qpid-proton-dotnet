@@ -23,6 +23,7 @@ using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Threading;
 using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
 
@@ -42,8 +43,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly IIncomingDelivery protonDelivery;
 
       private ClientStreamReceiverMessage message;
-      private Stream rawInputStream;
-      // TODO private RawDeliveryInputStream rawInputStream;
+      private RawDeliveryInputStream rawInputStream;
 
       internal ClientStreamDelivery(ClientStreamReceiver receiver, IIncomingDelivery protonDelivery)
       {
@@ -113,7 +113,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (message == null)
          {
-            // TODO message = new ClientStreamReceiverMessage(receiver, this, rawInputStream = new RawDeliveryInputStream());
+            message = new ClientStreamReceiverMessage(receiver, this, rawInputStream = new RawDeliveryInputStream(this));
          }
 
          return message;
@@ -159,18 +159,23 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal IIncomingDelivery ProtonDelivery => protonDelivery;
 
+      internal void HandleReceiverClosed(ClientStreamReceiver receiver)
+      {
+         rawInputStream?.HandleReceiverClosed(receiver);
+      }
+
       #endregion
 
       #region private stream delivery implementation
 
       private void HandleDeliveryRead(IIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         rawInputStream?.HandleDeliveryRead(delivery);
       }
 
       private void HandleDeliveryAborted(IIncomingDelivery delivery)
       {
-         throw new NotImplementedException();
+         rawInputStream?.HandleDeliveryAborted(delivery);
       }
 
       #endregion
@@ -179,20 +184,28 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private class RawDeliveryInputStream : Stream
       {
+         private const int INVALID_MARK = -1;
+         private const int DEFAULT_MARK_LIMIT = 1024;
+
          private readonly AtomicBoolean closed = false;
          private readonly ClientStreamDelivery delivery;
          private readonly ClientStreamReceiver receiver;
+         private readonly ClientSession session;
          private readonly ClientConnection connection;
          private readonly Engine.IIncomingDelivery protonDelivery;
          private readonly IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          private TaskCompletionSource<int> readRequest;
 
+         private long markIndex = INVALID_MARK;
+         private int markLimit;
+
          public RawDeliveryInputStream(ClientStreamDelivery delivery)
          {
             this.delivery = delivery;
             this.receiver = delivery.receiver;
             this.protonDelivery = delivery.protonDelivery;
+            this.session = (ClientSession)delivery.receiver.Session;
             this.connection = (ClientConnection)delivery.receiver.Session.Connection;
          }
 
@@ -202,21 +215,91 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override bool CanWrite => false;
 
-         public override long Length => throw new NotImplementedException();
+         public override long Length
+         {
+            get
+            {
+               CheckStreamStateIsValid();
+               if (buffer.IsReadable)
+               {
+                  return buffer.ReadableBytes;
+               }
+               else
+               {
+                  TaskCompletionSource<int> request = new TaskCompletionSource<int>();
+
+                  try
+                  {
+                     connection.Execute(() =>
+                     {
+                        if (protonDelivery.Available > 0)
+                        {
+                           buffer.Append(protonDelivery.ReadAll());
+                        }
+
+                        request.TrySetResult((int)buffer.ReadableBytes);
+                     });
+
+                     return connection.Request(receiver, request).Task.Result;
+                  }
+                  catch (Exception e)
+                  {
+                     throw new IOException("Error getting available bytes from incoming delivery", e);
+                  }
+               }
+            }
+         }
 
          public override long Position
          {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
+            get => markIndex = buffer.ReadOffset;
+            set => Seek(value, SeekOrigin.Begin);
          }
 
          public override void Close()
          {
+            markLimit = 0;
+            markIndex = INVALID_MARK;
+
             if (closed.CompareAndSet(false, true))
             {
                try
                {
+                  TaskCompletionSource<bool> closeRequest = new TaskCompletionSource<bool>();
 
+                  connection.Execute(() =>
+                  {
+                     AutoAcceptDeliveryIfNecessary();
+
+                     // If the deliver wasn't fully read either because there are remaining
+                     // bytes locally we need to discard those to aid in retention avoidance.
+                     // and to potentially open the session window to allow for fully reading
+                     // and discarding any inbound bytes that remain.
+                     try
+                     {
+                        _ = protonDelivery.ReadAll();
+                     }
+                     catch (EngineFailedException)
+                     {
+                        // Ignore as engine is down and we cannot read any more
+                     }
+
+                     // Clear anything that wasn't yet read and then clear any pending read request as EOF
+                     buffer.WriteOffset = buffer.Capacity;
+                     buffer.ReadOffset = buffer.Capacity;
+
+                     buffer.Compact();
+
+                     if (readRequest != null)
+                     {
+                        readRequest.TrySetResult(-1);
+                        readRequest = null;
+                     }
+
+                     closeRequest.TrySetResult(true);
+                  });
+
+                  connection.Request(receiver, closeRequest);
                }
                finally
                {
@@ -227,7 +310,30 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override void Flush()
          {
-            throw new NotImplementedException();
+            // Nothing to do here for incoming raw message stream.
+         }
+
+         public override int ReadByte()
+         {
+            CheckStreamStateIsValid();
+
+            int result = -1;
+
+            while (true)
+            {
+               if (buffer.IsReadable)
+               {
+                  result = buffer.ReadUnsignedByte() & 0xff;
+                  TryReleaseReadBuffers();
+                  break;
+               }
+               else if (RequestMoreData() < 0)
+               {
+                  break;
+               }
+            }
+
+            return result;
          }
 
          public override int Read(byte[] buffer, int offset, int count)
@@ -252,7 +358,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          #region Delivery event handlers
 
-         private void HandleDeliveryRead(IIncomingDelivery delivery)
+         internal void HandleDeliveryRead(IIncomingDelivery delivery)
          {
             if (closed)
             {
@@ -281,14 +387,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
 
-         private void HandleDeliveryAborted(IIncomingDelivery delivery)
+         internal void HandleDeliveryAborted(IIncomingDelivery delivery)
          {
             readRequest?.TrySetException(new ClientDeliveryAbortedException("The remote sender has aborted this delivery"));
 
             delivery.Settle();
          }
 
-         private void HandleReceiverClosed(ClientStreamReceiver receiver)
+         internal void HandleReceiverClosed(ClientStreamReceiver receiver)
          {
             readRequest?.TrySetException(new ClientResourceRemotelyClosedException("The receiver link has been remotely closed."));
          }
@@ -296,6 +402,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
          #endregion
 
          #region Private APIs for internal Stream use
+
+         private void TryReleaseReadBuffers()
+         {
+            if ((buffer.ReadOffset - markIndex) > markLimit)
+            {
+               markIndex = INVALID_MARK;
+               buffer.Compact();
+            }
+         }
 
          private int RequestMoreData()
          {

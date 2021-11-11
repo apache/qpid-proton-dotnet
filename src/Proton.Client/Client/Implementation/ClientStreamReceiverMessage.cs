@@ -704,12 +704,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override void SetLength(long value)
          {
-            throw new NotSupportedException();
+            throw new NotSupportedException("Cannot set length on an incoming streamed message Stream");
          }
 
          public override void Write(byte[] buffer, int offset, int count)
          {
-            throw new NotSupportedException();
+            throw new NotSupportedException("Cannot write to an incoming streamed message Stream");
          }
 
          protected void CheckClosed()
