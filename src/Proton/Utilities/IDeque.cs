@@ -45,21 +45,57 @@ namespace Apache.Qpid.Proton.Utilities
       /// </summary>
       bool IsEmpty { get; }
 
-      void AddFirst(T value);
+      /// <summary>
+      /// Inserts the given value onto the front of this Deque unless the deque has reached
+      /// its capacity limit in which case this method would throw an exception. Generally it
+      /// is preferable to call the TryEnqueueFront method and check the return value to determine
+      /// if the operation succeeded.
+      /// </summary>
+      /// <param name="value">The value to add to the front of the Deque</param>
+      /// <exception cref="InvalidOperationException">If the Deque is currently at max capacity</exception>
+      void EnqueueFront(T value);
 
-      void AddLast(T value);
+      /// <summary>
+      /// Inserts the given value onto the back of this Deque unless the deque has reached
+      /// its capacity limit in which case this method would throw an exception. Generally it
+      /// is preferable to call the TryEnqueueBack method and check the return value to determine
+      /// if the operation succeeded.
+      /// </summary>
+      /// <param name="value">The value to add to the back of the Deque</param>
+      /// <exception cref="InvalidOperationException">If the Deque is currently at max capacity</exception>
+      void EnqueueBack(T value);
 
-      bool TryAddFirst(T value);
+      /// <summary>
+      /// Removes and returns the element at the front of the Deque if the Deque is currently
+      /// not empty, otherwise this method throws an exception to indicate that there is no
+      /// value in the Deque currently. Generally it is preferable to call the TryDequeue
+      /// method and check the return value to see if the operation succeeded.
+      /// </summary>
+      /// <returns>The element at the front of the Deque</returns>
+      /// <exception cref="InvalidOperationException">If the Deque is currently empty</exception>
+      T DequeueFront();
 
-      bool TryAddLast(T value);
+      /// <summary>
+      /// Removes and returns the element at the back of the Deque if the Deque is currently
+      /// not empty, otherwise this method throws an exception to indicate that there is no
+      /// value in the Deque currently. Generally it is preferable to call the TryDequeue
+      /// method and check the return value to see if the operation succeeded.
+      /// </summary>
+      /// <returns>The element at the back of the Deque</returns>
+      /// <exception cref="InvalidOperationException">If the Deque is currently empty</exception>
+      T DequeueBack();
 
-      bool TryRemoveFirst(out T value);
-
-      bool TryRemoveLast(out T value);
-
-      bool TryPeekFirst(out T value);
-
-      bool TryPeekLast(out T value);
-
+      /// <summary>
+      /// Inserts the given value onto the back of this Deque unless the deque has reached
+      /// its capacity limit in which case this method would throw an exception. Generally it
+      /// is preferable to call the TryEnqueueBack method and check the return value to determine
+      /// if the operation succeeded.
+      /// </summary>
+      /// <param name="value">The value to add to the back of the Deque</param>
+      /// <exception cref="InvalidOperationException">If the Deque is currently at max capacity</exception>
+      void ICollection<T>.Add(T item)
+      {
+         EnqueueBack(item);
+      }
    }
 }

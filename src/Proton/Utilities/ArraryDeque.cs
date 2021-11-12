@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          foreach (T element in elements)
          {
-            AddLast(element);
+            EnqueueBack(element);
          }
       }
 
@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public object SyncRoot => sync;
 
-      public void AddFirst(T item)
+      public void EnqueueFront(T item)
       {
          if (item == null)
          {
@@ -80,24 +80,46 @@ namespace Apache.Qpid.Proton.Utilities
          }
       }
 
-      public void AddLast(T item)
+      public void EnqueueBack(T item)
       {
          if (item == null)
          {
             throw new ArgumentNullException("Values added to an array deque cannot be null");
          }
 
+         T[] localElements = this.elements;
+         localElements[tail = CircularAdvance(tail, localElements.Length)] = item;
+
+         if (++count == localElements.Length)
+         {
+            EnsureAdditionalCapacity(AtLeastOne);
+         }
+      }
+
+      public T DequeueFront()
+      {
+         if (count == 0)
+         {
+            throw new InvalidOperationException("The queue is empty and cannot provide additional elements");
+         }
+
          throw new NotImplementedException();
       }
 
-      public void Add(T item)
+      public T DequeueBack()
       {
-         AddLast(item);
+         if (count == 0)
+         {
+            throw new InvalidOperationException("The queue is empty and cannot provide additional elements");
+         }
+
+         throw new NotImplementedException();
       }
 
       public void Clear()
       {
-         throw new NotImplementedException();
+         ClearDequeArray(elements, head, tail);
+         head = tail = count = 0;
       }
 
       public bool Contains(T item)
@@ -120,36 +142,6 @@ namespace Apache.Qpid.Proton.Utilities
          throw new NotImplementedException();
       }
 
-      public bool TryAddFirst(T value)
-      {
-         throw new NotImplementedException();
-      }
-
-      public bool TryAddLast(T value)
-      {
-         throw new NotImplementedException();
-      }
-
-      public bool TryPeekFirst(out T value)
-      {
-         throw new NotImplementedException();
-      }
-
-      public bool TryPeekLast(out T value)
-      {
-         throw new NotImplementedException();
-      }
-
-      public bool TryRemoveFirst(out T value)
-      {
-         throw new NotImplementedException();
-      }
-
-      public bool TryRemoveLast(out T value)
-      {
-         throw new NotImplementedException();
-      }
-
       public IEnumerator<T> GetEnumerator()
       {
          return new ArrayDequeEnumerator(this);
@@ -167,13 +159,23 @@ namespace Apache.Qpid.Proton.Utilities
 
       }
 
-      private static int CircularReduce(int i, int length) {
-         if (--i < 0)
+      private void ClearDequeArray(T[] elements, int head, int tail)
+      {
+         while(head != tail)
          {
-            i = length - 1;
+            elements[head] = default(T);
+            CircularAdvance(head, elements.Length);
          }
+      }
 
-         return i;
+      private static int CircularAdvance(int i, int length)
+      {
+         return i++ % length;
+      }
+
+      private static int CircularReduce(int i, int length)
+      {
+         return i-- % length;
       }
 
       #endregion
