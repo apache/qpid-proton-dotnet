@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Utilities
    /// Methods are provided to insert, remove, and or peek at elements. Each of these methods
    /// exists in two forms: one throws an exception if the operation fails, the other returns a
    /// boolean value to indicate if the operation succeeded or failed. The try based form of the
-   /// insert operation is designed specifically for use with capacity-restricted Deque
+   /// insert operation is designed specifically for use with capacity-restricted queue
    /// implementations; in most implementations, insert operations cannot fail.
    /// </remarks>
    /// <typeparam name="T">The type that is carried in this collection</typeparam>
@@ -46,53 +46,121 @@ namespace Apache.Qpid.Proton.Utilities
       bool IsEmpty { get; }
 
       /// <summary>
-      /// Inserts the given value onto the front of this Deque unless the deque has reached
+      /// Inserts the given value onto the back of this queue unless the queue has reached
+      /// its capacity limit in which case this method would throw an exception. Generally it
+      /// is preferable to call the TryEnqueue method and check the return value to determine
+      /// if the operation succeeded.
+      /// </summary>
+      /// <param name="value">The value to add to the tail of the queue</param>
+      /// <exception cref="InvalidOperationException">If the queue is currently at max capacity</exception>
+      void Enqueue(T value);
+
+      /// <summary>
+      /// Attempts to insert the given value onto the back of this queue unless the deque has
+      /// reached its capacity limit in which case this method would throw an exception.
+      /// </summary>
+      /// <param name="value">The value to add to the front of the queue</param>
+      /// <returns>True if the value was added to the deque</returns>
+      bool TryEnqueue(T value);
+
+      /// <summary>
+      /// Inserts the given value onto the front of this queue unless the queue has reached
       /// its capacity limit in which case this method would throw an exception. Generally it
       /// is preferable to call the TryEnqueueFront method and check the return value to determine
       /// if the operation succeeded.
       /// </summary>
-      /// <param name="value">The value to add to the front of the Deque</param>
-      /// <exception cref="InvalidOperationException">If the Deque is currently at max capacity</exception>
+      /// <param name="value">The value to add to the front of the queue</param>
+      /// <exception cref="InvalidOperationException">If the queue is currently at max capacity</exception>
       void EnqueueFront(T value);
 
       /// <summary>
-      /// Inserts the given value onto the back of this Deque unless the deque has reached
+      /// Attempts to insert the given value onto the front of this queue unless the queue has
+      /// reached its capacity limit in which case this method would throw an exception.
+      /// </summary>
+      /// <param name="value">The value to add to the front of the queue</param>
+      /// <returns>True if the value was added to the deque</returns>
+      bool TryEnqueueFront(T value);
+
+      /// <summary>
+      /// Inserts the given value onto the back of this queue unless the deque has reached
       /// its capacity limit in which case this method would throw an exception. Generally it
       /// is preferable to call the TryEnqueueBack method and check the return value to determine
       /// if the operation succeeded.
       /// </summary>
-      /// <param name="value">The value to add to the back of the Deque</param>
-      /// <exception cref="InvalidOperationException">If the Deque is currently at max capacity</exception>
+      /// <param name="value">The value to add to the back of the queue</param>
+      /// <exception cref="InvalidOperationException">If the queue is currently at max capacity</exception>
       void EnqueueBack(T value);
 
       /// <summary>
-      /// Removes and returns the element at the front of the Deque if the Deque is currently
+      /// Attempts to insert the given value onto the back of this queue unless the deque has
+      /// reached its capacity limit in which case this method would throw an exception.
+      /// </summary>
+      /// <param name="value">The value to add to the front of the queue</param>
+      /// <returns>True if the value was added to the deque</returns>
+      bool TryEnqueueBack(T value);
+
+      /// <summary>
+      /// Removes and returns the element at the front of the queue if the queue is currently
       /// not empty, otherwise this method throws an exception to indicate that there is no
-      /// value in the Deque currently. Generally it is preferable to call the TryDequeue
+      /// value in the queue currently. Generally it is preferable to call the TryDequeue
       /// method and check the return value to see if the operation succeeded.
       /// </summary>
-      /// <returns>The element at the front of the Deque</returns>
-      /// <exception cref="InvalidOperationException">If the Deque is currently empty</exception>
+      /// <returns>The element at the front of the queue</returns>
+      /// <exception cref="InvalidOperationException">If the queue is currently empty</exception>
+      T Dequeue();
+
+      /// <summary>
+      /// Attempt to remove and return the element at the front of the queue if there is
+      /// any element to return otherwise the method returns false.
+      /// </summary>
+      /// <param name="front">A reference to store the value at the front of the queue</param>
+      /// <returns>True if a value was removed from the queue and returned.</returns>
+      bool TryDequeue(out T front);
+
+      /// <summary>
+      /// Removes and returns the element at the front of the queue if the queue is currently
+      /// not empty, otherwise this method throws an exception to indicate that there is no
+      /// value in the queue currently. Generally it is preferable to call the TryDequeueFront
+      /// method and check the return value to see if the operation succeeded.
+      /// </summary>
+      /// <returns>The element at the front of the queue</returns>
+      /// <exception cref="InvalidOperationException">If the queue is currently empty</exception>
       T DequeueFront();
 
       /// <summary>
-      /// Removes and returns the element at the back of the Deque if the Deque is currently
+      /// Attempt to remove and return the element at the front of the queue if there is
+      /// any element to return otherwise the method returns false.
+      /// </summary>
+      /// <param name="front">A reference to store the value at the front of the queue</param>
+      /// <returns>True if a value was removed from the queue and returned.</returns>
+      bool TryDequeueFront(out T front);
+
+      /// <summary>
+      /// Removes and returns the element at the back of the queue if the queue is currently
       /// not empty, otherwise this method throws an exception to indicate that there is no
-      /// value in the Deque currently. Generally it is preferable to call the TryDequeue
+      /// value in the queue currently. Generally it is preferable to call the TryDequeue
       /// method and check the return value to see if the operation succeeded.
       /// </summary>
-      /// <returns>The element at the back of the Deque</returns>
-      /// <exception cref="InvalidOperationException">If the Deque is currently empty</exception>
+      /// <returns>The element at the back of the queue</returns>
+      /// <exception cref="InvalidOperationException">If the queue is currently empty</exception>
       T DequeueBack();
 
       /// <summary>
-      /// Inserts the given value onto the back of this Deque unless the deque has reached
+      /// Attempt to remove and return the element at the back of the queue if there is
+      /// any element to return otherwise the method returns false.
+      /// </summary>
+      /// <param name="back">A reference to store the value at the back of the queue</param>
+      /// <returns>True if a value was removed from the queue and returned.</returns>
+      bool TryDequeueBack(out T back);
+
+      /// <summary>
+      /// Inserts the given value onto the back of this queue unless the deque has reached
       /// its capacity limit in which case this method would throw an exception. Generally it
       /// is preferable to call the TryEnqueueBack method and check the return value to determine
       /// if the operation succeeded.
       /// </summary>
-      /// <param name="value">The value to add to the back of the Deque</param>
-      /// <exception cref="InvalidOperationException">If the Deque is currently at max capacity</exception>
+      /// <param name="value">The value to add to the back of the queue</param>
+      /// <exception cref="InvalidOperationException">If the queue is currently at max capacity</exception>
       void ICollection<T>.Add(T item)
       {
          EnqueueBack(item);
