@@ -65,24 +65,24 @@ namespace Apache.Qpid.Proton.Utilities
 
       public object SyncRoot => sync;
 
-      public void Enqueue(T value)
-      {
-         EnqueueBack(value);
-      }
-
       public bool TryEnqueue(T value)
       {
          return TryEnqueueBack(value);
       }
 
-      public T Dequeue()
+      public void Enqueue(T value)
       {
-         return DequeueFront();
+         EnqueueBack(value);
       }
 
       public bool TryDequeue(out T front)
       {
          return TryDequeueFront(out front);
+      }
+
+      public T Dequeue()
+      {
+         return DequeueFront();
       }
 
       public bool TryEnqueueFront(T item)
@@ -97,12 +97,11 @@ namespace Apache.Qpid.Proton.Utilities
             return false;
          }
 
-         T[] localElements = this.elements;
          // Head always point to an item in the queue at the front unless the queue
          // is empty so it must be reduced first then assigned to create a slot
-         localElements[head = CircularReduce(head, localElements.Length)] = item;
+         elements[head = CircularReduce(head, elements.Length)] = item;
 
-         if (++count == localElements.Length)
+         if (++count == elements.Length)
          {
             EnsureAdditionalCapacity(AtLeastOne);
          }
@@ -131,13 +130,13 @@ namespace Apache.Qpid.Proton.Utilities
          }
 
          modCount++;
-         T[] localElements = this.elements;
+
          // Tail is always the location when an item will be added to the back
          // of the queue so we assign first then advance.
-         localElements[tail] = item;
-         tail = CircularAdvance(tail, localElements.Length);
+         elements[tail] = item;
+         tail = CircularAdvance(tail, elements.Length);
 
-         if (++count == localElements.Length)
+         if (++count == elements.Length)
          {
             EnsureAdditionalCapacity(AtLeastOne);
          }
@@ -162,12 +161,10 @@ namespace Apache.Qpid.Proton.Utilities
          }
 
          modCount++;
-         T[] localElements = this.elements;
-         int localHead = head;
 
-         result = localElements[localHead];
-         localElements[localHead] = default(T);
-         head = CircularAdvance(localHead, localElements.Length);
+         result = elements[head];
+         elements[head] = default(T);
+         head = CircularAdvance(head, elements.Length);
          count--;
 
          return true;
@@ -193,11 +190,10 @@ namespace Apache.Qpid.Proton.Utilities
             return false;
          }
 
-         T[] localElements = this.elements;
-         int newTail = tail = CircularReduce(tail, localElements.Length);
+         int newTail = tail = CircularReduce(tail, elements.Length);
 
-         result = localElements[newTail];
-         localElements[newTail] = default(T);
+         result = elements[newTail];
+         elements[newTail] = default(T);
          count--;
 
          return true;
@@ -215,17 +211,80 @@ namespace Apache.Qpid.Proton.Utilities
          return result;
       }
 
+      public T Peek()
+      {
+         return PeekFront();
+      }
+
+      public bool TryPeek(out T front)
+      {
+         return TryPeekFront(out front);
+      }
+
+      public T PeekFront()
+      {
+         T result;
+
+         if (!TryPeekFront(out result))
+         {
+            throw new InvalidOperationException("Cannot peek at front of empty queue");
+         }
+
+         return result;
+      }
+
+      public bool TryPeekFront(out T front)
+      {
+         if (count > 0)
+         {
+            front = elements[head];
+            return true;
+         }
+         else
+         {
+            front = default(T);
+            return false;
+         }
+      }
+
+      public T PeekBack()
+      {
+         T result;
+
+         if (!TryPeekBack(out result))
+         {
+            throw new InvalidOperationException("Cannot peek at back of empty queue");
+         }
+
+         return result;
+      }
+
+      public bool TryPeekBack(out T back)
+      {
+         if (count > 0)
+         {
+            back = elements[CircularReduce(tail, elements.Length)];
+            return true;
+         }
+         else
+         {
+            back = default(T);
+            return false;
+         }
+      }
+
       public void Clear()
       {
          ClearDequeArray(elements, head, tail);
          head = tail = count = 0;
+         modCount++;
       }
 
       public bool Contains(T item)
       {
          foreach (T element in this)
          {
-            if (element.Equals(item))
+            if (element?.Equals(item) ?? false)
             {
                return true;
             }
@@ -256,11 +315,26 @@ namespace Apache.Qpid.Proton.Utilities
 
       public bool Remove(T item)
       {
-         throw new NotImplementedException("ArrayDeque does not currently support item removal");
+         if (count != 0)
+         {
+            int range = count;
+
+            for (int i = head, j = 0; j < range; i = CircularAdvance(i, range))
+            {
+               if (elements[i]?.Equals(item) ?? false)
+               {
+                  RemoveInternal(i);
+                  return true;
+               }
+            }
+         }
+
+         return false;
       }
 
       public IEnumerator<T> GetEnumerator()
       {
+         LinkedList<T> list = new LinkedList<T>();
          return new ArrayDequeEnumerator(this);
       }
 
@@ -283,7 +357,9 @@ namespace Apache.Qpid.Proton.Utilities
          int currentSize = elements.Length;
 
          // Grow by more than the at least value to try and prevent repeated resizing.
-         int extraRoom = currentSize < sbyte.MaxValue ? Math.Max(currentSize, atLeast + 16) : atLeast + 16;
+         int extraRoom = currentSize < sbyte.MaxValue ?
+               Math.Max(currentSize, atLeast + 16) :  // When smaller double if we can
+               atLeast + (currentSize >> 1);          // When larger gro by 50% beyond the at least value
 
          if (extraRoom < 0)
          {
@@ -295,12 +371,13 @@ namespace Apache.Qpid.Proton.Utilities
          }
 
          T[] newElements = Statics.CopyOf(elements, currentSize + extraRoom);
+
          // for the wrapped head case we must push head elements forward to the end of the array
          // All other cases head would be less than tail and the copy would capture the state
          // without any disruptions to current element positions.
          if (tail < head || (tail == head && count != 0))
          {
-            Array.ConstrainedCopy(elements, head, newElements, head + extraRoom, extraRoom);
+            Array.ConstrainedCopy(elements, head, newElements, head + extraRoom, elements.Length - head);
 
             for (int i = head; i < head + extraRoom; ++i)
             {
@@ -319,18 +396,93 @@ namespace Apache.Qpid.Proton.Utilities
          while (head != tail)
          {
             elements[head] = default(T);
-            CircularAdvance(head, elements.Length);
+            head = CircularAdvance(head, elements.Length);
          }
       }
 
       private static int CircularAdvance(int i, int length)
       {
-         return ++i > length ? 0 : i;
+         return ++i < length ? i : 0;
       }
 
       private static int CircularReduce(int i, int length)
       {
-         return --i >= 0 ? 0 : length - 1;
+         return --i < 0 ? length - 1 : i;
+      }
+
+      /// <summary>
+      /// A more optimal algorithm would figure out which end is closer and
+      /// shift the elements that direction using memory copies which could
+      /// be implemented somewhat more efficiently than single element copies.
+      /// </summary>
+      private void RemoveInternal(int current)
+      {
+         int cursor = current;
+         while (cursor != head)
+         {
+            int next = CircularReduce(cursor, elements.Length);
+            elements[cursor] = elements[next];
+            cursor = next;
+         }
+         head = CircularAdvance(head, elements.Length);
+
+         elements[cursor] = default(T);
+         count--;
+         modCount++;
+      }
+
+      public override bool Equals(object other)
+      {
+         if (other is IEnumerable<T>)
+         {
+            return Equals((IEnumerable<T>)other);
+         }
+
+         return false;
+      }
+
+      public bool Equals(IEnumerable<T> other)
+      {
+         if (other == null || other.Count() != Count)
+         {
+            return false;
+         }
+
+         if (other == this)
+         {
+            return true;
+         }
+
+         foreach (T thisValue in this)
+         {
+            foreach(T otherValue in other)
+            {
+               if ((thisValue == null && otherValue != null) ||
+                   (thisValue != null && otherValue == null))
+               {
+                  return false;
+               }
+
+               if (thisValue?.Equals(otherValue) ?? (thisValue == null && otherValue == null))
+               {
+                  return true;
+               }
+            }
+         }
+
+         return false;
+      }
+
+      public override int GetHashCode()
+      {
+         HashCode hash = new HashCode();
+
+         foreach(T element in this)
+         {
+            hash.Add(element);
+         }
+
+         return hash.ToHashCode();
       }
 
       #endregion
@@ -341,6 +493,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          private readonly ArrayDeque<T> parent;
          private readonly int expectedModCount;
+
          private int head = -1;
 
          public ArrayDequeEnumerator(ArrayDeque<T> parent)

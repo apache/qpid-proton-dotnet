@@ -17,7 +17,7 @@
 
 using System;
 using System.Threading;
-using System.Collections.Generic;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Utilities
 {
@@ -36,10 +36,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
       private volatile int state = STOPPED;
 
-      // TODO: This is slower and more garbage heavy than an array based double ended
-      //       queue but .NET doesn't have that so for now use this and implement something
-      //       more performant later.
-      private readonly LinkedList<T> queue = new LinkedList<T>();
+      private readonly IDeque<T> queue = new ArrayDeque<T>();
 
       public bool IsRunning => state == RUNNING;
 
@@ -103,8 +100,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
                if (!IsEmpty && IsRunning)
                {
-                  value = queue.First.ValueRef;
-                  queue.RemoveFirst();
+                  value = queue.Dequeue();
                }
             }
          }
@@ -120,8 +116,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
          {
             if (IsRunning && queue.Count > 0)
             {
-               value = queue.First.ValueRef;
-               queue.RemoveFirst();
+               value = queue.Dequeue();
             }
          }
 
@@ -137,7 +132,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
                return;
             }
 
-            queue.AddLast(delivery);
+            queue.Enqueue(delivery);
 
             Monitor.Pulse(mutex);
          }
@@ -152,7 +147,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
                return;
             }
 
-            queue.AddFirst(delivery);
+            queue.EnqueueFront(delivery);
 
             Monitor.Pulse(mutex);
          }

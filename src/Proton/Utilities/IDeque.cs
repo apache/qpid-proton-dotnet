@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -35,7 +36,8 @@ namespace Apache.Qpid.Proton.Utilities
    /// implementations; in most implementations, insert operations cannot fail.
    /// </remarks>
    /// <typeparam name="T">The type that is carried in this collection</typeparam>
-   public interface IDeque<T> : ICollection<T>, IEnumerable<T>, IReadOnlyCollection<T>, IEnumerable, ICollection
+   public interface IDeque<T> : ICollection<T>, IEnumerable<T>, IReadOnlyCollection<T>, IEnumerable,
+                                ICollection, IEquatable<IEnumerable<T>>
    {
       /// <summary>
       /// Returns true if the double ended queue is currently empty. This method provides
@@ -118,6 +120,60 @@ namespace Apache.Qpid.Proton.Utilities
       bool TryDequeue(out T front);
 
       /// <summary>
+      /// Returns the element at the front of the queue if the queue is currently not empty,
+      /// otherwise this method throws an exception to indicate that there is no value in the
+      /// queue currently. Generally it is preferable to call the TryPeek method and check
+      /// the return value to see if the operation succeeded.
+      /// </summary>
+      /// <returns>The element at the front of the queue</returns>
+      /// <exception cref="InvalidOperationException">If the queue is currently empty</exception>
+      T Peek();
+
+      /// <summary>
+      /// Attempt to read and return the element at the front of the queue if there is
+      /// any element to return otherwise the method returns false.
+      /// </summary>
+      /// <param name="front">A reference to store the value at the front of the queue</param>
+      /// <returns>True if a value was read from the queue and returned.</returns>
+      bool TryPeek(out T front);
+
+      /// <summary>
+      /// Returns the element at the front of the queue if the queue is currently not empty,
+      /// otherwise this method throws an exception to indicate that there is no value in the
+      /// queue currently. Generally it is preferable to call the TryPeek method and check
+      /// the return value to see if the operation succeeded.
+      /// </summary>
+      /// <returns>The element at the front of the queue</returns>
+      /// <exception cref="InvalidOperationException">If the queue is currently empty</exception>
+      T PeekFront();
+
+      /// <summary>
+      /// Attempt to read and return the element at the front of the queue if there is
+      /// any element to return otherwise the method returns false.
+      /// </summary>
+      /// <param name="front">A reference to store the value at the front of the queue</param>
+      /// <returns>True if a value was read from the queue and returned.</returns>
+      bool TryPeekFront(out T front);
+
+      /// <summary>
+      /// Returns the element at the front of the queue if the queue is currently not empty,
+      /// otherwise this method throws an exception to indicate that there is no value in the
+      /// queue currently. Generally it is preferable to call the TryPeek method and check
+      /// the return value to see if the operation succeeded.
+      /// </summary>
+      /// <returns>The element at the front of the queue</returns>
+      /// <exception cref="InvalidOperationException">If the queue is currently empty</exception>
+      T PeekBack();
+
+      /// <summary>
+      /// Attempt to read and return the element at the front of the queue if there is
+      /// any element to return otherwise the method returns false.
+      /// </summary>
+      /// <param name="front">A reference to store the value at the front of the queue</param>
+      /// <returns>True if a value was read from the queue and returned.</returns>
+      bool TryPeekBack(out T front);
+
+      /// <summary>
       /// Removes and returns the element at the front of the queue if the queue is currently
       /// not empty, otherwise this method throws an exception to indicate that there is no
       /// value in the queue currently. Generally it is preferable to call the TryDequeueFront
@@ -165,5 +221,11 @@ namespace Apache.Qpid.Proton.Utilities
       {
          EnqueueBack(item);
       }
+
+      /// <summary>
+      /// Returns the current number of elements contained in the double ended Queue.
+      /// </summary>
+      new int Count { get; }
+
    }
 }
