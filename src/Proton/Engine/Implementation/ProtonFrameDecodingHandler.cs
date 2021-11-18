@@ -16,9 +16,9 @@
  */
 
 using System;
-using System.Threading;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Security;
 using Apache.Qpid.Proton.Types.Transport;
@@ -30,6 +30,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonFrameDecodingHandler : IEngineHandler, ISaslPerformativeHandler<IEngineHandlerContext>
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonFrameDecodingHandler>();
+
       /// <summary>
       /// Frame type indicator for AMQP protocol frames.
       /// </summary>
@@ -151,7 +153,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (!(stage is ParsingErrorStage))
          {
-            // TODO : LOG.trace("Frame decoder encountered error: ", error);
+            LOG.Trace("Frame decoder encountered error: ", error);
             stage = new ParsingErrorStage(this, error);
          }
 

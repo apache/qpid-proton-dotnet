@@ -17,6 +17,7 @@
 
 using System;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
@@ -26,6 +27,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonFrameLoggingHandler : IEngineHandler
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonFrameLoggingHandler>();
+
       private static readonly string AMQP_IN_PREFIX = "<- AMQP";
       private static readonly string AMQP_OUT_PREFIX = "-> AMQP";
       private static readonly string SASL_IN_PREFIX = "<- SASL";
@@ -90,11 +93,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             Trace(AMQP_IN_PREFIX, uniqueIdentifier, envelope.Channel, envelope.Body, envelope.Payload);
          }
 
-         // TODO
-         // if (LOG.isTraceEnabled())
-         // {
-         //    Log(AMQP_IN_PREFIX, uniqueIdentifier, envelope.Channel, envelope.Body, envelope.Payload);
-         // }
+         if (LOG.IsTraceEnabled)
+         {
+            Log(AMQP_IN_PREFIX, uniqueIdentifier, envelope.Channel, envelope.Body, envelope.Payload);
+         }
 
          context.FireRead(envelope);
       }
@@ -118,11 +120,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             Trace(AMQP_OUT_PREFIX, uniqueIdentifier, envelope.Channel, envelope.Body, envelope.Payload);
          }
 
-         // TODO
-         // if (LOG.isTraceEnabled())
-         // {
-         //    Log(AMQP_OUT_PREFIX, uniqueIdentifier, envelope.Channel, envelope.Body, envelope.Payload);
-         // }
+         if (LOG.IsTraceEnabled)
+         {
+            Log(AMQP_OUT_PREFIX, uniqueIdentifier, envelope.Channel, envelope.Body, envelope.Payload);
+         }
 
          context.FireWrite(envelope);
       }
@@ -145,11 +146,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (payload == null)
          {
-            // TODO : LOG.Trace("{}:[{}:{}] {}", prefix, connection, channel, performative);
+            LOG.Trace("{}:[{}:{}] {}", prefix, connection, channel, performative);
          }
          else
          {
-            // TODO : LOG.Trace("{}:[{}:{}] {} - {}", prefix, connection, channel, performative, StringUtils.toQuotedString(payload, PAYLOAD_STRING_LIMIT, true));
+            LOG.Trace("{}:[{}:{}] {} - {}", prefix, connection, channel, performative, StringUtils.ToQuotedString(payload, PAYLOAD_STRING_LIMIT, true));
          }
       }
 

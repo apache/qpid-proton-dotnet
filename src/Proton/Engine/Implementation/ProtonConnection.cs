@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transport;
@@ -32,6 +33,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonConnection : ProtonEndpoint<IConnection>, IConnection, IHeaderHandler<ProtonEngine>, IPerformativeHandler<ProtonEngine>
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonConnection>();
+
       private readonly Open localOpen = new Open();
       private Open remoteOpen;
       private AmqpHeader remoteHeader;
@@ -110,7 +113,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          return Negotiate((header) =>
          {
-            // TODO : LOG.trace("Negotiation completed with remote returning AMQP Header: {}", header);
+            LOG.Trace("Negotiation completed with remote returning AMQP Header: {}", header);
          });
       }
 

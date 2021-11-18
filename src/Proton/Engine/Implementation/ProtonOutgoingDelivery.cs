@@ -23,7 +23,8 @@ using Apache.Qpid.Proton.Types.Transport;
 namespace Apache.Qpid.Proton.Engine.Implementation
 {
    /// <summary>
-   ///
+   /// Outgoing delivery implementation that manges the state and payload
+   /// writes for this delivery.
    /// </summary>
    public sealed class ProtonOutgoingDelivery : IOutgoingDelivery
    {

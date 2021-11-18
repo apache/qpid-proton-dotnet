@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
@@ -34,6 +35,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonTransactionManager : ProtonEndpoint<ITransactionManager>, ITransactionManager
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonTransactionManager>();
+
       private readonly ProtonReceiver receiver;
       private readonly IDecoder payloadDecoder;
 

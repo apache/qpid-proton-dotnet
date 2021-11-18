@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
 
@@ -30,6 +31,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonSender : ProtonLink<ISender>, ISender
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonSender>();
+
       private readonly ProtonSessionOutgoingWindow sessionWindow;
       private readonly LinkedSplayedDictionary<uint, ProtonOutgoingDelivery> unsettled =
          new LinkedSplayedDictionary<uint, ProtonOutgoingDelivery>();
@@ -335,7 +338,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            // TODO LOG.info("Sender opened but no event handler registered to inform: {}", this);
+            LOG.Info("Sender opened but no event handler registered to inform: {0}", this);
          }
 
          return this;

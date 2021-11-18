@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
@@ -31,6 +32,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonReceiver : ProtonLink<IReceiver>, IReceiver
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonReceiver>();
+
       private Action<IIncomingDelivery> deliveryReadEventHandler = null;
       private Action<IIncomingDelivery> deliveryAbortedEventHandler = null;
       private Action<IIncomingDelivery> deliveryUpdatedEventHandler = null;
@@ -434,7 +437,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             }
             else
             {
-               // TODO LOG.info("Receiver opened but no event handler registered to inform: {}", this);
+               LOG.Info("Receiver opened but no event handler registered to inform: {0}", this);
             }
          }
 

@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
@@ -34,6 +35,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonTransactionController : ProtonEndpoint<ITransactionController>, ITransactionController
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonTransactionController>();
+
       private static readonly IProtonBuffer ENCODED_DECLARE;
 
       static ProtonTransactionController()
@@ -312,7 +315,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            // TODO LOG.debug("Transaction {} declared successfully but no handler registered to signal result", transaction);
+            LOG.Debug("Transaction {0} declared successfully but no handler registered to signal result", transaction);
          }
       }
 
@@ -324,7 +327,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            // TODO LOG.debug("Transaction {} declare failed but no handler registered to signal result", transaction);
+            LOG.Debug("Transaction {0} declare failed but no handler registered to signal result", transaction);
          }
       }
 
@@ -336,7 +339,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            // TODO LOG.debug("Transaction {} discharged successfully but no handler registered to signal result", transaction);
+            LOG.Debug("Transaction {0} discharged successfully but no handler registered to signal result", transaction);
          }
       }
 
@@ -348,7 +351,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            // TODO LOG.debug("Transaction {} discharge failed but no handler registered to signal result", transaction);
+            LOG.Debug("Transaction {0} discharge failed but no handler registered to signal result", transaction);
          }
       }
 

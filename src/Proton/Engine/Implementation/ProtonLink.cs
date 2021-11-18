@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
@@ -47,6 +48,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public abstract class ProtonLink<T> : ProtonEndpoint<T>, ILink<T>, IProtonLink where T : ILink<T>
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonLink<T>>();
+
       protected readonly ProtonConnection connection;
       protected readonly ProtonSession session;
 
@@ -632,7 +635,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       IProtonLink IProtonLink.RemoteAttach(in Attach attach)
       {
-         // TODO LOG.trace("Link:{} Received remote Attach:{}", self(), attach);
+         LOG.Trace("Link:{0} Received remote Attach:{1}", this, attach);
 
          remoteAttach = attach;
          remoteState = LinkState.Active;
@@ -645,7 +648,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       IProtonLink IProtonLink.RemoteDetach(in Detach detach)
       {
-         // TODO LOG.trace("Link:{} Received remote Detach:{}", self(), detach);
+         LOG.Trace("Link:{0} Received remote Detach:{1}", this, detach);
          RemoteErrorCondition = detach.Error;
          if (IsSender)
          {
@@ -674,28 +677,28 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       IProtonLink IProtonLink.RemoteFlow(in Flow flow)
       {
-         // TODO LOG.trace("Link:{} Received new Flow:{}", self(), flow);
+         LOG.Trace("Link:{0} Received new Flow:{1}", this, flow);
          HandleRemoteFlow(flow);
          return this;
       }
 
       IProtonLink IProtonLink.RemoteTransfer(in Transfer transfer, in IProtonBuffer payload, out ProtonIncomingDelivery delivery)
       {
-         // TODO LOG.trace("Link:{} Received new Transfer:{}", self(), transfer);
+         LOG.Trace("Link:{0} Received new Transfer:{1}", this, transfer);
          HandleRemoteTransfer(transfer, payload, out delivery);
          return this;
       }
 
       IProtonLink IProtonLink.RemoteDisposition(in Disposition disposition, in ProtonIncomingDelivery delivery)
       {
-         // TODO LOG.trace("Link:{} Received remote disposition:{} for sent delivery:{}", self(), disposition, delivery);
+         LOG.Trace("Link:{0} Received remote disposition:{1} for sent delivery:{2}", this, disposition, delivery);
          HandleRemoteDisposition(disposition, delivery);
          return this;
       }
 
       IProtonLink IProtonLink.RemoteDisposition(in Disposition disposition, in ProtonOutgoingDelivery delivery)
       {
-         // TODO LOG.trace("Link:{} Received remote disposition:{} for received delivery:{}", self(), disposition, delivery);
+         LOG.Trace("Link:{0} Received remote disposition:{1} for received delivery:{2}", disposition, delivery);
          HandleRemoteDisposition(disposition, delivery);
          return this;
       }

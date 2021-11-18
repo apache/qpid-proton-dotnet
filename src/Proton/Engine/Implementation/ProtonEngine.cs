@@ -18,6 +18,7 @@
 using System;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Common.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transport;
@@ -29,6 +30,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonEngine : IEngine
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonEngine>();
+
       private static readonly IProtonBuffer EMPTY_FRAME_BUFFER =
          ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0x00, 0x00, 0x00, 0x08, 0x02, 0x00, 0x00, 0x00 });
 
@@ -61,7 +64,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<IEngine> engineShutdownHandler;
       private Action<IEngine> engineFailureHandler = (engine) =>
       {
-         // TODO : LOG.warn("Engine encountered error and will become inoperable: ", engine.failureCause());
+         LOG.Warn("Engine encountered error and will become inoperable: ", engine.FailureCause);
       };
 
       public ProtonEngine() : base()
@@ -143,7 +146,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
             if (nextIdleTimeoutCheck != null)
             {
-               // TODO : LOG.trace("Canceling scheduled Idle Timeout Check");
+               LOG.Trace("Canceling scheduled Idle Timeout Check");
                // TODO : Cancellation Token -> nextIdleTimeoutCheck.Cancel(false);
                nextIdleTimeoutCheck = null;
             }
@@ -218,7 +221,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          // Immediate run of the idle timeout check logic will decide afterwards when / if we should
          // reschedule the idle timeout processing.
-         // TODO : LOG.trace("Auto Idle Timeout Check being initiated");
+         LOG.Trace("Auto Idle Timeout Check being initiated");
          idleTimeoutExecutor = taskFactory;
          // TODO : idleTimeoutExecutor.TryExecuteTask(new IdleTimeoutCheck());
 
@@ -263,7 +266,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
             if (nextIdleTimeoutCheck != null)
             {
-               // TODO : LOG.trace("Canceling scheduled Idle Timeout Check");
+               LOG.Trace("Canceling scheduled Idle Timeout Check");
                // TODO : nextIdleTimeoutCheck.cancel(false);
                nextIdleTimeoutCheck = null;
             }
@@ -536,7 +539,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                   delay = Math.Min(MAX_IDLE_CHECK_INTERVAL, delay);
 
                   checkScheduled = true;
-                  // TODO :LOG.trace("IdleTimeoutCheck rescheduling with delay: {}", delay);
+                  LOG.Trace("IdleTimeoutCheck rescheduling with delay: {}", delay);
                   // TODO :nextIdleTimeoutCheck = idleTimeoutExecutor.schedule(this, delay, TimeUnit.MILLISECONDS);
                }
 
@@ -545,16 +548,16 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                //        arrives if nothing set to run and remote indicates it has an idle timeout.
 
             }
-            catch (Exception)
+            catch (Exception error)
             {
-               // TODO :LOG.trace("Auto Idle Timeout Check encountered error during check: ", error);
+               LOG.Trace("Auto Idle Timeout Check encountered error during check: ", error);
             }
          }
 
          if (!checkScheduled)
          {
             nextIdleTimeoutCheck = null;
-            // TODO : LOG.trace("Auto Idle Timeout Check task exiting and will not be rescheduled");
+            LOG.Trace("Auto Idle Timeout Check task exiting and will not be rescheduled");
          }
       }
 
