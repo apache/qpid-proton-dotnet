@@ -66,9 +66,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             lock (connections)
             {
-               foreach(KeyValuePair<string, ClientConnection> connection in connections)
+               foreach (KeyValuePair<string, ClientConnection> connection in connections)
                {
-                  connection.Value.CloseAsync();
+                  _ = connection.Value.CloseAsync();
                }
             }
          }
@@ -115,13 +115,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private ClientConnection AddConnection(ClientConnection connection)
       {
-         connections.Add(connection.ConnectionId, connection);
+         lock (connections)
+         {
+            connections.Add(connection.ConnectionId, connection);
+         }
+
          return connection;
       }
 
       internal void UnregisterClosedConnection(ClientConnection connection)
       {
-         lock(connections)
+         lock (connections)
          {
             connections.Remove(connection.ConnectionId);
             if (closed && connections.Count == 0)
