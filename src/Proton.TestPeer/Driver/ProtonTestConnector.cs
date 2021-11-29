@@ -18,7 +18,6 @@
 using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
