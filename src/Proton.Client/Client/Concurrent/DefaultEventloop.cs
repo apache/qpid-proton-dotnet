@@ -20,7 +20,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Apache.Qpid.Proton.Common.Concurrent.Default
+namespace Apache.Qpid.Proton.Client.Concurrent
 {
    /// <summary>
    /// Default event loop implementation.

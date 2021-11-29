@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
-using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation

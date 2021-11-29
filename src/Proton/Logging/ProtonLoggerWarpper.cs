@@ -18,7 +18,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace Apache.Qpid.Proton.Common.Logging
+namespace Apache.Qpid.Proton.Logging
 {
    /// <summary>
    /// Proton external .NET logging extensions wrapper used to provide

@@ -17,7 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
 using Apache.Qpid.Proton.Types.Transport;

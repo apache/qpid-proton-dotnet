@@ -15,23 +15,45 @@
  * limitations under the License.
  */
 
+using System;
 using Microsoft.Extensions.Logging;
 
-namespace Apache.Qpid.Proton.Common.Logging
+namespace Apache.Qpid.Proton.Logging
 {
    /// <summary>
-   /// The Proton default logger provider implementation.
+   /// Proton No-Op MS logger implementation that sink holes all logging and
+   /// reports no levels enabled.
    /// </summary>
-   public sealed class ProtonDefaultLoggerProvider : ILoggerProvider
+   internal class ProtonNoOpLogger : ILogger
    {
-      public ILogger CreateLogger(string categoryName)
+      private readonly string name;
+
+      internal ProtonNoOpLogger(string name)
       {
-         return new ProtonNoOpLogger(categoryName);
+         this.name = name;
       }
 
-      public void Dispose()
+      public IDisposable BeginScope<TState>(TState state)
       {
-         // Nothing to do yet.
+         return NoOpDisposable.Instance;
+      }
+
+      public bool IsEnabled(LogLevel logLevel)
+      {
+         return false;
+      }
+
+      public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+      {
+      }
+
+      private class NoOpDisposable : IDisposable
+      {
+         public static NoOpDisposable Instance = new NoOpDisposable();
+
+         public void Dispose()
+         {
+         }
       }
    }
 }

@@ -18,7 +18,7 @@
 using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
-using Apache.Qpid.Proton.Common.Logging;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Security;
 using Apache.Qpid.Proton.Types.Transport;

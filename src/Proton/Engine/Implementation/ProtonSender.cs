@@ -18,7 +18,7 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Common.Logging;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
 

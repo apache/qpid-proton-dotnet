@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-using Apache.Qpid.Proton.Common.Utilities;
+using Apache.Qpid.Proton.Utilities;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 
-namespace Apache.Qpid.Proton.Common.Logging
+namespace Apache.Qpid.Proton.Logging
 {
    /// <summary>
    /// Proton Logging API factory which provides an single point of entry for

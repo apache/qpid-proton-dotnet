@@ -17,7 +17,7 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Common.Logging
+namespace Apache.Qpid.Proton.Logging
 {
    /// <summary>
    /// Proton defined logging API used to abstract the ultimate source of

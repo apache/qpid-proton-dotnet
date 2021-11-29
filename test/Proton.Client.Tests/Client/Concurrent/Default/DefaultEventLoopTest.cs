@@ -19,7 +19,7 @@ using System;
 using System.Threading;
 using NUnit.Framework;
 
-namespace Apache.Qpid.Proton.Common.Concurrent.Default
+namespace Apache.Qpid.Proton.Client.Concurrent.Default
 {
    [TestFixture, Timeout(20000)]
    public class DefaultEventLoopTest

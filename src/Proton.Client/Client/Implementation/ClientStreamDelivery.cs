@@ -21,7 +21,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Exceptions;
-using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Messaging;

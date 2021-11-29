@@ -16,19 +16,32 @@
  */
 
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Apache.Qpid.Proton.Client.Threading
+namespace Apache.Qpid.Proton.Client.Concurrent
 {
    /// <summary>
-   /// Extension of the basic executor API which provides API to manage the
-   /// lifetime and accessability of the service.  An executor service can be
-   /// shutdown which leads to tasks being rejected and provides additional
-   /// API for submitting and managing tasks that have been submitted.
+   /// Single threaded event processing loop interface. Implementations
+   /// accept queue'd actions to be processed within the event loop in
+   /// serial fashion.
    /// </summary>
-   public interface IExecutorService : IExecutor
+   public interface IEventLoop
    {
+      /// <summary>
+      /// Returns if the code currently executing is operating within the context
+      /// of the event loop thread or not.
+      /// </summary>
+      bool InEventLoop { get; }
+
+      /// <summary>
+      /// Execute some action at a future time in order of submission.  The event
+      /// loop implementation must guarantee that events never execute concurrently
+      /// or out of order.
+      /// </summary>
+      /// <param name="action">The action to be performed</param>
+      /// <exception cref="ArgumentNullException">If the provided action is null</exception>
+      /// <exception cref="RejectedExecutionException">If the action is rejected</exception>
+      void Execute(Action action);
+
       /// <summary>
       /// Returns true if the service has been shutdown.
       /// </summary>
@@ -53,29 +66,6 @@ namespace Apache.Qpid.Proton.Client.Threading
       /// will still be allowed to execute but any new tasks will be rejected.
       /// </summary>
       void Shutdown();
-
-      /// <summary>
-      /// Submits a task for asynchronous execution and returns a Task type that will
-      /// provide the result of the action or indicate an error if the task failed
-      /// for some reason. The behavior of the task execution is governed by the
-      /// implementation of the executor service.
-      /// </summary>
-      /// <typeparam name="T">The type of result the executed action provides</typeparam>
-      /// <param name="action">The action to execute</param>
-      /// <returns>A Task instance that provides the result of the action</returns>
-      Task<T> SubmitAsync<T>(Func<T> action);
-
-      /// <summary>
-      /// Submits a task for asynchronous execution and returns a Task type that will
-      /// provide the result of the action or indicate an error if the task failed
-      /// for some reason. The behavior of the task execution is governed by the
-      /// implementation of the executor service.
-      /// </summary>
-      /// <typeparam name="T">The type of result the executed action provides</typeparam>
-      /// <param name="action">The action to execute</param>
-      /// <param name="token">The cancellation token that can be used to attempt to cancel the task</param>
-      /// <returns>A Task instance that provides the result of the action</returns>
-      Task<T> SubmitAsync<T>(Func<T> action, CancellationToken token);
 
    }
 }

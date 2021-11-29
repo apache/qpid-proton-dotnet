@@ -17,7 +17,7 @@
 
 using System;
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Common.Logging;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Engine.Implementation

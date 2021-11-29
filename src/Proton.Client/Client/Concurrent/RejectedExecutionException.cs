@@ -17,7 +17,7 @@
 
 using System;
 
-namespace Apache.Qpid.Proton.Client.Threading
+namespace Apache.Qpid.Proton.Client.Concurrent
 {
    /// <summary>
    /// Exception that is thrown when a "Task" or "Action" that is submitted to

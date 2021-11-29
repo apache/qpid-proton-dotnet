@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Common.Logging;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;

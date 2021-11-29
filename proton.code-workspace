@@ -4,9 +4,6 @@
          "path": "src/Proton"
       },
       {
-         "path": "src/Proton.Common"
-      },
-      {
          "path": "src/Proton.Client"
       },
       {
@@ -15,9 +12,6 @@
       {
          "path": "test/Proton.Tests"
       },
-      {
-         "path": "test/Proton.Common.Tests"
-      }
       {
          "path": "test/Proton.Client.Tests"
       },

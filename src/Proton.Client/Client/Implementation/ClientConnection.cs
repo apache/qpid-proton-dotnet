@@ -21,7 +21,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Exceptions;
-using Apache.Qpid.Proton.Client.Threading;
+using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine.Sasl.Client;
 

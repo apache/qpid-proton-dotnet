@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace Apache.Qpid.Proton.Common.Logging
+namespace Apache.Qpid.Proton.Logging
 {
    /// <summary>
    /// Log levels used by the proton logging abstractions.

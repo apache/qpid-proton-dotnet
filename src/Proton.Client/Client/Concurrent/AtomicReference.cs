@@ -17,7 +17,7 @@
 
 using System.Threading;
 
-namespace Apache.Qpid.Proton.Common.Concurrent
+namespace Apache.Qpid.Proton.Client.Concurrent
 {
    /// <summary>
    /// Provides an object reference that may be updated and read atomically.
