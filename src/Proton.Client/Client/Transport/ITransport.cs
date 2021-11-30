@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Net;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Concurrent;
 
@@ -36,6 +37,11 @@ namespace Apache.Qpid.Proton.Client.Transport
       IEventLoop EventLoop { get; }
 
       /// <summary>
+      /// Returns the endpoint that his transport connects to.
+      /// </summary>
+      EndPoint EndPoint { get; }
+
+      /// <summary>
       /// Initiates an orderly close of the transport.
       /// </summary>
       void Close();
@@ -44,7 +50,8 @@ namespace Apache.Qpid.Proton.Client.Transport
       /// Initiates the IO level connect that will trigger IO events
       /// in the transport event loop based on the outcome.
       /// </summary>
-      void Connect();
+      /// <returns>This transport instance</returns>
+      ITransport Connect(string address, int port);
 
       /// <summary>
       /// Queues the given buffer for write using this transport and
@@ -53,7 +60,8 @@ namespace Apache.Qpid.Proton.Client.Transport
       /// </summary>
       /// <param name="buffer">The buffer to write</param>
       /// <param name="writeCompleteAction">optional action to be performed</param>
-      void Write(IProtonBuffer buffer, Action writeCompleteAction);
+      /// <returns>This transport instance</returns>
+      ITransport Write(IProtonBuffer buffer, Action writeCompleteAction);
 
       /// <summary>
       /// Configures the read handler used to process incoming bytes that
@@ -61,8 +69,32 @@ namespace Apache.Qpid.Proton.Client.Transport
       /// the registered event loop.
       /// </summary>
       /// <param name="readHandler">Handler that is invoked on read</param>
-      /// <returns>This transport instance.</returns>
-      ITransport TransportReadHandler(Action<IProtonBuffer> readHandler);
+      /// <returns>This transport instance</returns>
+      ITransport TransportReadHandler(Action<ITransport, IProtonBuffer> readHandler);
+
+      /// <summary>
+      /// Configures the async connected handler that is called when a transport
+      /// creates a successful connection to the remote
+      /// </summary>
+      /// <param name="connectedHandler">Handler that is invoked on connect</param>
+      /// <returns>This transport instance</returns>
+      ITransport TransportConnectedHandler(Action<ITransport> connectedHandler);
+
+      /// <summary>
+      /// Configures the async connected handler that is called when a transport
+      /// fails to connect to a remote.
+      /// </summary>
+      /// <param name="connectedHandler">Handler that is invoked on connect failure</param>
+      /// <returns>This transport instance</returns>
+      ITransport TransportConnectFailedHandler(Action<ITransport, Exception> connectFailedHandler);
+
+      /// <summary>
+      /// Configures the async disconnected handler that is called when a transport
+      /// experiences a loss of connectivity with the remote.
+      /// </summary>
+      /// <param name="connectedHandler">Handler that is invoked on disconnect</param>
+      /// <returns>This transport instance</returns>
+      ITransport TransportDisconnectedHandler(Action<ITransport> disconnectedHandler);
 
    }
 }
