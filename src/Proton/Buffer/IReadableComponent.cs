@@ -47,14 +47,14 @@ namespace Apache.Qpid.Proton.Buffer
       /// throws an invalid operation exception to indicate that there is no readable
       /// byte array.
       /// </summary>
-      long ReadableArrayOffset { get; }
+      int ReadableArrayOffset { get; }
 
       /// <summary>
       /// Access the usable length of the readable backing array if one exists otherwise
       /// throws an invalid operation exception to indicate that there is no readable
       /// byte array.
       /// </summary>
-      long ReadableArrayLength { get; }
+      int ReadableArrayLength { get; }
 
    }
 }

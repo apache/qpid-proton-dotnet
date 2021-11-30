@@ -245,17 +245,17 @@ namespace Apache.Qpid.Proton.Buffer
 
       public byte[] ReadableArray => array;
 
-      public long ReadableArrayOffset => readOffset;
+      public int ReadableArrayOffset => (int)readOffset; // Array backing means int casting is ok.
 
-      public long ReadableArrayLength => ReadableBytes;
+      public int ReadableArrayLength => (int)ReadableBytes; // Array backing means int casting is ok.
 
       public bool HasWritableArray => true;
 
       public byte[] WritableArray => array;
 
-      public long WritableArrayOffset => writeOffset;
+      public int WritableArrayOffset => (int)writeOffset; // Array backing means int casting is ok.
 
-      public long WritableArrayLength => WritableBytes;
+      public int WritableArrayLength => (int)WritableBytes; // Array backing means int casting is ok.
 
       public int ForEachReadableComponent(in int index, in Func<int, IReadableComponent, bool> processor)
       {
