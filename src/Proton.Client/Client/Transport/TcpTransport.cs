@@ -50,6 +50,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       private TcpClient channel;
       private Stream socketReader;
       private Stream socketWriter;
+      private volatile bool connected;
 
       private Action<ITransport> connectedHandler;
       private Action<ITransport, Exception> connectFailedHandler;
@@ -57,6 +58,8 @@ namespace Apache.Qpid.Proton.Client.Transport
       private Action<ITransport, IProtonBuffer> readHandler;
 
       #region Transport property access APIs
+
+      public bool IsConnected => connected;
 
       public IEventLoop EventLoop => eventLoop;
 
@@ -69,6 +72,17 @@ namespace Apache.Qpid.Proton.Client.Transport
          this.eventLoop = eventLoop;
          this.options = options;
          this.sslOptions = sslOptions;
+
+         Channel<ChannelWrite> outputChannel = Channel.CreateUnbounded<ChannelWrite>(
+            new UnboundedChannelOptions
+            {
+               AllowSynchronousContinuations = false,
+               SingleReader = true,
+               SingleWriter = false
+            });
+
+         this.channelOutputSink = outputChannel.Reader;
+         this.channelOutputSource = outputChannel.Writer;
       }
 
       public void Close()

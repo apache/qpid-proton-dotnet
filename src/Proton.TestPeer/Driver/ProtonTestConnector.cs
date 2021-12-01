@@ -36,12 +36,12 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public ProtonTestConnector(in ILoggerFactory loggerFactory = null)
       {
-         this.driver = new AMQPTestDriver(PeerName, ConnectorFrameSink, null, loggerFactory);
+         this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, null, loggerFactory);
       }
 
       public ProtonTestConnector(in Action<Stream> frameSink, in ILoggerFactory loggerFactory = null)
       {
-         this.driver = new AMQPTestDriver(PeerName, ConnectorFrameSink, null, loggerFactory);
+         this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, null, loggerFactory);
 
          this.frameSink = frameSink;
       }
@@ -49,16 +49,6 @@ namespace Apache.Qpid.Proton.Test.Driver
       public void ConnectorFrameSink(Action<Stream> frameSink)
       {
          this.frameSink = frameSink;
-      }
-
-      private void ConnectorFrameSink(Stream frame)
-      {
-         if (frameSink == null)
-         {
-            throw new InvalidOperationException("Connector was not properly configured with a frame sink");
-         }
-
-         frameSink.Invoke(frame);
       }
 
       public override AMQPTestDriver Driver => driver;
@@ -84,12 +74,17 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       protected override void ProcessConnectionEstablished()
       {
-        driver.HandleConnectedEstablished();
+         driver.HandleConnectedEstablished();
       }
 
       protected override void ProcessDriverOutput(Stream output)
       {
-        frameSink.Invoke(output);
+         if (frameSink == null)
+         {
+            throw new InvalidOperationException("Connector was not properly configured with a frame sink");
+         }
+
+         frameSink.Invoke(output);
       }
    }
 }
