@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Network;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -35,6 +36,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private PeerTcpClient client;
 
+      private ILoggerFactory loggerFactory;
       private ILogger<ProtonTestServer> logger;
 
       public ProtonTestServer(in ILoggerFactory loggerFactory = null) : this(new ProtonTestServerOptions(), loggerFactory)
@@ -45,10 +47,11 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          this.options = options;
          this.server = new PeerTcpServer();
+         this.loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
          this.server.ClientConnectedHandler(HandleClientConnected);
          this.server.ServerFailedHandler(HandlerServerStartFailed);
-         this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, loggerFactory);
-         this.logger = loggerFactory?.CreateLogger<ProtonTestServer>();
+         this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, this.loggerFactory);
+         this.logger = this.loggerFactory.CreateLogger<ProtonTestServer>();
       }
 
       public string ServerAddress => server.ListeningOnAddress;
@@ -109,9 +112,10 @@ namespace Apache.Qpid.Proton.Test.Driver
          ProcessConnectionEstablished();
       }
 
-      private void HandlerServerStartFailed(PeerTcpServer server)
+      private void HandlerServerStartFailed(PeerTcpServer server, Exception ex)
       {
-         driver.SignalFailure(new IOException("Server failed to start"));
+         logger.LogWarning(ex, "Server accept failed: ");
+         driver.SignalFailure(new IOException("Server failed to start", ex));
       }
 
       #endregion
@@ -122,7 +126,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          if (!closed)
          {
-            logger.LogInformation("The client connection has dropped.");
+            logger?.LogInformation("The client connection has dropped.");
          }
          Close();
       }

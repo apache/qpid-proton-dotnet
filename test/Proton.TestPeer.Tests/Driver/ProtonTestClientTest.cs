@@ -137,5 +137,68 @@ namespace Apache.Qpid.Proton.Test.Driver
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestClientCanConnectAndOpenExchanged()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            ProtonTestClient client = new ProtonTestClient();
+
+            client.Connect(remoteAddress, remotePort);
+            client.ExpectAMQPHeader();
+            client.ExpectOpen();
+            client.ExpectClose();
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            client.RemoteHeader(AMQPHeader.Header).Now();
+            client.RemoteOpen().Now();
+            client.RemoteClose().Now();
+            client.WaitForScriptToComplete();
+
+            client.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestClientFailsTestIfFrameSizeExpectationNotMet()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            ProtonTestClient client = new ProtonTestClient();
+
+            client.Connect(remoteAddress, remotePort);
+            client.ExpectAMQPHeader();
+            client.ExpectOpen().WithFrameSize(4096);
+            client.RemoteHeader(AMQPHeader.Header).Now();
+            client.RemoteOpen().Now();
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            Assert.Throws<AssertionError>(() => client.WaitForScriptToComplete());
+
+            client.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }

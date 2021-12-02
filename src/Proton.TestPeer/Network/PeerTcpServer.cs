@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private Socket serverListener;
 
       private Action<PeerTcpClient> clientConnectedHandler;
-      private Action<PeerTcpServer> serverFailedHandler;
+      private Action<PeerTcpServer, Exception> serverFailedHandler;
 
       public PeerTcpServer()
       {
@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          return this;
       }
 
-      public PeerTcpServer ServerFailedHandler(Action<PeerTcpServer> serverFailedHandler)
+      public PeerTcpServer ServerFailedHandler(Action<PeerTcpServer, Exception> serverFailedHandler)
       {
          this.serverFailedHandler = serverFailedHandler;
          return this;
@@ -89,9 +89,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             // Signal that the client has connected and is ready for scripted action.
             server.clientConnectedHandler(new PeerTcpClient(client));
          }
-         catch (Exception)
+         catch (Exception ex)
          {
-            server.serverFailedHandler(server);
+            server.serverFailedHandler(server, ex);
          }
          finally
          {
