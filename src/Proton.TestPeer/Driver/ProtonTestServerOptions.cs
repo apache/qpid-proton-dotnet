@@ -22,5 +22,18 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public sealed class ProtonTestServerOptions : ProtonNetworkPeerOptions
    {
+      private static readonly int SERVER_CHOOSES_PORT = 0;
+
+      public static readonly int DEFAULT_SERVER_PORT = SERVER_CHOOSES_PORT;
+
+      /// <summary>
+      /// The port that the test peer server will listen on for an incoming
+      /// connection from a client. If a value of zero is given the server
+      /// will find a free port and listen there, to get the active port
+      /// the user would need to start the server and then request the port
+      /// from the running server.
+      /// </summary>
+      public int ServerPort { get; set; } = DEFAULT_SERVER_PORT;
+
    }
 }

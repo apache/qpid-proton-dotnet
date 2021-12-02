@@ -28,9 +28,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
    public sealed class PeerTcpClient
    {
       private readonly Socket clientSocket;
-      private readonly EventLoop eventLoop;
-      private readonly ChannelReader<byte[]> channelOutputSink;
-      private readonly ChannelWriter<byte[]> channelOutputSource;
+      private readonly ChannelReader<Stream> channelOutputSink;
+      private readonly ChannelWriter<Stream> channelOutputSource;
       private readonly bool serverClientConnection;
 
       private Action<PeerTcpClient> connectedHandler;
@@ -49,24 +48,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       /// <summary>
       /// Create a new peer Tcp client instance that can be used to connect to a remote.
       /// </summary>
-      public PeerTcpClient(EventLoop eventLoop) : this(eventLoop, new Socket(SocketType.Stream, ProtocolType.Tcp), false)
+      public PeerTcpClient() : this(new Socket(SocketType.Stream, ProtocolType.Tcp), false)
       {
       }
 
-      public PeerTcpClient(EventLoop eventLoop, Socket socket) : this(eventLoop, socket, true)
+      public PeerTcpClient(Socket socket) : this(socket, true)
       {
       }
 
-      private PeerTcpClient(EventLoop eventLoop, Socket socket, bool serverClientConnection)
+      private PeerTcpClient(Socket socket, bool serverClientConnection)
       {
-         Statics.RequireNonNull(eventLoop, "Peer client connection requires an event loop");
          Statics.RequireNonNull(socket, "Client Socket cannot be null");
 
          this.clientSocket = socket;
-         this.eventLoop = eventLoop;
          this.serverClientConnection = serverClientConnection;
 
-         Channel<byte[]> outputChannel = Channel.CreateUnbounded<byte[]>(
+         Channel<Stream> outputChannel = Channel.CreateUnbounded<Stream>(
             new UnboundedChannelOptions
             {
                AllowSynchronousContinuations = false,
@@ -171,6 +168,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
       }
 
+      public PeerTcpClient Write(Stream stream)
+      {
+         CheckClosed();
+         channelOutputSource.TryWrite(stream);
+         return this;
+      }
+
+      private void CheckClosed()
+      {
+         if (closed)
+         {
+            throw new InvalidOperationException("Peer TCP channel is closed");
+         }
+      }
+
       #region Channel Read Async pump
 
       private void ChannelReadLoop()
@@ -186,7 +198,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                if (!closed)
                {
                   _ = channelOutputSource.TryComplete();
-                  eventLoop.Execute(() => disconnectedHandler(this));
+                  disconnectedHandler(this);
                }
 
                break;  // TODO more graceful error handling.
@@ -198,7 +210,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                   readBuffer = Statics.CopyOf(readBuffer, bytesRead);
                }
 
-               eventLoop.Execute(() => readHandler(this, readBuffer));
+               readHandler(this, readBuffer);
             }
          }
       }
@@ -213,9 +225,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       {
          while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
          {
-            while (channelOutputSink.TryRead(out byte[] write))
+            while (channelOutputSink.TryRead(out Stream stream))
             {
-               await streamWriter.WriteAsync(write, 0, write.Length);
+               await stream.CopyToAsync(streamWriter, 8192);
             }
 
             await streamWriter.FlushAsync().ConfigureAwait(false);

@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// <summary>
    /// The AMQP Test driver internal frame processing a script handler class.
    /// </summary>
-   public sealed class AMQPTestDriver : IFrameHandler
+   public class AMQPTestDriver : IFrameHandler
    {
       private readonly Mutex mutex = new Mutex();
       private readonly String driverName;
@@ -47,7 +47,6 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private readonly Action<Stream> frameConsumer;
       private readonly Action<Exception> assertionConsumer;
-      private readonly Func<TaskFactory> taskFactorySupplier;
 
       private volatile Exception failureCause;
 
@@ -72,21 +71,20 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
 
-      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Func<TaskFactory> scheduler) :
-         this(name, frameConsumer, null, scheduler, NullLoggerFactory.Instance)
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer) :
+         this(name, frameConsumer, null, NullLoggerFactory.Instance)
       {
       }
 
-      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Func<TaskFactory> scheduler, ILoggerFactory logFactory) :
-         this(name, frameConsumer, null, scheduler, logFactory)
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer, ILoggerFactory logFactory) :
+         this(name, frameConsumer, null, logFactory)
       {
       }
 
-      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Action<Exception> assertConsumer, Func<TaskFactory> scheduler, ILoggerFactory logFactory)
+      public AMQPTestDriver(string name, Action<Stream> frameConsumer, Action<Exception> assertConsumer, ILoggerFactory logFactory)
       {
          this.sessions = new DriverSessions(this);
          this.frameConsumer = frameConsumer;
-         this.taskFactorySupplier = scheduler;
          this.assertionConsumer = assertConsumer;
          this.driverName = name;
          this.loggerFactory = logFactory ?? NullLoggerFactory.Instance;
@@ -135,20 +133,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal void AfterDelay(long delay, ScriptedAction action)
       {
-         if (taskFactorySupplier == null)
-         {
-            throw new InvalidOperationException("This driver cannot schedule delayed events, no scheduler available");
-         }
-
-         TaskFactory factory = taskFactorySupplier.Invoke();
-
-         if (factory == null)
-         {
-            throw new InvalidOperationException("This driver cannot schedule delayed events, no scheduler available");
-         }
-
-         // TODO : Schedule not just run
-         factory.StartNew(() =>
+         Task.Delay((int)delay).ContinueWith((x) =>
          {
             logger.LogTrace("{} running delayed action: {}", driverName, action);
             action.Perform(this);
@@ -176,25 +161,33 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// <param name="ex">The exception that triggered this call</param>
       public void SignalFailure(Exception ex)
       {
-         if (this.failureCause == null)
+         mutex.WaitOne();
+         try
          {
-            if (ex is AssertionError)
+            if (this.failureCause == null)
             {
-               logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
-               this.failureCause = (AssertionError)ex;
-            }
-            else
-            {
-               logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
-               this.failureCause = new AssertionError(ex.Message, ex);
-            }
+               if (ex is AssertionError)
+               {
+                  logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
+                  this.failureCause = (AssertionError)ex;
+               }
+               else
+               {
+                  logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
+                  this.failureCause = new AssertionError(ex.Message, ex);
+               }
 
-            SearchForScriptCompletionAndTrigger();
+               SearchForScriptCompletionAndTrigger();
 
-            if (assertionConsumer != null)
-            {
-               assertionConsumer.Invoke(failureCause);
+               if (assertionConsumer != null)
+               {
+                  assertionConsumer.Invoke(failureCause);
+               }
             }
+         }
+         finally
+         {
+            mutex.ReleaseMutex();
          }
       }
 
@@ -234,9 +227,10 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       #region Trigger sends of Header, AMQP and SASL frames to connected peers
 
-      internal void SendHeader(AMQPHeader header)
+      internal virtual void SendHeader(AMQPHeader header)
       {
          logger.LogTrace("{} Sending AMQP Header: {}", driverName, header);
+         mutex.WaitOne();
          try
          {
             frameConsumer.Invoke(new MemoryStream(header.ToArray()));
@@ -245,24 +239,29 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             SignalFailure(new AssertionError("Frame was not consumed due to error.", ex));
          }
+         finally
+         {
+            mutex.ReleaseMutex();
+         }
       }
 
-      internal void SendAMQPFrame(ushort channel, IDescribedType performative, byte[] payload)
+      internal virtual void SendAMQPFrame(ushort channel, IDescribedType performative, byte[] payload)
       {
          logger.LogTrace("{} Sending performative: {}", driverName, performative);
 
-         if (performative is PerformativeDescribedType)
-         {
-            switch (((PerformativeDescribedType)performative).Type)
-            {
-               case PerformativeType.Open:
-                  localOpen = (Open)performative;
-                  break;
-            }
-         }
-
+         mutex.WaitOne();
          try
          {
+            if (performative is PerformativeDescribedType)
+            {
+               switch (((PerformativeDescribedType)performative).Type)
+               {
+                  case PerformativeType.Open:
+                     localOpen = (Open)performative;
+                     break;
+               }
+            }
+
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel, payload, null);
             logger.LogTrace("{} Writing out buffer of  size:{} to consumer: {}", driverName, stream.Length, frameConsumer);
@@ -272,21 +271,25 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             SignalFailure(new AssertionError("Frame was not written due to error.", ex));
          }
+         finally
+         {
+            mutex.ReleaseMutex();
+         }
       }
 
-      internal void SendSaslFrame<T>(ushort channel, T performative) where T : IDescribedType
+      internal virtual void SendSaslFrame<T>(ushort channel, T performative) where T : IDescribedType
       {
-         // When the outcome of SASL is written the decoder should revert to initial state
-         // as the only valid next incoming value is an AMQP header.
-         if (performative is SaslOutcome)
-         {
-            frameParser.ResetToExpectingHeader();
-         }
-
-         logger.LogTrace("{} Sending sasl performative: {}", driverName, performative);
-
+         mutex.WaitOne();
          try
          {
+            // When the outcome of SASL is written the decoder should revert to initial state
+            // as the only valid next incoming value is an AMQP header.
+            if (performative is SaslOutcome)
+            {
+               frameParser.ResetToExpectingHeader();
+            }
+
+            logger.LogTrace("{} Sending sasl performative: {}", driverName, performative);
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel);
             frameConsumer.Invoke(stream);
@@ -295,26 +298,35 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             SignalFailure(new AssertionError("Frame was not written due to error.", ex));
          }
+         finally
+         {
+            mutex.ReleaseMutex();
+         }
       }
 
-      public void SendEmptyFrame(ushort channel)
+      public virtual void SendEmptyFrame(ushort channel)
       {
-         MemoryStream stream = new MemoryStream();
-         frameEncoder.HandleWrite(stream, null, channel, null, null);
-
+         mutex.WaitOne();
          try
          {
+            MemoryStream stream = new MemoryStream();
+            frameEncoder.HandleWrite(stream, null, channel, null, null);
             frameConsumer.Invoke(stream);
          }
          catch (Exception ex)
          {
             SignalFailure(new AssertionError("Frame was not consumed due to error.", ex));
          }
+         finally
+         {
+            mutex.ReleaseMutex();
+         }
       }
 
-      internal void SendBytes(byte[] buffer)
+      internal virtual void SendBytes(byte[] buffer)
       {
          logger.LogTrace("{} Sending bytes from ProtonBuffer: {}", driverName, buffer);
+         mutex.WaitOne();
          try
          {
             frameConsumer.Invoke(new MemoryStream(buffer));
@@ -322,6 +334,10 @@ namespace Apache.Qpid.Proton.Test.Driver
          catch (Exception ex)
          {
             SignalFailure(new AssertionError("Buffer was not consumed due to error.", ex));
+         }
+         finally
+         {
+            mutex.ReleaseMutex();
          }
       }
 
@@ -445,6 +461,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public void HandlePerformative(uint frameSize, PerformativeDescribedType amqp, ushort channel, byte[] payload)
       {
+         mutex.WaitOne();
+
          switch (amqp.Type)
          {
             case PerformativeType.Heartbeat:
@@ -458,7 +476,6 @@ namespace Apache.Qpid.Proton.Test.Driver
                break;
          }
 
-         mutex.WaitOne();
          try
          {
             IScriptedElement scriptEntry;
@@ -511,8 +528,16 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public void HandleHeartbeat(uint frameSize, ushort channel)
       {
-         emptyFrameCount++;
-         HandlePerformative(frameSize, Heartbeat.INSTANCE, channel, null);
+         mutex.WaitOne();
+         try
+         {
+            emptyFrameCount++;
+            HandlePerformative(frameSize, Heartbeat.INSTANCE, channel, null);
+         }
+         finally
+         {
+            mutex.ReleaseMutex();
+         }
       }
 
       #endregion

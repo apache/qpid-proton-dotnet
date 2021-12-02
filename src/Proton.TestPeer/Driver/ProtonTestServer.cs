@@ -17,6 +17,8 @@
 
 using System;
 using System.IO;
+using Apache.Qpid.Proton.Test.Driver.Network;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -28,24 +30,111 @@ namespace Apache.Qpid.Proton.Test.Driver
    public sealed class ProtonTestServer : ProtonTestPeer
    {
       private readonly AMQPTestDriver driver;
+      private readonly ProtonTestServerOptions options;
+      private readonly PeerTcpServer server;
+
+      private PeerTcpClient client;
+
+      private ILogger<ProtonTestServer> logger;
+
+      public ProtonTestServer(in ILoggerFactory loggerFactory = null) : this(new ProtonTestServerOptions(), loggerFactory)
+      {
+      }
+
+      public ProtonTestServer(ProtonTestServerOptions options, in ILoggerFactory loggerFactory = null)
+      {
+         this.options = options;
+         this.server = new PeerTcpServer();
+         this.server.ClientConnectedHandler(HandleClientConnected);
+         this.server.ServerFailedHandler(HandlerServerStartFailed);
+         this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, loggerFactory);
+         this.logger = loggerFactory?.CreateLogger<ProtonTestServer>();
+      }
+
+      public string ServerAddress => server.ListeningOnAddress;
+
+      public int ServerPort => server.ListeningOnPort;
+
+      public void Start()
+      {
+         CheckClosed();
+         server.Start();
+      }
+
+      public void Close()
+      {
+         base.Dispose();
+      }
 
       public override AMQPTestDriver Driver => driver;
 
       protected override string PeerName => "Server";
 
+      #region Server handlers for AMQP test driver events and server socket events
+
       protected override void ProcessCloseRequest()
       {
-         throw new NotImplementedException();
+         server.Stop();
+         client?.Close();
       }
 
       protected override void ProcessConnectionEstablished()
       {
-         throw new NotImplementedException();
+         driver.HandleConnectedEstablished();
       }
 
       protected override void ProcessDriverOutput(Stream output)
       {
-         throw new NotImplementedException();
+         client.Write(output);
       }
+
+      private void ProcessDriverAssertion(Exception error)
+      {
+         Close();
+      }
+
+      #endregion
+
+      #region TCP Server event handlers
+
+      private void HandleClientConnected(PeerTcpClient client)
+      {
+         // Configure the client
+         client.TransportDisconnectedHandler(DisconnectedHandler);
+         client.TransportReadHandler(ClientReadHandler);
+
+         this.client = client;
+         this.client.Start();
+
+         ProcessConnectionEstablished();
+      }
+
+      private void HandlerServerStartFailed(PeerTcpServer server)
+      {
+         driver.SignalFailure(new IOException("Server failed to start"));
+      }
+
+      #endregion
+
+      #region Connected TCP Client event handlers
+
+      private void DisconnectedHandler(PeerTcpClient client)
+      {
+         if (!closed)
+         {
+            logger.LogInformation("The client connection has dropped.");
+         }
+         Close();
+      }
+
+      private void ClientReadHandler(PeerTcpClient client, byte[] buffer)
+      {
+         if (!closed)
+         {
+            driver.Ingest(new MemoryStream(buffer));
+         }
+      }
+
+      #endregion
    }
 }

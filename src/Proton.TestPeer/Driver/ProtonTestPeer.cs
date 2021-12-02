@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       /// <param name="delay"></param>
       /// <returns></returns>
-      public ProtonTestPeer dropAfterLastHandler(int delay)
+      public ProtonTestPeer DropAfterLastHandler(int delay)
       {
          Driver.AddScriptedElement(new ConnectionDropAction(this).AfterDelay(delay));
          return this;

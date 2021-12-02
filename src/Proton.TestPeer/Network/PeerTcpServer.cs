@@ -18,7 +18,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using Apache.Qpid.Proton.Test.Driver.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Network
 {
@@ -29,24 +28,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
    public sealed class PeerTcpServer
    {
       private Socket serverListener;
-      private EventLoop eventLoop;
 
       private Action<PeerTcpClient> clientConnectedHandler;
       private Action<PeerTcpServer> serverFailedHandler;
 
-      public PeerTcpServer(EventLoop eventLoop)
+      public PeerTcpServer()
       {
-         if (eventLoop == null)
-         {
-            throw new ArgumentNullException("Peer listener requires an event loop");
-         }
-
          IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0);
          serverListener = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
          serverListener.Bind(endpoint);
-
-         this.eventLoop = eventLoop;
       }
+
+      public string ListeningOnAddress => ((IPEndPoint)serverListener.LocalEndPoint).Address.ToString();
+
+      public int ListeningOnPort => ((IPEndPoint)serverListener.LocalEndPoint).Port;
 
       public int Start()
       {
@@ -92,12 +87,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             Socket client = server.serverListener.EndAccept(result);
 
             // Signal that the client has connected and is ready for scripted action.
-            server.eventLoop.Execute(() =>
-               server.clientConnectedHandler(new PeerTcpClient(server.eventLoop, client)));
+            server.clientConnectedHandler(new PeerTcpClient(client));
          }
          catch (Exception)
          {
-            server.eventLoop.Execute(() => server.serverFailedHandler(server));
+            server.serverFailedHandler(server);
          }
          finally
          {

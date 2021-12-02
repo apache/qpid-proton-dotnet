@@ -25,8 +25,6 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public abstract class ProtonNetworkPeerOptions : ICloneable
    {
-      private static readonly int SERVER_CHOOSES_PORT = 0;
-
       public static readonly int DEFAULT_SEND_BUFFER_SIZE = 64 * 1024;
       public static readonly int DEFAULT_RECEIVE_BUFFER_SIZE = DEFAULT_SEND_BUFFER_SIZE;
       public static readonly int DEFAULT_TRAFFIC_CLASS = 0;
@@ -34,7 +32,6 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly bool DEFAULT_TCP_KEEP_ALIVE = false;
       public static readonly int DEFAULT_SO_LINGER = int.MinValue;
       public static readonly int DEFAULT_SO_TIMEOUT = -1;
-      public static readonly int DEFAULT_SERVER_PORT = SERVER_CHOOSES_PORT;
       public static readonly bool DEFAULT_TRACE_BYTES = false;
       public static readonly string DEFAULT_CONTEXT_PROTOCOL = "TLS";
       public static readonly bool DEFAULT_TRUST_ALL = false;
@@ -58,8 +55,6 @@ namespace Apache.Qpid.Proton.Test.Driver
       public bool TcpKeepAlive { get; set; } = DEFAULT_TCP_KEEP_ALIVE;
 
       public bool TcpNoDelay { get; set; } = DEFAULT_TCP_NO_DELAY;
-
-      public int ServerPort { get; set; } = DEFAULT_SERVER_PORT;
 
       public string LocalAddress { get; set; }
 
