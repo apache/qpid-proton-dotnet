@@ -20,40 +20,12 @@ using Apache.Qpid.Proton.Test.Driver.Exceptions;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
-using NLog.Extensions.Logging;
-
 namespace Apache.Qpid.Proton.Test.Driver
 {
    [Ignore("WIP")]
-   [TestFixture]
-   public class ProtonTestClientTest
+   [TestFixture, Timeout(20000)]
+   public class ProtonTestClientTest : ProtonBaseTestFixture
    {
-      private ILoggerFactory loggerFactory;
-      private ILogger logger;
-
-      [OneTimeSetUp]
-      public void OneTimeSetup()
-      {
-         var config = new NLog.Config.LoggingConfiguration();
-
-         // Targets where to log to: File and Console
-         NLog.Targets.Target logfile = new NLog.Targets.FileTarget("logfile")
-         {
-            FileName = "./target/" + GetType().Name + ".txt"
-         };
-         NLog.Targets.Target logconsole = new NLog.Targets.ConsoleTarget("logconsole");
-
-         // Rules for mapping loggers to targets
-         config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logconsole);
-         config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, logfile);
-
-         loggerFactory = LoggerFactory.Create(builder =>
-            builder.ClearProviders().AddNLog(config)
-         );
-
-         logger = loggerFactory.CreateLogger<ProtonTestClientTest>();
-      }
-
       [Test]
       public void TestClientCanConnectAndExchangeAMQPHeaders()
       {
@@ -65,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             string remoteAddress = peer.ServerAddress;
             int remotePort = peer.ServerPort;
 
-            ProtonTestClient client = new ProtonTestClient();
+            ProtonTestClient client = new ProtonTestClient(loggerFactory);
 
             client.Connect(remoteAddress, remotePort);
             client.ExpectAMQPHeader();
@@ -91,7 +63,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             string remoteAddress = peer.ServerAddress;
             int remotePort = peer.ServerPort;
 
-            ProtonTestClient client = new ProtonTestClient();
+            ProtonTestClient client = new ProtonTestClient(loggerFactory);
 
             client.Connect(remoteAddress, remotePort);
             client.ExpectAMQPHeader();
@@ -120,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             string remoteAddress = peer.ServerAddress;
             int remotePort = peer.ServerPort;
 
-            ProtonTestClient client = new ProtonTestClient();
+            ProtonTestClient client = new ProtonTestClient(loggerFactory);
 
             client.Connect(remoteAddress, remotePort);
             client.ExpectAMQPHeader();
@@ -151,7 +123,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             string remoteAddress = peer.ServerAddress;
             int remotePort = peer.ServerPort;
 
-            ProtonTestClient client = new ProtonTestClient();
+            ProtonTestClient client = new ProtonTestClient(loggerFactory);
 
             client.Connect(remoteAddress, remotePort);
             client.ExpectAMQPHeader();
@@ -183,7 +155,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             string remoteAddress = peer.ServerAddress;
             int remotePort = peer.ServerPort;
 
-            ProtonTestClient client = new ProtonTestClient();
+            ProtonTestClient client = new ProtonTestClient(loggerFactory);
 
             client.Connect(remoteAddress, remotePort);
             client.ExpectAMQPHeader();

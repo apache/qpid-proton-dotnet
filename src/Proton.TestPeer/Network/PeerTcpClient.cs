@@ -22,6 +22,7 @@ using System.Net.Sockets;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Test.Driver.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver.Network
 {
@@ -31,6 +32,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private readonly ChannelReader<Stream> channelOutputSink;
       private readonly ChannelWriter<Stream> channelOutputSource;
       private readonly bool serverClientConnection;
+      private readonly AtomicBoolean closed = new AtomicBoolean();
 
       private Action<PeerTcpClient> connectedHandler;
       private Action<PeerTcpClient, Exception> connectFailedHandler;
@@ -43,25 +45,26 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private Task readLoop;
       private Task writeLoop;
 
-      private volatile bool closed;
+      private ILogger<PeerTcpClient> logger;
 
       /// <summary>
       /// Create a new peer Tcp client instance that can be used to connect to a remote.
       /// </summary>
-      public PeerTcpClient() : this(new Socket(SocketType.Stream, ProtocolType.Tcp), false)
+      public PeerTcpClient(in ILoggerFactory loggerFactory) : this(loggerFactory, new Socket(SocketType.Stream, ProtocolType.Tcp), false)
       {
       }
 
-      public PeerTcpClient(Socket socket) : this(socket, true)
+      public PeerTcpClient(in ILoggerFactory loggerFactory, in Socket socket) : this(loggerFactory, socket, true)
       {
       }
 
-      private PeerTcpClient(Socket socket, bool serverClientConnection)
+      private PeerTcpClient(in ILoggerFactory loggerFactory, in Socket socket, bool serverClientConnection)
       {
          Statics.RequireNonNull(socket, "Client Socket cannot be null");
 
          this.clientSocket = socket;
          this.serverClientConnection = serverClientConnection;
+         this.logger = loggerFactory.CreateLogger<PeerTcpClient>();
 
          Channel<Stream> outputChannel = Channel.CreateUnbounded<Stream>(
             new UnboundedChannelOptions
@@ -105,8 +108,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       public void Close()
       {
-         closed = true;
-         clientSocket.Close();
+         if (closed.CompareAndSet(false, true))
+         {
+            try
+            {
+               // Stop additional writes but wait for queued writes to complete.
+               channelOutputSource?.TryComplete();
+               writeLoop?.GetAwaiter().GetResult();
+            }
+            catch(Exception)
+            {
+            }
+
+            clientSocket.Close();
+         }
       }
 
       public void Connect(string address, int port)
@@ -194,17 +209,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             int bytesRead = streamReader.Read(readBuffer, 0, readBuffer.Length);
             if (bytesRead == 0)
             {
+               _ = channelOutputSource.TryComplete();
+
                // End of stream
                if (!closed)
                {
-                  _ = channelOutputSource.TryComplete();
+                  logger.LogTrace("TCP client read ebd if stream when not already closed.");
                   disconnectedHandler(this);
                }
 
-               break;  // TODO more graceful error handling.
+               break;
             }
             else
             {
+               logger.LogTrace("Read {0} bytes from incoming read event", bytesRead);
                if (bytesRead < readBuffer.Length)
                {
                   readBuffer = Statics.CopyOf(readBuffer, bytesRead);

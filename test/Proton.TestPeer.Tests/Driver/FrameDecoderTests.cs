@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
@@ -27,7 +26,7 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
-   [TestFixture]
+   [TestFixture, Timeout(20000)]
    public class frameHandlerTests
    {
       [Test]

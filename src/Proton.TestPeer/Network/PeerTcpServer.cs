@@ -18,6 +18,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver.Network
 {
@@ -32,8 +33,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private Action<PeerTcpClient> clientConnectedHandler;
       private Action<PeerTcpServer, Exception> serverFailedHandler;
 
-      public PeerTcpServer()
+      private ILoggerFactory loggerFactory;
+      private ILogger<PeerTcpServer> logger;
+
+      public PeerTcpServer(in ILoggerFactory loggerFactory)
       {
+         this.loggerFactory = loggerFactory;
+         this.logger = loggerFactory.CreateLogger<PeerTcpServer>();
+
          IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0);
          serverListener = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
          serverListener.Bind(endpoint);
@@ -86,11 +93,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          {
             Socket client = server.serverListener.EndAccept(result);
 
+            server.logger.LogInformation("Peer Tcp Server accepted new connection: {0}", client);
+
             // Signal that the client has connected and is ready for scripted action.
-            server.clientConnectedHandler(new PeerTcpClient(client));
+            server.clientConnectedHandler(new PeerTcpClient(server.loggerFactory, client));
+         }
+         catch (SocketException sockEx)
+         {
+            server.logger.LogWarning(sockEx, "Server accept failed: {0}, SocketErrorCode:{1}",
+                                     sockEx.Message, sockEx.SocketErrorCode);
+            server.serverFailedHandler(server, sockEx);
          }
          catch (Exception ex)
          {
+            server.logger.LogWarning(ex, "Server accept failed: {0}", ex.Message);
             server.serverFailedHandler(server, ex);
          }
          finally

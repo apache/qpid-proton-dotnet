@@ -46,8 +46,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       public ProtonTestServer(ProtonTestServerOptions options, in ILoggerFactory loggerFactory = null)
       {
          this.options = options;
-         this.server = new PeerTcpServer();
          this.loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
+         this.server = new PeerTcpServer(this.loggerFactory);
          this.server.ClientConnectedHandler(HandleClientConnected);
          this.server.ServerFailedHandler(HandlerServerStartFailed);
          this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, this.loggerFactory);
@@ -61,7 +61,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       public void Start()
       {
          CheckClosed();
-         server.Start();
+         int listenOn = server.Start();
+         logger.LogTrace("Proton test server listening on port[{0}]", listenOn);
       }
 
       public void Close()

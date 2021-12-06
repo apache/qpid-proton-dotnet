@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Network;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -33,6 +34,9 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly ProtonTestClientOptions options;
       private readonly PeerTcpClient client;
 
+      private ILoggerFactory loggerFactory;
+      private ILogger<ProtonTestClient> logger;
+
       public ProtonTestClient(in ILoggerFactory loggerFactory = null) : this(new ProtonTestClientOptions(), loggerFactory)
       {
       }
@@ -40,7 +44,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       public ProtonTestClient(ProtonTestClientOptions options, in ILoggerFactory loggerFactory = null)
       {
          this.options = options;
-         this.client = new PeerTcpClient();
+         this.loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
+         this.client = new PeerTcpClient(this.loggerFactory);
          this.client.TransportConnectedHandler(HandleClientConnected);
          this.client.TransportConnectFailedHandler(HandleClientConnectFailed);
          this.client.TransportDisconnectedHandler(HandleClientDisconnected);
@@ -80,7 +85,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private void ProcessDriverAssertion(Exception error)
       {
-         client?.Close();
+         Close();
       }
 
       #region TCP Client handler methods
@@ -97,7 +102,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private void HandleClientDisconnected(PeerTcpClient client)
       {
-         driver.SignalFailure(new IOException("Client connection failed."));
+         logger.LogTrace("Client connection failed before channel closed");
       }
 
       private void HandleClientRead(PeerTcpClient client, byte[] buffer)

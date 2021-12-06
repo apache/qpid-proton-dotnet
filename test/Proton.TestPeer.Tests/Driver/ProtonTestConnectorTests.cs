@@ -24,26 +24,9 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
-   [TestFixture]
-   public class ProtonTestConnectorTests
+   [TestFixture, Timeout(20000)]
+   public class ProtonTestConnectorTests : ProtonBaseTestFixture
    {
-      private ILoggerFactory loggerFactory;
-
-      [OneTimeSetUp]
-      public void OneTimeSetup()
-      {
-         loggerFactory = LoggerFactory.Create(builder =>
-            builder.ClearProviders()
-                   .SetMinimumLevel(LogLevel.Trace)
-                   .AddSimpleConsole(options =>
-                   {
-                      options.IncludeScopes = true;
-                      options.SingleLine = true;
-                      options.TimestampFormat = "hh:mm:ss ";
-                   })
-         );
-      }
-
       [Test]
       public void TestCreateConnectorAndIngestFailsWhenNoExpectationsSet()
       {
