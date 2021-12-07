@@ -168,12 +168,12 @@ namespace Apache.Qpid.Proton.Test.Driver
             {
                if (ex is AssertionError)
                {
-                  logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
+                  logger.LogTrace("{0} sending failure assertion due to: {1}", driverName, ex.Message);
                   this.failureCause = (AssertionError)ex;
                }
                else
                {
-                  logger.LogTrace("{} sending failure assertion due to: ", driverName, ex);
+                  logger.LogTrace("{0} sending failure assertion due to: {1}", driverName, ex.Message);
                   this.failureCause = new AssertionError(ex.Message, ex);
                }
 
@@ -207,16 +207,16 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// <param name="input">Stream of bytes to decode</param>
       public void Ingest(Stream input)
       {
-         logger.LogTrace("{} processing new inbound buffer of size: {}", driverName, input.Length - input.Position);
+         logger.LogTrace("{0} processing new inbound buffer of size: {1}", driverName, input.Length - input.Position);
 
          try
          {
             // Process off all encoded frames from this buffer one at a time.
             while (input.Position < input.Length && failureCause == null)
             {
-               logger.LogTrace("{} ingesting {} bytes.", driverName, input.Length - input.Position);
+               logger.LogTrace("{0} ingesting {1} bytes.", driverName, input.Length - input.Position);
                frameParser.Ingest(input);
-               logger.LogTrace("{} ingestion completed cycle, remaining bytes in buffer: {}", driverName, input.Length - input.Position);
+               logger.LogTrace("{0} ingestion completed cycle, remaining bytes in buffer: {1}", driverName, input.Length - input.Position);
             }
          }
          catch (Exception e)
@@ -229,7 +229,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal virtual void SendHeader(AMQPHeader header)
       {
-         logger.LogTrace("{} Sending AMQP Header: {}", driverName, header);
+         logger.LogTrace("{0} Sending AMQP Header: {1}", driverName, header);
          mutex.WaitOne();
          try
          {
@@ -247,7 +247,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal virtual void SendAMQPFrame(ushort channel, IDescribedType performative, byte[] payload)
       {
-         logger.LogTrace("{} Sending performative: {}", driverName, performative);
+         logger.LogTrace("{0} Sending performative: {1}", driverName, performative);
 
          mutex.WaitOne();
          try
@@ -264,7 +264,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel, payload, null);
-            logger.LogTrace("{} Writing out buffer of  size:{} to consumer: {}", driverName, stream.Length, frameConsumer);
+            logger.LogTrace("{0} Writing out buffer of size:{1} to consumer: {2}", driverName, stream.Length, frameConsumer);
             frameConsumer.Invoke(stream);
          }
          catch (Exception ex)
@@ -289,7 +289,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                frameParser.ResetToExpectingHeader();
             }
 
-            logger.LogTrace("{} Sending sasl performative: {}", driverName, performative);
+            logger.LogTrace("{0} Sending sasl performative: {1}", driverName, performative);
             MemoryStream stream = new MemoryStream();
             frameEncoder.HandleWrite(stream, performative, channel);
             frameConsumer.Invoke(stream);
@@ -325,7 +325,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal virtual void SendBytes(byte[] buffer)
       {
-         logger.LogTrace("{} Sending bytes from ProtonBuffer: {}", driverName, buffer);
+         logger.LogTrace("{0} Sending bytes from ProtonBuffer: {1}", driverName, buffer);
          mutex.WaitOne();
          try
          {
@@ -350,10 +350,12 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            IScriptedElement peekNext = script.Peek();
-            if (peekNext.ScriptedType == ScriptEntryType.Action)
+            if (script.TryPeek(out IScriptedElement peekNext))
             {
-               ProcessScript(peekNext);
+               if (peekNext.ScriptedType == ScriptEntryType.Action)
+               {
+                  ProcessScript(peekNext);
+               }
             }
          }
          finally
