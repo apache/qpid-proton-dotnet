@@ -59,6 +59,8 @@ namespace Apache.Qpid.Proton.Test.Driver
          Driver.WaitForScriptToComplete(timeout);
       }
 
+      public bool IsClosed => closed;
+
       public uint EmptyFrameCount => Driver.EmptyFrameCount;
 
       public uint PerformativeCount => Driver.PerformativeCount;

@@ -22,7 +22,6 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
-   [Ignore("WIP")]
    [TestFixture, Timeout(20000)]
    public class ProtonTestClientTest : ProtonBaseTestFixture
    {
@@ -166,6 +165,40 @@ namespace Apache.Qpid.Proton.Test.Driver
             logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
 
             Assert.Throws<AssertionError>(() => client.WaitForScriptToComplete());
+
+            client.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestClientSendPipelinedHeaderAndOpen()
+      {
+         byte[] basicOpen = new byte[] {(byte)'A', (byte)'M', (byte)'Q', (byte)'P', 0, 1, 0, 0, // HEADER
+                                        0, 0, 0, 49, 2, 0, 0, 0, 0, 83, 16, 192, 36, 5, 161, 9, 99, 111,
+                                        110, 116, 97, 105, 110, 101, 114, 161, 9, 108, 111, 99, 97, 108,
+                                        104, 111, 115, 116, 112, 0, 0, 64, 0, 96, 255, 255, 112, 0, 0, 117, 48};
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            ProtonTestClient client = new ProtonTestClient(loggerFactory);
+
+            client.Connect(remoteAddress, remotePort);
+            client.ExpectAMQPHeader();
+            client.ExpectOpen();
+            client.RemoteBytes().WithBytes(basicOpen).Now();
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            Assert.DoesNotThrow(() => client.WaitForScriptToComplete());
 
             client.Close();
 

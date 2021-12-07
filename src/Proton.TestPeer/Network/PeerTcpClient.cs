@@ -214,7 +214,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                // End of stream
                if (!closed)
                {
-                  logger.LogTrace("{0} TCP client read end of stream when not already closed.", serverClientConnection ? "Server" : "Client");
+                  logger.LogTrace("{0} TCP client read end of stream when not already closed.",
+                                  serverClientConnection ? "Server" : "Client");
                   disconnectedHandler(this);
                }
 
@@ -223,7 +224,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             else
             {
                logger.LogTrace("{0} TCP client read {0} bytes from incoming read event",
-                               bytesRead, serverClientConnection ? "Server" : "Client");
+                               serverClientConnection ? "Server" : "Client", bytesRead);
                if (bytesRead < readBuffer.Length)
                {
                   readBuffer = Statics.CopyOf(readBuffer, bytesRead);

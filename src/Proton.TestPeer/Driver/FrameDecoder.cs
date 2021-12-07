@@ -152,7 +152,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          internal override void Parse(Stream incoming)
          {
             int nextByte = 0;
-            while ((nextByte = incoming.ReadByte()) != -1 && headerByte < AMQPHeader.HEADER_SIZE_BYTES)
+            while (headerByte < AMQPHeader.HEADER_SIZE_BYTES && (nextByte = incoming.ReadByte()) != -1)
             {
                headerBytes[headerByte++] = ((byte)nextByte);
             }
