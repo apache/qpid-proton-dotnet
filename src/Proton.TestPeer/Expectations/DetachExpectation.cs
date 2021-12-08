@@ -81,19 +81,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          {
             // Input was validated now populate response With auto values where not configured
             // to say otherwise by the test.
-            if (response.OnChannel() == null)
+            if (response.OnChannel() == null && link.Session.LocalChannel.HasValue)
             {
-               response.OnChannel((ushort)link.Session.LocalChannel);
+               response.OnChannel(link.Session.LocalChannel.Value);
             }
 
-            if (response.Performative.Handle == null)
+            if (response.Performative.Handle == null && link.Handle.HasValue)
             {
-               response.WithHandle((uint)link.Handle);
+               response.WithHandle(link.Handle.Value);
             }
 
-            if (response.Performative.Closed == null)
+            if (response.Performative.Closed == null && detach.Closed.HasValue)
             {
-               response.WithClosed((bool)detach.Closed);
+               response.WithClosed(detach.Closed.Value);
             }
          }
       }

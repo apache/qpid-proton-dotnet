@@ -140,15 +140,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          {
             // Input was validated now populate response With auto values where not configured
             // to say otherwise by the test.
-            if (response.OnChannel() == null)
+            if (response.OnChannel() == null && link.Session.LocalChannel.HasValue)
             {
-               response.OnChannel((ushort)link.Session.LocalChannel);
+               response.OnChannel(link.Session.LocalChannel.Value);
             }
 
             // Populate the fields of the response With defaults if non set by the test script
-            if (response.Performative.First == null)
+            if (response.Performative.First == null && transfer.DeliveryId.HasValue)
             {
-               response.WithFirst((uint)transfer.DeliveryId);
+               response.WithFirst(transfer.DeliveryId.Value);
             }
 
             if (response.Performative.Role == null)
