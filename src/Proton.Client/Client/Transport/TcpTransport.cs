@@ -89,8 +89,19 @@ namespace Apache.Qpid.Proton.Client.Transport
       {
          if (closed.CompareAndSet(false, true))
          {
-            // Could have been completed by a channel disconnect.
-            channelOutputSource?.TryComplete();
+            // Could have been completed by a channel disconnect, we shutdown
+            // the writer channel and attempt to allow the output task to finish
+            // the quiesced channel. If any errors occur on close we ignore them
+            // since we are shutting down anyway.
+            try
+            {
+               channelOutputSource?.TryComplete();
+               writeLoop?.GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+            }
+
             channel?.Close();
          }
       }
@@ -105,7 +116,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          IPAddress address = Dns.GetHostEntry(host).AddressList[0];
 
-         channel = new TcpClient();
+         channel = new TcpClient(address.AddressFamily);
          channel.BeginConnect(address, port, new AsyncCallback(ConnectCallback), this);
 
          return this;
@@ -195,6 +206,7 @@ namespace Apache.Qpid.Proton.Client.Transport
             int bytesRead = socketReader.Read(readBuffer, 0, readBuffer.Length);
             if (bytesRead == 0)
             {
+               _ = channelOutputSource.TryComplete();
                // End of stream
                // TODO mark as disconnected to fail writes
                if (!closed)

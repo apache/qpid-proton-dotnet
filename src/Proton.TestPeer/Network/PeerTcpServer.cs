@@ -41,8 +41,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          this.loggerFactory = loggerFactory;
          this.logger = loggerFactory.CreateLogger<PeerTcpServer>();
 
-         IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 0);
-         serverListener = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+         IPEndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 0);
+         serverListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
          serverListener.Bind(endpoint);
       }
 
