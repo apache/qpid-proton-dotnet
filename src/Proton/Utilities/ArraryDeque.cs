@@ -27,6 +27,40 @@ namespace Apache.Qpid.Proton.Utilities
    /// The backing array will grow as necessary to support usage. This collection is not thread-safe.
    /// Null elements are prohibited in this collection.
    /// </summary>
+   /// <remarks>
+   ///
+   ///  0 1 2 3 4 5 6 7 8 9
+   /// ---------------------
+   /// | | | | | | | | | | |   Empty head = tail = 0
+   /// ---------------------
+   ///  H
+   ///  T
+   ///
+   ///  0 1 2 3 4 5 6 7 8 9
+   /// ---------------------
+   /// |x|x|x|x|x| | | | | |   Size 5; Head = 0, tail = 5
+   /// ---------------------
+   ///  H         T
+   ///
+   ///  0 1 2 3 4 5 6 7 8 9
+   /// ---------------------
+   /// |x|x|x| | | | | |x|x|   Size 5; Head = 8, tail = 3
+   /// ---------------------
+   ///        T         H
+   ///
+   /// * Head always advances to meat tail even on wrap.
+   /// * In the inverted case the gap between head and tail is empty elements
+   ///
+   /// Following capacity increase when head > tail (or head == tail because of insert when
+   /// one slot left)
+   ///
+   ///  0 1 2 3 4 5 6 7 8 9
+   /// -----------------------
+   /// |x|x|x| | | | | |x|x| |   Size 5; Head = 8, tail = 3
+   /// -----------------------
+   ///        T         H
+   ///
+   /// </remarks>
    /// <typeparam name="T">The type that is stored in this double ended queue implementation</typeparam>
    public sealed class ArrayDeque<T> : IDeque<T>
    {
