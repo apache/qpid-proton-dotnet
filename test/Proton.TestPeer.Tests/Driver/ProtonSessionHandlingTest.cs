@@ -59,7 +59,6 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      [Ignore("Signed comparison error needs investigation")]
       [Test]
       public void TestSessionBeginResponseUsesScriptedChannel()
       {
@@ -92,7 +91,6 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      [Ignore("Signed comparison error needs investigation")]
       [Test]
       public void TestWaitForCompletionFailsWhenRemoteSendEndOnWrongChannel()
       {
@@ -126,7 +124,6 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      [Ignore("Signed comparison error needs investigation")]
       [Test]
       public void TestServerEndResponseFillsChannelsAutomaticallyIfNoneSpecified()
       {
@@ -159,7 +156,6 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      [Ignore("Signed comparison error needs investigation")]
       [Test]
       public void TestServerRespondToLastBeginFeature()
       {

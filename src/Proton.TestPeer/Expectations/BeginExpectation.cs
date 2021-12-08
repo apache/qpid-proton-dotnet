@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return endAction;
       }
 
-      public BeginExpectation WithRemoteChannel(uint remoteChannel)
+      public BeginExpectation WithRemoteChannel(ushort remoteChannel)
       {
          return WithRemoteChannel(Is.EqualTo(remoteChannel));
       }
