@@ -99,7 +99,8 @@ namespace Apache.Qpid.Proton.Test.Driver
             throw new AssertionError("Received duplicate Begin for already opened session on channel: " + remoteChannel);
          }
 
-         ushort localChannelMax = driver.LocalOpen?.ChannelMax ?? ushort.MaxValue;
+         ushort localChannelMax = driver.LocalOpen == null ? ushort.MinValue :
+            (driver.LocalOpen?.ChannelMax ?? ushort.MaxValue);
 
          if (remoteChannel > localChannelMax)
          {

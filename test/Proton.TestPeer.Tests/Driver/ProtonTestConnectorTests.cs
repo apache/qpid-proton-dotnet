@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
-using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver

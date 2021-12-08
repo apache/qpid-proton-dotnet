@@ -286,7 +286,6 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
       }
 
-      [Ignore("Test not failing on create when channel max is zero")]
       [Test]
       public void TestPeerEnforcesChannelMaxOfZeroOnPipelinedOpenBegin()
       {

@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             builder.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddNLog(config)
          );
 
-         logger = loggerFactory.CreateLogger<ProtonTestClientTest>();
+         logger = loggerFactory.CreateLogger(GetType().Name);
       }
 
       [SetUp]
