@@ -92,6 +92,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
          }
       }
 
+      public override string ToString()
+      {
+         return "AMQP-header:[" + BitConverter.ToString(buffer) + "]";
+      }
+
       #region Static validation methods for header bytes
 
       public static AMQPHeader Header => AMQP_HEADER;

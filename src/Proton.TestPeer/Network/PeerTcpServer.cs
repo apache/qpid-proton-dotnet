@@ -93,7 +93,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          {
             Socket client = server.serverListener.EndAccept(result);
 
-            server.logger.LogInformation("Peer Tcp Server accepted new connection: {0}", client);
+            server.logger.LogInformation("Peer Tcp Server accepted new connection: {0}", client.RemoteEndPoint);
 
             // Signal that the client has connected and is ready for scripted action.
             server.clientConnectedHandler(new PeerTcpClient(server.loggerFactory, client));
