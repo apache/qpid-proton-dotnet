@@ -36,6 +36,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private ILoggerFactory loggerFactory;
       private ILogger<PeerTcpServer> logger;
 
+
+
       public PeerTcpServer(in ILoggerFactory loggerFactory)
       {
          this.loggerFactory = loggerFactory;
@@ -46,7 +48,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          serverListener.Bind(endpoint);
       }
 
-      public string ListeningOnAddress => ((IPEndPoint)serverListener.LocalEndPoint).Address.ToString();
+      public string ListeningOnAddress => IPAddress.Loopback.ToString();
 
       public int ListeningOnPort => ((IPEndPoint)serverListener.LocalEndPoint).Port;
 
