@@ -36,6 +36,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private ILoggerFactory loggerFactory;
       private ILogger<PeerTcpServer> logger;
 
+      private string listenAddress;
+      private int listenPort;
+
       public PeerTcpServer(in ILoggerFactory loggerFactory)
       {
          this.loggerFactory = loggerFactory;
@@ -46,9 +49,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          serverListener.Bind(endpoint);
       }
 
-      public string ListeningOnAddress => IPAddress.Loopback.ToString();
+      public string ListeningOnAddress => listenAddress;
 
-      public int ListeningOnPort => ((IPEndPoint)serverListener.LocalEndPoint).Port;
+      public int ListeningOnPort => listenPort;
 
       public int Start()
       {
@@ -65,6 +68,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          serverListener.Listen(1);
 
          logger.LogInformation("Peer TCP Server listen started on endpoint: {0}", serverListener.LocalEndPoint);
+
+         this.listenAddress = ((IPEndPoint)serverListener.LocalEndPoint).Address.ToString();
+         this.listenPort = ((IPEndPoint)serverListener.LocalEndPoint).Port;
 
          serverListener.BeginAccept(new AsyncCallback(NewTcpClientConnection), this);
 
