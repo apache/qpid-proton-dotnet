@@ -343,7 +343,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                                               .And().Now();
 
             // Wait for the above and then script next steps
-            client.WaitForScriptToComplete();
+            Assert.DoesNotThrow(() => client.WaitForScriptToComplete());
 
             Assert.Throws<AssertionError>(() => peer.WaitForScriptToComplete());
          }
