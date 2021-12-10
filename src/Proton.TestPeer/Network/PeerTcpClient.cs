@@ -161,9 +161,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       public void Connect(string address, int port)
       {
-         IPAddress host = Dns.GetHostEntry(address).AddressList[0];
+         IPHostEntry entry = Dns.GetHostEntry(address);
+         foreach (IPAddress ipAddress in entry.AddressList)
+         {
+            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+            {
+               Connect(new IPEndPoint(ipAddress, port));
+               return;
+            }
+         }
 
-         this.Connect(new IPEndPoint(host, port));
+         throw new InvalidOperationException("Could not resolve the address into an IPV4 IP Address");
       }
 
       public void Start()

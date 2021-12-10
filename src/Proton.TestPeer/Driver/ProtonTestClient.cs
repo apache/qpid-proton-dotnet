@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Net;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Network;
 using Microsoft.Extensions.Logging;
@@ -52,6 +53,12 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.client.TransportDisconnectedHandler(HandleClientDisconnected);
          this.client.TransportReadHandler(HandleClientRead);
          this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, loggerFactory);
+      }
+
+      public void Connect(IPEndPoint endpoint)
+      {
+         CheckClosed();
+         client.Connect(endpoint);
       }
 
       public void Connect(string addres, int port)

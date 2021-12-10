@@ -17,6 +17,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using Apache.Qpid.Proton.Test.Driver.Network;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -53,6 +54,8 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, this.loggerFactory);
          this.logger = this.loggerFactory.CreateLogger<ProtonTestServer>();
       }
+
+      public IPEndPoint ServerEndPoint => server.ListeningOn;
 
       public string ServerAddress => server.ListeningOnAddress;
 
