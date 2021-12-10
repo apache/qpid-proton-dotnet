@@ -19,6 +19,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
+using Apache.Qpid.Proton.Test.Driver.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Network
 {
@@ -29,6 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
    public sealed class PeerTcpServer
    {
       private Socket serverListener;
+      private AtomicBoolean closed = new AtomicBoolean();
 
       private Action<PeerTcpClient> clientConnectedHandler;
       private Action<PeerTcpServer, Exception> serverFailedHandler;
@@ -72,14 +74,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          this.listenAddress = ((IPEndPoint)serverListener.LocalEndPoint).Address.ToString();
          this.listenPort = ((IPEndPoint)serverListener.LocalEndPoint).Port;
 
-         serverListener.BeginAccept(new AsyncCallback(NewTcpClientConnection), this);
+         try
+         {
+            serverListener.BeginAccept(new AsyncCallback(NewTcpClientConnection), this);
+         }
+         catch(Exception ex)
+         {
+            logger.LogWarning(ex, "Peer TCP Server failed on begin accept : {0}", ex.Message);
+         }
 
          return ((IPEndPoint)serverListener.LocalEndPoint).Port;
       }
 
       public void Stop()
       {
-         serverListener.Close();
+         if (closed.CompareAndSet(false, true))
+         {
+            logger.LogInformation("Peer TCP Server closed endpoint: {0}", serverListener.LocalEndPoint);
+            serverListener.Close();
+         }
       }
 
       public PeerTcpServer ClientConnectedHandler(Action<PeerTcpClient> clientConnectedHandler)
