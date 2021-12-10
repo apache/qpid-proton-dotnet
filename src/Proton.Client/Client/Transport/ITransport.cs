@@ -17,6 +17,7 @@
 
 using System;
 using System.Net;
+using System.Security.Principal;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Concurrent;
 
@@ -40,6 +41,13 @@ namespace Apache.Qpid.Proton.Client.Transport
       /// Returns the endpoint that his transport connects to.
       /// </summary>
       EndPoint EndPoint { get; }
+
+      /// <summary>
+      /// Returns a local principal that was created following successful SSL
+      /// handshaking with the remote. Before a handshake or in the case of non-SSL
+      /// transport types this method returns null.
+      /// </summary>
+      IPrincipal LocalPrincipal { get; }
 
       /// <summary>
       /// Initiates an orderly close of the transport.

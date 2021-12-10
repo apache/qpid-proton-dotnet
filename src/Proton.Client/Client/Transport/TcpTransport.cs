@@ -19,6 +19,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Principal;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
@@ -64,6 +65,8 @@ namespace Apache.Qpid.Proton.Client.Transport
       public IEventLoop EventLoop => eventLoop;
 
       public EndPoint EndPoint => channelEndpoint;
+
+      public IPrincipal LocalPrincipal => null; // TODO
 
       #endregion
 

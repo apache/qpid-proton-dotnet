@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -30,6 +31,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientSession : ISession
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSession>();
+
       private static readonly IClientTransactionContext NoOpTransactionContext = new ClientNoOpTransactionContext();
 
       private const long INFINITE = -1;
@@ -292,7 +295,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, rollbackFuture).Task.Result;
+         return connection.Request(this, rollbackFuture).Task.GetAwaiter().GetResult();
       }
 
       #region Internal client session API
@@ -525,7 +528,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private void HandleRemoteOpen(Engine.ISession session)
       {
          openFuture.SetResult(this);
-         // LOG.trace("Session:{} opened successfully.", id());
+         LOG.Trace("Session:{0} opened successfully.", SessionId);
 
          foreach (Engine.ISender sender in protonSession.Senders)
          {

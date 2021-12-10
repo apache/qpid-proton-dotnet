@@ -24,12 +24,16 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine.Sasl.Client;
+using Apache.Qpid.Proton.Client.Transport;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
    // TODO
    public class ClientConnection : IConnection
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientConnection>();
+
       private const int UNLIMITED = -1;
       private const int UNDEFINED = -1;
 
@@ -42,9 +46,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientConnectionCapabilities capabilities = new ClientConnectionCapabilities();
       private readonly TaskCompletionSource<IConnection> openFuture = new TaskCompletionSource<IConnection>();
       private readonly TaskCompletionSource<IConnection> closeFuture = new TaskCompletionSource<IConnection>();
+      private readonly IOContext ioContext;
 
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
+      private ITransport transport;
       private AtomicReference<Exception> failureCause = new AtomicReference<Exception>();
       private ClientSession connectionSession;
       private ClientSender connectionSender;
@@ -58,6 +64,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.options = options;
          this.connectionId = client.NextConnectionId();
          this.sessionBuilder = new ClientSessionBuilder(this);
+         this.ioContext = new IOContext(options.TransportOptions, options.SslOptions);
 
          reconnectPool.Add(new ReconnectLocation(host, port));
          reconnectPool.AddAll(options.ReconnectOptions.ReconnectLocations);
@@ -102,7 +109,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          try
          {
-            CloseAsync(error).Wait();
+            CloseAsync(error).GetAwaiter().GetResult();
          }
          catch (Exception)
          {
@@ -409,7 +416,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             failureCause.CompareAndSet(null, ClientExceptionSupport.CreateOrPassthroughFatal(ex));
             _ = openFuture.TrySetException(failureCause);
             _ = closeFuture.TrySetResult(this);
-            // TODO ioContext.shutdown();
+            ioContext.Shutdown();
 
             throw failureCause;
          }
@@ -439,12 +446,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal void Execute(Action action)
       {
-         // TODO Add task to work list
+         ioContext.EventLoop.Execute(action);
       }
 
       internal void Schedule(Action action, TimeSpan delay)
       {
-         // TODO Add task to work list
+         // TODO: Either add scheduling to event loop or handle timeouts here somehow
+         Task.Delay(delay).ContinueWith((t) => ioContext.EventLoop.Execute(action));
       }
 
       internal TaskCompletionSource<T> Request<T>(Object requestor, TaskCompletionSource<T> request)
@@ -528,12 +536,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (totalConnections == 1)
          {
-            // TODO LOG.info("Connection {} connected to server: {}:{}", getId(), transport.getHost(), transport.getPort());
+            LOG.Info("Connection {0} connected to server: {1}", ConnectionId, transport.EndPoint);
             // TODO SubmitConnectionEvent(options.connectedHandler(), transport.getHost(), transport.getPort(), null);
          }
          else
          {
-            // TODO LOG.info("Connection {} reconnected to server: {}:{}", getId(), transport.getHost(), transport.getPort());
+            LOG.Info("Connection {0} reconnected to server: {1}", ConnectionId, transport.EndPoint);
             // TODO SubmitConnectionEvent(options.reconnectedHandler(), transport.getHost(), transport.getPort(), null);
          }
 
@@ -552,9 +560,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                connection.Engine.Shutdown();
             }
-            catch (Exception)
+            catch (Exception ignore)
             {
-               //LOG.debug("Unexpected exception thrown from engine shutdown: ", ignore);
+               LOG.Debug("Unexpected exception thrown from engine shutdown: {0}", ignore.Message);
             }
          }
          else
@@ -597,7 +605,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               // TODO transport.close();
+               transport.Close();
             }
             catch (Exception)
             {
@@ -627,11 +635,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             failureCause = new ClientConnectionRemotelyClosedException("Unknown error led to connection disconnect");
          }
 
-         // TODO LOG.trace("Engine reports failure with error: {}", failureCause.getMessage());
+         LOG.Trace("Engine reports failure with error: {}", failureCause.Message);
 
          if (IsReconnectAllowed(failureCause))
          {
-            // TODO LOG.info("Connection {} interrupted to server: {}:{}", getId(), transport.getHost(), transport.getPort());
+            LOG.Info("Connection {0} interrupted to server: {1}", ConnectionId, transport.EndPoint);
             // TODO SubmitDisconnectionEvent(options.interruptedHandler(), transport.getHost(), transport.getPort(), failureCause);
 
             // Initial configuration validation happens here, if this step fails then the
@@ -679,7 +687,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             engine.Configuration.TraceFrames = true;
             if (!engine.Configuration.TraceFrames)
             {
-               // TODO LOG.warn("Connection {} frame tracing was enabled but protocol engine does not support it", getId());
+               LOG.Warn("Connection {0} frame tracing was enabled but protocol engine does not support it", ConnectionId);
             }
          }
 
@@ -786,10 +794,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          _ = openFuture.TrySetException(failureCause);
          _ = closeFuture.TrySetResult(this);
 
-         // TODO
-         // LOG.warn("Connection {} has failed due to: {}", ConnectionId, failureCause != null ?
-         //          failureCause.GetType().Name + " -> " + failureCause.Message : "No failure details provided.");
+         LOG.Warn("Connection {0} has failed due to: {1}", ConnectionId, failureCause != null ?
+                  failureCause.Get().GetType().Name + " -> " + failureCause.Get().Message : "No failure details provided.");
 
+         // TODO
          // SubmitDisconnectionEvent(options.DisconnectedHandler, transport.Host, transport.Port, failureCause);
       }
 
@@ -802,10 +810,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          try
          {
             reconnectAttempts++;
+            transport = ioContext.NewTransport();
+            LOG.Trace("Connection {0} Attempting connection to remote {1}", ConnectionId, location.Host, location.Port);
+
             // TODO
-            //transport = ioContext.newTransport();
-            //LOG.trace("Connection {} Attempting connection to remote {}:{}", getId(), location.getHost(), location.getPort());
-            // transport.connect(location.getHost(), location.getPort(), new ClientTransportListener(engine));
+            // transport.TransportConnectedHandler(HandleTransportConnected);
+            // transport.TransportConnectFailedHandler(HandleConnectFailed);
+            // transport.TransportDisconnectedHandler(HandleTransportDisconnected);
+            // transport.TransportReadHandler(HandleTransportRead);
+
+            transport.Connect(location.Host, location.Port);
          }
          catch (Exception error)
          {
@@ -819,7 +833,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          int warnInterval = options.ReconnectOptions.WarnAfterReconnectAttempts;
          if (reconnectAttempts > 0 && warnInterval > 0 && (reconnectAttempts % warnInterval) == 0)
          {
-            // TODO LOG.warn("Connection {}: Failed to connect after: {} attempt(s) continuing to retry.", getId(), reconnectAttempts);
+            LOG.Warn("Connection {0}: Failed to connect after: {1} attempt(s) continuing to retry.", ConnectionId, reconnectAttempts);
          }
 
          // If no connection recovery required then we have never fully connected to a remote
@@ -829,25 +843,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (reconnectAttempts == 0)
             {
-               // TODO LOG.trace("Initial connect attempt will be performed immediately");
+               LOG.Trace("Initial connect attempt will be performed immediately");
                // executor.execute(()->attemptConnection(location));
             }
             else
             {
                long delay = NextReconnectDelay();
-               // TODO LOG.trace("Next connect attempt will be in {} milliseconds", delay);
+               LOG.Trace("Next connect attempt will be in {0} milliseconds", delay);
                // executor.schedule(()->attemptConnection(location), delay, TimeUnit.MILLISECONDS);
             }
          }
          else if (reconnectAttempts == 0)
          {
-            // TODO LOG.trace("Initial reconnect attempt will be performed immediately");
+            LOG.Trace("Initial reconnect attempt will be performed immediately");
             // executor.execute(()->attemptConnection(location));
          }
          else
          {
             long delay = NextReconnectDelay();
-            // TODO LOG.trace("Next reconnect attempt will be in {} milliseconds", delay);
+            LOG.Trace("Next reconnect attempt will be in {0} milliseconds", delay);
             // executor.schedule(()->attemptConnection(location), delay, TimeUnit.MILLISECONDS);
          }
       }
@@ -962,7 +976,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public string Password => options.Password;
 
-         public IPrincipal LocalPrincipal => throw new NotImplementedException(); // TODO
+         public IPrincipal LocalPrincipal => connection.transport?.LocalPrincipal;
 
       }
 
