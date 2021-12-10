@@ -40,6 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       private string listenAddress;
       private int listenPort;
+      private IPEndPoint listenEndpoint;
 
       public PeerTcpServer(in ILoggerFactory loggerFactory)
       {
@@ -50,6 +51,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          serverListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
          serverListener.Bind(endpoint);
       }
+
+      public IPEndPoint ListeningOn => listenEndpoint;
 
       public string ListeningOnAddress => listenAddress;
 
@@ -71,8 +74,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
          logger.LogInformation("Peer TCP Server listen started on endpoint: {0}", serverListener.LocalEndPoint);
 
-         this.listenAddress = ((IPEndPoint)serverListener.LocalEndPoint).Address.ToString();
-         this.listenPort = ((IPEndPoint)serverListener.LocalEndPoint).Port;
+         this.listenEndpoint = ((IPEndPoint)serverListener.LocalEndPoint);
+         this.listenAddress = listenEndpoint.Address.ToString();
+         this.listenPort = listenEndpoint.Port;
 
          try
          {

@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       /// <summary>
       /// Create a new peer Tcp client instance that can be used to connect to a remote.
       /// </summary>
-      public PeerTcpClient(in ILoggerFactory loggerFactory) : this(loggerFactory, new Socket(SocketType.Stream, ProtocolType.Tcp), false)
+      public PeerTcpClient(in ILoggerFactory loggerFactory) : this(loggerFactory, new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp), false)
       {
       }
 
@@ -124,7 +124,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          }
       }
 
-      public void Connect(string address, int port)
+      public void Connect(IPEndPoint endpoint)
       {
          if (clientSocket.Connected || serverClientConnection)
          {
@@ -136,17 +136,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             throw new InvalidOperationException("Cannot connect after client connection was closed");
          }
 
-         Statics.RequireNonNull(address, "Cannot connect when the host given is null");
+         Statics.RequireNonNull(endpoint, "Cannot connect when the end point given is null");
          Statics.RequireNonNull(connectedHandler, "Cannot connect until a connected handler is registered");
          Statics.RequireNonNull(connectFailedHandler, "Cannot connect until a connect failed handler is registered");
          Statics.RequireNonNull(disconnectedHandler, "Cannot connect until a disconnected handler is registered");
          Statics.RequireNonNull(readHandler, "Cannot connect when a read handler is registered");
 
-         IPAddress host = Dns.GetHostEntry(address).AddressList[0];
-
          try
          {
-            clientSocket.Connect(host, port);
+            clientSocket.Connect(endpoint);
          }
          catch (Exception)
          {
@@ -159,6 +157,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
+      }
+
+      public void Connect(string address, int port)
+      {
+         IPAddress host = Dns.GetHostEntry(address).AddressList[0];
+
+         this.Connect(new IPEndPoint(host, port));
       }
 
       public void Start()
