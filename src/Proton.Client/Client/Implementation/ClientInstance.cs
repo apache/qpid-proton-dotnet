@@ -53,10 +53,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          try
          {
-            CloseAsync().Wait();
+            CloseAsync().GetAwaiter().GetResult();
          }
          catch (Exception)
          {
+            // Ignore exceptions as we are closed regardless.
          }
       }
 

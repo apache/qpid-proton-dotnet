@@ -29,7 +29,11 @@ using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
+   /// <summary>
+   /// The client connection class manages a single connection to a remote AMQP
+   /// peer and handles connection errors and reconnection operations if those
+   /// are enabled.
+   /// </summary>
    public class ClientConnection : IConnection
    {
       private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientConnection>();
@@ -109,16 +113,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          try
          {
-            CloseAsync(error).GetAwaiter().GetResult();
+            DoCloseAsync(error).GetAwaiter().GetResult();
          }
          catch (Exception)
          {
+            // Ignore any exception as we are closed regardless
          }
       }
 
       public Task<IConnection> CloseAsync(IErrorCondition error = null)
       {
-         throw new System.NotImplementedException();
+         return DoCloseAsync(error);
       }
 
       public void Dispose()
@@ -670,6 +675,70 @@ namespace Apache.Qpid.Proton.Client.Implementation
       #endregion
 
       #region private connection utility methods
+
+      private Task<IConnection> DoCloseAsync(IErrorCondition error)
+      {
+         if (closed.CompareAndSet(false, true))
+         {
+            try
+            {
+               ioContext.EventLoop.Execute(() =>
+               {
+                  LOG.Trace("Close requested for connection: {0}", this);
+
+                  if (protonConnection.IsLocallyOpen)
+                  {
+                     protonConnection.ErrorCondition = ClientErrorCondition.AsProtonErrorCondition(error);
+
+                     try
+                     {
+                        protonConnection.Close();
+                     }
+                     catch (Exception)
+                     {
+                        // Engine error handler will kick in if the write of Close fails
+                     }
+                  }
+                  else
+                  {
+                     engine.Shutdown();
+                  }
+               });
+            }
+            catch (RejectedExecutionException rje)
+            {
+               LOG.Trace("Close task rejected from the event loop", rje);
+            }
+            finally
+            {
+               try
+               {
+                  // TODO: Blocking here isn't ideal but for now we want to await
+                  ///      the remote sending the close performative back to us
+                  ///      before dropping the connection. We should probably schedule
+                  ///      a task that closes the connection and completes the close
+                  ///      future if the remote hasn't responded by then.
+                  closeFuture.Task.GetAwaiter().GetResult();
+               }
+               catch (Exception)
+               {
+                  // Ignore error as we are closed regardless
+               }
+               finally
+               {
+                  try
+                  {
+                     transport.Close();
+                  }
+                  catch (Exception) { }
+
+                  ioContext.Shutdown();
+               }
+            }
+         }
+
+         return closeFuture.Task;
+      }
 
       private void InitializeProtonResources(ReconnectLocation location)
       {

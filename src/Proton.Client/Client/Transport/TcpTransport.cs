@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       private EndPoint channelEndpoint;
       private Task readLoop;
       private Task writeLoop;
-      private TcpClient channel;
+      private Socket channel;
       private Stream socketReader;
       private Stream socketWriter;
       private volatile bool connected;
@@ -105,7 +105,21 @@ namespace Apache.Qpid.Proton.Client.Transport
             {
             }
 
-            channel?.Close();
+            try
+            {
+               channel?.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+               channel?.Close();
+            }
+            catch (Exception)
+            {
+            }
          }
       }
 
@@ -119,7 +133,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          IPAddress address = Dns.GetHostEntry(host).AddressList[0];
 
-         channel = new TcpClient(address.AddressFamily);
+         channel = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
          channel.BeginConnect(address, port, new AsyncCallback(ConnectCallback), this);
 
          return this;
@@ -170,8 +184,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private void CompleteConnection()
       {
-         socketReader = channel.GetStream();
-         socketWriter = channel.GetStream();
+         socketReader = new NetworkStream(channel);
+         socketWriter = new NetworkStream(channel);
 
          // TODO: This currently creates two threads for each transport which could
          //       be reduced to one or none at some point using async Tasks
@@ -210,6 +224,13 @@ namespace Apache.Qpid.Proton.Client.Transport
             if (bytesRead == 0)
             {
                _ = channelOutputSource.TryComplete();
+               try
+               {
+                  channel.Shutdown(SocketShutdown.Both);
+               }
+               catch(Exception)
+               {}
+
                // End of stream
                // TODO mark as disconnected to fail writes
                if (!closed)
@@ -242,14 +263,18 @@ namespace Apache.Qpid.Proton.Client.Transport
       {
          private readonly IProtonBuffer buffer;
          private readonly Action completion;
+         private readonly bool flush;
 
-         public ChannelWrite(IProtonBuffer buffer, Action completion)
+         public ChannelWrite(IProtonBuffer buffer, Action completion, bool flush = true)
          {
             this.buffer = buffer;
             this.completion = completion;
+            this.flush = flush;
          }
 
          public IProtonBuffer Buffer => buffer;
+
+         public bool IsFlushRequired => flush;
 
          public bool HasCompletion => completion != null;
 
@@ -262,7 +287,9 @@ namespace Apache.Qpid.Proton.Client.Transport
       {
          while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
          {
-            while (channelOutputSink.TryRead(out ChannelWrite write))
+            ChannelWrite write = null;
+
+            while (channelOutputSink.TryRead(out write))
             {
                write.Buffer.ForEachReadableComponent(0, (idx, x) => WriteComponent(x));
 
@@ -274,7 +301,10 @@ namespace Apache.Qpid.Proton.Client.Transport
                }
             }
 
-            await socketWriter.FlushAsync().ConfigureAwait(false);
+            if (write?.IsFlushRequired ?? false)
+            {
+               await socketWriter.FlushAsync().ConfigureAwait(false);
+            }
          }
       }
 
