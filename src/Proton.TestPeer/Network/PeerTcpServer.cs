@@ -95,7 +95,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          if (closed.CompareAndSet(false, true))
          {
             logger.LogInformation("Peer TCP Server closed endpoint: {0}", serverListener.LocalEndPoint);
-            serverListener.Close();
+            try
+            {
+               serverListener.Shutdown(SocketShutdown.Both);
+            }
+            catch(Exception)
+            {
+            }
+
+            try
+            {
+               serverListener.Close(1);
+            }
+            catch(Exception)
+            {
+            }
          }
       }
 
@@ -128,16 +142,31 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          {
             server.logger.LogWarning(sockEx, "Server accept failed: {0}, SocketErrorCode:{1}",
                                      sockEx.Message, sockEx.SocketErrorCode);
-            server.serverFailedHandler(server, sockEx);
+            try
+            {
+               server.serverFailedHandler(server, sockEx);
+            }
+            catch (Exception)
+            {}
          }
          catch (Exception ex)
          {
             server.logger.LogWarning(ex, "Server accept failed: {0}", ex.Message);
-            server.serverFailedHandler(server, ex);
+            try
+            {
+               server.serverFailedHandler(server, ex);
+            }
+            catch(Exception)
+            {}
          }
          finally
          {
-            server.Stop(); // Only accept one connection.
+            try
+            {
+               server.Stop(); // Only accept one connection.
+            }
+            catch(Exception)
+            {}
          }
       }
    }

@@ -116,11 +116,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                channelOutputSource?.TryComplete();
                writeLoop?.GetAwaiter().GetResult();
             }
-            catch(Exception)
+            catch (Exception)
             {
             }
 
-            clientSocket.Close();
+            try
+            {
+               clientSocket.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception)
+            {
+            }
+
+            try
+            {
+               clientSocket.Close(1);
+            }
+            catch (Exception)
+            {
+            }
          }
       }
 
@@ -148,7 +162,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          }
          catch (Exception)
          {
-            clientSocket.Close();
+            try
+            {
+               clientSocket.Close();
+            }
+            catch (Exception)
+            {
+            }
             throw;
          }
 
@@ -219,8 +239,36 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          {
             byte[] readBuffer = new byte[1024];
 
-            int bytesRead = streamReader.Read(readBuffer, 0, readBuffer.Length);
-            if (bytesRead == 0)
+            try
+            {
+               int bytesRead = streamReader.Read(readBuffer, 0, readBuffer.Length);
+               if (bytesRead == 0)
+               {
+                  _ = channelOutputSource.TryComplete();
+
+                  // End of stream
+                  if (!closed)
+                  {
+                     logger.LogTrace("{0} TCP client read end of stream when not already closed.",
+                                    serverClientConnection ? "Server" : "Client");
+                     disconnectedHandler(this);
+                  }
+
+                  break;
+               }
+               else
+               {
+                  logger.LogTrace("{0} TCP client read {0} bytes from incoming read event",
+                                 serverClientConnection ? "Server" : "Client", bytesRead);
+                  if (bytesRead < readBuffer.Length)
+                  {
+                     readBuffer = Statics.CopyOf(readBuffer, bytesRead);
+                  }
+
+                  readHandler(this, readBuffer);
+               }
+            }
+            catch (IOException)
             {
                _ = channelOutputSource.TryComplete();
 
@@ -228,22 +276,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                if (!closed)
                {
                   logger.LogTrace("{0} TCP client read end of stream when not already closed.",
-                                  serverClientConnection ? "Server" : "Client");
+                                 serverClientConnection ? "Server" : "Client");
                   disconnectedHandler(this);
                }
-
-               break;
-            }
-            else
-            {
-               logger.LogTrace("{0} TCP client read {0} bytes from incoming read event",
-                               serverClientConnection ? "Server" : "Client", bytesRead);
-               if (bytesRead < readBuffer.Length)
-               {
-                  readBuffer = Statics.CopyOf(readBuffer, bytesRead);
-               }
-
-               readHandler(this, readBuffer);
             }
          }
       }
@@ -256,14 +291,26 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       // fires those bytes into the socket output stream as they arrive.
       private async Task ChannelWriteLoop()
       {
-         while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
+         try
          {
-            while (channelOutputSink.TryRead(out Stream stream))
+            while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
             {
-               await stream.CopyToAsync(streamWriter, 8192);
-            }
+               while (channelOutputSink.TryRead(out Stream stream))
+               {
+                  await stream.CopyToAsync(streamWriter, 8192);
+               }
 
-            await streamWriter.FlushAsync().ConfigureAwait(false);
+               await streamWriter.FlushAsync().ConfigureAwait(false);
+            }
+         }
+         catch (Exception)
+         {
+            if (!closed)
+            {
+               logger.LogTrace("{0} TCP client write failed when not already closed.",
+                              serverClientConnection ? "Server" : "Client");
+               disconnectedHandler(this);
+            }
          }
       }
 

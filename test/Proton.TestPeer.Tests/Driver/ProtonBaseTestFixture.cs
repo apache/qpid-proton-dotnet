@@ -18,6 +18,8 @@
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using NLog.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -42,27 +44,42 @@ namespace Apache.Qpid.Proton.Test.Driver
          NLog.Targets.Target logconsole = new NLog.Targets.ConsoleTarget("logconsole");
 
          // Rules for mapping loggers to targets
-         config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logconsole);
-         config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, logfile);
+         config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, logconsole);
+         config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logfile);
 
          loggerFactory = LoggerFactory.Create(builder =>
             builder.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddNLog(config)
          );
 
          logger = loggerFactory.CreateLogger(GetType().Name);
+
+         AppDomain currentDomain = AppDomain.CurrentDomain;
+         currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UncaughtExceptionHander);
+      }
+
+      public static void UncaughtExceptionHander(object sender, UnhandledExceptionEventArgs args)
+      {
+         Console.WriteLine(string.Format("Unit test run threw unhandled exception: {}", args.ExceptionObject.ToString()));
       }
 
       [SetUp]
       public void SetUp()
       {
+         // Just in case the one time setup routine is disabled create a null logger to prevent
+         // NPEs from code in the tests.
+         if (logger == null)
+         {
+            logger = NullLogger.Instance;
+         }
+
          testName = TestContext.CurrentContext.Test.Name;
-         logger.LogInformation("--------- Begin test {0} ---------------------------------", testName);
+         logger?.LogInformation("--------- Begin test {0} ---------------------------------", testName);
       }
 
       [TearDown]
       public void TearDown()
       {
-         logger.LogInformation("--------- End test {0} ---------------------------------", testName);
+         logger?.LogInformation("--------- End test {0} ---------------------------------", testName);
       }
    }
 }

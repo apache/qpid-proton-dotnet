@@ -341,9 +341,13 @@ namespace Apache.Qpid.Proton.Test.Driver
             client.RemoteAttach().OfSender().WithHandle(42).Now();
 
             // Wait for the above and then script next steps
+            logger.LogInformation("Test waiting for client script to complete.");
+
             Assert.DoesNotThrow(() => client.WaitForScriptToComplete());
 
-            Assert.Throws<AssertionError>(() => peer.WaitForScriptToComplete());
+            logger.LogInformation("Test finished with client expectations, now awaiting server fail");
+
+            Assert.Catch<AssertionError>(() => peer.WaitForScriptToComplete());
          }
       }
 
