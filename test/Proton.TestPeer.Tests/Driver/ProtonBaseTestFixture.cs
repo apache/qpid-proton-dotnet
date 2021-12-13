@@ -47,11 +47,13 @@ namespace Apache.Qpid.Proton.Test.Driver
          config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, logconsole);
          config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logfile);
 
-         loggerFactory = LoggerFactory.Create(builder =>
-            builder.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddNLog(config)
-         );
+         loggerFactory = NullLoggerFactory.Instance;
+         // loggerFactory = LoggerFactory.Create(builder =>
+         //    builder.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddNLog(config)
+         // );
 
-         logger = loggerFactory.CreateLogger(GetType().Name);
+         logger = NullLogger.Instance;
+            //loggerFactory.CreateLogger(GetType().Name);
 
          AppDomain currentDomain = AppDomain.CurrentDomain;
          currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UncaughtExceptionHander);
