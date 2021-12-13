@@ -107,17 +107,17 @@ namespace Apache.Qpid.Proton.Codec.Primitives
 
          if (fromStream)
          {
-            Assert.AreEqual(42.0, streamDecoder.ReadDouble(stream, streamDecoderState), 0.0);
-            Assert.AreEqual(43.0, streamDecoder.ReadDouble(stream, streamDecoderState, 42.0), 0.0);
+            Assert.AreEqual(42.0, streamDecoder.ReadDouble(stream, streamDecoderState));
+            Assert.AreEqual(43.0, streamDecoder.ReadDouble(stream, streamDecoderState, 42.0));
             Assert.IsNull(streamDecoder.ReadDouble(stream, streamDecoderState));
-            Assert.AreEqual(43.0, streamDecoder.ReadDouble(stream, streamDecoderState, 43.0), 0.0);
+            Assert.AreEqual(43.0, streamDecoder.ReadDouble(stream, streamDecoderState, 43.0));
          }
          else
          {
-            Assert.AreEqual(42.0, decoder.ReadDouble(buffer, decoderState), 0.0);
-            Assert.AreEqual(43.0, decoder.ReadDouble(buffer, decoderState, 42.0), 0.0);
+            Assert.AreEqual(42.0, decoder.ReadDouble(buffer, decoderState));
+            Assert.AreEqual(43.0, decoder.ReadDouble(buffer, decoderState, 42.0));
             Assert.IsNull(decoder.ReadDouble(buffer, decoderState));
-            Assert.AreEqual(43.0, decoder.ReadDouble(buffer, decoderState, 43.0), 0.0);
+            Assert.AreEqual(43.0, decoder.ReadDouble(buffer, decoderState, 43.0));
          }
       }
 
