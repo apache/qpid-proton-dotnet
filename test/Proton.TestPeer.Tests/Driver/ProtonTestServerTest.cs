@@ -36,6 +36,18 @@ namespace Apache.Qpid.Proton.Test.Driver
       }
 
       [Test]
+      public void TestServerStartThenStopAndWaitForCompletion()
+      {
+         ProtonTestServer peer = new ProtonTestServer();
+
+         Assert.IsFalse(peer.IsClosed);
+         peer.Start();
+         peer.Close();
+         Assert.IsTrue(peer.IsClosed);
+         peer.WaitForScriptToComplete();
+      }
+
+      [Test]
       public void TestServerFailsTestIfFrameSizeExpectationNotMet()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))

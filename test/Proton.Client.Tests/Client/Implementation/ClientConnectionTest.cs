@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogInformation("Connection create failed due to: ", ex);
+               logger.LogInformation(ex, "Connection create failed due to: {0}", ex.Message);
                Assert.IsTrue(ex.InnerException is ClientException);
             }
 

@@ -140,24 +140,30 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          }
          catch (SocketException sockEx)
          {
-            server.logger.LogWarning(sockEx, "Server accept failed: {0}, SocketErrorCode:{1}",
-                                     sockEx.Message, sockEx.SocketErrorCode);
-            try
+            if (!server.closed)
             {
-               server.serverFailedHandler(server, sockEx);
+               server.logger.LogWarning(sockEx, "Server accept failed: {0}, SocketErrorCode:{1}",
+                                       sockEx.Message, sockEx.SocketErrorCode);
+               try
+               {
+                  server.serverFailedHandler(server, sockEx);
+               }
+               catch (Exception)
+               {}
             }
-            catch (Exception)
-            {}
          }
          catch (Exception ex)
          {
-            server.logger.LogWarning(ex, "Server accept failed: {0}", ex.Message);
-            try
+            if (!server.closed)
             {
-               server.serverFailedHandler(server, ex);
+               server.logger.LogWarning(ex, "Server accept failed: {0}", ex.Message);
+               try
+               {
+                  server.serverFailedHandler(server, ex);
+               }
+               catch (Exception)
+               { }
             }
-            catch(Exception)
-            {}
          }
          finally
          {

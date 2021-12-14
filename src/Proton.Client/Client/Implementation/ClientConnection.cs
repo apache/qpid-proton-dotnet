@@ -26,6 +26,8 @@ using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine.Sasl.Client;
 using Apache.Qpid.Proton.Client.Transport;
 using Apache.Qpid.Proton.Logging;
+using Apache.Qpid.Proton.Engine.Exceptions;
+using System.IO;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -457,7 +459,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       internal void Schedule(Action action, TimeSpan delay)
       {
          // TODO: Either add scheduling to event loop or handle timeouts here somehow
-         Task.Delay(delay).ContinueWith((t) => ioContext.EventLoop.Execute(action));
+         Task.Delay(delay).ContinueWith((t) => Execute(action));
       }
 
       internal TaskCompletionSource<T> Request<T>(Object requestor, TaskCompletionSource<T> request)
@@ -835,7 +837,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             try
             {
-               openFuture.Task.Wait();
+               openFuture.Task.GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -882,17 +884,60 @@ namespace Apache.Qpid.Proton.Client.Implementation
             transport = ioContext.NewTransport();
             LOG.Trace("Connection {0} Attempting connection to remote {1}", ConnectionId, location.Host, location.Port);
 
-            // TODO
-            // transport.TransportConnectedHandler(HandleTransportConnected);
-            // transport.TransportConnectFailedHandler(HandleConnectFailed);
-            // transport.TransportDisconnectedHandler(HandleTransportDisconnected);
-            // transport.TransportReadHandler(HandleTransportRead);
+            transport.TransportConnectedHandler(HandleTransportConnected);
+            transport.TransportConnectFailedHandler(HandleTransportConnectFailed);
+            transport.TransportDisconnectedHandler(HandleTransportDisconnected);
+            transport.TransportReadHandler(HandleTransportRead);
 
             transport.Connect(location.Host, location.Port);
          }
          catch (Exception error)
          {
             engine.EngineFailed(ClientExceptionSupport.CreateOrPassthroughFatal(error));
+         }
+      }
+
+      private void HandleTransportConnected(ITransport transport)
+      {
+         // Trigger the AMQP header and Open performative exchange on connect
+         engine.Start().Open();
+      }
+
+      private void HandleTransportConnectFailed(ITransport transport, Exception error)
+      {
+         if (!engine.IsShutdown)
+         {
+            LOG.Debug("Transport reports connect attempt failed: {0}", transport);
+            engine.EngineFailed(
+               new IOException(string.Format("Connection to remote {0} failed.", transport.EndPoint)));
+         }
+      }
+
+      private void HandleTransportDisconnected(ITransport transport)
+      {
+         if (!engine.IsShutdown)
+         {
+            LOG.Debug("Transport reports connection dropped: {0}", transport);
+            engine.EngineFailed(
+               new IOException(string.Format("Connection to remote {0} dropped.", transport.EndPoint)));
+         }
+      }
+
+      private void HandleTransportRead(ITransport transport, IProtonBuffer buffer)
+      {
+         try
+         {
+            do
+            {
+               engine.Ingest(buffer);
+            }
+            while (buffer.IsReadable && engine.IsWritable);
+            // TODO - How do we handle case of not all data read ?
+         }
+         catch (EngineStateException e)
+         {
+            LOG.Warn("Caught problem during incoming data processing: {0}", e.Message, e);
+            engine.EngineFailed(ClientExceptionSupport.CreateOrPassthroughFatal(e));
          }
       }
 
@@ -913,25 +958,31 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (reconnectAttempts == 0)
             {
                LOG.Trace("Initial connect attempt will be performed immediately");
-               // executor.execute(()->attemptConnection(location));
+               ioContext.EventLoop.Execute(() => AttemptConnection(location));
             }
             else
             {
                long delay = NextReconnectDelay();
                LOG.Trace("Next connect attempt will be in {0} milliseconds", delay);
-               // executor.schedule(()->attemptConnection(location), delay, TimeUnit.MILLISECONDS);
+               // TODO: Executor scheduling would handle connection close, this will
+               //       try and run this even after a close.
+               Task.Delay((int)delay).ContinueWith(
+                  (t) => ioContext.EventLoop.Execute(() => AttemptConnection(location)));
             }
          }
          else if (reconnectAttempts == 0)
          {
             LOG.Trace("Initial reconnect attempt will be performed immediately");
-            // executor.execute(()->attemptConnection(location));
+            ioContext.EventLoop.Execute(() => AttemptConnection(location));
          }
          else
          {
             long delay = NextReconnectDelay();
             LOG.Trace("Next reconnect attempt will be in {0} milliseconds", delay);
-            // executor.schedule(()->attemptConnection(location), delay, TimeUnit.MILLISECONDS);
+            // TODO: Executor scheduling would handle connection close, this will
+            //       try and run this even after a close.
+            Task.Delay((int)delay).ContinueWith(
+               (t) => ioContext.EventLoop.Execute(() => AttemptConnection(location)));
          }
       }
 

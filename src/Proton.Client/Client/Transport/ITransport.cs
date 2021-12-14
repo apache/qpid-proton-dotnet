@@ -82,7 +82,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       /// <summary>
       /// Configures the async connected handler that is called when a transport
-      /// creates a successful connection to the remote
+      /// creates a successful connection to the remote. The handler is always
+      /// invoked within the registered event loop.
       /// </summary>
       /// <param name="connectedHandler">Handler that is invoked on connect</param>
       /// <returns>This transport instance</returns>
@@ -90,7 +91,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       /// <summary>
       /// Configures the async connected handler that is called when a transport
-      /// fails to connect to a remote.
+      /// fails to connect to a remote. The handler is always invoked within the
+      /// registered event loop.
       /// </summary>
       /// <param name="connectedHandler">Handler that is invoked on connect failure</param>
       /// <returns>This transport instance</returns>
@@ -98,7 +100,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       /// <summary>
       /// Configures the async disconnected handler that is called when a transport
-      /// experiences a loss of connectivity with the remote.
+      /// experiences a loss of connectivity with the remote. The handler is always
+      /// invoked within the registered event loop.
       /// </summary>
       /// <param name="connectedHandler">Handler that is invoked on disconnect</param>
       /// <returns>This transport instance</returns>

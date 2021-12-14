@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private readonly Lazy<TaskCompletionSource<IClient>> closeTask = new Lazy<TaskCompletionSource<IClient>>();
 
-      public string ContainerId => throw new System.NotImplementedException();
+      public string ContainerId => options.Id;
 
       internal ClientInstance(ClientOptions options)
       {
