@@ -250,6 +250,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       internal class FrameBufferingStage : FrameParserStage
       {
          private MemoryStream buffer;
+         private uint frameSize;
+         private uint bytesRemaining;
 
          public FrameBufferingStage(FrameDecoder decoder) : base(decoder)
          {
@@ -257,13 +259,15 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          internal override void Parse(Stream input)
          {
-            if ((input.Length - input.Position) < buffer.Length - buffer.Position)
+            uint incomingBytes = (uint)(input.Length - input.Position);
+
+            if (incomingBytes < bytesRemaining)
             {
                input.CopyTo(buffer);
             }
             else
             {
-               input.CopyTo(buffer, (int)(buffer.Length - buffer.Position));
+               input.CopyTo(buffer, (int)bytesRemaining);
 
                // Now we can consume the buffer frame body.
                decoder.InitializeFrameBodyParsingStage((uint)buffer.Position);
@@ -277,11 +281,16 @@ namespace Apache.Qpid.Proton.Test.Driver
                   buffer = null;
                }
             }
+
+            bytesRemaining -= incomingBytes;
          }
 
          internal override FrameBufferingStage Reset(uint frameSize)
          {
-            buffer = new MemoryStream((int)frameSize);
+            this.buffer = new MemoryStream((int)frameSize);
+            this.frameSize = frameSize;
+            this.bytesRemaining = frameSize;
+
             return this;
          }
       }

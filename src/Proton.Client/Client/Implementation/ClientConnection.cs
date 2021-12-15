@@ -587,7 +587,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleEngineOutput(IProtonBuffer buffer, Action ioComplete)
       {
-         // TODO
+         bool autoFlush = false;
+
+         if (autoFlush)
+         {
+            //transport.WriteAndFlush(buffer, ioComplete);
+         }
+         else
+         {
+            transport.Write(buffer, ioComplete);
+         }
       }
 
       /// <summary>

@@ -24,6 +24,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Concurrent;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Transport
@@ -36,6 +37,8 @@ namespace Apache.Qpid.Proton.Client.Transport
    /// </summary>
    public class TcpTransport : ITransport
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<TcpTransport>();
+
       private readonly ChannelReader<ChannelWrite> channelOutputSink;
       private readonly ChannelWriter<ChannelWrite> channelOutputSource;
 
@@ -131,6 +134,8 @@ namespace Apache.Qpid.Proton.Client.Transport
          Statics.RequireNonNull(disconnectedHandler, "Cannot connect until a disconnected handler is registered");
          Statics.RequireNonNull(readHandler, "Cannot connect when a read handler is registered");
 
+         LOG.Debug("Transport attempting connection to: {0}:{1}", host, port);
+
          IPAddress address = Dns.GetHostEntry(host).AddressList[0];
 
          channel = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -169,6 +174,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       public ITransport Write(IProtonBuffer buffer, Action writeCompleteAction)
       {
+         LOG.Trace("Transport write dispatching buffer of size : {0}", buffer.ReadableBytes);
+
          try
          {
             channelOutputSource.TryWrite(new ChannelWrite(buffer, writeCompleteAction));

@@ -21,13 +21,13 @@ using NUnit.Framework;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Microsoft.Extensions.Logging;
+using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
    [TestFixture, Timeout(20000)]
    public class ClientConnectionTest : ClientBaseTestFixture
    {
-      [Ignore("Not yet ready for these to work.")]
       [Test]
       public void TestConnectFailsDueToServerStopped()
       {
@@ -58,6 +58,59 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             peer.WaitForScriptToComplete();
          }
+      }
+
+      [Test]
+      public void TestCreateConnectionToNonSaslPeer()
+      {
+         DoConnectionWithUnexpectedHeaderTestImpl(AMQPHeader.Header.ToArray());
+      }
+
+      [Test]
+      public void TestCreateConnectionToNonAmqpPeer()
+      {
+         DoConnectionWithUnexpectedHeaderTestImpl(
+            new byte[] { (byte)'N', (byte)'O', (byte)'T', (byte)'-', (byte)'A', (byte)'M', (byte)'Q', (byte)'P' });
+      }
+
+      private void DoConnectionWithUnexpectedHeaderTestImpl(byte[] responseHeader)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLHeader().RespondWithBytes(responseHeader);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions("guest", "guest");
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            try
+            {
+               _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            }
+            catch (Exception ex)
+            {
+               logger.LogInformation(ex, "Open task threw error: {0}", ex.Message);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      protected ConnectionOptions ConnectionOptions(string user, string password)
+      {
+         ConnectionOptions options = new ConnectionOptions();
+         options.User = user;
+         options.Password = password;
+
+         return options;
       }
    }
 }
