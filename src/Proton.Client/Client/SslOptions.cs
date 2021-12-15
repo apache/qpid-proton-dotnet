@@ -51,11 +51,13 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>A deep copy of this options instance.</returns>
       public object Clone()
       {
-         return CopyInto(new SslOptions());
+         return MemberwiseClone();
       }
 
       internal SslOptions CopyInto(SslOptions other)
       {
+         other.DefaultSslPort = DefaultSslPort;
+
          return this;
       }
 
@@ -63,6 +65,11 @@ namespace Apache.Qpid.Proton.Client
       /// Controls if SSL is enabled for the connection these options are applied to.
       /// </summary>
       public bool SslEnabled { get; set; }
+
+      /// <summary>
+      /// Returns the configured default SSL port which if not set otherwise is 5671
+      /// </summary>
+      public int DefaultSslPort { get; set; } = DEFAULT_SSL_PORT;
 
    }
 }

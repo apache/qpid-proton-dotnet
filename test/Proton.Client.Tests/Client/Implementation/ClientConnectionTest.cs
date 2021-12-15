@@ -22,6 +22,7 @@ using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Microsoft.Extensions.Logging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
+using Apache.Qpid.Proton.Test.Driver.Matchers;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -102,6 +103,160 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             peer.WaitForScriptToComplete();
          }
+      }
+
+      [Test]
+      public void TestCreateConnectionString()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions("guest", "guest");
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Test fails as events are yet implemented")]
+      [Test]
+      public void TestCreateConnectionSignalsEvent()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            CountdownEvent connected = new CountdownEvent(1);
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+
+            options.Connected += (sender, eventArgs) => connected.AddCount();
+
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.IsTrue(connected.Wait(5000));
+
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithConfiguredContainerId()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().WithContainerId("container-id-test").Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            ClientOptions options = new ClientOptions();
+            options.Id = "container-id-test";
+
+            IClient container = IClient.Create(options);
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithUnconfiguredContainerId()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().WithContainerId(Matches.Any(typeof(string))).Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            ClientOptions options = new ClientOptions();
+            IClient container = IClient.Create(options);
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionStringWithDefaultTcpPort()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+
+            options.TransportOptions.DefaultTcpPort = remotePort;
+
+            IConnection connection = container.Connect(remoteAddress, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      protected ProtonTestServerOptions TestServerOptions()
+      {
+         return new ProtonTestServerOptions();
+      }
+
+      protected ConnectionOptions ConnectionOptions()
+      {
+         return new ConnectionOptions();
       }
 
       protected ConnectionOptions ConnectionOptions(string user, string password)

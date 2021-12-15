@@ -134,6 +134,16 @@ namespace Apache.Qpid.Proton.Client.Transport
          Statics.RequireNonNull(disconnectedHandler, "Cannot connect until a disconnected handler is registered");
          Statics.RequireNonNull(readHandler, "Cannot connect when a read handler is registered");
 
+         if (port < 0 && options.DefaultTcpPort < 0 && (sslOptions.SslEnabled && sslOptions.DefaultSslPort < 0))
+         {
+            throw new ArgumentOutOfRangeException("Transport port value must be a non-negative int value or a default port configured");
+         }
+
+         if (port < 0)
+         {
+            port = sslOptions.SslEnabled ? sslOptions.DefaultSslPort : options.DefaultTcpPort;
+         }
+
          LOG.Debug("Transport attempting connection to: {0}:{1}", host, port);
 
          IPAddress address = Dns.GetHostEntry(host).AddressList[0];
@@ -235,8 +245,8 @@ namespace Apache.Qpid.Proton.Client.Transport
                {
                   channel.Shutdown(SocketShutdown.Both);
                }
-               catch(Exception)
-               {}
+               catch (Exception)
+               { }
 
                // End of stream
                // TODO mark as disconnected to fail writes

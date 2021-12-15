@@ -60,12 +60,21 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>A deep copy of this options instance.</returns>
       public object Clone()
       {
-         return CopyInto(new TransportOptions());
+         return MemberwiseClone();
       }
 
       internal TransportOptions CopyInto(TransportOptions other)
       {
+         other.DefaultTcpPort = DefaultTcpPort;
+
          return this;
       }
+
+      /// <summary>
+      /// Configures the default TCP port that all client connections should use if
+      /// none is provided in the connect call.
+      /// </summary>
+      public int DefaultTcpPort { get; set; } = DEFAULT_TCP_PORT;
+
    }
 }
