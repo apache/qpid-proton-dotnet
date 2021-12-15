@@ -68,6 +68,8 @@ namespace Apache.Qpid.Proton.Logging
       {
          get
          {
+            // TODO: Loggers already created will be using the old logger factory
+            //       loggers which could cause issues in tests.
             ILoggerFactory current = Volatile.Read(ref loggerFactory);
             if (current == null)
             {

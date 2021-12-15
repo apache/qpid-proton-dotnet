@@ -18,6 +18,7 @@
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using NLog.Extensions.Logging;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -50,6 +51,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          );
 
          logger = loggerFactory.CreateLogger(GetType().Name);
+
+         // Configure the proton logger facility such that it uses the configured logger factory.
+         ProtonLoggerFactory.Factory = loggerFactory;
       }
 
       [SetUp]

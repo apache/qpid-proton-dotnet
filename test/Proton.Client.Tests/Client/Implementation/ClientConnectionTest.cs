@@ -62,6 +62,45 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
+      public void TestCreateTwoDistinctConnectionsFromSingleClientInstance()
+      {
+         using ProtonTestServer firstPeer = new ProtonTestServer(TestServerOptions(), loggerFactory);
+         using ProtonTestServer secondPeer = new ProtonTestServer(TestServerOptions(), loggerFactory);
+         {
+            firstPeer.ExpectSASLAnonymousConnect();
+            firstPeer.ExpectOpen().WithContainerId(Matches.Any(typeof(string))).Respond();
+            firstPeer.ExpectClose().Respond();
+            firstPeer.Start();
+
+            secondPeer.ExpectSASLAnonymousConnect();
+            secondPeer.ExpectOpen().WithContainerId(Matches.Any(typeof(string))).Respond();
+            secondPeer.ExpectClose().Respond();
+            secondPeer.Start();
+
+            string firstAddress = firstPeer.ServerAddress;
+            int firstPort = firstPeer.ServerPort;
+            string secondAddress = secondPeer.ServerAddress;
+            int secondPort = secondPeer.ServerPort;
+
+            logger.LogInformation("Test started, peer 1 listening on: {0}:{1}", firstAddress, firstPort);
+            logger.LogInformation("Test started, peer 2 listening on: {0}:{1}", secondAddress, secondPort);
+
+            IClient container = IClient.Create();
+            IConnection connection1 = container.Connect(firstAddress, firstPort, ConnectionOptions());
+            IConnection connection2 = container.Connect(secondAddress, secondPort, ConnectionOptions());
+
+            _ = connection1.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection2.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            _ = connection1.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            _ = connection2.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            firstPeer.WaitForScriptToComplete();
+            secondPeer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
       public void TestCreateConnectionToNonSaslPeer()
       {
          DoConnectionWithUnexpectedHeaderTestImpl(AMQPHeader.Header.ToArray());
