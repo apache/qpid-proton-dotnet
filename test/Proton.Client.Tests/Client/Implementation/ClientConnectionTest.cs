@@ -170,7 +170,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test fails as events are yet implemented")]
       [Test]
       public void TestCreateConnectionSignalsEvent()
       {
@@ -191,7 +190,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = ConnectionOptions();
 
-            options.Connected += (sender, eventArgs) => connected.AddCount();
+            options.ConnectedHandler = (conn, eventArgs) => connected.Signal();
 
             IConnection connection = container.Connect(remoteAddress, remotePort, options);
 
@@ -283,6 +282,81 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
             _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionEstablishedHandlerGetsCalled()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            CountdownEvent established = new CountdownEvent(1);
+            ConnectionOptions options = ConnectionOptions();
+
+            options.ConnectedHandler = (connection, connectEvent) =>
+            {
+               logger.LogInformation("Connection signaled that it was established");
+               established.Signal();
+            };
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            Assert.IsTrue(established.Wait(TimeSpan.FromSeconds(10)));
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionFailedHandlerGetsCalled()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin();
+            peer.DropAfterLastHandler(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            CountdownEvent failed = new CountdownEvent(1);
+            ConnectionOptions options = ConnectionOptions();
+
+            options.DisconnectedHandler = (connection, location) =>
+            {
+               logger.LogInformation("Connection signaled that it has failed");
+               failed.Signal();
+            };
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.OpenSession();
+
+            Assert.IsTrue(failed.Wait(TimeSpan.FromMilliseconds(10)));
+
+            connection.Close();
 
             peer.WaitForScriptToComplete();
          }

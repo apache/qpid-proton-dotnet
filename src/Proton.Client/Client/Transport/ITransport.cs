@@ -38,6 +38,18 @@ namespace Apache.Qpid.Proton.Client.Transport
       IEventLoop EventLoop { get; }
 
       /// <summary>
+      /// Returns the originally provided host address this transport was given in the
+      /// connect method. Returns null if connect was not yet called.
+      /// </summary>
+      string Host { get; }
+
+      /// <summary>
+      /// Returns the this transport was given or a default that was used in the
+      /// connect method. Returns -1 if connect was not yet called.
+      /// </summary>
+      int Port { get; }
+
+      /// <summary>
       /// Returns the endpoint that his transport connects to.
       /// </summary>
       EndPoint EndPoint { get; }

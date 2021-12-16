@@ -55,6 +55,8 @@ namespace Apache.Qpid.Proton.Client.Transport
       private Stream socketReader;
       private Stream socketWriter;
       private volatile bool connected;
+      private string host;
+      private int port = -1;
 
       private Action<ITransport> connectedHandler;
       private Action<ITransport, Exception> connectFailedHandler;
@@ -64,6 +66,10 @@ namespace Apache.Qpid.Proton.Client.Transport
       #region Transport property access APIs
 
       public bool IsConnected => connected;
+
+      public string Host => host;
+
+      public int Port => port;
 
       public IEventLoop EventLoop => eventLoop;
 
@@ -150,6 +156,9 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          channel = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
          channel.BeginConnect(address, port, new AsyncCallback(ConnectCallback), this);
+
+         this.host = host;
+         this.port = port;
 
          return this;
       }

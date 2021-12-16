@@ -544,12 +544,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          if (totalConnections == 1)
          {
             LOG.Info("Connection {0} connected to server: {1}", ConnectionId, transport.EndPoint);
-            // TODO SubmitConnectionEvent(options.connectedHandler(), transport.getHost(), transport.getPort(), null);
+            SubmitConnectionEvent(options.ConnectedHandler, transport.Host, transport.Port);
          }
          else
          {
             LOG.Info("Connection {0} reconnected to server: {1}", ConnectionId, transport.EndPoint);
-            // TODO SubmitConnectionEvent(options.reconnectedHandler(), transport.getHost(), transport.getPort(), null);
+            SubmitConnectionEvent(options.ReconnectedHandler, transport.Host, transport.Port);
          }
 
          openFuture.TrySetResult(this);
@@ -877,8 +877,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          LOG.Warn("Connection {0} has failed due to: {1}", ConnectionId, failureCause != null ?
                   failureCause.Get().GetType().Name + " -> " + failureCause.Get().Message : "No failure details provided.");
 
-         // TODO
-         // SubmitDisconnectionEvent(options.DisconnectedHandler, transport.Host, transport.Port, failureCause);
+         SubmitDisconnectionEvent(options.DisconnectedHandler, transport.Host, transport.Port, cause);
       }
 
       #endregion
@@ -1082,6 +1081,36 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
 
          return nextReconnectDelay;
+      }
+
+      private void SubmitConnectionEvent(Action<IConnection, ConnectionEvent> handler, string host, int port)
+      {
+         if (handler != null)
+         {
+            try
+            {
+               Task.Factory.StartNew(() => handler(this, new ConnectionEvent(host, port)));
+            }
+            catch (Exception ex)
+            {
+               LOG.Trace("Error thrown while attempting to submit event notification ", ex);
+            }
+         }
+      }
+
+      private void SubmitDisconnectionEvent(Action<IConnection, DisconnectionEvent> handler, string host, int port, ClientIOException cause)
+      {
+         if (handler != null)
+         {
+            try
+            {
+               Task.Factory.StartNew(() => handler(this, new DisconnectionEvent(host, port, cause)));
+            }
+            catch (Exception ex)
+            {
+               LOG.Trace("Error thrown while attempting to submit event notification ", ex);
+            }
+         }
       }
 
       #endregion
