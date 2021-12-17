@@ -563,6 +563,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             CheckFailed();
             if (script.Count > 0)
             {
+               logger.LogDebug("{0} Test driver queueing script completion action, behind {1} entries", Name, script.Count);
                possibleWait = new ScriptCompleteAction(this).Queue();
             }
          }
@@ -701,7 +702,9 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          IScriptedElement peekNext = null;
 
-         while (script.TryPeek(out peekNext) && failureCause == null)
+         script.TryPeek(out peekNext);
+
+         do
          {
             if (peekNext is ScriptedAction action)
             {
@@ -713,7 +716,10 @@ namespace Apache.Qpid.Proton.Test.Driver
             {
                return;
             }
+
+            script.TryPeek(out peekNext);
          }
+         while (peekNext != null && failureCause == null);
       }
 
       private void CheckFailed()

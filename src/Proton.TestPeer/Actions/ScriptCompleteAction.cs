@@ -18,6 +18,7 @@
 using System;
 using System.Threading;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace Apache.Qpid.Proton.Test.Driver.Actions
 {
@@ -29,10 +30,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    {
       private readonly AMQPTestDriver driver;
       private readonly CountdownEvent complete = new CountdownEvent(1);
+      private readonly ILogger<ScriptCompleteAction> logger;
 
       public ScriptCompleteAction(AMQPTestDriver driver)
       {
          this.driver = driver;
+         this.logger = driver.LoggerFactory.CreateLogger<ScriptCompleteAction>();
       }
 
       public override ScriptCompleteAction Later(long delay)
@@ -43,12 +46,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override ScriptCompleteAction Now()
       {
+         logger.LogTrace("{0} Script compeltion action triggered on Now call", driver.Name);
          complete.Signal();
          return this;
       }
 
       public override ScriptCompleteAction Perform(AMQPTestDriver driver)
       {
+         logger.LogTrace("{0} Script compeltion action performing action via script driver", driver.Name);
          complete.Signal();
          return this;
       }

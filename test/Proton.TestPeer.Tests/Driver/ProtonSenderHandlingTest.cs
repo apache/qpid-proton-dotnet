@@ -23,7 +23,7 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
-   [TestFixture, Timeout(20000)]
+   [TestFixture, Timeout(90000)]
    public class ProtonSenderHandlingTest : ProtonBaseTestFixture
    {
       [Test]
@@ -317,6 +317,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       }
 
       [Test]
+      [Repeat(20)]
       public void TestPeerEnforcesHandleMaxOfZeroOnPipelinedOpenBeginAttach()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))

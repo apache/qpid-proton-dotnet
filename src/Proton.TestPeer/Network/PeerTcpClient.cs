@@ -110,6 +110,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       {
          if (closed.CompareAndSet(false, true))
          {
+            Task.Delay(20).GetAwaiter().GetResult();
+
             try
             {
                // Stop additional writes but wait for queued writes to complete.
@@ -130,7 +132,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
             try
             {
-               clientSocket.Close(1);
+               clientSocket.Close(10);
             }
             catch (Exception)
             {
@@ -258,7 +260,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                }
                else
                {
-                  logger.LogTrace("{0} TCP client read {0} bytes from incoming read event",
+                  logger.LogTrace("{0} TCP client read {1} bytes from incoming read event",
                                  serverClientConnection ? "Server" : "Client", bytesRead);
                   if (bytesRead < readBuffer.Length)
                   {
@@ -297,6 +299,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             {
                while (channelOutputSink.TryRead(out Stream stream))
                {
+                  logger.LogTrace("{0} TCP client writing {1} bytes to output stream",
+                                  serverClientConnection ? "Server" : "Client", stream.Length);
                   await stream.CopyToAsync(streamWriter, 8192);
                }
 
