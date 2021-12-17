@@ -692,6 +692,408 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      [Test]
+      public void TestConnectionOpenFutureWaitCancelledOnConnectionDropWithTimeout()
+      {
+         DoTestConnectionOpenFutureWaitCancelledOnConnectionDrop(true);
+      }
+
+      [Test]
+      public void TestConnectionOpenFutureWaitCancelledOnConnectionDropNoTimeout()
+      {
+         DoTestConnectionOpenFutureWaitCancelledOnConnectionDrop(false);
+      }
+
+      protected void DoTestConnectionOpenFutureWaitCancelledOnConnectionDrop(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            peer.WaitForScriptToComplete();
+            peer.Close();
+
+            try
+            {
+               if (timeout)
+               {
+                  connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  connection.OpenTask.Wait();
+               }
+               Assert.Fail("Should have thrown an execution error due to connection drop");
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "connection open failed with error: {0}", error.Message);
+            }
+
+            try
+            {
+               if (timeout)
+               {
+                  connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  connection.CloseAsync().Wait();
+               }
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "connection close failed with error: {0}", error.Message);
+               Assert.Fail("Close should ignore connect error and complete without error.");
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestRemotelyCloseConnectionDuringSessionCreation()
+      {
+         String BREAD_CRUMB = "ErrorMessageBreadCrumb";
+
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin();
+            peer.RemoteClose().WithErrorCondition(AmqpError.NOT_ALLOWED.ToString(), BREAD_CRUMB).Queue();
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            connection.OpenTask.Wait();
+
+            ISession session = connection.OpenSession();
+
+            try
+            {
+               session.OpenTask.Wait();
+               Assert.Fail("Open should throw error when waiting for remote open and connection remotely closed.");
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "Session open failed with error: {0}", error.Message);
+               Assert.IsNotNull(error.Message, "Expected exception to have a message");
+               Assert.IsTrue(error.Message.Contains(BREAD_CRUMB), "Expected breadcrumb to be present in message");
+               Assert.IsNotNull(error.InnerException, "Execution error should convey the cause");
+               Assert.IsTrue(error.InnerException is ClientConnectionRemotelyClosedException);
+            }
+
+            session.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionOpenTimeoutWhenNoRemoteOpenArrivesTimeout()
+      {
+         DoTestConnectionOpenTimeoutWhenNoRemoteOpenArrives(true);
+      }
+
+      [Test]
+      public void TestConnectionOpenTimeoutWhenNoRemoteOpenArrivesNoTimeout()
+      {
+         DoTestConnectionOpenTimeoutWhenNoRemoteOpenArrives(false);
+      }
+
+      private void DoTestConnectionOpenTimeoutWhenNoRemoteOpenArrives(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            ConnectionOptions options = ConnectionOptions();
+            options.OpenTimeout = 75;
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            try
+            {
+               if (timeout)
+               {
+                  connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  connection.OpenTask.Wait();
+               }
+
+               Assert.Fail("Open should timeout when no open response and complete future with error.");
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "Connection open failed with error: {0}", error.Message);
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionOpenWaitWithTimeoutCanceledWhenConnectionDrops()
+      {
+         DoTestConnectionOpenWaitCanceledWhenConnectionDrops(true);
+      }
+
+      [Test]
+      public void TestConnectionOpenWaitWithNoTimeoutCanceledWhenConnectionDrops()
+      {
+         DoTestConnectionOpenWaitCanceledWhenConnectionDrops(false);
+      }
+
+      private void DoTestConnectionOpenWaitCanceledWhenConnectionDrops(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.DropAfterLastHandler(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            try
+            {
+               if (timeout)
+               {
+                  connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  connection.OpenTask.Wait();
+               }
+
+               Assert.Fail("Open should timeout when no open response and complete future with error.");
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "Connection open failed with error: {0}", error.Message);
+               Assert.IsTrue(error.InnerException is ClientIOException);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionCloseTimeoutWhenNoRemoteCloseArrivesTimeout()
+      {
+         DoTestConnectionCloseTimeoutWhenNoRemoteCloseArrives(true);
+      }
+
+      [Test]
+      public void TestConnectionCloseTimeoutWhenNoRemoteCloseArrivesNoTimeout()
+      {
+         DoTestConnectionCloseTimeoutWhenNoRemoteCloseArrives(false);
+      }
+
+      private void DoTestConnectionCloseTimeoutWhenNoRemoteCloseArrives(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            ConnectionOptions options = ConnectionOptions();
+            options.CloseTimeout = 75;
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            // Shouldn't throw from close, nothing to be done anyway.
+            try
+            {
+               if (timeout)
+               {
+                  connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  connection.CloseAsync().Wait();
+               }
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "Connection open failed with error: {0}", error.Message);
+               Assert.Fail("Close should ignore lack of close response and complete without error.");
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionCloseWaitWithTimeoutCompletesAfterRemoteConnectionDrops()
+      {
+         DoTestConnectionCloseWaitCompletesAfterRemoteConnectionDrops(true);
+      }
+
+      [Test]
+      public void TestConnectionCloseWaitWithNoTimeoutCompletesAfterRemoteConnectionDrops()
+      {
+         DoTestConnectionCloseWaitCompletesAfterRemoteConnectionDrops(false);
+      }
+
+      private void DoTestConnectionCloseWaitCompletesAfterRemoteConnectionDrops(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose();
+            peer.DropAfterLastHandler(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            // Shouldn't throw from close, nothing to be done anyway.
+            try
+            {
+               if (timeout)
+               {
+                  connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  connection.CloseAsync().Wait();
+               }
+            }
+            catch (Exception error)
+            {
+               logger.LogInformation(error, "Connection open failed with error: {0}", error.Message);
+               Assert.Fail("Close should treat Connection drop as success and complete without error.");
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateDefaultSenderFailsOnConnectionWithoutSupportForAnonymousRelay()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions()).OpenTask.Result;
+
+            try
+            {
+               connection.DefaultSender();
+               Assert.Fail("Should not be able to get the default sender when remote does not offer anonymous relay");
+            }
+            catch (ClientUnsupportedOperationException unsupported)
+            {
+               logger.LogInformation(unsupported, "Caught expected error: {0}", unsupported.Message);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Sender is not fully implemented yet")]
+      [Test]
+      public void TestCreateDefaultSenderOnConnectionWithSupportForAnonymousRelay()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().WithDesiredCapabilities(ClientConstants.ANONYMOUS_RELAY.ToString())
+                             .Respond()
+                             .WithOfferedCapabilities(ClientConstants.ANONYMOUS_RELAY.ToString());
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions()).OpenTask.Result;
+
+            ISender defaultSender = connection.DefaultSender();
+            defaultSender.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.IsNotNull(defaultSender);
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
       protected ProtonTestServerOptions TestServerOptions()
       {
          return new ProtonTestServerOptions();

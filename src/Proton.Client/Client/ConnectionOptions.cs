@@ -22,6 +22,8 @@ namespace Apache.Qpid.Proton.Client
 {
    public class ConnectionOptions : ICloneable
    {
+      private static readonly string[] DEFAULT_DESIRED_CAPABILITIES_ARRAY = new string[] { "ANONYMOUS-RELAY" };
+
       public static readonly long INFINITE = -1;
       public static readonly long DEFAULT_OPEN_TIMEOUT = 15000;
       public static readonly long DEFAULT_CLOSE_TIMEOUT = 60000;
@@ -192,7 +194,7 @@ namespace Apache.Qpid.Proton.Client
       /// The desired capabilities inform the remote peer of the various capabilities the connection
       /// requires and the remote should return those that it supports in its offered capabilities.
       /// </summary>
-      public string[] DesiredCapabilities { get; set; }
+      public string[] DesiredCapabilities { get; set; } = DEFAULT_DESIRED_CAPABILITIES_ARRAY;
 
       /// <summary>
       /// Configures a collection of property values that are sent to the remote upon opening
