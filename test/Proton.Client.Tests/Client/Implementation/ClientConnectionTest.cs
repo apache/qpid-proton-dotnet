@@ -23,6 +23,9 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Microsoft.Extensions.Logging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
+using Apache.Qpid.Proton.Types.Transport;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -357,6 +360,333 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsTrue(failed.Wait(TimeSpan.FromSeconds(10)));
 
             connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithCredentialsChoosesSASLPlainIfOffered()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLPlainConnect("user", "pass");
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            CountdownEvent established = new CountdownEvent(1);
+            ConnectionOptions options = ConnectionOptions("user", "pass");
+
+            options.ConnectedHandler = (connection, connectEvent) =>
+            {
+               logger.LogInformation("Connection signaled that it was established");
+               established.Signal();
+            };
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            Assert.IsTrue(established.Wait(TimeSpan.FromSeconds(10)));
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithSASLDisabledToSASLEnabledHost()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectAMQPHeader().RespondWithSASLHeader();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            ConnectionOptions options = ConnectionOptions();
+            options.SaslOptions.SaslEnabled = false;
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            try
+            {
+               _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               Assert.Fail("Should not successfully connect to remote");
+            }
+            catch (Exception ex)
+            {
+               Assert.IsTrue(ex.InnerException is ClientConnectionRemotelyClosedException);
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionCloseGetsResponseWithErrorDoesNotThrowTimedGet()
+      {
+         DoTestConnectionCloseGetsResponseWithErrorDoesNotThrow(true);
+      }
+
+      [Test]
+      public void TestConnectionCloseGetsResponseWithErrorDoesNotThrowUntimedGet()
+      {
+         DoTestConnectionCloseGetsResponseWithErrorDoesNotThrow(false);
+      }
+
+      protected void DoTestConnectionCloseGetsResponseWithErrorDoesNotThrow(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond().WithErrorCondition(ConnectionError.CONNECTION_FORCED.ToString(), "Not accepting connections");
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            if (timeout)
+            {
+               // Should close normally and not throw error as we initiated the close.
+               _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            }
+            else
+            {
+               // Should close normally and not throw error as we initiated the close.
+               _ = connection.OpenTask.Result;
+               // TODO Passes if given time: Task.Delay(100).Wait();
+               _ = connection.CloseAsync().Result;
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestRemotelyCloseConnectionWithRedirect()
+      {
+         string redirectVhost = "vhost";
+         string redirectNetworkHost = "localhost";
+         int redirectPort = 5677;
+         string redirectScheme = "wss";
+         string redirectPath = "/websockets";
+
+         // Tell the test peer to close the connection when executing its last handler
+         IDictionary<string, object> errorInfo = new Dictionary<string, object>();
+         errorInfo.Add(ClientConstants.OPEN_HOSTNAME.ToString(), redirectVhost);
+         errorInfo.Add(ClientConstants.NETWORK_HOST.ToString(), redirectNetworkHost);
+         errorInfo.Add(ClientConstants.PORT.ToString(), redirectPort);
+         errorInfo.Add(ClientConstants.SCHEME.ToString(), redirectScheme);
+         errorInfo.Add(ClientConstants.PATH.ToString(), redirectPath);
+
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Reject(ConnectionError.REDIRECT.ToString(), "Not accepting connections", errorInfo);
+            peer.ExpectBegin().Optional();
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            try
+            {
+               _ = connection.DefaultSession().OpenTask.Result;
+               Assert.Fail("Should not be able to connect since the connection is redirected.");
+            }
+            catch (Exception ex)
+            {
+               logger.LogDebug("Received expected exception from session open: {0}", ex.Message);
+               Exception cause = ex.InnerException;
+               Assert.IsTrue(cause is ClientConnectionRedirectedException);
+
+               ClientConnectionRedirectedException connectionRedirect = (ClientConnectionRedirectedException)ex.InnerException;
+
+               Assert.AreEqual(redirectVhost, connectionRedirect.Hostname);
+               Assert.AreEqual(redirectNetworkHost, connectionRedirect.NetworkHostname);
+               Assert.AreEqual(redirectPort, connectionRedirect.Port);
+               Assert.AreEqual(redirectScheme, connectionRedirect.Scheme);
+               Assert.AreEqual(redirectPath, connectionRedirect.Path);
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionBlockingCloseGetsResponseWithErrorDoesNotThrow()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond().WithErrorCondition(ConnectionError.CONNECTION_FORCED.ToString(), "Not accepting connections");
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            // Should close normally and not throw error as we initiated the close.
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionClosedWithErrorToRemoteSync()
+      {
+         DoTestConnectionClosedWithErrorToRemote(false);
+      }
+
+      [Test]
+      public void TestConnectionClosedWithErrorToRemoteAsync()
+      {
+         DoTestConnectionClosedWithErrorToRemote(true);
+      }
+
+      private void DoTestConnectionClosedWithErrorToRemote(bool async)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().WithError(ConnectionError.CONNECTION_FORCED.ToString(), "Closed").Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            _ = connection.OpenTask.Result;
+
+            if (async)
+            {
+               connection.CloseAsync(IErrorCondition.Create(ConnectionError.CONNECTION_FORCED.ToString(), "Closed")).Wait();
+            }
+            else
+            {
+               connection.Close(IErrorCondition.Create(ConnectionError.CONNECTION_FORCED.ToString(), "Closed"));
+            }
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionRemoteClosedAfterOpened()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Reject(ConnectionError.CONNECTION_FORCED.ToString(), "Not accepting connections");
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionRemoteClosedAfterOpenedWithEmptyErrorConditionDescription()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Reject(ConnectionError.CONNECTION_FORCED.ToString(), (String)null);
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionRemoteClosedAfterOpenedWithNoRemoteErrorCondition()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Reject();
+            peer.ExpectClose();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
 
             peer.WaitForScriptToComplete();
          }
