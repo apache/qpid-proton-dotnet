@@ -152,7 +152,22 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          LOG.Debug("Transport attempting connection to: {0}:{1}", host, port);
 
-         IPAddress address = Dns.GetHostEntry(host).AddressList[0];
+         IPHostEntry entry = Dns.GetHostEntry(host);
+         IPAddress address = default(IPAddress);
+
+         foreach (IPAddress ipAddress in entry.AddressList)
+         {
+            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+            {
+               address = ipAddress;
+            }
+         }
+
+         if (address == default(IPAddress))
+         {
+            throw new IOException(
+               string.Format("Could not resolve a remote address from the given host: {0}", host));
+         }
 
          channel = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
          channel.BeginConnect(address, port, new AsyncCallback(ConnectCallback), this);

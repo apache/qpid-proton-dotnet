@@ -317,7 +317,6 @@ namespace Apache.Qpid.Proton.Test.Driver
       }
 
       [Test]
-      [Repeat(20)]
       public void TestPeerEnforcesHandleMaxOfZeroOnPipelinedOpenBeginAttach()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
