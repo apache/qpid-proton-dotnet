@@ -323,7 +323,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test failure needs investigation")]
       [Test]
       public void TestCreateConnectionFailedHandlerGetsCalled()
       {
@@ -355,7 +354,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
             _ = connection.OpenSession();
 
-            Assert.IsTrue(failed.Wait(TimeSpan.FromMilliseconds(10)));
+            Assert.IsTrue(failed.Wait(TimeSpan.FromSeconds(10)));
 
             connection.Close();
 

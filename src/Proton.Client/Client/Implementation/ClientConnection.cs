@@ -435,7 +435,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             throw new ClientIllegalStateException("The Connection was explicitly closed", failureCause);
          }
-         else if (failureCause != null)
+         else if (failureCause.Get() != null)
          {
             throw failureCause;
          }
