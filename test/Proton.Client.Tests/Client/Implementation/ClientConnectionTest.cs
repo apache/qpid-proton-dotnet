@@ -27,6 +27,8 @@ using Apache.Qpid.Proton.Types.Transport;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
+using System.Linq;
+using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -1257,6 +1259,607 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             receiver.CloseAsync().Wait(TimeSpan.FromSeconds(10));
             connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionSenderOpenHeldUntilConnectionOpenedAndRelaySupportConfirmed()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.ExpectBegin();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            ISender sender = connection.DefaultSender();
+
+            peer.WaitForScriptToComplete();
+
+            // This should happen after we inject the held open and attach
+            peer.ExpectAttach().OfSender().WithTarget().WithAddress(Test.Driver.Matchers.Is.NullValue()).And().Respond();
+            peer.ExpectClose().Respond();
+
+            // Inject held responses to get the ball rolling again
+            peer.RemoteOpen().WithOfferedCapabilities("ANONYMOUS-RELAY").Now();
+            peer.RespondToLastBegin().Now();
+
+            try
+            {
+               sender.OpenTask.Wait();
+            }
+            catch (Exception ex)
+            {
+               Assert.Fail("Open of Sender failed waiting for response: " + ex.InnerException.Message);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionSenderIsSingleton()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond().WithOfferedCapabilities("ANONYMOUS-RELAY");
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().WithTarget().WithAddress(Test.Driver.Matchers.Is.NullValue()).And().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            ISender sender1 = connection.DefaultSender();
+            ISender sender2 = connection.DefaultSender();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            try
+            {
+               sender1.OpenTask.Wait();
+            }
+            catch (Exception ex)
+            {
+               Assert.Fail("Open of Sender 1 failed waiting for response: " + ex.InnerException.Message);
+            }
+
+            try
+            {
+               sender2.OpenTask.Wait();
+            }
+            catch (Exception ex)
+            {
+               Assert.Fail("Open of Sender 2 failed waiting for response: " + ex.InnerException.Message);
+            }
+
+            Assert.AreSame(sender1, sender2);
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionSenderOpenFailsWhenAnonymousRelayNotSupported()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            ISender sender = connection.DefaultSender();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            try
+            {
+               sender.OpenTask.Wait();
+               Assert.Fail("Open of Sender should have failed waiting for response when anonymous relay not supported");
+            }
+            catch (Exception)
+            {
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionGetRemotePropertiesWaitsForRemoteBegin()
+      {
+         TryReadConnectionRemoteProperties(true);
+      }
+
+      [Test]
+      public void TestConnectionGetRemotePropertiesFailsAfterOpenTimeout()
+      {
+         TryReadConnectionRemoteProperties(false);
+      }
+
+      private void TryReadConnectionRemoteProperties(bool openResponse)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+            options.OpenTimeout = 100;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            peer.WaitForScriptToComplete();
+
+            IDictionary<string, object> expectedProperties = new Dictionary<string, object>();
+            expectedProperties.Add("TEST", "test-property");
+
+            if (openResponse)
+            {
+               peer.ExpectClose().Respond();
+               peer.RemoteOpen().WithProperties(expectedProperties).Later(10);
+            }
+            else
+            {
+               peer.ExpectClose();
+            }
+
+            if (openResponse)
+            {
+               Assert.IsNotNull(connection.Properties, "Remote should have responded with a remote properties value");
+               Assert.AreEqual(expectedProperties, connection.Properties);
+            }
+            else
+            {
+               try
+               {
+                  _ = connection.Properties;
+                  Assert.Fail("Should failed to get remote state due to no open response");
+               }
+               catch (ClientException ex)
+               {
+                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+               }
+            }
+
+            connection.CloseAsync().GetAwaiter().GetResult();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionGetRemoteOfferedCapabilitiesWaitsForRemoteBegin()
+      {
+         TryReadConnectionRemoteOfferedCapabilities(true);
+      }
+
+      [Test]
+      public void TestConnectionGetRemoteOfferedCapabilitiesFailsAfterOpenTimeout()
+      {
+         TryReadConnectionRemoteOfferedCapabilities(false);
+      }
+
+      private void TryReadConnectionRemoteOfferedCapabilities(bool openResponse)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+            options.OpenTimeout = 100;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            peer.WaitForScriptToComplete();
+
+            if (openResponse)
+            {
+               peer.ExpectClose().Respond();
+               peer.RemoteOpen().WithOfferedCapabilities("transactions").Later(10);
+            }
+            else
+            {
+               peer.ExpectClose();
+            }
+
+            if (openResponse)
+            {
+               Assert.IsNotNull(connection.OfferedCapabilities, "Remote should have responded with a remote offered Capabilities value");
+               Assert.AreEqual(1, connection.OfferedCapabilities.Count);
+               Assert.AreEqual("transactions", connection.OfferedCapabilities.ElementAt(0));
+            }
+            else
+            {
+               try
+               {
+                  _ = connection.OfferedCapabilities;
+                  Assert.Fail("Should failed to get remote state due to no open response");
+               }
+               catch (ClientException ex)
+               {
+                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+               }
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionGetRemoteDesiredCapabilitiesWaitsForRemoteBegin()
+      {
+         TryReadConnectionRemoteDesiredCapabilities(true);
+      }
+
+      [Test]
+      public void TestConnectionGetRemoteDesiredCapabilitiesFailsAfterOpenTimeout()
+      {
+         TryReadConnectionRemoteDesiredCapabilities(false);
+      }
+
+      private void TryReadConnectionRemoteDesiredCapabilities(bool openResponse)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+            options.OpenTimeout = 100;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            peer.WaitForScriptToComplete();
+
+            if (openResponse)
+            {
+               peer.ExpectClose().Respond();
+               peer.RemoteOpen().WithDesiredCapabilities("Error-Free").Later(10);
+            }
+            else
+            {
+               peer.ExpectClose();
+            }
+
+            if (openResponse)
+            {
+               Assert.IsNotNull(connection.DesiredCapabilities, "Remote should have responded with a remote desired Capabilities value");
+               Assert.AreEqual(1, connection.DesiredCapabilities.Count);
+               Assert.AreEqual("Error-Free", connection.DesiredCapabilities.ElementAt(0));
+            }
+            else
+            {
+               try
+               {
+                  _ = connection.DesiredCapabilities;
+                  Assert.Fail("Should failed to get remote state due to no open response");
+               }
+               catch (ClientException ex)
+               {
+                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+               }
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCloseWithErrorCondition()
+      {
+         String condition = "amqp:precondition-failed";
+         String description = "something bad happened.";
+
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().WithError(condition, description).Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            connection.OpenTask.Wait();
+
+            connection.Close(IErrorCondition.Create(condition, description, null));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestAnonymousSenderOpenHeldUntilConnectionOpenedAndSupportConfirmed()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen();
+            peer.ExpectBegin();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            ISender sender = connection.OpenAnonymousSender();
+
+            peer.WaitForScriptToComplete();
+
+            // This should happen after we inject the held open and attach
+            peer.ExpectAttach().OfSender().WithTarget().WithAddress(Test.Driver.Matchers.Is.NullValue()).And().Respond();
+            peer.ExpectClose().Respond();
+
+            // Inject held responses to get the ball rolling again
+            peer.RemoteOpen().WithOfferedCapabilities("ANONYMOUS-RELAY").Now();
+            peer.RespondToLastBegin().Now();
+
+            try
+            {
+               sender.OpenTask.Wait();
+            }
+            catch (Exception ex)
+            {
+               Assert.Fail("Open of Sender failed waiting for response: " + ex.InnerException.Message);
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Sender doesn't yet implement the send operation")]
+      [Test]
+      public void TestSendHeldUntilConnectionOpenedAndSupportConfirmed()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond().WithOfferedCapabilities("ANONYMOUS-RELAY");
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().WithTarget().WithAddress(Test.Driver.Matchers.Is.NullValue()).And().Respond();
+            peer.RemoteFlow().WithLinkCredit(1).Queue();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .WithDeliveryTag(new byte[] { 0 }).Respond().WithSettled(true).WithState().Accepted();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            try
+            {
+               ITracker tracker = connection.Send(IMessage<string>.Create("Hello World"));
+               Assert.IsNotNull(tracker);
+               _ = tracker.AwaitAccepted();
+            }
+            catch (ClientException ex)
+            {
+               Assert.Fail("Open of Sender failed waiting for response: " + ex.Message);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Connection doesn't yet implement the send operation")]
+      [Test]
+      public void TestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemote()
+      {
+         DoTestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemote(false);
+      }
+
+      [Ignore("Connection doesn't yet implement the send operation")]
+      [Test]
+      public void TestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemoteAfterAlreadyOpened()
+      {
+         DoTestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemote(true);
+      }
+
+      private void DoTestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemote(bool openWait)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            // Ensures that the Begin arrives regard of a race on open without anonymous relay support
+            connection.DefaultSession();
+
+            if (openWait)
+            {
+               connection.OpenTask.Wait();
+            }
+
+            try
+            {
+               connection.Send(IMessage<string>.Create("Hello World"));
+               Assert.Fail("Open of Sender should fail as remote did not advertise anonymous relay support: ");
+            }
+            catch (ClientUnsupportedOperationException)
+            {
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestOpenAnonymousSenderFailsWhenAnonymousRelayNotAdvertisedByRemote()
+      {
+         DoTestOpenAnonymousSenderFailsWhenAnonymousRelayNotAdvertisedByRemote(false);
+      }
+
+      [Test]
+      public void TestOpenAnonymousSenderFailsWhenAnonymousRelayNotAdvertisedByRemoteAfterAlreadyOpened()
+      {
+         DoTestOpenAnonymousSenderFailsWhenAnonymousRelayNotAdvertisedByRemote(true);
+      }
+
+      private void DoTestOpenAnonymousSenderFailsWhenAnonymousRelayNotAdvertisedByRemote(bool openWait)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            // Ensures that the Begin arrives regard of a race on open without anonymous relay support
+            connection.DefaultSession();
+
+            if (openWait)
+            {
+               connection.OpenTask.Wait();
+            }
+
+            try
+            {
+               connection.OpenAnonymousSender().OpenTask.Wait();
+               Assert.Fail("Open of Sender should fail as remote did not advertise anonymous relay support: ");
+            }
+            catch (ClientUnsupportedOperationException)
+            {
+            }
+            catch (Exception ex)
+            {
+               Assert.IsTrue(ex.InnerException is ClientUnsupportedOperationException);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Connection doesn't yet implement the full open durable receiver features")]
+      [Test]
+      public void TestOpenDurableReceiverFromConnection()
+      {
+         String address = "test-topic";
+         String subscriptionName = "mySubscriptionName";
+
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithName(subscriptionName)
+                               .WithSource()
+                                   .WithAddress(address)
+                                   .WithDurable(TerminusDurability.UnsettledState)
+                                   .WithExpiryPolicy(TerminusExpiryPolicy.Never)
+                                   .WithDistributionMode("copy")
+                               .And().Respond();
+            peer.ExpectFlow();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IReceiver receiver = connection.OpenDurableReceiver(address, subscriptionName);
+
+            receiver.OpenTask.Wait();
+            receiver.CloseAsync().Wait();
+
+            connection.CloseAsync().Wait();
 
             peer.WaitForScriptToComplete();
          }

@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="other">The connection options instance to copy</param>
       public ConnectionOptions(ConnectionOptions other) : base()
       {
-         other.CopyInto(this);
+         other?.CopyInto(this);
       }
 
       /// <summary>
