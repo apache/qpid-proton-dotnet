@@ -1865,6 +1865,39 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      [Ignore("Client local bind not yet implemented")]
+      [Test]
+      public void TestLocalPortOption()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            int localPort = 5671;
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions();
+            options.TransportOptions.LocalPort = localPort;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            connection.OpenTask.Wait();
+
+            Assert.AreEqual(localPort, peer.ClientPort);
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
       protected ProtonTestServerOptions TestServerOptions()
       {
          return new ProtonTestServerOptions();

@@ -61,6 +61,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public int ServerPort => server.ListeningOnPort;
 
+      public int ClientPort => client.RemoteEndpoint.Port;
+
       public void Start()
       {
          CheckClosed();

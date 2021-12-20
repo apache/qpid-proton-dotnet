@@ -106,6 +106,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          return this;
       }
 
+      public IPEndPoint LocalEndpoint => (IPEndPoint)clientSocket.LocalEndPoint;
+
+      public IPEndPoint RemoteEndpoint => (IPEndPoint)clientSocket.RemoteEndPoint;
+
       public void Close()
       {
          if (closed.CompareAndSet(false, true))

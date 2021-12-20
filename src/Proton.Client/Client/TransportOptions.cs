@@ -76,5 +76,20 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       public int DefaultTcpPort { get; set; } = DEFAULT_TCP_PORT;
 
+      /// <summary>
+      /// Assigned local address that the client should bind to when creating a
+      /// connection to the remote. The user is responsible for ensuring this
+      /// local address is free and can be bound to otherwise an error will be
+      /// thrown on connect.
+      /// </summary>
+      public string LocalAddress { get; set; }
+
+      /// <summary>
+      /// Assigned local port that the connection should bind to when attempting to
+      /// connect to the remote.  The user is responsible for ensuring this local
+      /// port is free otherwise an error will be thrown on connect.
+      /// </summary>
+      public int LocalPort { get; set; } = -1;
+
    }
 }
