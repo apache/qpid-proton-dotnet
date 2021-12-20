@@ -224,7 +224,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return Request(this, createReceiver).Task.GetAwaiter().GetResult();
       }
 
-      public IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
+      public IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties = null)
+      {
+         return OpenDynamicReceiver(null, dynamicNodeProperties);
+      }
+
+      public IReceiver OpenDynamicReceiver(ReceiverOptions options, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();

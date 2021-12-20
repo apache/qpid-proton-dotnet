@@ -25,7 +25,7 @@ using Apache.Qpid.Proton.Engine;
 namespace Apache.Qpid.Proton.Client.Implementation
 {
    /// <summary>
-   /// TODO
+   /// Sender implementation that send complete messages on a remote link.
    /// </summary>
    public sealed class ClientSender : ISender
    {
@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession Session => session;
 
-      public Task<ISender> OpenTask => throw new NotImplementedException();
+      public Task<ISender> OpenTask => openFuture.Task;
 
       public string Address
       {
@@ -126,27 +126,45 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public void Close(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         try
+         {
+            CloseAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<ISender> CloseAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         return DoCloseOrDetach(true, error);
       }
 
       public void Detach(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         try
+         {
+            DetachAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<ISender> DetachAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         return DoCloseOrDetach(false, error);
       }
 
       public void Dispose()
       {
-         throw new NotImplementedException();
+         try
+         {
+            Close();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
@@ -215,7 +233,42 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #endregion
 
-      #region Private Receiver Implementation
+      #region Private Sender Implementation
+
+      private Task<ISender> DoCloseOrDetach(bool close, IErrorCondition error)
+      {
+         if (closed.CompareAndSet(false, true))
+         {
+            // Already closed by failure or shutdown so no need to
+            if (!closeFuture.Task.IsCompleted)
+            {
+               session.Execute(() =>
+               {
+                  if (protonSender.IsLocallyOpen)
+                  {
+                     try
+                     {
+                        protonSender.ErrorCondition = ClientErrorCondition.AsProtonErrorCondition(error);
+                        if (close)
+                        {
+                           protonSender.Close();
+                        }
+                        else
+                        {
+                           protonSender.Detach();
+                        }
+                     }
+                     catch (Exception)
+                     {
+                        // The engine event handlers will deal with errors
+                     }
+                  }
+               });
+            }
+         }
+
+         return closeFuture.Task;
+      }
 
       private ITracker CreateTracker(IOutgoingDelivery delivery)
       {

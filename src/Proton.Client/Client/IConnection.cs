@@ -97,7 +97,21 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="options">Optional receiver options to use for configuration</param>
       /// <param name="dynamicNodeProperties">Optional properties to assign to the node create</param>
       /// <returns>A new receiver instance</returns>
-      IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null);
+      IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties = null);
+
+      /// <summary>
+      /// Creates a dynamic receiver used to consume messages from the dynamically generated node.
+      /// on the remote. The returned receiver will be configured using the provided options.
+      ///
+      /// The returned receiver may not have been opened on the remote when it is returned.  Some
+      /// methods of the receiver can block until the remote fully opens the receiver, the user can
+      /// wait for the remote to respond to the open request by obtaining the open task from the
+      /// receiver and using it to await the completion of the receiver open.
+      /// </summary>
+      /// <param name="options">Optional receiver options to use for configuration</param>
+      /// <param name="dynamicNodeProperties">Optional properties to assign to the node create</param>
+      /// <returns>A new receiver instance</returns>
+      IReceiver OpenDynamicReceiver(ReceiverOptions options, IDictionary<string, object> dynamicNodeProperties = null);
 
       /// <summary>
       /// Creates a stream receiver used to consume large messages from the given node address.

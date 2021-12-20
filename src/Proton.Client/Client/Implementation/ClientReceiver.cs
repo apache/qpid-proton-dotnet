@@ -144,27 +144,45 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public void Close(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         try
+         {
+            CloseAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<IReceiver> CloseAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         return DoCloseOrDetach(true, error);
       }
 
       public void Detach(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         try
+         {
+            DetachAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<IReceiver> DetachAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         return DoCloseOrDetach(false, error);
       }
 
       public void Dispose()
       {
-         throw new NotImplementedException();
+         try
+         {
+            Close();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<IReceiver> Drain()
@@ -268,6 +286,41 @@ namespace Apache.Qpid.Proton.Client.Implementation
       #endregion
 
       #region Private Receiver Implementation
+
+      private Task<IReceiver> DoCloseOrDetach(bool close, IErrorCondition error)
+      {
+         if (closed.CompareAndSet(false, true))
+         {
+            // Already closed by failure or shutdown so no need to
+            if (!closeFuture.Task.IsCompleted)
+            {
+               session.Execute(() =>
+               {
+                  if (protonReceiver.IsLocallyOpen)
+                  {
+                     try
+                     {
+                        protonReceiver.ErrorCondition = ClientErrorCondition.AsProtonErrorCondition(error);
+                        if (close)
+                        {
+                           protonReceiver.Close();
+                        }
+                        else
+                        {
+                           protonReceiver.Detach();
+                        }
+                     }
+                     catch (Exception)
+                     {
+                        // The engine event handlers will deal with errors
+                     }
+                  }
+               });
+            }
+         }
+
+         return closeFuture.Task;
+      }
 
       private void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {

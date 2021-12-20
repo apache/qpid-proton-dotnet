@@ -26,6 +26,7 @@ using Apache.Qpid.Proton.Test.Driver.Matchers;
 using Apache.Qpid.Proton.Types.Transport;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -1060,7 +1061,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Sender is not fully implemented yet")]
       [Test]
       public void TestCreateDefaultSenderOnConnectionWithSupportForAnonymousRelay()
       {
@@ -1089,6 +1089,174 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNotNull(defaultSender);
 
             connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionRecreatesAnonymousRelaySenderAfterRemoteCloseOfSender()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().WithDesiredCapabilities(ClientConstants.ANONYMOUS_RELAY.ToString())
+                             .Respond()
+                             .WithOfferedCapabilities(ClientConstants.ANONYMOUS_RELAY.ToString());
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteDetach().Queue();
+            peer.ExpectDetach();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            ISender defaultSender = connection.DefaultSender().OpenTask.GetAwaiter().GetResult();
+            Assert.IsNotNull(defaultSender);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectClose().Respond();
+
+            ISender defaultSender2 = connection.DefaultSender();
+
+            Assert.IsNotNull(defaultSender2);
+            Assert.AreNotSame(defaultSender, defaultSender2);
+
+            defaultSender2.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Connection doesn't create dynamic receiver yet")]
+      [Test]
+      public void TestCreateDynamicReceiver()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource(new SourceMatcher().WithDynamic(true).WithAddress(Matches.Is(null)))
+                               .Respond();
+            peer.ExpectFlow();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            IReceiver receiver = connection.OpenDynamicReceiver();
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+
+            receiver.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Connection doesn't create dynamic receiver yet")]
+      [Test]
+      public void TestCreateDynamicReceiverWithNodeProperties()
+      {
+         IDictionary<string, object> dynamicNodeProperties = new Dictionary<string, object>();
+         dynamicNodeProperties.Add("test", "vale");
+
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource()
+                               .WithDynamic(true)
+                               .WithAddress(Matches.Is(null))
+                               .WithDynamicNodeProperties(dynamicNodeProperties)
+                               .Also()
+                               .Respond();
+            peer.ExpectFlow();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            IReceiver receiver = connection.OpenDynamicReceiver(dynamicNodeProperties);
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+
+            receiver.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Connection doesn't create dynamic receiver yet")]
+      [Test]
+      public void TestCreateDynamicReceiverWithReceiverOptions()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithDesiredCapabilities("queue")
+                               .Respond();
+            peer.ExpectFlow();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            ReceiverOptions options = new ReceiverOptions();
+            options.DesiredCapabilities = new string[] { "queue" };
+            IReceiver receiver = connection.OpenDynamicReceiver(options);
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+
+            receiver.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
 
             peer.WaitForScriptToComplete();
          }
