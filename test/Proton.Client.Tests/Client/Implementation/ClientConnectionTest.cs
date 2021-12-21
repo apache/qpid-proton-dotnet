@@ -1140,7 +1140,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Connection doesn't create dynamic receiver yet")]
       [Test]
       public void TestCreateDynamicReceiver()
       {
@@ -1223,7 +1222,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Connection doesn't create dynamic receiver yet")]
       [Test]
       public void TestCreateDynamicReceiverWithReceiverOptions()
       {

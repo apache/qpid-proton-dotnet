@@ -450,7 +450,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalOpen(Engine.IReceiver receiver)
       {
-         throw new NotImplementedException();
+         if (options.OpenTimeout > 0)
+         {
+            session.Schedule(() =>
+            {
+               if (!openFuture.Task.IsCompleted)
+               {
+                  ImmediateLinkShutdown(
+                     new ClientOperationTimedOutException("Receiver open timed out waiting for remote to respond"));
+               }
+            }, TimeSpan.FromMilliseconds(options.OpenTimeout));
+         }
       }
 
       private void HandleLocalCloseOrDetach(Engine.IReceiver receiver)
