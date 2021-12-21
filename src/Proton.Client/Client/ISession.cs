@@ -88,7 +88,7 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="subscriptionName">The subscription name to use for the receiver</param>
       /// <param name="options">Optional receiver options to use for configuration</param>
       /// <returns>A new receiver instance</returns>
-      IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options);
+      IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null);
 
       /// <summary>
       /// Creates a dynamic receiver used to consume messages from the dynamically generated node.

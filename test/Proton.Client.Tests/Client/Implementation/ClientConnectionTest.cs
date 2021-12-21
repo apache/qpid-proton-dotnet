@@ -24,7 +24,6 @@ using Microsoft.Extensions.Logging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
 using Apache.Qpid.Proton.Types.Transport;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
 using System.Linq;
