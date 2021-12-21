@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -29,6 +30,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientSender : ISender
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSender>();
+
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private ClientException failureCause;
 
@@ -210,10 +213,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       internal void Disposition(IOutgoingDelivery delivery, Types.Transport.IDeliveryState state, bool settled)
       {
          CheckClosedOrFailed();
-         // TODO
-         //   executor.execute(() -> {
-         //       delivery.disposition(state, settled);
-         //   });
+         session.Execute(() =>
+         {
+            delivery.Disposition(state, settled);
+         });
       }
 
       internal ClientSender SenderRemotelyClosedHandler(Action<ClientSender> handler)
@@ -416,11 +419,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
 
             _ = openFuture.TrySetResult(this);
-            // TODO LOG.trace("Sender opened successfully");
+            LOG.Trace("Sender opened successfully");
          }
          else
          {
-            // TODO LOG.debug("Sender opened but remote signalled close is pending: ", sender);
+            LOG.Debug("Sender {0} opened but remote signalled close is pending: ", sender);
          }
       }
 

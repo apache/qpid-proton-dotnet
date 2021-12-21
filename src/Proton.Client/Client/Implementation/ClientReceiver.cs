@@ -23,6 +23,7 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -33,6 +34,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientReceiver : IReceiver
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientReceiver>();
+
       private readonly ReceiverOptions options;
       private readonly ClientSession session;
       private readonly string receiverId;
@@ -273,8 +276,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal void Disposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
-         // TODO CheckClosedOrFailed();
-         // asyncApplyDisposition(delivery, state, settle);
+         CheckClosedOrFailed();
+         AsyncApplyDisposition(delivery, state, settle);
       }
 
       internal String ReceiverId => receiverId;
@@ -324,11 +327,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
-         // TODO
-         //   executor.execute(() -> {
-         //       session.getTransactionContext().disposition(delivery, state, settle);
-         //       ReplenishCreditIfNeeded();
-         //   });
+         session.Execute(() =>
+         {
+            // TODO session.TransactionContext.Disposition(delivery, state, settle);
+            ReplenishCreditIfNeeded();
+         });
       }
 
       private void ReplenishCreditIfNeeded()
@@ -345,14 +348,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   uint additionalCredit = creditWindow - potentialPrefetch;
 
-                  // TODO LOG.trace("Consumer granting additional credit: {}", additionalCredit);
+                  LOG.Trace("Consumer granting additional credit: {0}", additionalCredit);
                   try
                   {
                      protonReceiver.AddCredit(additionalCredit);
                   }
-                  catch (Exception)
+                  catch (Exception ex)
                   {
-                     // TODO LOG.debug("Error caught during credit top-up", ex);
+                     LOG.Debug("Error caught during credit top-up", ex);
                   }
                }
             }
@@ -364,7 +367,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          uint creditWindow = options.CreditWindow;
          if (creditWindow > 0)
          {
-            // TODO executor.execute(() -> replenishCreditIfNeeded());
+            session.Execute(ReplenishCreditIfNeeded);
          }
       }
 
@@ -475,8 +478,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             if (timeout > 0)
             {
-               // TODO session.ScheduleRequestTimeout(closeFuture, timeout, ()->
-               //    new ClientOperationTimedOutException("receiver close timed out waiting for remote to respond");
+               session.ScheduleRequestTimeout(closeFuture, timeout, () =>
+                  new ClientOperationTimedOutException("receiver close timed out waiting for remote to respond"));
             }
          }
          else
@@ -501,12 +504,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             _ = openFuture.TrySetResult(this);
 
-            // TODO
-            //LOG.trace("Receiver opened successfully: {}", receiverId);
+            LOG.Trace("Receiver opened successfully: {0}", receiverId);
          }
          else
          {
-            // TODO LOG.debug("Receiver opened but remote signalled close is pending: {}", receiverId);
+            LOG.Debug("Receiver opened but remote signalled close is pending: {0}", receiverId);
          }
       }
 
@@ -612,7 +614,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleDeliveryReceived(IIncomingDelivery delivery)
       {
-         // TODO LOG.trace("Delivery data was received: {}", delivery);
+         LOG.Trace("Delivery data was received: {0}", delivery);
 
          if (delivery.DefaultDeliveryState == null)
          {
@@ -621,7 +623,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (!delivery.IsPartial)
          {
-            // TODO LOG.trace("{} has incoming Message(s).", this);
+            LOG.Trace("{0} has incoming Message(s).", this);
             messageQueue.Enqueue(new ClientDelivery(this, delivery));
          }
          else
@@ -637,19 +639,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleDeliveryAborted(IIncomingDelivery delivery)
       {
-         // TODO LOG.trace("Delivery data was aborted: {}", delivery);
+         LOG.Trace("Delivery data was aborted: {0}", delivery);
          delivery.Settle();
          ReplenishCreditIfNeeded();
       }
 
       private void HandleDeliveryStateRemotelyUpdated(IIncomingDelivery delivery)
       {
-         // TODO LOG.trace("Delivery remote state was updated: {}", delivery);
+         LOG.Trace("Delivery remote state was updated: {0}", delivery);
       }
 
       private void HandleReceiverCreditUpdated(Engine.IReceiver receiver)
       {
-         // TODO LOG.trace("Receiver credit update by remote: {}", receiver);
+         LOG.Trace("Receiver credit update by remote: {0}", receiver);
 
          if (drainingFuture != null)
          {

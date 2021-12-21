@@ -21,12 +21,20 @@ using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
+   /// <summary>
+   /// Implements the streaming message receiver which allows for reading of large
+   /// messages in smaller chunks. The API allows for multiple calls to receiver but
+   /// any call that happens after a large message receives begins will be blocked
+   /// until the previous large messsage is fully read and the next arrives.
+   /// </summary>
    public sealed class ClientStreamReceiver : IStreamReceiver
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamReceiver>();
+
       private readonly StreamReceiverOptions options;
       private readonly ClientSession session;
       private readonly string receiverId;

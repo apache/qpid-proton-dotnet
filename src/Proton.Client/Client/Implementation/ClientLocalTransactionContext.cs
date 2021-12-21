@@ -24,6 +24,7 @@ using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -36,6 +37,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                                                            Rejected.DescriptorSymbol,
                                                                            Released.DescriptorSymbol,
                                                                            Modified.DescriptorSymbol };
+
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientLocalTransactionContext>();
 
       private readonly string DECLARE_FUTURE_NAME = "Declare:Future";
       private readonly string DISCHARGE_FUTURE_NAME = "Discharge:Future";
@@ -410,7 +413,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DECLARE_FUTURE_NAME, null);
-         // TODO LOG.trace("Declare of transaction:{} completed", transaction);
+         LOG.Trace("Declare of transaction:{0} completed", transaction);
 
          if (future.Task.IsCompletedSuccessfully || future.Task.IsCanceled)
          {
@@ -433,7 +436,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DECLARE_FUTURE_NAME, null);
-         // TODO LOG.trace("Declare of transaction:{} failed", transaction);
+         LOG.Trace("Declare of transaction:{0} failed", transaction);
          ClientException cause = ClientExceptionSupport.ConvertToNonFatalException(transaction.Error);
          future?.TrySetException(new ClientTransactionDeclarationException(cause.Message, cause));
       }
@@ -442,7 +445,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DISCHARGE_FUTURE_NAME, null);
-         // TODO LOG.trace("Discharge of transaction:{} completed", transaction);
+         LOG.Trace("Discharge of transaction:{0} completed", transaction);
          future?.TrySetResult(session);
 
          if (transaction.Attachments.Get(START_TRANSACTION_MARKER, false))
@@ -455,7 +458,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DISCHARGE_FUTURE_NAME, null);
-         // TODO LOG.trace("Discharge of transaction:{} failed", transaction);
+         LOG.Trace("Discharge of transaction:{0} failed", transaction);
          ClientException cause = ClientExceptionSupport.ConvertToNonFatalException(transaction.Error);
          future?.TrySetException(new ClientTransactionRolledBackException(cause.Message, cause));
       }
@@ -505,6 +508,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
       }
+
       private void HandleParentEndpointClosed(Engine.ITransactionController txnController)
       {
          txnController?.Close();

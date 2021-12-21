@@ -22,12 +22,18 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
+   /// <summary>
+   /// Implements the stream sender using a stateful current outgoing message that prevents
+   /// any sends other than to the current message until the current is completed.
+   /// </summary>
    public sealed class ClientStreamSender : IStreamSender
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamSender>();
+
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private ClientException failureCause;
 
