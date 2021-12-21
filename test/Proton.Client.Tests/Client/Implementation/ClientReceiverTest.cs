@@ -1,0 +1,319 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+using System.Threading;
+using Apache.Qpid.Proton.Test.Driver;
+using NUnit.Framework;
+using Microsoft.Extensions.Logging;
+using System;
+using Apache.Qpid.Proton.Client.Exceptions;
+using Apache.Qpid.Proton.Types.Transport;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Apache.Qpid.Proton.Client.Implementation
+{
+   [TestFixture, Timeout(20000)]
+   public class ClientReceiverTest : ClientBaseTestFixture
+   {
+      [Test]
+      public void TestCreateReceiverAndClose()
+      {
+         DoTestCreateReceiverAndCloseOrDetachLink(true);
+      }
+
+      [Test]
+      public void TestCreateReceiverAndDetach()
+      {
+         DoTestCreateReceiverAndCloseOrDetachLink(false);
+      }
+
+      private void DoTestCreateReceiverAndCloseOrDetachLink(bool close)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().WithSource().WithDistributionMode(Test.Driver.Matchers.Is.NullValue()).And().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectDetach().WithClosed(close).Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            ISession session = connection.OpenSession();
+            session.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            IReceiver receiver = session.OpenReceiver("test-queue");
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.AreSame(container, receiver.Client);
+            Assert.AreSame(connection, receiver.Connection);
+            Assert.AreSame(session, receiver.Session);
+
+            if (close)
+            {
+               receiver.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            }
+            else
+            {
+               receiver.DetachAsync().Wait(TimeSpan.FromSeconds(10));
+            }
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateReceiverAndCloseSync()
+      {
+         DoTestCreateReceiverAndCloseOrDetachSync(true);
+      }
+
+      [Test]
+      public void TestCreateReceiverAndDetachSync()
+      {
+         DoTestCreateReceiverAndCloseOrDetachSync(false);
+      }
+
+      private void DoTestCreateReceiverAndCloseOrDetachSync(bool close)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectDetach().WithClosed(close).Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            ISession session = connection.OpenSession();
+            session.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            IReceiver receiver = session.OpenReceiver("test-queue");
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            if (close)
+            {
+               receiver.Close();
+            }
+            else
+            {
+               receiver.Detach();
+            }
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateReceiverAndCloseWithErrorSync()
+      {
+         DoTestCreateReceiverAndCloseOrDetachWithErrorSync(true);
+      }
+
+      [Test]
+      public void TestCreateReceiverAndDetachWithErrorSync()
+      {
+         DoTestCreateReceiverAndCloseOrDetachWithErrorSync(false);
+      }
+
+      private void DoTestCreateReceiverAndCloseOrDetachWithErrorSync(bool close)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.ExpectDetach().WithError("amqp-resource-deleted", "an error message").WithClosed(close).Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            ISession session = connection.OpenSession();
+            session.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            IReceiver receiver = session.OpenReceiver("test-queue");
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            if (close)
+            {
+               receiver.Close(IErrorCondition.Create("amqp-resource-deleted", "an error message", null));
+            }
+            else
+            {
+               receiver.Detach(IErrorCondition.Create("amqp-resource-deleted", "an error message", null));
+            }
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestReceiverOpenRejectedByRemote()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().Respond().WithNullSource();
+            peer.ExpectFlow();
+            peer.RemoteDetach().WithErrorCondition(AmqpError.UNAUTHORIZED_ACCESS.ToString(), "Cannot read from this address").Queue();
+            peer.ExpectDetach();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenReceiver("test-queue");
+
+            try
+            {
+               receiver.OpenTask.Wait();
+               Assert.Fail("Open of receiver should fail due to remote indicating pending close.");
+            }
+            catch (Exception exe)
+            {
+               Assert.IsNotNull(exe.InnerException);
+               Assert.IsTrue(exe.InnerException is ClientLinkRemotelyClosedException);
+               ClientLinkRemotelyClosedException linkClosed = (ClientLinkRemotelyClosedException)exe.InnerException;
+               Assert.IsNotNull(linkClosed.Error);
+               Assert.AreEqual(AmqpError.UNAUTHORIZED_ACCESS.ToString(), linkClosed.Error.Condition);
+            }
+
+            peer.WaitForScriptToComplete();
+
+            // Should not result in any close being sent now, already closed.
+            receiver.CloseAsync().Wait();
+
+            peer.ExpectClose().Respond();
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete(TimeSpan.FromSeconds(10));
+         }
+      }
+
+      [Test]
+      public void TestOpenReceiverTimesOutWhenNoAttachResponseReceivedTimeout()
+      {
+         DoTestOpenReceiverTimesOutWhenNoAttachResponseReceived(true);
+      }
+
+      [Test]
+      public void TestOpenReceiverTimesOutWhenNoAttachResponseReceivedNoTimeout()
+      {
+         DoTestOpenReceiverTimesOutWhenNoAttachResponseReceived(false);
+      }
+
+      private void DoTestOpenReceiverTimesOutWhenNoAttachResponseReceived(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver();
+            peer.ExpectFlow();
+            peer.ExpectDetach();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               OpenTimeout = 10
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options);
+
+            try
+            {
+               if (timeout)
+               {
+                  receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  receiver.OpenTask.Wait();
+               }
+
+               Assert.Fail("Should not complete the open future without an error");
+            }
+            catch (Exception exe)
+            {
+               Exception cause = exe.InnerException;
+               Assert.IsTrue(cause is ClientOperationTimedOutException);
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+   }
+}
