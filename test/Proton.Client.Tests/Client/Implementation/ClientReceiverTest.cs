@@ -709,5 +709,221 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestCreateDynamicReceiver()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource().WithDynamic(true).WithAddress((string)null)
+                               .And().Respond()
+                               .WithSource().WithDynamic(true).WithAddress("test-dynamic-node");
+            peer.ExpectFlow();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenDynamicReceiver().OpenTask.Result;
+
+            Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+            Assert.AreEqual("test-dynamic-node", receiver.Address);
+
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Test peer matching on dictionary equality not worked out yet")]
+      [Test]
+      public void TestCreateDynamicReceiverWthNodeProperties()
+      {
+         IDictionary<string, object> nodeProperties = new Dictionary<string, object>();
+         nodeProperties.Add("test-property-1", "one");
+         nodeProperties.Add("test-property-2", "two");
+         nodeProperties.Add("test-property-3", "three");
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource()
+                                   .WithDynamic(true)
+                                   .WithAddress((String)null)
+                                   .WithDynamicNodeProperties(nodeProperties)
+                               .And().Respond()
+                               .WithSource()
+                                   .WithDynamic(true)
+                                   .WithAddress("test-dynamic-node")
+                                   .WithDynamicNodeProperties(nodeProperties);
+            peer.ExpectFlow();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenDynamicReceiver(null, nodeProperties).OpenTask.Result;
+
+            Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+            Assert.AreEqual("test-dynamic-node", receiver.Address);
+
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateDynamicReceiverWithNoCreditWindow()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource().WithDynamic(true).WithAddress((String)null)
+                               .And().Respond()
+                               .WithSource().WithDynamic(true).WithAddress("test-dynamic-node");
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 0
+            };
+            IReceiver receiver = session.OpenDynamicReceiver(receiverOptions).OpenTask.Result;
+
+            // Perform another round trip operation to ensure we see that no flow frame was
+            // sent by the receiver
+            session.OpenSender("test");
+
+            Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+            Assert.AreEqual("test-dynamic-node", receiver.Address);
+
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestDynamicReceiverAddressWaitsForRemoteAttach()
+      {
+         tryReadDynamicReceiverAddress(true);
+      }
+
+      [Test]
+      public void TestDynamicReceiverAddressFailsAfterOpenTimeout()
+      {
+         tryReadDynamicReceiverAddress(false);
+      }
+
+      private void tryReadDynamicReceiverAddress(bool attachResponse)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource().WithDynamic(true).WithAddress((String)null);
+            peer.ExpectFlow();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               OpenTimeout = 100
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenDynamicReceiver();
+
+            peer.WaitForScriptToComplete();
+
+            if (attachResponse)
+            {
+               peer.ExpectDetach().Respond();
+               peer.RespondToLastAttach().WithSource().WithAddress("test-dynamic-node").And().Later(10);
+            }
+            else
+            {
+               peer.ExpectDetach();
+            }
+
+            if (attachResponse)
+            {
+               Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
+               Assert.AreEqual("test-dynamic-node", receiver.Address);
+            }
+            else
+            {
+               try
+               {
+                  _ = receiver.Address;
+                  Assert.Fail("Should failed to get address due to no attach response");
+               }
+               catch (ClientException ex)
+               {
+                  logger.LogDebug("Caught expected exception from address call", ex);
+               }
+            }
+
+            try
+            {
+               receiver.Close();
+            }
+            catch (Exception ex)
+            {
+               logger.LogDebug("Caught unexpected exception from close call", ex);
+               Assert.Fail("Should not fail to close when connection not closed and detach sent");
+            }
+
+            peer.ExpectClose().Respond();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }
