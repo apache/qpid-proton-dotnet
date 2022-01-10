@@ -522,5 +522,192 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete(TimeSpan.FromSeconds(10));
          }
       }
+
+      [Test]
+      public void TestDrainCompletesWhenReceiverHasNoCredit()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 0
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Task<IReceiver> draining = receiver.Drain();
+            draining.Wait(TimeSpan.FromSeconds(5));
+
+            // Close things down
+            peer.ExpectClose().Respond();
+            connection.Close();
+
+            peer.WaitForScriptToComplete(TimeSpan.FromSeconds(10));
+         }
+      }
+
+      [Test]
+      public void TestDrainAdditionalDrainCallThrowsWhenReceiverStillDraining()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.ExpectFlow().WithDrain(true);
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenReceiver("test-queue").OpenTask.Result;
+
+            receiver.Drain();
+
+            try
+            {
+               receiver.Drain().Wait();
+               Assert.Fail("Drain call should fail since already draining.");
+            }
+            catch (Exception cliEx)
+            {
+               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               Assert.IsTrue(cliEx.InnerException is ClientIllegalStateException);
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestAddCreditFailsWhileDrainPending()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond().WithInitialDeliveryCount(20);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 0
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            // Add some credit, verify not draining
+            uint credit = 7;
+            peer.ExpectFlow().WithDrain(Matches.AnyOf(Test.Driver.Matchers.Is.EqualTo(false),
+                                                      Test.Driver.Matchers.Is.NullValue()))
+                             .WithLinkCredit(credit);
+
+            // Ensure we get the attach response with the initial delivery count.
+            receiver.OpenTask.Result.AddCredit(credit);
+
+            peer.WaitForScriptToComplete();
+
+            // Drain all the credit
+            peer.ExpectFlow().WithDrain(true).WithLinkCredit(credit).WithDeliveryCount(20);
+            peer.ExpectClose().Respond();
+
+            Task<IReceiver> draining = receiver.Drain();
+            Assert.IsFalse(draining.IsCompleted);
+
+            try
+            {
+               receiver.AddCredit(1);
+               Assert.Fail("Should not allow add credit when drain is pending");
+            }
+            catch (ClientIllegalStateException)
+            {
+               // Expected
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestAddCreditFailsWhenCreditWindowEnabled()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 10 // Explicitly set a credit window to unsure behavior is consistent.
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            try
+            {
+               receiver.AddCredit(1);
+               Assert.Fail("Should not allow add credit when credit window configured");
+            }
+            catch (ClientIllegalStateException)
+            {
+               // Expected
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }
