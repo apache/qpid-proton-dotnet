@@ -528,5 +528,51 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Ignore("Send not yet implemented fully")]
+      [Test]
+      public void TestSendTimesOutWhenNoCreditIssued()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               SendTimeout = 1
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            try
+            {
+               sender.Send(message);
+               Assert.Fail("Should throw a send timed out exception");
+            }
+            catch (ClientSendTimedOutException)
+            {
+               // Expected error, ignore
+            }
+
+            sender.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }

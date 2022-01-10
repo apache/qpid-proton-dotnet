@@ -357,6 +357,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      internal TaskCompletionSource<T> Request<T>(Object requestor, TaskCompletionSource<T> request)
+      {
+         return connection.Request(requestor, request);
+      }
+
       internal ClientReceiver InternalOpenReceiver(string address, ReceiverOptions receiverOptions)
       {
          return receiverBuilder.Receiver(address, receiverOptions).Open();

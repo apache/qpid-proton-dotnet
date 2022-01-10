@@ -470,7 +470,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Add Credit is not yet implemented")]
       [Test]
       public void TestReceiverDrainAllOutstanding()
       {
@@ -490,7 +489,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;
-            IReceiver receiver = session.OpenReceiver("test-queue").OpenTask.Result;
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 0
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options).OpenTask.Result;
 
             peer.WaitForScriptToComplete();
 

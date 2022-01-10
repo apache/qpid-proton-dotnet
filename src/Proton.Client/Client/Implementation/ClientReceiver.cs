@@ -142,7 +142,37 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IReceiver AddCredit(uint credit)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<IReceiver> creditAdded = new TaskCompletionSource<IReceiver>();
+
+         session.Execute(() =>
+         {
+            if (NotClosedOrFailed(creditAdded))
+            {
+               if (options.CreditWindow != 0)
+               {
+                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit when a credit window has been configured"));
+               }
+               else if (protonReceiver.IsDraining)
+               {
+                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit while a drain is pending"));
+               }
+               else
+               {
+                  try
+                  {
+                     protonReceiver.AddCredit(credit);
+                     creditAdded.TrySetResult(this);
+                  }
+                  catch (Exception ex)
+                  {
+                     creditAdded.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
+                  }
+               }
+            }
+         });
+
+         return session.Request(this, creditAdded).Task.Result;
       }
 
       public void Close(IErrorCondition error = null)
@@ -190,7 +220,41 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public Task<IReceiver> Drain()
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<IReceiver> drainComplete = new TaskCompletionSource<IReceiver>();
+
+         session.Execute(() =>
+         {
+            if (NotClosedOrFailed(drainComplete))
+            {
+               if (protonReceiver.IsDraining)
+               {
+                  drainComplete.TrySetException(new ClientIllegalStateException("Receiver is already draining"));
+                  return;
+               }
+
+               try
+               {
+                  if (protonReceiver.Drain())
+                  {
+                     drainingFuture = drainComplete;
+                     // TODO: Need a cancellation point: drainingTimeout
+                     session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
+                         () => new ClientOperationTimedOutException("Timed out waiting for remote to respond to drain request"));
+                  }
+                  else
+                  {
+                     drainComplete.TrySetResult(this);
+                  }
+               }
+               catch (Exception ex)
+               {
+                  drainComplete.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
+               }
+            }
+         });
+
+         return drainComplete.Task;
       }
 
       public IDelivery Receive()
@@ -380,6 +444,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
          else if (failureCause != null)
          {
             throw failureCause;
+         }
+      }
+
+      private bool NotClosedOrFailed(TaskCompletionSource<IReceiver> request)
+      {
+         if (IsClosed)
+         {
+            request.TrySetException(new ClientIllegalStateException("The Receiver was explicitly closed", failureCause));
+            return false;
+         }
+         else if (failureCause != null)
+         {
+            request.TrySetException(failureCause);
+            return false;
+         }
+         else
+         {
+            return true;
          }
       }
 

@@ -42,6 +42,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly TaskCompletionSource<IReceiver> openFuture = new TaskCompletionSource<IReceiver>();
       private readonly TaskCompletionSource<IStreamReceiver> closeFuture = new TaskCompletionSource<IStreamReceiver>();
 
+      private TaskCompletionSource<IReceiver> drainingFuture;
+
       private Engine.IReceiver protonReceiver;
       private ClientException failureCause;
       private volatile ISource remoteSource;
@@ -141,7 +143,76 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamReceiver AddCredit(uint credit)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<IStreamReceiver> creditAdded = new TaskCompletionSource<IStreamReceiver>();
+
+         session.Execute(() =>
+         {
+            if (NotClosedOrFailed(creditAdded))
+            {
+               if (options.CreditWindow != 0)
+               {
+                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit when a credit window has been configured"));
+               }
+               else if (protonReceiver.IsDraining)
+               {
+                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit while a drain is pending"));
+               }
+               else
+               {
+                  try
+                  {
+                     protonReceiver.AddCredit(credit);
+                     creditAdded.TrySetResult(this);
+                  }
+                  catch (Exception ex)
+                  {
+                     creditAdded.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
+                  }
+               }
+            }
+         });
+
+         return session.Request(this, creditAdded).Task.Result;
+      }
+
+      public Task<IReceiver> Drain()
+      {
+         CheckClosedOrFailed();
+         TaskCompletionSource<IReceiver> drainComplete = new TaskCompletionSource<IReceiver>();
+
+         session.Execute(() =>
+         {
+            if (NotClosedOrFailed(drainComplete))
+            {
+               if (protonReceiver.IsDraining)
+               {
+                  drainComplete.TrySetException(new ClientIllegalStateException("Stream Receiver is already draining"));
+                  return;
+               }
+
+               try
+               {
+                  if (protonReceiver.Drain())
+                  {
+                     drainingFuture = drainComplete;
+                     // TODO: Need a cancellation point: drainingTimeout
+                     session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
+                         () => new ClientOperationTimedOutException("Timed out waiting for remote to respond to drain request"));
+                  }
+                  else
+                  {
+                     drainComplete.TrySetResult(this);
+                  }
+               }
+               catch (Exception ex)
+               {
+                  drainComplete.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
+               }
+            }
+         });
+
+         return drainComplete.Task;
       }
 
       public void Close(IErrorCondition error = null)
@@ -165,11 +236,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       public void Dispose()
-      {
-         throw new NotImplementedException();
-      }
-
-      public Task<IReceiver> Drain()
       {
          throw new NotImplementedException();
       }
@@ -230,6 +296,36 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
             }
+         }
+      }
+
+      private void CheckClosedOrFailed()
+      {
+         if (IsClosed)
+         {
+            throw new ClientIllegalStateException("The StreamReceiver was explicitly closed", failureCause);
+         }
+         else if (failureCause != null)
+         {
+            throw failureCause;
+         }
+      }
+
+      private bool NotClosedOrFailed<T>(TaskCompletionSource<T> request)
+      {
+         if (IsClosed)
+         {
+            request.TrySetException(new ClientIllegalStateException("The Receiver was explicitly closed", failureCause));
+            return false;
+         }
+         else if (failureCause != null)
+         {
+            request.TrySetException(failureCause);
+            return false;
+         }
+         else
+         {
+            return true;
          }
       }
 
