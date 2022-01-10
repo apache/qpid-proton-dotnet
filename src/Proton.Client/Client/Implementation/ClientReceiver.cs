@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public int QueuedDeliveries => messageQueue.Count;
 
-      public IReceiver AddCredit(int credit)
+      public IReceiver AddCredit(uint credit)
       {
          throw new NotImplementedException();
       }

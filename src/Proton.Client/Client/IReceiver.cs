@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="credit">The amount of new credit to add to the existing credit if any</param>
       /// <returns>This receiver instance.</returns>
-      IReceiver AddCredit(int credit);
+      IReceiver AddCredit(uint credit);
 
       /// <summary>
       /// Blocking receive method that waits forever for the remote to provide a delivery for consumption.

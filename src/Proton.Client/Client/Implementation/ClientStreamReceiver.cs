@@ -139,7 +139,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public IStreamReceiver AddCredit(int credit)
+      public IStreamReceiver AddCredit(uint credit)
       {
          throw new NotImplementedException();
       }

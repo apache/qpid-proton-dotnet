@@ -24,6 +24,8 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Types.Transport;
 using System.Collections.Generic;
 using System.Linq;
+using Apache.Qpid.Proton.Test.Driver.Matchers;
+using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -313,6 +315,208 @@ namespace Apache.Qpid.Proton.Client.Implementation
             connection.CloseAsync().Wait();
 
             peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestOpenReceiverWaitWithTimeoutFailsWhenConnectionDrops()
+      {
+         DoTestOpenReceiverWaitFailsWhenConnectionDrops(true);
+      }
+
+      [Test]
+      public void TestOpenReceiverWaitWithNoTimeoutFailsWhenConnectionDrops()
+      {
+         DoTestOpenReceiverWaitFailsWhenConnectionDrops(false);
+      }
+
+      private void DoTestOpenReceiverWaitFailsWhenConnectionDrops(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver();
+            peer.ExpectFlow();
+            peer.DropAfterLastHandler(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenReceiver("test-queue");
+
+            try
+            {
+               if (timeout)
+               {
+                  receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  receiver.OpenTask.Wait();
+               }
+
+               Assert.Fail("Should not complete the open future without an error");
+            }
+            catch (Exception exe)
+            {
+               Exception cause = exe.InnerException;
+               Assert.IsTrue(cause is ClientIOException);
+            }
+
+            connection.CloseAsync().GetAwaiter().GetResult();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCloseReceiverTimesOutWhenNoCloseResponseReceivedTimeout()
+      {
+         DoTestCloseOrDetachReceiverTimesOutWhenNoCloseResponseReceived(true, true);
+      }
+
+      [Test]
+      public void TestCloseReceiverTimesOutWhenNoCloseResponseReceivedNoTimeout()
+      {
+         DoTestCloseOrDetachReceiverTimesOutWhenNoCloseResponseReceived(true, false);
+      }
+
+      [Test]
+      public void TestDetachReceiverTimesOutWhenNoCloseResponseReceivedTimeout()
+      {
+         DoTestCloseOrDetachReceiverTimesOutWhenNoCloseResponseReceived(false, true);
+      }
+
+      [Test]
+      public void TestDetachReceiverTimesOutWhenNoCloseResponseReceivedNoTimeout()
+      {
+         DoTestCloseOrDetachReceiverTimesOutWhenNoCloseResponseReceived(false, false);
+      }
+
+      private void DoTestCloseOrDetachReceiverTimesOutWhenNoCloseResponseReceived(bool close, bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.ExpectDetach();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               CloseTimeout = 5
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
+            connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenReceiver("test-queue");
+            receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            try
+            {
+               if (close)
+               {
+                  if (timeout)
+                  {
+                     receiver.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+                  }
+                  else
+                  {
+                     receiver.CloseAsync().Wait();
+                  }
+               }
+               else
+               {
+                  if (timeout)
+                  {
+                     receiver.DetachAsync().Wait(TimeSpan.FromSeconds(10));
+                  }
+                  else
+                  {
+                     receiver.DetachAsync().Wait();
+                  }
+               }
+
+               Assert.Fail("Should not complete the close or detach future without an error");
+            }
+            catch (Exception exe)
+            {
+               Exception cause = exe.InnerException;
+               Assert.IsTrue(cause is ClientOperationTimedOutException);
+            }
+
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Add Credit is not yet implemented")]
+      [Test]
+      public void TestReceiverDrainAllOutstanding()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            IReceiver receiver = session.OpenReceiver("test-queue").OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            // Add some credit, verify not draining
+            uint credit = 7;
+            peer.ExpectFlow().WithDrain(Matches.AnyOf(Test.Driver.Matchers.Is.EqualTo(false),
+                                                      Test.Driver.Matchers.Is.NullValue()))
+                             .WithLinkCredit(credit).WithDeliveryCount(0);
+
+            receiver.AddCredit(credit);
+
+            peer.WaitForScriptToComplete();
+
+            // Drain all the credit
+            peer.ExpectFlow().WithDrain(true).WithLinkCredit(credit).WithDeliveryCount(0)
+                             .Respond()
+                             .WithDrain(true).WithLinkCredit(0).WithDeliveryCount(credit);
+
+            Task<IReceiver> draining = receiver.Drain();
+            draining.Wait(TimeSpan.FromSeconds(5));
+
+            // Close things down
+            peer.ExpectClose().Respond();
+            connection.Close();
+
+            peer.WaitForScriptToComplete(TimeSpan.FromSeconds(10));
          }
       }
    }

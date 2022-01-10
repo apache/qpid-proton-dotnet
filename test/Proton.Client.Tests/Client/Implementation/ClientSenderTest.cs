@@ -379,5 +379,154 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestOpenSenderWaitWithTimeoutFailsWhenConnectionDrops()
+      {
+         DoTestOpenSenderWaitFailsWhenConnectionDrops(true);
+      }
+
+      [Test]
+      public void TestOpenSenderWaitWithNoTimeoutFailsWhenConnectionDrops()
+      {
+         DoTestOpenSenderWaitFailsWhenConnectionDrops(false);
+      }
+
+      private void DoTestOpenSenderWaitFailsWhenConnectionDrops(bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender();
+            peer.DropAfterLastHandler(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue");
+
+            Thread.Sleep(10); // Allow some time for attach to get written
+
+            try
+            {
+               if (timeout)
+               {
+                  sender.OpenTask.Wait(TimeSpan.FromSeconds(10));
+               }
+               else
+               {
+                  sender.OpenTask.Wait();
+               }
+
+               Assert.Fail("Should not complete the open future without an error");
+            }
+            catch (Exception exe)
+            {
+               Exception cause = exe.InnerException;
+               Assert.IsTrue(cause is ClientConnectionRemotelyClosedException);
+            }
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCloseSenderTimesOutWhenNoCloseResponseReceivedTimeout()
+      {
+         DoTestCloseOrDetachSenderTimesOutWhenNoCloseResponseReceived(true, true);
+      }
+
+      [Test]
+      public void TestCloseSenderTimesOutWhenNoCloseResponseReceivedNoTimeout()
+      {
+         DoTestCloseOrDetachSenderTimesOutWhenNoCloseResponseReceived(true, false);
+      }
+
+      [Test]
+      public void TestDetachSenderTimesOutWhenNoCloseResponseReceivedTimeout()
+      {
+         DoTestCloseOrDetachSenderTimesOutWhenNoCloseResponseReceived(false, true);
+      }
+
+      [Test]
+      public void TestDetachSenderTimesOutWhenNoCloseResponseReceivedNoTimeout()
+      {
+         DoTestCloseOrDetachSenderTimesOutWhenNoCloseResponseReceived(false, false);
+      }
+
+      private void DoTestCloseOrDetachSenderTimesOutWhenNoCloseResponseReceived(bool close, bool timeout)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectDetach();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               CloseTimeout = 10
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            try
+            {
+               if (close)
+               {
+                  if (timeout)
+                  {
+                     sender.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+                  }
+                  else
+                  {
+                     sender.CloseAsync().Wait();
+                  }
+               }
+               else
+               {
+                  if (timeout)
+                  {
+                     sender.DetachAsync().Wait(TimeSpan.FromSeconds(10));
+                  }
+                  else
+                  {
+                     sender.DetachAsync().Wait();
+                  }
+               }
+
+               Assert.Fail("Should not complete the close or detach future without an error");
+            }
+            catch (Exception exe)
+            {
+               Exception cause = exe.InnerException;
+               Assert.IsTrue(cause is ClientOperationTimedOutException);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }
