@@ -42,6 +42,29 @@ namespace Apache.Qpid.Proton.Utilities
       }
 
       /// <summary>
+      /// Copy values from the given array that fall within the given range to a new
+      /// array that is sized to hold the copied range.
+      /// </summary>
+      /// <typeparam name="T">The type of the array being copied</typeparam>
+      /// <param name="original">The original array where the elements are copied from</param>
+      /// <param name="from">The starting index in the array to begin the copy</param>
+      /// <param name="to">The ending index in the array for the copy</param>
+      /// <returns>A new array that contains a copy of the specified subregion of the original array</returns>
+      /// <exception cref="ArgumentOutOfRangeException">If the from index is greater than the to index</exception>
+      public static T[] CopyOfRange<T>(T[] original, int from, int to)
+      {
+         int newLength = to - from;
+         if (newLength < 0)
+         {
+            throw new ArgumentOutOfRangeException("Value of " + from + " > " + to);
+         }
+
+         T[] copy = new T[newLength];
+         Array.ConstrainedCopy(original, from, copy, 0, Math.Min(original.Length - from, newLength));
+         return copy;
+      }
+
+      /// <summary>
       /// Checks if the given value is greater than zero and throws an exception if not.
       /// </summary>
       /// <param name="value">The value to check</param>

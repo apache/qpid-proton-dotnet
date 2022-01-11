@@ -82,6 +82,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return channel;
       }
 
+      public ScriptedAction AfterDelay(int delay)
+      {
+         this.delay = delay;
+         return this;
+      }
+
       /// <summary>
       /// Returns the channel this action was instructed to operate on or null if
       /// nothing configured which allows the action code to select an appropriate

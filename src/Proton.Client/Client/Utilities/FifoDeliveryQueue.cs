@@ -95,7 +95,14 @@ namespace Apache.Qpid.Proton.Client.Utilities
             {
                if (IsEmpty && timeout != TimeSpan.Zero)
                {
-                  Monitor.Wait(this.mutex, timeout);
+                  if (timeout == TimeSpan.MaxValue)
+                  {
+                     Monitor.Wait(this.mutex);
+                  }
+                  else
+                  {
+                     Monitor.Wait(this.mutex, timeout);
+                  }
                }
 
                if (!IsEmpty && IsRunning)

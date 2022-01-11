@@ -19,6 +19,9 @@ using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using NLog.Extensions.Logging;
 using Apache.Qpid.Proton.Logging;
+using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Codec;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -67,6 +70,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public void TearDown()
       {
          logger.LogInformation("--------- End test {0} ---------------------------------", testName);
+      }
+
+      protected byte[] CreateEncodedMessage(ISection body)
+      {
+         IEncoder encoder = CodecFactory.Encoder;
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         encoder.WriteObject(buffer, encoder.NewEncoderState(), body);
+         byte[] result = new byte[buffer.ReadableBytes];
+         buffer.CopyInto(0, result, 0, result.Length);
+         return result;
       }
    }
 }

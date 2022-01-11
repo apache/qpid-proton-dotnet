@@ -254,7 +254,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public AttachInjectAction WithDesiredCapabilities(string[] desiredCapabilities)
+      public AttachInjectAction WithDesiredCapabilities(params string[] desiredCapabilities)
       {
          attach.DesiredCapabilities = TypeMapper.ToSymbolArray(desiredCapabilities);
          return this;
