@@ -393,7 +393,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          session.Execute(() =>
          {
-            // TODO session.TransactionContext.Disposition(delivery, state, settle);
+            session.TransactionContext.Disposition(delivery, state, settle);
             ReplenishCreditIfNeeded();
          });
       }

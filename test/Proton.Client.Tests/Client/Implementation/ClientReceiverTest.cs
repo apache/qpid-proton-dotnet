@@ -1743,7 +1743,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Auto accept not yet working in receiver")]
       [Test]
       public void TestReceiverAddCreditOnAbortedTransferWhenNeeded()
       {
