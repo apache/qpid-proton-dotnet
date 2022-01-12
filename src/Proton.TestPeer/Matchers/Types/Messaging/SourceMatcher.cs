@@ -44,12 +44,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       public virtual SourceMatcher WithDurable(TerminusDurability durability)
       {
-         return WithDurable(Is.EqualTo(durability));
+         return WithDurable(Is.EqualTo((uint)durability));
       }
 
       public virtual SourceMatcher WithExpiryPolicy(TerminusExpiryPolicy expiry)
       {
-         return WithExpiryPolicy(Is.EqualTo(expiry));
+         return WithExpiryPolicy(Is.EqualTo(expiry.ToSymbol()));
       }
 
       public virtual SourceMatcher WithTimeout(uint timeout)

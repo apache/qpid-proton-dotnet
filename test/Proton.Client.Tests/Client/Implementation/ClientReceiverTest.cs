@@ -2957,7 +2957,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Issue in test peer matchers prevents correct matching")]
       [Test]
       public void TestOpenDurableReceiver()
       {
