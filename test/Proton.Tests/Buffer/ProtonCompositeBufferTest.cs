@@ -892,25 +892,49 @@ namespace Apache.Qpid.Proton.Buffer
 
       #endregion
 
-      #region Proton abstract buffer tests API implementation
+      #region Tests for composite buffer Append API
 
-      // protected override IProtonBuffer AllocateBuffer(int initialCapacity)
-      // {
-      //    IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Allocate(initialCapacity);
-      //    return IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, wrapped);
-      // }
+      [Test]
+      public void TestAppendTwoByteBackedBuffers()
+      {
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
 
-      // protected override IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
-      // {
-      //    IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Allocate(initialCapacity, maxCapacity);
-      //    return IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, wrapped);
-      // }
+         // For Equality checks
+         byte[] dataAll = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5, 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer bufferAll = ProtonByteBufferAllocator.Instance.Wrap(dataAll);
+         Assert.AreEqual(bufferAll.ReadableBytes, data1.Length + data2.Length);
 
-      // protected override IProtonBuffer WrapBuffer(byte[] array)
-      // {
-      //    IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Wrap(array);
-      //    return IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, wrapped);
-      // }
+         buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(data1).Reset());
+         buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(data2).Reset());
+
+         Assert.AreEqual(buffer.WritableBytes, data1.Length + data2.Length);
+         Assert.AreNotEqual(buffer, bufferAll);
+
+         buffer.WriteOffset += buffer.WritableBytes;
+
+         Assert.AreEqual(buffer, bufferAll);
+      }
+
+      [Test]
+      public void TestAppendRejectsReadGapedBuffer()
+      {
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer1 = ProtonByteBufferAllocator.Instance.Wrap(data1);
+         buffer1.WriteOffset += buffer1.WritableBytes;
+
+         byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Wrap(data2);
+         buffer2.WriteOffset += buffer1.WritableBytes;
+         buffer2.ReadOffset += 1;
+
+         buffer.Append(buffer1);
+
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Append(buffer2));
+      }
 
       #endregion
    }

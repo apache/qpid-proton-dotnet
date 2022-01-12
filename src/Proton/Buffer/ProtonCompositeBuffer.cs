@@ -205,7 +205,21 @@ namespace Apache.Qpid.Proton.Buffer
          {
             if (IProtonCompositeBuffer.IsComposite(buffer))
             {
-               throw new NotImplementedException();
+               IProtonCompositeBuffer composite = buffer as IProtonCompositeBuffer;
+               IEnumerable<IProtonBuffer> decomposed = composite.DecomposeBuffer();
+               int decomposedLength = decomposed.Count();
+
+               List<IProtonBuffer> newComposed = new List<IProtonBuffer>(buffers.Length + decomposedLength);
+               newComposed.AddRange(buffers);
+               newComposed.AddRange(decomposed);
+
+               // Will throw if duplicates detected otherwise returns.
+               IEnumerable<IProtonBuffer> filtered = FilterIncomingBuffers(newComposed);
+
+               int extendedAt = buffers.Length;
+               buffers = Statics.CopyOf(buffers, extendedAt + decomposedLength);
+               Array.ConstrainedCopy(decomposed.ToArray(), 0, buffers, extendedAt, decomposedLength);
+               ComputeOffsetsAndIndexes();
             }
             else
             {
