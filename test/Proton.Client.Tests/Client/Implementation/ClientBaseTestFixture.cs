@@ -81,5 +81,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
          buffer.CopyInto(0, result, 0, result.Length);
          return result;
       }
+
+      protected byte[] CreateEncodedMessage(params Data[] body)
+      {
+         IEncoder encoder = CodecFactory.Encoder;
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         foreach (Data data in body)
+         {
+            encoder.WriteObject(buffer, encoder.NewEncoderState(), data);
+         }
+         byte[] result = new byte[buffer.ReadableBytes];
+         buffer.CopyInto(0, result, 0, result.Length);
+         return result;
+      }
    }
 }
