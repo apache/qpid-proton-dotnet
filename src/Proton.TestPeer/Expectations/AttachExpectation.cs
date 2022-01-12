@@ -625,7 +625,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public override AttachSourceMatcher WithDefaultTimeout()
       {
-         base.WithTimeout(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0)));
+         base.WithTimeout(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
          return this;
       }
 

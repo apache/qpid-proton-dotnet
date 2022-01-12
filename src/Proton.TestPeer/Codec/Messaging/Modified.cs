@@ -96,16 +96,27 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
             return false;
          }
 
-         Object described = Described;
-         Object described2 = d.Described;
-         if (described == null)
+         if (d is Modified other)
          {
-            return described2 == null;
+            if (UndeliverableHere != other.UndeliverableHere || DeliveryFailed != other.DeliveryFailed)
+            {
+               return false;
+            }
+            else if (MessageAnnotations != null)
+            {
+               return MessageAnnotations.Equals(other.MessageAnnotations);
+            }
+            else if (other.MessageAnnotations != null)
+            {
+               return other.MessageAnnotations.Equals(MessageAnnotations);
+            }
+            else
+            {
+               return true;
+            }
          }
-         else
-         {
-            return described.Equals(described2);
-         }
+
+         return false;
       }
 
       public override int GetHashCode()
