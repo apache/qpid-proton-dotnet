@@ -1101,14 +1101,14 @@ namespace Apache.Qpid.Proton.Buffer
 
          public ulong GetUnsignedLong(long index)
          {
-            return (ulong)(Get(index) << 56 |
-                           Get(index + 1) << 48 |
-                           Get(index + 2) << 40 |
-                           Get(index + 3) << 32 |
-                           Get(index + 4) << 24 |
-                           Get(index + 5) << 16 |
-                           Get(index + 6) << 8 |
-                           Get(index + 7));
+            return (ulong)Get(index) << 56 |
+                   (ulong)Get(index + 1) << 48 |
+                   (ulong)Get(index + 2) << 40 |
+                   (ulong)Get(index + 3) << 32 |
+                   (ulong)Get(index + 4) << 24 |
+                   (ulong)Get(index + 5) << 16 |
+                   (ulong)Get(index + 6) << 8 |
+                   (ulong)Get(index + 7);
          }
 
          public char ReadChar()
@@ -1156,14 +1156,14 @@ namespace Apache.Qpid.Proton.Buffer
 
          public ulong ReadUnsignedLong()
          {
-            return (uint)(Read() << 56 |
-                          Read() << 48 |
-                          Read() << 40 |
-                          Read() << 32 |
-                          Read() << 24 |
-                          Read() << 16 |
-                          Read() << 8 |
-                          Read());
+            return (ulong)Read() << 56 |
+                   (ulong)Read() << 48 |
+                   (ulong)Read() << 40 |
+                   (ulong)Read() << 32 |
+                   (ulong)Read() << 24 |
+                   (ulong)Read() << 16 |
+                   (ulong)Read() << 8 |
+                   (ulong)Read();
          }
 
          public IProtonBuffer SetChar(long index, char value)

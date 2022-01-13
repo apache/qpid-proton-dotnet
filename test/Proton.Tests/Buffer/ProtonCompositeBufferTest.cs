@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Buffer
@@ -299,6 +300,27 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(0, buffer.ReadOffset);
 
          Assert.AreEqual(2048, buffer.ReadLong());
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.AreEqual(8, buffer.ReadOffset);
+
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadLong());
+      }
+
+      [Test]
+      public void TestGetLongWithTwoArraysContainingOneElementWithUnEvenSplit()
+      {
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+
+         buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 9, 8 }))
+               .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 255, 255, 0, 1, 2, 3 }));
+
+         Assert.AreEqual(8, buffer.ReadableBytes);
+         Assert.IsTrue(buffer.IsReadable);
+         Assert.AreEqual(0, buffer.ReadOffset);
+
+         Assert.AreEqual(651051616836846083L, buffer.ReadLong());
 
          Assert.AreEqual(0, buffer.ReadableBytes);
          Assert.IsFalse(buffer.IsReadable);
@@ -928,12 +950,82 @@ namespace Apache.Qpid.Proton.Buffer
 
          byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
          IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Wrap(data2);
-         buffer2.WriteOffset += buffer1.WritableBytes;
+         buffer2.WriteOffset += buffer2.WritableBytes;
          buffer2.ReadOffset += 1;
 
          buffer.Append(buffer1);
 
          Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Append(buffer2));
+      }
+
+      [Test]
+      public void TestAppendRejectsWriteGapedBuffer()
+      {
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer1 = ProtonByteBufferAllocator.Instance.Wrap(data1);
+         buffer1.WriteOffset -= 1;
+
+         byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Wrap(data2);
+
+         buffer.Append(buffer1);
+
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Append(buffer2));
+      }
+
+      [Test]
+      public void TestAppendOneCompositeBufferToAnotherEmptyComposite()
+      {
+         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1).Reset());
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data2).Reset());
+
+         // For Equality checks
+         byte[] dataAll = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5, 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer bufferAll = ProtonByteBufferAllocator.Instance.Wrap(dataAll);
+         Assert.AreEqual(bufferAll.ReadableBytes, data1.Length + data2.Length);
+
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         buffer.Append(appendTo);
+
+         Assert.AreEqual(buffer.WritableBytes, data1.Length + data2.Length);
+         Assert.AreNotEqual(buffer, bufferAll);
+
+         buffer.WriteOffset += buffer.WritableBytes;
+
+         Assert.AreEqual(buffer, bufferAll);
+         Assert.AreEqual(2, buffer.DecomposeBuffer().Count());
+      }
+
+      [Test]
+      public void TestAppendOneCompositeBufferToAnotherNonEmptyComposite()
+      {
+         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1).Reset());
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data2).Reset());
+
+         // For Equality checks
+         byte[] dataAll = new byte[] { 9, 8, 255, 255, 0, 1, 2, 3, 4, 5, 255, 255, 255, 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer bufferAll = ProtonByteBufferAllocator.Instance.Wrap(dataAll);
+         Assert.AreEqual(bufferAll.ReadableBytes, data1.Length + data2.Length + 2);
+
+         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 9, 8 }).Reset());
+         buffer.Append(appendTo);
+
+         Assert.AreEqual(buffer.WritableBytes, data1.Length + data2.Length + 2);
+         Assert.AreNotEqual(buffer, bufferAll);
+
+         buffer.WriteOffset += buffer.WritableBytes;
+
+         Assert.AreEqual(buffer, bufferAll);
+         Assert.AreEqual(3, buffer.DecomposeBuffer().Count());
       }
 
       #endregion
