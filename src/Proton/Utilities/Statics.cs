@@ -186,5 +186,43 @@ namespace Apache.Qpid.Proton.Utilities
             throw new ArgumentNullException(errorMessage ?? "Value provided cannot be null");
          }
       }
+
+      /// <summary>
+      /// Add the two numbers and return the result if there was no overflow, otherwise
+      /// throw an exception.
+      /// </summary>
+      /// <param name="x">The first value to add</param>
+      /// <param name="y">The second value to add</param>
+      /// <returns>The resulting summed value if no overflow occurred</returns>
+      /// <exception cref="ArithmeticException">If the addition resulted in an overflow</exception>
+      internal static int AddExact(int x, int y)
+      {
+         int r = x + y;
+         // HD 2-12 Overflow if both arguments have the opposite sign of the result
+         if (((x ^ r) & (y ^ r)) < 0)
+         {
+            throw new ArithmeticException("integer overflow");
+         }
+         return r;
+      }
+
+      /// <summary>
+      /// Add the two numbers and return the result if there was no overflow, otherwise
+      /// throw an exception.
+      /// </summary>
+      /// <param name="x">The first value to add</param>
+      /// <param name="y">The second value to add</param>
+      /// <returns>The resulting summed value if no overflow occurred</returns>
+      /// <exception cref="ArithmeticException">If the addition resulted in an overflow</exception>
+      internal static long AddExact(long x, long y)
+      {
+         long r = x + y;
+         // HD 2-12 Overflow if both arguments have the opposite sign of the result
+         if (((x ^ r) & (y ^ r)) < 0)
+         {
+            throw new ArithmeticException("integer overflow");
+         }
+         return r;
+      }
    }
 }

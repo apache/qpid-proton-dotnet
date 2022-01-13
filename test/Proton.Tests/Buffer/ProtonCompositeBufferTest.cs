@@ -134,7 +134,7 @@ namespace Apache.Qpid.Proton.Buffer
          buffer.ReadOffset = 10;
          Assert.AreEqual(10, buffer.ReadOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadOffset = 11);
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadOffset = 11);
       }
 
       [Test]
@@ -146,16 +146,16 @@ namespace Apache.Qpid.Proton.Buffer
          try
          {
             buffer.ReadOffset = 2;
-            Assert.Fail("Should throw a ArgumentOutOfRangeException");
+            Assert.Fail("Should throw a IndexOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.ReadOffset = -1;
-            Assert.Fail("Should throw a ArgumentOutOfRangeException");
+            Assert.Fail("Should throw a IndexOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          // Test with something appended
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 127 }));
@@ -163,16 +163,16 @@ namespace Apache.Qpid.Proton.Buffer
          try
          {
             buffer.ReadOffset = 2;
-            Assert.Fail("Should throw a ArgumentOutOfRangeException");
+            Assert.Fail("Should throw a IndexOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
 
          try
          {
             buffer.ReadOffset = -1;
-            Assert.Fail("Should throw a ArgumentOutOfRangeException");
+            Assert.Fail("Should throw a IndexOutOfRangeException");
          }
-         catch (ArgumentOutOfRangeException) { }
+         catch (IndexOutOfRangeException) { }
       }
 
       #endregion
@@ -208,7 +208,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(10, buffer.ReadOffset);
          Assert.AreEqual(10, buffer.WriteOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadByte());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
       }
 
       [Test]
@@ -235,14 +235,14 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(0, buffer.ReadableBytes);
          Assert.AreEqual(10, buffer.ReadOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadByte());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
       }
 
       [Test]
       public void TestGetShortByteWithNothingAppended()
       {
          ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadShort());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadShort());
       }
 
       [Test]
@@ -263,7 +263,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.IsFalse(buffer.IsReadable);
          Assert.AreEqual(2, buffer.ReadOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadShort());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadShort());
       }
 
       [Test]
@@ -284,7 +284,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.IsFalse(buffer.IsReadable);
          Assert.AreEqual(4, buffer.ReadOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadInt());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadInt());
       }
 
       [Test]
@@ -305,7 +305,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.IsFalse(buffer.IsReadable);
          Assert.AreEqual(8, buffer.ReadOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadLong());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadLong());
       }
 
       [Test]
@@ -326,7 +326,7 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.IsFalse(buffer.IsReadable);
          Assert.AreEqual(8, buffer.ReadOffset);
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadLong());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadLong());
       }
 
       [Ignore("CopyInto is not yet implemented")]
@@ -356,7 +356,7 @@ namespace Apache.Qpid.Proton.Buffer
             destination.WriteOffset = 0;
          }
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.ReadByte());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
       }
 
       [Test]
@@ -373,8 +373,8 @@ namespace Apache.Qpid.Proton.Buffer
             Assert.AreEqual(buffer.ReadByte(), buffer.GetByte(i));
          }
 
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetByte(-1));
-         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.GetByte(buffer.WriteOffset));
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.GetByte(-1));
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.GetByte(buffer.WriteOffset));
       }
 
       [Test]
@@ -914,7 +914,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       #endregion
 
-      #region Tests for composite buffer Append API
+      #region Tests for composite buffer Append other composites API
 
       [Test]
       public void TestAppendTwoByteBackedBuffers()
@@ -1026,6 +1026,30 @@ namespace Apache.Qpid.Proton.Buffer
 
          Assert.AreEqual(buffer, bufferAll);
          Assert.AreEqual(3, buffer.DecomposeBuffer().Count());
+      }
+
+      #endregion
+
+      #region The Abstract methods needed for the base buffers tests.
+
+      protected bool CanBufferCapacityBeChanged()
+      {
+         return false; // Cannot resize the composite at the moment
+      }
+
+      protected IProtonBuffer AllocateBuffer(int initialCapacity)
+      {
+         return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
+      }
+
+      protected IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
+      {
+         return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity, maxCapacity));
+      }
+
+      protected IProtonBuffer WrapBuffer(byte[] array)
+      {
+         return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Wrap(array));
       }
 
       #endregion

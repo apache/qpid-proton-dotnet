@@ -306,12 +306,70 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer CopyInto(long srcPos, byte[] dest, long destPos, long length)
       {
-         throw new NotImplementedException();
+         if (length < 0)
+         {
+            throw new ArgumentOutOfRangeException("Length cannot be negative: " + length + '.');
+         }
+         if (srcPos < 0)
+         {
+            throw IndexOutOfBounds(srcPos, false);
+         }
+         if (srcPos + length > capacity)
+         {
+            throw IndexOutOfBounds(srcPos + length, false);
+         }
+
+         while (length > 0)
+         {
+            // Given a required length of zero choose buffer always gives a direct
+            // access buffer form the array of buffers.
+            IProtonBuffer buf = (IProtonBuffer) ChooseBuffer(srcPos, 0);
+
+            // Delegate to each subregion for a copy into the array, moving the array
+            // offset by the copy amount with each iteration.
+            long toCopy = Math.Min(buf.Capacity - nextComputedAccessIndex, length);
+            buf.CopyInto(nextComputedAccessIndex, dest, destPos, toCopy);
+            srcPos += toCopy;
+            destPos += toCopy;
+            length -= toCopy;
+         }
+
+         return this;
       }
 
       public IProtonBuffer CopyInto(long srcPos, IProtonBuffer dest, long destPos, long length)
       {
-         throw new NotImplementedException();
+         if (length < 0)
+         {
+            throw new ArgumentOutOfRangeException("Length cannot be negative: " + length + '.');
+         }
+         if (srcPos < 0)
+         {
+            throw IndexOutOfBounds(srcPos, false);
+         }
+         if (Statics.AddExact(srcPos, length) > capacity)
+         {
+            throw IndexOutOfBounds(srcPos + length, false);
+         }
+
+         // TODO There could be an issue here with the copy if the source and dest buffers overlap
+
+         while (length > 0)
+         {
+            // Given a required length of zero choose buffer always gives a direct
+            // access buffer form the array of buffers.
+            IProtonBuffer buf = (IProtonBuffer) ChooseBuffer(srcPos, 0);
+
+            // Delegate to each subregion for a copy into the array, moving the array
+            // offset by the copy amount with each iteration.
+            long toCopy = Math.Min(buf.Capacity - nextComputedAccessIndex, length);
+            buf.CopyInto(nextComputedAccessIndex, dest, destPos, toCopy);
+            srcPos += toCopy;
+            destPos += toCopy;
+            length -= toCopy;
+         }
+
+         return this;
       }
 
       public IProtonBuffer EnsureWritable(long amount)
@@ -889,7 +947,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       private Exception IndexOutOfBounds(long index, bool write)
       {
-         return new ArgumentOutOfRangeException(
+         return new IndexOutOfRangeException(
             "Index " + index + " is out of bounds: [read 0 to " + writeOffset + ", write 0 to " + capacity + "].");
       }
 
