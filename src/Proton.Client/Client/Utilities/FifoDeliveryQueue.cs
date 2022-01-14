@@ -34,13 +34,13 @@ namespace Apache.Qpid.Proton.Client.Utilities
       private static readonly int STOPPED = 1;
       private static readonly int RUNNING = 2;
 
-      private volatile int state = STOPPED;
+      private int state = STOPPED;
 
       private readonly IDeque<T> queue = new ArrayDeque<T>();
 
-      public bool IsRunning => state == RUNNING;
+      public bool IsRunning => Volatile.Read(ref state) == RUNNING;
 
-      public bool IsClosed => state == CLOSED;
+      public bool IsClosed => Volatile.Read(ref state) == CLOSED;
 
       public bool IsEmpty
       {

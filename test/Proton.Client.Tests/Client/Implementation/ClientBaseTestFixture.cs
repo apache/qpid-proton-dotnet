@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          // Rules for mapping loggers to targets
          config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logconsole);
-         config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, logfile);
+         config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logfile);
 
          loggerFactory = LoggerFactory.Create(builder =>
             builder.ClearProviders().SetMinimumLevel(LogLevel.Trace).AddNLog(config)
