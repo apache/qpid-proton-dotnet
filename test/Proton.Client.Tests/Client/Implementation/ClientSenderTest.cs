@@ -529,7 +529,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Send not yet implemented fully")]
       [Test]
       public void TestSendTimesOutWhenNoCreditIssued()
       {
@@ -551,7 +550,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               SendTimeout = 1
+               SendTimeout = 10
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options);
             ISession session = connection.OpenSession();
@@ -569,6 +568,65 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
 
             sender.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Sends not yet working from client sender")]
+      [Test]
+      public void TestSendCompletesWhenCreditEventuallyOffered()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               SendTimeout = 2000
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            // Expect a transfer but only after the flow which is delayed to allow the
+            // client time to block on credit.
+            peer.ExpectTransfer().WithNonNullPayload();
+            peer.RemoteFlow().WithDeliveryCount(0)
+                             .WithLinkCredit(1)
+                             .WithIncomingWindow(1024)
+                             .WithOutgoingWindow(10)
+                             .WithNextIncomingId(0)
+                             .WithNextOutgoingId(1).Later(30);
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            try
+            {
+               logger.LogDebug("Attempting send with sender: {}", sender);
+               sender.Send(message);
+            }
+            catch (ClientSendTimedOutException)
+            {
+               Assert.Fail("Should not throw a send timed out exception");
+            }
+
+            sender.CloseAsync();
+
             connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
 
             peer.WaitForScriptToComplete();

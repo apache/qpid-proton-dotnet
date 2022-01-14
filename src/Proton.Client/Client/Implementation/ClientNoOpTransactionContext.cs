@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IClientTransactionContext Send(ClientOutgoingEnvelope envelope, Types.Transport.IDeliveryState state, bool settled)
       {
-         envelope.SendPayload(state, settled);
+         envelope.Transmit(state, settled);
          return this;
       }
 

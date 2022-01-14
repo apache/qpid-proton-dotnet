@@ -17,6 +17,7 @@
 
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -32,14 +33,47 @@ namespace Apache.Qpid.Proton.Client.Implementation
    internal sealed class ClientOutgoingEnvelope
    {
       private readonly IProtonBuffer payload;
-      private readonly Task<ITracker> request;
+      private readonly TaskCompletionSource<ITracker> request;
       private readonly ClientSender sender;
-      private readonly bool complete;
-      private readonly int messageFormat;
+      private readonly uint messageFormat;
 
-      private bool aborted;
       // TODO private ScheduledFuture<?> sendTimeout;
       private IOutgoingDelivery delivery;
+
+      /// <summary>
+      /// Create a new In-flight Send instance for a complete message send. No further
+      /// sends can occur after the send completes however if the send cannot be completed
+      /// due to session or link credit issues the send will be requeued at the sender for
+      /// retry when the credit is updated by the remote.
+      /// </summary>
+      /// <param name="sender">The originating sender of the wrapped message payload</param>
+      /// <param name="messageFormat">The AMQP message format to encode the transfer</param>
+      /// <param name="payload">The encoded message bytes</param>
+      /// <param name="request">The request that is linked to this send event</param>
+      public ClientOutgoingEnvelope(ClientSender sender, uint messageFormat, IProtonBuffer payload, TaskCompletionSource<ITracker> request)
+      {
+         this.messageFormat = messageFormat;
+         this.payload = payload;
+         this.request = request;
+         this.sender = sender;
+      }
+
+      /// <summary>
+      /// Indicates if the delivery contained within this envelope is aborted. This does
+      /// not transmit the actual aborted status to the remote, the sender must transmit
+      /// the contents of the envelope in order to convery the abort.
+      /// </summary>
+      public bool Aborted { get; set; } = false;
+
+      /// <summary>
+      /// The client sender instance that this envelope is linked to
+      /// </summary>
+      public ClientSender Sender => sender;
+
+      /// <summary>
+      /// The encoded message payload this envelope wraps.
+      /// </summary>
+      public IProtonBuffer Payload => payload;
 
       /// <summary>
       /// Performs a send of some or all of the message payload on this outgoing delivery
@@ -48,17 +82,101 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// </summary>
       /// <param name="state">The delivery state to apply</param>
       /// <param name="settled">The settlement value to apply</param>
-      public ClientOutgoingEnvelope SendPayload(Types.Transport.IDeliveryState state, bool settled)
+      public ClientOutgoingEnvelope Transmit(Types.Transport.IDeliveryState state, bool settled)
       {
-         // TODO
+         if (delivery == null)
+         {
+            delivery = sender.ProtonSender.Next();
+            delivery.LinkedResource = sender.CreateTracker(delivery);
+         }
+
+         if (delivery.TransferCount == 0)
+         {
+            delivery.MessageFormat = messageFormat;
+            delivery.Disposition(state, settled);
+         }
+
+         // We must check if the delivery was fully written and then complete the send operation otherwise
+         // if the session capacity limited the amount of payload data we need to hold the completion until
+         // the session capacity is refilled and we can fully write the remaining message payload. This
+         // area could use some enhancement to allow control of write and flush when dealing with delivery
+         // modes that have low assurance versus those that are strict.
+         if (Aborted)
+         {
+            delivery.Abort();
+            Succeeded();
+         }
+         else
+         {
+            delivery.StreamBytes(payload, true);
+            if (payload != null && payload.IsReadable)
+            {
+               sender.AddToHeadOfBlockedQueue(this);
+            }
+            else
+            {
+               Succeeded();
+            }
+         }
+
          return this;
       }
 
       public ClientOutgoingEnvelope Discard()
       {
          // TODO
+         // if (sendTimeout != null)
+         // {
+         //    sendTimeout.cancel(true);
+         //    sendTimeout = null;
+         // }
+
+         if (delivery != null)
+         {
+            ClientTracker tracker = (ClientTracker)delivery.LinkedResource;
+            if (tracker != null)
+            {
+               tracker.CompleteSettlementTask();
+            }
+            request.TrySetResult(tracker);
+         }
+         else
+         {
+            request.TrySetResult(sender.CreateNoOpTracker());
+         }
+
          return this;
       }
 
+      public ClientOutgoingEnvelope Failed(ClientException exception)
+      {
+         // TODO
+         // if (sendTimeout != null)
+         // {
+         //    sendTimeout.cancel(true);
+         // }
+
+         request.TrySetException(exception);
+
+         return this;
+      }
+
+      public ClientOutgoingEnvelope Succeeded()
+      {
+         // TODO
+         // if (sendTimeout != null)
+         // {
+         //    sendTimeout.cancel(true);
+         // }
+
+         request.TrySetResult((ITracker)delivery.LinkedResource);
+
+         return this;
+      }
+
+      public ClientException CreateSendTimedOutException()
+      {
+         return new ClientSendTimedOutException("Timed out waiting for credit to send");
+      }
    }
 }

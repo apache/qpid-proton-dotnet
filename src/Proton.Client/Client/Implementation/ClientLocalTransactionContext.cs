@@ -185,16 +185,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                Types.Transport.IDeliveryState txnOutcome =
                    cachedSenderOutcome ?? (cachedSenderOutcome = new TransactionalState(currentTxn.TxnId));
-               envelope.SendPayload(txnOutcome, settled);
+               envelope.Transmit(txnOutcome, settled);
             }
             else
             {
-               envelope.SendPayload(new TransactionalState(currentTxn.TxnId, (IOutcome)state), settled);
+               envelope.Transmit(new TransactionalState(currentTxn.TxnId, (IOutcome)state), settled);
             }
          }
          else
          {
-            envelope.SendPayload(state, settled);
+            envelope.Transmit(state, settled);
          }
 
          return this;

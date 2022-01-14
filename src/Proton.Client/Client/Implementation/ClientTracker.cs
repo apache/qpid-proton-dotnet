@@ -187,6 +187,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          _ = remoteSettlementFuture.TrySetException(cause);
       }
 
+      internal void CompleteSettlementTask()
+      {
+         _ = remoteSettlementFuture.TrySetResult(this);
+      }
+
       #endregion
 
       #region Private tracker APIs

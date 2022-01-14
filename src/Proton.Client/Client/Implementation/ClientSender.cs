@@ -22,6 +22,9 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Types.Transport;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -35,6 +38,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private ClientException failureCause;
 
+      private readonly IDeque<ClientOutgoingEnvelope> blocked = new ArrayDeque<ClientOutgoingEnvelope>();
       private readonly SenderOptions options;
       private readonly ClientSession session;
       private readonly string senderId;
@@ -172,12 +176,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         return DoSendMessage(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, true);
       }
 
       public ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         return DoSendMessage(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, true);
       }
 
       #region Internal Sender API
@@ -192,7 +198,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal bool IsSendingSettled => sendsSettled;
 
+      internal Engine.ISender ProtonSender => protonSender;
+
       internal SenderOptions Options => options;
+
+      internal ITracker CreateTracker(IOutgoingDelivery delivery)
+      {
+         return new ClientTracker(this, delivery);
+      }
+
+      internal ITracker CreateNoOpTracker()
+      {
+         return new ClientNoOpTracker(this);
+      }
 
       internal ClientSender Open()
       {
@@ -238,6 +256,77 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Private Sender Implementation
 
+      private ITracker DoSendMessage<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
+      {
+         TaskCompletionSource<ITracker> operation = new TaskCompletionSource<ITracker>();
+
+         IProtonBuffer buffer = message.Encode(deliveryAnnotations);
+
+         session.Execute(() =>
+         {
+            if (NotClosedOrFailed(operation))
+            {
+               try
+               {
+                  ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, message.MessageFormat, buffer, operation);
+
+                  if (protonSender.IsSendable && protonSender.Current == null)
+                  {
+                     session.TransactionContext.Send(envelope, null, protonSender.SenderSettleMode == SenderSettleMode.Settled);
+                  }
+                  else if (waitForCredit)
+                  {
+                     AddToTailOfBlockedQueue(envelope);
+                  }
+                  else
+                  {
+                     operation.TrySetResult(null);
+                  }
+               }
+               catch (Exception error)
+               {
+                  operation.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               }
+            }
+         });
+
+         return session.Request(this, operation).Task.GetAwaiter().GetResult();
+      }
+
+      internal void AddToTailOfBlockedQueue(ClientOutgoingEnvelope send)
+      {
+         // TODO Need a cancellation token to tell the scheduled timeout it was cancelled.
+         // if (options.SendTimeout > 0 && send.SendTimeout == null)
+         // {
+         //    send.SendTimeout(executor.schedule(()-> {
+         //       send.failed(send.createSendTimedOutException());
+         //    }, options.SendTimeout(), TimeUnit.MILLISECONDS));
+         // }
+         if (options.SendTimeout > 0)
+         {
+            session.Schedule(() =>
+            {
+               send.Failed(send.CreateSendTimedOutException());
+            },
+            TimeSpan.FromMilliseconds(options.SendTimeout));
+         }
+
+         blocked.EnqueueBack(send);
+      }
+
+      internal void AddToHeadOfBlockedQueue(ClientOutgoingEnvelope send)
+      {
+         // TODO
+         // if (options.SendTimeout > 0 && send.SendTimeout == null)
+         // {
+         //    send.sendTimeout(executor.schedule(()-> {
+         //       send.failed(send.createSendTimedOutException());
+         //    }, options.sendTimeout(), TimeUnit.MILLISECONDS));
+         // }
+
+         blocked.EnqueueFront(send);
+      }
+
       private Task<ISender> DoCloseOrDetach(bool close, IErrorCondition error)
       {
          if (closed.CompareAndSet(false, true))
@@ -273,16 +362,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return closeFuture.Task;
       }
 
-      private ITracker CreateTracker(IOutgoingDelivery delivery)
-      {
-         return new ClientTracker(this, delivery);
-      }
-
-      private ITracker CreateNoOpTracker()
-      {
-         return new ClientNoOpTracker(this);
-      }
-
       private void CheckClosedOrFailed()
       {
          if (IsClosed)
@@ -292,6 +371,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
          else if (failureCause != null)
          {
             throw failureCause;
+         }
+      }
+
+      private bool NotClosedOrFailed<T>(TaskCompletionSource<T> request)
+      {
+         if (IsClosed)
+         {
+            request.TrySetException(new ClientIllegalStateException("The Sender was explicitly closed", failureCause));
+            return false;
+         }
+         else if (failureCause != null)
+         {
+            request.TrySetException(failureCause);
+            return false;
+         }
+         else
+         {
+            return true;
          }
       }
 
