@@ -116,7 +116,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
             try
             {
-               channel?.Shutdown(SocketShutdown.Both);
+               // Only stop reads as we might have queued writes we want to allow to fire.
+               channel?.Shutdown(SocketShutdown.Receive);
             }
             catch (Exception)
             {
@@ -124,7 +125,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
             try
             {
-               channel?.Close();
+               // Close with a bit of time to allow queued writes to complete.
+               channel?.Close(50);
             }
             catch (Exception)
             {
