@@ -183,7 +183,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
          CheckClosedOrFailed();
-         return DoSendMessage(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, true);
+         return DoSendMessage(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, false);
       }
 
       #region Internal Sender API
@@ -578,7 +578,41 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleCreditStateUpdated(Engine.ISender sender)
       {
-         throw new NotImplementedException();
+         if (!blocked.IsEmpty)
+         {
+            while (sender.IsSendable && !blocked.IsEmpty)
+            {
+               ClientOutgoingEnvelope held = blocked.Peek();
+               if (held.Delivery == protonSender.Current)
+               {
+                  LOG.Trace("Dispatching previously held send");
+                  try
+                  {
+                     // We don't currently allow a sender to define any outcome so we pass null for
+                     // now, however a transaction context will apply its TransactionalState outcome
+                     // and would wrap anything we passed in the future.
+                     session.TransactionContext.Send(held, null, IsSendingSettled);
+                  }
+                  catch (Exception error)
+                  {
+                     held.Failed(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+                  }
+                  finally
+                  {
+                     blocked.Dequeue();
+                  }
+               }
+               else
+               {
+                  break;
+               }
+            }
+         }
+
+         if (sender.IsDraining && sender.Current == null && blocked.IsEmpty)
+         {
+            sender.Drained();
+         }
       }
 
       private void HandleEngineShutdown(Engine.IEngine engine)

@@ -24,6 +24,7 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Types.Transport;
 using System.Collections.Generic;
 using System.Linq;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -574,7 +575,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Sends not yet working from client sender")]
       [Test]
       public void TestSendCompletesWhenCreditEventuallyOffered()
       {
@@ -628,6 +628,215 @@ namespace Apache.Qpid.Proton.Client.Implementation
             sender.CloseAsync();
 
             connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Test peer needs a transfer composite payload matcher")]
+      [Test]
+      public void TestSendWhenCreditIsAvailable()
+      {
+         DoTestSendWhenCreditIsAvailable(false, false);
+      }
+
+      [Ignore("Test peer needs a transfer composite payload matcher")]
+      [Test]
+      public void TestTrySendWhenCreditIsAvailable()
+      {
+         DoTestSendWhenCreditIsAvailable(true, false);
+      }
+
+      [Ignore("Test peer needs a transfer composite payload matcher")]
+      [Test]
+      public void TestSendWhenCreditIsAvailableWithDeliveryAnnotations()
+      {
+         DoTestSendWhenCreditIsAvailable(false, true);
+      }
+
+      [Ignore("Test peer needs a transfer composite payload matcher")]
+      [Test]
+      public void TestTrySendWhenCreditIsAvailableWithDeliveryAnnotations()
+      {
+         DoTestSendWhenCreditIsAvailable(true, true);
+      }
+
+      private void DoTestSendWhenCreditIsAvailable(bool trySend, bool addDeliveryAnnotations)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithDeliveryCount(0)
+                             .WithLinkCredit(10)
+                             .WithIncomingWindow(1024)
+                             .WithOutgoingWindow(10)
+                             .WithNextIncomingId(0)
+                             .WithNextOutgoingId(1).Queue();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            // This ensures that the flow to sender is processed before we try-send
+            IReceiver receiver = session.OpenReceiver("test-queue", new ReceiverOptions()
+            {
+               CreditWindow = 0
+            }
+            ).OpenTask.Result;
+
+            IDictionary<string, object> deliveryAnnotations = new Dictionary<string, object>();
+            deliveryAnnotations.Add("da1", 1);
+            deliveryAnnotations.Add("da2", 2);
+            deliveryAnnotations.Add("da3", 3);
+            DeliveryAnnotationsMatcher daMatcher = new DeliveryAnnotationsMatcher(true);
+            daMatcher.WithEntry("da1", Test.Driver.Matchers.Is.EqualTo(1));
+            daMatcher.WithEntry("da2", Test.Driver.Matchers.Is.EqualTo(2));
+            daMatcher.WithEntry("da3", Test.Driver.Matchers.Is.EqualTo(3));
+            AmqpValueMatcher bodyMatcher = new AmqpValueMatcher("Hello World");
+            //TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
+            //if (addDeliveryAnnotations)
+            //{
+            //   payloadMatcher.DeliveryAnnotationsMatcher = daMatcher);
+            //}
+            //payloadMatcher.MessageContentMatcher = bodyMatcher);
+
+            peer.WaitForScriptToComplete();
+            //peer.ExpectTransfer().WithPayload(payloadMatcher);
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+
+            ITracker tracker;
+            if (trySend)
+            {
+               if (addDeliveryAnnotations)
+               {
+                  tracker = sender.TrySend(message, deliveryAnnotations);
+               }
+               else
+               {
+                  tracker = sender.TrySend(message);
+               }
+            }
+            else
+            {
+               if (addDeliveryAnnotations)
+               {
+                  tracker = sender.Send(message, deliveryAnnotations);
+               }
+               else
+               {
+                  tracker = sender.Send(message);
+               }
+            }
+
+            Assert.IsNotNull(tracker);
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestTrySendWhenNoCreditAvailable()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               SendTimeout = 1
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            Assert.IsNull(sender.TrySend(message));
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateSenderWithQoSOfAtMostOnce()
+      {
+         DoTestCreateSenderWithConfiguredQoS(DeliveryMode.AtMostOnce);
+      }
+
+      [Test]
+      public void TestCreateSenderWithQoSOfAtLeastOnce()
+      {
+         DoTestCreateSenderWithConfiguredQoS(DeliveryMode.AtLeastOnce);
+      }
+
+      private void DoTestCreateSenderWithConfiguredQoS(DeliveryMode qos)
+      {
+         byte sndMode = (byte)(qos == DeliveryMode.AtMostOnce ? SenderSettleMode.Settled : SenderSettleMode.Unsettled);
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender()
+                               .WithSndSettleMode(sndMode)
+                               .WithRcvSettleMode((byte)ReceiverSettleMode.First)
+                               .Respond()
+                               .WithSndSettleMode(sndMode)
+                               .WithRcvSettleMode((byte?)ReceiverSettleMode.Second);
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            SenderOptions options = new SenderOptions()
+            {
+               DeliveryMode = qos
+            };
+            ISender sender = session.OpenSender("test-queue", options).OpenTask.Result;
+
+            Assert.AreEqual("test-queue", sender.Address);
+
+            sender.CloseAsync().Wait();
+            connection.CloseAsync().Wait();
 
             peer.WaitForScriptToComplete();
          }

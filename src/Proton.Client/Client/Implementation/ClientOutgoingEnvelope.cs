@@ -76,6 +76,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public IProtonBuffer Payload => payload;
 
       /// <summary>
+      /// Returns the proton outgoing delivery object that is contained in this envelope
+      /// which can be null if the payload to be sent has not yet had a transmit attempt
+      /// due to lack of any credit on the link or in the session window.
+      /// </summary>
+      public IOutgoingDelivery Delivery => delivery;
+
+      /// <summary>
       /// Performs a send of some or all of the message payload on this outgoing delivery
       /// or possibly an abort if the delivery has already begun streaming and has since
       /// been tagged as aborted.
