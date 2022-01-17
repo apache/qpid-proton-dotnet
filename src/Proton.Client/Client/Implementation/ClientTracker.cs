@@ -48,7 +48,21 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IDeliveryState RemoteState => remoteDeliveryState;
 
-      public Task<ITracker> SettlementTask => throw new NotImplementedException();
+      public Task<ITracker> SettlementTask
+      {
+         get
+         {
+            if (Settled)
+            {
+               // If we've settled on our side the remote will never send us any
+               // updates on its own settlement state as we've already told it
+               // that we have forgotten about this delivery.
+               remoteSettlementFuture.TrySetResult(this);
+            }
+
+            return remoteSettlementFuture.Task;
+         }
+      }
 
       public ITracker Disposition(IDeliveryState state, bool settle)
       {

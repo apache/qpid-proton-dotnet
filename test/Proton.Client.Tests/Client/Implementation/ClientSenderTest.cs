@@ -841,5 +841,240 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestSendAutoSettlesOnceRemoteSettles()
+      {
+         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(false);
+      }
+
+      [Test]
+      public void TestTrySendAutoSettlesOnceRemoteSettles()
+      {
+         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(true);
+      }
+
+      private void DoTestSentMessageGetsAutoSettledAfterRemoteSettles(bool trySend)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithDeliveryCount(0)
+                             .WithLinkCredit(10)
+                             .WithIncomingWindow(1024)
+                             .WithOutgoingWindow(10)
+                             .WithNextIncomingId(0)
+                             .WithNextOutgoingId(1).Queue();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            // This ensures that the flow to sender is processed before we try-send
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 0
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .Respond()
+                                 .WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+
+            ITracker tracker;
+            if (trySend)
+            {
+               tracker = sender.TrySend(message);
+            }
+            else
+            {
+               tracker = sender.Send(message);
+            }
+
+            Assert.IsNotNull(tracker);
+            Assert.IsNotNull(tracker.SettlementTask.Result);
+            Assert.AreEqual(tracker.RemoteState.Type, DeliveryStateType.Accepted);
+
+            sender.CloseAsync();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestSendDoesNotAutoSettlesOnceRemoteSettlesIfAutoSettleOff()
+      {
+         DoTestSentMessageNotAutoSettledAfterRemoteSettles(false);
+      }
+
+      [Test]
+      public void TestTrySendDoesNotAutoSettlesOnceRemoteSettlesIfAutoSettleOff()
+      {
+         DoTestSentMessageNotAutoSettledAfterRemoteSettles(true);
+      }
+
+      private void DoTestSentMessageNotAutoSettledAfterRemoteSettles(bool trySend)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithDeliveryCount(0)
+                             .WithLinkCredit(10)
+                             .WithIncomingWindow(1024)
+                             .WithOutgoingWindow(10)
+                             .WithNextIncomingId(0)
+                             .WithNextOutgoingId(1).Queue();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession();
+            SenderOptions options = new SenderOptions()
+            {
+               AutoSettle = false
+            };
+            ISender sender = session.OpenSender("test-queue", options).OpenTask.Result;
+
+            // This ensures that the flow to sender is processed before we try-send
+            ReceiverOptions rcvOptions = new ReceiverOptions()
+            {
+               CreditWindow = 0
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", rcvOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .Respond()
+                                 .WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+
+            ITracker tracker;
+            if (trySend)
+            {
+               tracker = sender.TrySend(message);
+            }
+            else
+            {
+               tracker = sender.Send(message);
+            }
+
+            Assert.IsNotNull(tracker);
+            Assert.IsTrue(tracker.SettlementTask.Wait(TimeSpan.FromSeconds(5)));
+            Assert.AreEqual(tracker.RemoteState.Type, DeliveryStateType.Accepted);
+            Assert.IsNull(tracker.State);
+            Assert.IsFalse(tracker.Settled);
+
+            sender.CloseAsync();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestSenderSendingSettledCompletesTrackerAcknowledgeFuture()
+      {
+         DoTestSenderSendingSettledCompletesTrackerAcknowledgeFuture(false);
+      }
+
+      [Test]
+      public void TestSenderTrySendingSettledCompletesTrackerAcknowledgeFuture()
+      {
+         DoTestSenderSendingSettledCompletesTrackerAcknowledgeFuture(true);
+      }
+
+      private void DoTestSenderSendingSettledCompletesTrackerAcknowledgeFuture(bool trySend)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender()
+                               .WithSenderSettleModeSettled()
+                               .WithReceiverSettlesFirst()
+                               .Respond()
+                               .WithSenderSettleModeSettled()
+                               .WithReceiverSettlesFirst();
+            peer.RemoteFlow().WithLinkCredit(10).Queue();
+            peer.ExpectAttach().Respond();  // Open a receiver to ensure sender link has processed
+            peer.ExpectFlow();              // the inbound flow frame we sent previously before send.
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession();
+            SenderOptions options = new SenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtMostOnce
+            };
+            ISender sender = session.OpenSender("test-queue", options).OpenTask.Result;
+
+            Assert.AreEqual("test-queue", sender.Address);
+            session.OpenReceiver("dummy").OpenTask.Wait();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithNonNullPayload();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            ITracker tracker;
+            if (trySend)
+            {
+               tracker = sender.TrySend(message);
+            }
+            else
+            {
+               tracker = sender.Send(message);
+            }
+
+            Assert.IsNotNull(tracker);
+            Assert.IsTrue(tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(tracker.SettlementTask.Result.Settled);
+
+            sender.CloseAsync().Wait();
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(5));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
    }
 }

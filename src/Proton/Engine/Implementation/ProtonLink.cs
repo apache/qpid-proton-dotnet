@@ -698,7 +698,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       IProtonLink IProtonLink.RemoteDisposition(in Disposition disposition, in ProtonOutgoingDelivery delivery)
       {
-         LOG.Trace("Link:{0} Received remote disposition:{1} for received delivery:{2}", disposition, delivery);
+         LOG.Trace("Link:{0} Received remote disposition:{1} for received delivery:{2}", this, disposition, delivery);
          HandleRemoteDisposition(disposition, delivery);
          return this;
       }
