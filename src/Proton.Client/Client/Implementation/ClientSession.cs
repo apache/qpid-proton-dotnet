@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task.Result;
+         return connection.Request(this, createReceiver).Task.GetAwaiter().GetResult();
       }
 
       public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
@@ -161,7 +161,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task.Result;
+         return connection.Request(this, createReceiver).Task.GetAwaiter().GetResult();
       }
 
       public virtual IReceiver OpenReceiver(string address, ReceiverOptions options = null)
@@ -184,7 +184,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task.Result;
+         return connection.Request(this, createReceiver).Task.GetAwaiter().GetResult();
       }
 
       public virtual ISender OpenAnonymousSender(SenderOptions options = null)
@@ -205,7 +205,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createSender).Task.Result;
+         return connection.Request(this, createSender).Task.GetAwaiter().GetResult();
       }
 
       public virtual ISender OpenSender(string address, SenderOptions options = null)
@@ -228,7 +228,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createSender).Task.Result;
+         return connection.Request(this, createSender).Task.GetAwaiter().GetResult();
       }
 
       public ISession BeginTransaction()
@@ -253,7 +253,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, beginFuture).Task.Result;
+         return connection.Request(this, beginFuture).Task.GetAwaiter().GetResult();
       }
 
       public ISession CommitTransaction()
@@ -274,7 +274,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, commitFuture).Task.Result;
+         return connection.Request(this, commitFuture).Task.GetAwaiter().GetResult();
       }
 
       public ISession RollbackTransaction()

@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          get
          {
             WaitForOpenToComplete();
-            return ClientConversionSupport.ToStringArray(protonSender.OfferedCapabilities);
+            return ClientConversionSupport.ToStringArray(protonSender.RemoteOfferedCapabilities);
          }
       }
 
@@ -127,7 +127,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          get
          {
             WaitForOpenToComplete();
-            return ClientConversionSupport.ToStringArray(protonSender.DesiredCapabilities);
+            return ClientConversionSupport.ToStringArray(protonSender.RemoteDesiredCapabilities);
          }
       }
 
