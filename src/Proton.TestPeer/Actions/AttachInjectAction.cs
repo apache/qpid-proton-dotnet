@@ -462,7 +462,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public SourceBuilder WithDefaultOutcome(IOutcome outcome)
          {
-            source.DefaultOutcome = (DescribedType)outcome;
+            source.DefaultOutcome = (IDescribedType)outcome;
             return this;
          }
 

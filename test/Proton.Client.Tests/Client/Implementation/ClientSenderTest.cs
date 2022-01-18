@@ -2823,7 +2823,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test peer issue with scripting")]
       [Test]
       public void TestInspectRemoteSourceMatchesValuesSent()
       {
