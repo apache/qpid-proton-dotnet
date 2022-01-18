@@ -1177,7 +1177,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Connection doesn't create dynamic receiver yet")]
+      [Ignore("Test peer can't match dynamic node properties yet")]
       [Test]
       public void TestCreateDynamicReceiverWithNodeProperties()
       {
@@ -1816,7 +1816,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Connection doesn't yet implement the full open durable receiver features")]
       [Test]
       public void TestOpenDurableReceiverFromConnection()
       {
