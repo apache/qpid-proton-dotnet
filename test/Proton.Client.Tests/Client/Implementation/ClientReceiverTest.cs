@@ -2824,7 +2824,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Issue in test peer matchers prevents correct matching")]
       [Test]
       public void TestCreateReceiverWithDefaultSourceAndTargetOptions()
       {
@@ -2852,7 +2851,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                             .WithDynamic(Test.Driver.Matchers.Matches.AnyOf(
                                                                Test.Driver.Matchers.Is.NullValue(),
                                                                Test.Driver.Matchers.Is.EqualTo(false)))
-                                            .WithDynamicNodeProperties(Test.Driver.Matchers.Is.NotNullValue())
+                                            .WithDynamicNodeProperties(Test.Driver.Matchers.Is.NullValue())
                                .And().Respond();
             peer.ExpectFlow().WithLinkCredit(10);
             peer.ExpectDetach().Respond();

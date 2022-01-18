@@ -182,10 +182,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             source.DefaultOutcome = (IOutcome)sourceOptions.DefaultOutcome.AsProtonType();
          }
-         else
-         {
-            source.DefaultOutcome = (IOutcome)SourceOptions.DefaultReceiverOutcome.AsProtonType();
-         }
 
          source.Outcomes = ClientConversionSupport.ToSymbolArray(sourceOptions.Outcomes);
          source.Capabilities = ClientConversionSupport.ToSymbolArray(sourceOptions.Capabilities);

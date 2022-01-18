@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client
@@ -27,6 +28,10 @@ namespace Apache.Qpid.Proton.Client
    public class SourceOptions : TerminusOptions, ICloneable
    {
       public static readonly IDeliveryState DefaultReceiverOutcome = new ClientModified(true, false);
+
+      private static readonly DeliveryStateType[] DefaultSupportedOutcomes = new DeliveryStateType[] {
+         DeliveryStateType.Accepted, DeliveryStateType.Rejected, DeliveryStateType.Released, DeliveryStateType.Modified
+      };
 
       /// <summary>
       /// Creates a default SourceOptions instance.
@@ -62,7 +67,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The supported outcomes that are assigned to the source configuration.
       /// </summary>
-      public DeliveryStateType[] Outcomes { get; set; }
+      public IEnumerable<DeliveryStateType> Outcomes { get; set; } = DefaultSupportedOutcomes;
 
       /// <summary>
       /// Clone this options instance, changes to the cloned options are not reflected
@@ -84,9 +89,7 @@ namespace Apache.Qpid.Proton.Client
 
          if (Outcomes != null)
          {
-            DeliveryStateType[] outcomes = new DeliveryStateType[Outcomes.Length];
-            Array.Copy(Outcomes, outcomes, Outcomes.Length);
-            other.Outcomes = outcomes;
+            other.Outcomes = new List<DeliveryStateType>(Outcomes);
          }
 
          return this;

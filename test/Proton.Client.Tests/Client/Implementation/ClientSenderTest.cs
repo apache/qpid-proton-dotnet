@@ -2522,7 +2522,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test peer script matching issues")]
       [Test]
       public void TestCreateSenderWithDefaultSourceAndTargetOptions()
       {

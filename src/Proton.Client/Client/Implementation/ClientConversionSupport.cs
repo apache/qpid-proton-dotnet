@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Apache.Qpid.Proton.Types;
+using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -43,16 +45,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      public static Symbol[] ToSymbolArray(DeliveryStateType[] stateTypeArray)
+      public static Symbol[] ToSymbolArray(IEnumerable<DeliveryStateType> stateTypeArray)
       {
          Symbol[] result = null;
 
          if (stateTypeArray != null)
          {
-            result = new Symbol[stateTypeArray.Length];
-            for (int i = 0; i < stateTypeArray.Length; ++i)
+            result = new Symbol[stateTypeArray.Count()];
+            for (int i = 0; i < result.Length; ++i)
             {
-               result[i] = stateTypeArray[i].ToSymbolicType();
+               result[i] = stateTypeArray.ElementAt(i).AsProtonType();
             }
          }
 
@@ -163,6 +165,23 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
 
          return result;
+      }
+
+      public static Symbol AsProtonType(this DeliveryStateType mode)
+      {
+         switch (mode)
+         {
+            case DeliveryStateType.Accepted:
+               return Accepted.DescriptorSymbol;
+            case DeliveryStateType.Rejected:
+               return Rejected.DescriptorSymbol;
+            case DeliveryStateType.Modified:
+               return Modified.DescriptorSymbol;
+            case DeliveryStateType.Released:
+               return Released.DescriptorSymbol;
+         }
+
+         throw new ArgumentException("Cannot convert unknown delivery state type: " + mode);
       }
 
       public static Symbol AsProtonType(this DistributionMode mode)
