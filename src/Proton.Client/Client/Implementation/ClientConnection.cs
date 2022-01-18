@@ -386,7 +386,23 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public ITracker Send<T>(IMessage<T> message)
       {
          CheckClosedOrFailed();
-         throw new System.NotImplementedException();
+         Objects.RequireNonNull(message, "Cannot send a null message");
+         TaskCompletionSource<ISender> result = new TaskCompletionSource<ISender>();
+
+         Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               result.TrySetResult(LazyCreateConnectionSender());
+            }
+            catch (Exception error)
+            {
+               result.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return Request(this, result).Task.GetAwaiter().GetResult().Send(message);
       }
 
       public override string ToString()

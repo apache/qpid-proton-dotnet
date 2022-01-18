@@ -1668,7 +1668,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Sender doesn't yet implement the send operation")]
       [Test]
       public void TestSendHeldUntilConnectionOpenedAndSupportConfirmed()
       {
@@ -1709,14 +1708,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Connection doesn't yet implement the send operation")]
       [Test]
       public void TestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemote()
       {
          DoTestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemote(false);
       }
 
-      [Ignore("Connection doesn't yet implement the send operation")]
       [Test]
       public void TestConnectionLevelSendFailsWhenAnonymousRelayNotAdvertisedByRemoteAfterAlreadyOpened()
       {
