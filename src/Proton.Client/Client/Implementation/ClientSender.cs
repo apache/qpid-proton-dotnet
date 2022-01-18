@@ -459,12 +459,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
 
-         // TODO
-         // Cancel all blocked sends passing an appropriate error to the future
-         //   blocked.removeIf((held) -> {
-         //       held.failed(cause);
-         //       return true;
-         //   });
+         foreach (ClientOutgoingEnvelope envelope in blocked)
+         {
+            envelope.Failed(cause);
+         }
+
+         blocked.Clear();
       }
 
       #endregion

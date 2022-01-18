@@ -661,7 +661,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          if (IsReconnectAllowed(failureCause))
          {
             LOG.Info("Connection {0} interrupted to server: {1}", ConnectionId, transport.EndPoint);
-            // TODO SubmitDisconnectionEvent(options.interruptedHandler(), transport.getHost(), transport.getPort(), failureCause);
+            SubmitDisconnectionEvent(options.InterruptedHandler, transport.Host, transport.Port, failureCause);
 
             // Initial configuration validation happens here, if this step fails then the
             // user most likely configured something incorrect or that violates some constraint

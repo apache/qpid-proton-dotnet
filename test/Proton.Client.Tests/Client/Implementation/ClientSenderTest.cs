@@ -1762,7 +1762,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Blocked senders not handled well yet")]
       [Test]
       public void TestSendBlockedForCreditFailsWhenLinkRemotelyClosed()
       {
@@ -1791,12 +1790,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
+               logger.LogInformation("About to send and block until the remote error occurs");
                sender.Send(message);
                Assert.Fail("Send should have timed out.");
             }
             catch (ClientResourceRemotelyClosedException)
             {
                // Expected send to throw indicating that the remote closed the link
+               logger.LogInformation("Sender threw excepted exception when remote detached");
             }
 
             connection.CloseAsync().Wait();
@@ -1805,7 +1806,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Blocked senders not handled well yet")]
       [Test]
       public void TestSendBlockedForCreditFailsWhenSessionRemotelyClosed()
       {
@@ -1848,7 +1848,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Blocked senders not handled well yet")]
       [Test]
       public void TestSendBlockedForCreditFailsWhenConnectionRemotelyClosed()
       {
@@ -1890,7 +1889,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Blocked senders not handled well yet")]
       [Test]
       public void TestSendBlockedForCreditFailsWhenConnectionDrops()
       {
@@ -2099,7 +2097,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Blocked senders not handled well yet")]
       [Test]
       public void TestBlockedSendThrowsConnectionRemotelyClosedError()
       {
