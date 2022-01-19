@@ -89,6 +89,7 @@ namespace Apache.Qpid.Proton.Client
             other.Properties = new Dictionary<string, object>(Properties);
          }
 
+         ReconnectOptions.CopyInto(other.ReconnectOptions);
          TransportOptions.CopyInto(other.TransportOptions);
          SslOptions.CopyInto(other.SslOptions);
          SaslOptions.CopyInto(other.SaslOptions);

@@ -17,7 +17,9 @@
 
 using System;
 using System.Threading;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
+using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
@@ -26,7 +28,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
    [TestFixture, Timeout(20000)]
    public class ClientReconnectTest : ClientBaseTestFixture
    {
-      [Ignore("Client failover not yet fully operational")]
       [Test]
       public void TestConnectionNotifiesReconnectionLifecycleEvents()
       {
@@ -104,6 +105,60 @@ namespace Apache.Qpid.Proton.Client.Implementation
             connection.Close();
 
             secondPeer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectThrowsSecurityViolationOnFailureSaslAuth()
+      {
+         DoTestConnectThrowsSecurityViolationOnFailureSaslExchange((byte)SaslCode.Auth);
+      }
+
+      [Test]
+      public void TestConnectThrowsSecurityViolationOnFailureSaslSys()
+      {
+         DoTestConnectThrowsSecurityViolationOnFailureSaslExchange((byte)SaslCode.Sys);
+      }
+
+      [Test]
+      public void TestConnectThrowsSecurityViolationOnFailureSaslSysPerm()
+      {
+         DoTestConnectThrowsSecurityViolationOnFailureSaslExchange((byte)SaslCode.SysPerm);
+      }
+
+      private void DoTestConnectThrowsSecurityViolationOnFailureSaslExchange(byte saslCode)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectFailingSASLPlainConnect(saslCode);
+            peer.DropAfterLastHandler(10);
+            peer.Start();
+
+            ConnectionOptions options = new ConnectionOptions();
+            options.ReconnectOptions.ReconnectEnabled = true;
+            options.User = "test";
+            options.Password = "pass";
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            try
+            {
+               connection.OpenTask.Wait();
+            }
+            catch (Exception exe)
+            {
+               Assert.IsTrue(exe.InnerException is ClientConnectionSecuritySaslException);
+            }
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
          }
       }
    }
