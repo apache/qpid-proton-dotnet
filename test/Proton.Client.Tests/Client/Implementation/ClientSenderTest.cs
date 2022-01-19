@@ -351,7 +351,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
-            ISession session = connection.OpenSession();
+            ISession session = connection.OpenSession().OpenTask.Result;
             SenderOptions options = new SenderOptions();
             options.OpenTimeout = 10;
             ISender sender = session.OpenSender("test-queue", options);
