@@ -996,7 +996,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
                // TODO: Executor scheduling would handle connection close, this will
                //       try and run this even after a close.
                Task.Delay((int)delay).ContinueWith(
-                  (t) => ioContext.EventLoop.Execute(() => AttemptConnection(location)));
+                  (t) => ioContext.EventLoop.Execute(() =>
+                  {
+                     if (!IsClosed)
+                     {
+                        AttemptConnection(location);
+                     }
+                  })
+               );
             }
          }
          else if (reconnectAttempts == 0)
@@ -1011,7 +1018,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // TODO: Executor scheduling would handle connection close, this will
             //       try and run this even after a close.
             Task.Delay((int)delay).ContinueWith(
-               (t) => ioContext.EventLoop.Execute(() => AttemptConnection(location)));
+               (t) => ioContext.EventLoop.Execute(() =>
+               {
+                  if (!IsClosed)
+                  {
+                     AttemptConnection(location);
+                  }
+               })
+            );
          }
       }
 
