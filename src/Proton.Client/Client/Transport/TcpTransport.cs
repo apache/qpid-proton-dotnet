@@ -223,6 +223,11 @@ namespace Apache.Qpid.Proton.Client.Transport
          return this;
       }
 
+      public override string ToString()
+      {
+         return "TcpTransport:[remote = " + host + ":" + port + "]";
+      }
+
       #region Async callbacks for socket operations
 
       private void CompleteConnection()
