@@ -26,8 +26,6 @@ using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine.Sasl.Client;
 using Apache.Qpid.Proton.Client.Transport;
 using Apache.Qpid.Proton.Logging;
-using Apache.Qpid.Proton.Engine.Exceptions;
-using System.IO;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
