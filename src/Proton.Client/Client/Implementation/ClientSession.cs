@@ -534,7 +534,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleRemoteOpen(Engine.ISession session)
       {
-         openFuture.SetResult(this);
+         openFuture.TrySetResult(this);
          LOG.Trace("Session:{0} opened successfully.", SessionId);
 
          foreach (Engine.ISender sender in protonSession.Senders)
