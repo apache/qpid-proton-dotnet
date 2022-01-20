@@ -126,6 +126,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public override IReadOnlyDictionary<Symbol, object> RemoteProperties => sender.RemoteProperties;
 
+      public override ErrorCondition RemoteErrorCondition => sender.RemoteErrorCondition;
+
       public Source Source
       {
          get => sender.Source;
