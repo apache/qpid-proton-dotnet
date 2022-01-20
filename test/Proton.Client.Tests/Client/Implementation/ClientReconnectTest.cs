@@ -261,7 +261,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Error reconnecting for unknown reasons")]
       [Test]
       public void TestConnectHandlesSaslTempFailureAndReconnects()
       {

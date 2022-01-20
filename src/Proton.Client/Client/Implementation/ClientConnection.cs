@@ -910,63 +910,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
          try
          {
             reconnectAttempts++;
-            transport = ioContext.NewTransport();
+            transport = new ClientTransportProxy(engine, ioContext.NewTransport()).Transport;
             LOG.Trace("Connection {0} Attempting connection to remote {1}", ConnectionId, location.Host, location.Port);
-
-            transport.TransportConnectedHandler(HandleTransportConnected);
-            transport.TransportConnectFailedHandler(HandleTransportConnectFailed);
-            transport.TransportDisconnectedHandler(HandleTransportDisconnected);
-            transport.TransportReadHandler(HandleTransportRead);
-
             transport.Connect(location.Host, location.Port);
          }
          catch (Exception error)
          {
             engine.EngineFailed(ClientExceptionSupport.CreateOrPassthroughFatal(error));
-         }
-      }
-
-      private void HandleTransportConnected(ITransport transport)
-      {
-         // Trigger the AMQP header and Open performative exchange on connect
-         engine.Start().Open();
-      }
-
-      private void HandleTransportConnectFailed(ITransport transport, Exception error)
-      {
-         if (!engine.IsShutdown)
-         {
-            LOG.Debug("Transport reports connect attempt failed: {0}", transport);
-            engine.EngineFailed(
-               new IOException(string.Format("Connection to remote {0} failed.", transport.EndPoint)));
-         }
-      }
-
-      private void HandleTransportDisconnected(ITransport transport)
-      {
-         if (!engine.IsShutdown)
-         {
-            LOG.Debug("Transport reports connection dropped: {0}", transport);
-            engine.EngineFailed(
-               new IOException(string.Format("Connection to remote {0} dropped.", transport.EndPoint)));
-         }
-      }
-
-      private void HandleTransportRead(ITransport transport, IProtonBuffer buffer)
-      {
-         try
-         {
-            do
-            {
-               engine.Ingest(buffer);
-            }
-            while (buffer.IsReadable && engine.IsWritable);
-            // TODO - How do we handle case of not all data read ?
-         }
-         catch (EngineStateException e)
-         {
-            LOG.Warn("Caught problem during incoming data processing: {0}", e.Message, e);
-            engine.EngineFailed(ClientExceptionSupport.CreateOrPassthroughFatal(e));
          }
       }
 
