@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Concurrent;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -67,9 +68,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             lock (connections)
             {
-               foreach (KeyValuePair<string, ClientConnection> connection in connections)
+               if (connections.Count == 0)
                {
-                  _ = connection.Value.CloseAsync();
+                  closeTask.Value.TrySetResult(this);
+               }
+               else
+               {
+                  foreach (KeyValuePair<string, ClientConnection> connection in connections)
+                  {
+                     _ = connection.Value.CloseAsync();
+                  }
                }
             }
          }
@@ -110,7 +118,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (closed)
          {
-            throw new InvalidOperationException("Cannot create new connections, the Client has been closed.");
+            throw new ClientIllegalStateException("Cannot create new connections, the Client has been closed.");
          }
       }
 

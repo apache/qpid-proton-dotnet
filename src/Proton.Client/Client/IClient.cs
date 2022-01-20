@@ -44,6 +44,12 @@ namespace Apache.Qpid.Proton.Client
       string ContainerId { get; }
 
       /// <summary>
+      /// Blocking close method that waits for all open connections to be closed before
+      /// returning to the caller.
+      /// </summary>
+      void Close();
+
+      /// <summary>
       /// Initiates an asynchronous close of all the connections created from this client
       /// container.  The returned Task allows the caller to wait for the close to complete
       /// or check in periodically to see if the operation has finished.

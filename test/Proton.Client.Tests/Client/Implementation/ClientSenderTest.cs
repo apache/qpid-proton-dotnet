@@ -2498,7 +2498,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             });
 
             peer.WaitForScriptToComplete();
-            peer.RemoteFlow().WithIncomingWindow(1).WithDeliveryCount(0).WithNextIncomingId(1).WithLinkCredit(1).Now();
             peer.ExpectTransfer().WithNonNullPayload().WithMore(true);
             peer.RemoteFlow().WithIncomingWindow(1).WithDeliveryCount(0).WithNextIncomingId(2).WithLinkCredit(1).Queue();
             peer.ExpectTransfer().WithNonNullPayload().WithMore(false).Respond().WithSettled(true).WithState().Accepted();
@@ -2507,7 +2506,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.RemoteFlow().WithIncomingWindow(1).WithDeliveryCount(1).WithNextIncomingId(4).WithLinkCredit(1).Queue();
             peer.ExpectTransfer().WithNonNullPayload().WithMore(false).Respond().WithSettled(true).WithState().Accepted();
 
-            Assert.IsTrue(send2Completed.Wait(TimeSpan.FromSeconds(10)));
+            // This is the initial flow that trigger the above expect and flow chain.
+            peer.RemoteFlow().WithIncomingWindow(1).WithDeliveryCount(0).WithNextIncomingId(1).WithLinkCredit(1).Now();
+
+            Assert.IsTrue(send2Completed.Wait(TimeSpan.FromSeconds(20)));
 
             peer.WaitForScriptToComplete();
             peer.ExpectDetach().Respond();
