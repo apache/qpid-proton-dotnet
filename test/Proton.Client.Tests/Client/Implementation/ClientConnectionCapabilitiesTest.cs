@@ -126,7 +126,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          connection.Setup(con => con.DesiredCapabilities).Returns(desired);
          connection.Setup(con => con.RemoteOfferedCapabilities).Returns(offered);
 
-
          capabilities.DetermineCapabilities(connection.Object);
 
          if (expectation)
