@@ -17,6 +17,8 @@
 
 namespace Apache.Qpid.Proton.Client
 {
+   using Apache.Qpid.Proton.Client.Implementation;
+
    public interface IDeliveryState
    {
       /// <summary>
@@ -28,7 +30,31 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Quick access to determine if the state value indicates the delivery was accepted.
       /// </summary>
-      bool Accepted { get; }
+      bool IsAccepted { get; }
+
+      /// <summary>
+      /// Returns an instance of a delivery state that accepts a delivery
+      /// </summary>
+      /// <returns>An accepted delivery state type</returns>
+      static IDeliveryState Accepted() => ClientAccepted.Instance;
+
+      /// <summary>
+      /// Returns an instance of a delivery state that releases a delivery
+      /// </summary>
+      /// <returns>An released delivery state type</returns>
+      static IDeliveryState Released() => ClientReleased.Instance;
+
+      /// <summary>
+      /// Returns an instance of a delivery state that rejects a delivery
+      /// </summary>
+      /// <returns>An rejected delivery state type</returns>
+      static IDeliveryState Rejected(string condition, string description = null) => new ClientRejected(condition, description);
+
+      /// <summary>
+      /// Returns an instance of a delivery state that modifies a delivery
+      /// </summary>
+      /// <returns>An modified delivery state type</returns>
+      static IDeliveryState Modified(bool deliveryFailed, bool undeliverableHere = false) => new ClientModified(deliveryFailed, undeliverableHere);
 
    }
 }

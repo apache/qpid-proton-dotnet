@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public abstract class ClientDeliveryState : IDeliveryState
    {
-      public bool Accepted => Type == DeliveryStateType.Accepted;
+      public bool IsAccepted => Type == DeliveryStateType.Accepted;
 
       public abstract DeliveryStateType Type { get; }
 

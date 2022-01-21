@@ -95,7 +95,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                remoteSettlementFuture.Task.Wait();
 
-               if (RemoteState != null && RemoteState.Accepted)
+               if (RemoteState != null && RemoteState.IsAccepted)
                {
                   return this;
                }
@@ -123,7 +123,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                if (remoteSettlementFuture.Task.Wait(timeout))
                {
-                  if (RemoteState != null && RemoteState.Accepted)
+                  if (RemoteState != null && RemoteState.IsAccepted)
                   {
                      return this;
                   }

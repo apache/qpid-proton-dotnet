@@ -2678,7 +2678,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             tracker.AwaitAccepted();
 
             Assert.IsTrue(tracker.RemoteSettled);
-            Assert.IsTrue(tracker.RemoteState.Accepted);
+            Assert.IsTrue(tracker.RemoteState.IsAccepted);
 
             peer.WaitForScriptToComplete();
             peer.ExpectDetach().Respond();
@@ -2725,7 +2725,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
 
             Assert.IsTrue(tracker.RemoteSettled);
-            Assert.IsFalse(tracker.RemoteState.Accepted);
+            Assert.IsFalse(tracker.RemoteState.IsAccepted);
 
             peer.WaitForScriptToComplete();
             peer.ExpectDetach().Respond();

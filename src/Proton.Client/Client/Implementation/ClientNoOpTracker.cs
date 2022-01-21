@@ -27,14 +27,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private IDeliveryState state;
       private bool settled;
 
+      private readonly Task<ITracker> completed;
+
       internal ClientNoOpTracker(ClientSender sender)
       {
          this.sender = sender;
+         this.completed = Task.FromResult<ITracker>(this);
       }
 
       public ISender Sender => sender;
 
-      public bool Settled => true;
+      public bool Settled => settled;
 
       public IDeliveryState State => state;
 
@@ -42,7 +45,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IDeliveryState RemoteState => ClientAccepted.Instance;
 
-      public Task<ITracker> SettlementTask => throw new NotImplementedException(); // TODO
+      public Task<ITracker> SettlementTask => completed;
 
       public ITracker AwaitAccepted()
       {
