@@ -27,6 +27,7 @@ using Apache.Qpid.Proton.Types.Transactions;
 using Apache.Qpid.Proton.Client.TestSupport;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -1490,7 +1491,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender not completed and test peer needs payload matcher")]
+      [Ignore("Stream sender not completed yet")]
       [Test]
       public void TestStreamSenderMessageCanOperatesWithinTransaction()
       {
@@ -1534,10 +1535,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             headerMatcher.WithTtl(65535);
             headerMatcher.WithFirstAcquirer(true);
             headerMatcher.WithDeliveryCount(2);
-            // EncodedDataMatcher dataMatcher = new EncodedDataMatcher(new byte[] { 0, 1, 2, 3 });
-            // TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
-            // payloadMatcher.HeadersMatcher = headerMatcher;
-            // payloadMatcher.MessageContentMatcher = dataMatcher;
+            DataMatcher dataMatcher = new DataMatcher(new byte[] { 0, 1, 2, 3 });
+            TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
+            payloadMatcher.HeaderMatcher = headerMatcher;
+            payloadMatcher.MessageContentMatcher = dataMatcher;
 
             peer.WaitForScriptToComplete();
             peer.ExpectCoordinatorAttach().Respond();
@@ -1545,7 +1546,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectDeclare().Accept(txnId);
             peer.ExpectTransfer().WithHandle(0)
                                  .WithMore(true)
-                                 //.WithPayload(payloadMatcher)
+                                 .WithPayload(payloadMatcher)
                                  .WithState().Transactional().WithTxnId(txnId).And()
                                  .Respond()
                                  .WithState().Transactional().WithTxnId(txnId).WithAccepted().And()

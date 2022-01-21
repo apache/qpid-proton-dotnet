@@ -15,14 +15,9 @@
  * limitations under the License.
  */
 
-using System;
-using System.Diagnostics;
 using System.Threading;
-using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
-using Apache.Qpid.Proton.Test.Driver.Codec.Security;
-using Apache.Qpid.Proton.Types.Transport;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 

@@ -27,6 +27,7 @@ using System.Linq;
 using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -635,28 +636,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test peer needs a transfer composite payload matcher")]
       [Test]
       public void TestSendWhenCreditIsAvailable()
       {
          DoTestSendWhenCreditIsAvailable(false, false);
       }
 
-      [Ignore("Test peer needs a transfer composite payload matcher")]
       [Test]
       public void TestTrySendWhenCreditIsAvailable()
       {
          DoTestSendWhenCreditIsAvailable(true, false);
       }
 
-      [Ignore("Test peer needs a transfer composite payload matcher")]
       [Test]
       public void TestSendWhenCreditIsAvailableWithDeliveryAnnotations()
       {
          DoTestSendWhenCreditIsAvailable(false, true);
       }
 
-      [Ignore("Test peer needs a transfer composite payload matcher")]
       [Test]
       public void TestTrySendWhenCreditIsAvailableWithDeliveryAnnotations()
       {
@@ -706,15 +703,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             daMatcher.WithEntry("da2", Test.Driver.Matchers.Is.EqualTo(2));
             daMatcher.WithEntry("da3", Test.Driver.Matchers.Is.EqualTo(3));
             AmqpValueMatcher bodyMatcher = new AmqpValueMatcher("Hello World");
-            //TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
-            //if (addDeliveryAnnotations)
-            //{
-            //   payloadMatcher.DeliveryAnnotationsMatcher = daMatcher);
-            //}
-            //payloadMatcher.MessageContentMatcher = bodyMatcher);
+            TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
+            if (addDeliveryAnnotations)
+            {
+               payloadMatcher.DeliveryAnnotationsMatcher = daMatcher;
+            }
+            payloadMatcher.MessageContentMatcher = bodyMatcher;
 
             peer.WaitForScriptToComplete();
-            //peer.ExpectTransfer().WithPayload(payloadMatcher);
+            peer.ExpectTransfer().WithPayload(payloadMatcher);
             peer.ExpectDetach().Respond();
             peer.ExpectClose().Respond();
 
