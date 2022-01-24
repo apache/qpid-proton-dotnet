@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
@@ -84,5 +85,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       }
 
       #endregion
+
+      protected override Enum GetFieldEnumByIndex(uint index)
+      {
+         return (HeaderField)index;
+      }
    }
 }

@@ -29,6 +29,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       protected override Type DescribedTypeClassType => typeof(Transfer);
 
+      protected override bool MatchesSafely(ListDescribedType item)
+      {
+         return base.MatchesSafely(item);
+      }
+
       public TransferMatcher WithHandle(uint handle)
       {
          return WithHandle(Is.EqualTo(handle));

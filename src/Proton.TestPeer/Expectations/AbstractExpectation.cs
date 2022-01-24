@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -83,7 +84,30 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       {
          if (GetPayloadMatcher() != null)
          {
-            MatcherAssert.AssertThat("Payload does not match expectation", payload, GetPayloadMatcher());
+            try
+            {
+               MatcherAssert.AssertThat("Payload does not match expectation", payload, GetPayloadMatcher());
+            }
+            catch (Exception ex)
+            {
+               try
+               {
+                  if (payload != null)
+                  {
+                     // Allow for stream based and byte array based matchers
+                     MatcherAssert.AssertThat("Payload does not match expectation",
+                                              new MemoryStream(payload), GetPayloadMatcher());
+                  }
+                  else
+                  {
+                     throw ex;  // Failed because it shouldn't be null
+                  }
+               }
+               catch (Exception)
+               {
+                  throw ex; // Honer the original error
+               }
+            }
          }
          else if (payload != null)
          {

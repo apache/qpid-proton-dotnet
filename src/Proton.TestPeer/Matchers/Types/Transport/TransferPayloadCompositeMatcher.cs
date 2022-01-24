@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
       private string propertiesMatcherFailureDescription;
       private ApplicationPropertiesMatcher applicationPropertiesMatcher;
       private string applicationPropertiesMatcherFailureDescription;
-      private List<TypeSafeMatcher<byte[]>> msgContentMatchers = new List<TypeSafeMatcher<byte[]>>();
+      private List<TypeSafeMatcher<Stream>> msgContentMatchers = new List<TypeSafeMatcher<Stream>>();
       private string msgContentMatcherFailureDescription;
       private FooterMatcher footersMatcher;
       private string footerMatcherFailureDescription;
@@ -83,13 +83,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          set => payloadLengthMatcher = value;
       }
 
-      public List<TypeSafeMatcher<byte[]>> MessageContentMatchers
+      public List<TypeSafeMatcher<Stream>> MessageContentMatchers
       {
          get => msgContentMatchers;
          set => msgContentMatchers = value;
       }
 
-      public TypeSafeMatcher<byte[]> MessageContentMatcher
+      public TypeSafeMatcher<Stream> MessageContentMatcher
       {
          get
          {
@@ -119,7 +119,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          }
       }
 
-      public void AddMessageContentMatcher(TypeSafeMatcher<byte[]> matcher)
+      public void AddMessageContentMatcher(TypeSafeMatcher<Stream> matcher)
       {
          MessageContentMatchers.Add(matcher);
       }
@@ -303,9 +303,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
             {
                stream.Seek(bytesConsumed, SeekOrigin.Begin);
                long originalReadableBytes = stream.Length - stream.Position;
-               byte[] payloadSegment = new byte[stream.Length - stream.Position];
-               stream.Read(payloadSegment, 0, payloadSegment.Length);
-               bool contentMatches = msgContentMatcher.Matches(payloadSegment);
+               bool contentMatches = msgContentMatcher.Matches(stream);
 
                if (!contentMatches)
                {
@@ -319,7 +317,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
                   return false;
                }
 
-               bytesConsumed += originalReadableBytes - (stream.Position - stream.Length);
+               bytesConsumed += originalReadableBytes - (stream.Length - stream.Position);
             }
          }
 

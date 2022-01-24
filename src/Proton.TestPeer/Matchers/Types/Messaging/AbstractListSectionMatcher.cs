@@ -29,6 +29,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       {
       }
 
+      protected abstract Enum GetFieldEnumByIndex(uint index);
+
       protected override void VerifyReceivedDescribedObject(object described)
       {
          if (!(described is IList))
@@ -39,10 +41,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          }
 
          uint fieldNumber = 0;
-         IDictionary valueMap = new Dictionary<uint, object>();
+         IDictionary valueMap = new Dictionary<Enum, object>();
          foreach (object value in (IList)described)
          {
-            valueMap.Add(fieldNumber++, value);
+            valueMap.Add(GetFieldEnumByIndex(fieldNumber++), value);
          }
 
          VerifyReceivedFields(valueMap);

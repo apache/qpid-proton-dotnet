@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
    /// Base matcher implementation for AMQP sections that are encoded into the message
    /// body section.
    /// </summary>
-   public abstract class AbstractBodySectionMatcher : TypeSafeMatcher<byte[]>
+   public abstract class AbstractBodySectionMatcher : TypeSafeMatcher<Stream>
    {
       private readonly Symbol descriptorSymbol;
       private readonly ulong descriptorCode;
@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       protected object ExpectedValue => expectedValue;
 
-      protected override void DescribeMismatchSafely(byte[] item, IDescription mismatchDescription)
+      protected override void DescribeMismatchSafely(Stream item, IDescription mismatchDescription)
       {
          mismatchDescription.AppendText("\nActual encoded form: ").AppendValue(item);
 
@@ -70,10 +70,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          }
       }
 
-      protected override bool MatchesSafely(byte[] incoming)
+      protected override bool MatchesSafely(Stream incoming)
       {
          ICodec data = CodecFactory.Create();
-         long decoded = data.Decode(new MemoryStream(incoming));
+         long decoded = data.Decode(incoming);
          decodedDescribedType = data.GetDescribedType();
          object descriptor = decodedDescribedType.Descriptor;
 
@@ -102,7 +102,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
             }
          }
 
-         if (decoded < incoming.Length && !permitTrailingBytes)
+         if (decoded < (incoming.Length - incoming.Position) && !permitTrailingBytes)
          {
             unexpectedTrailingBytes = true;
             return false;

@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       /// <exception cref="ArgumentOutOfRangeException">If the incoming data has trailing bytes when not expected</exception>
       public long Verify(Stream receivedBytes)
       {
-         long length = receivedBytes.Length;
+         long length = receivedBytes.Length - receivedBytes.Position;
          ICodec data = CodecFactory.Create();
          long decoded = data.Decode(receivedBytes);
 

@@ -21,13 +21,6 @@ using NUnit.Framework;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Microsoft.Extensions.Logging;
-using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
-using Apache.Qpid.Proton.Test.Driver.Matchers;
-using Apache.Qpid.Proton.Types.Transport;
-using System.Collections.Generic;
-using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
-using System.Linq;
-using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {

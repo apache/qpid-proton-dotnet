@@ -16,6 +16,7 @@
  */
 
 using System;
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
@@ -29,6 +30,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
       protected override Type DescribedTypeClassType => typeof(Declare);
 
       #region Matcher based with API
+
+      protected override bool MatchesSafely(ListDescribedType item)
+      {
+         return base.MatchesSafely(item);
+      }
 
       #endregion
    }

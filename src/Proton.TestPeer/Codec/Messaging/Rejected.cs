@@ -22,7 +22,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public enum RejectedField
+   public enum RejectedField : uint
    {
       Error
    }

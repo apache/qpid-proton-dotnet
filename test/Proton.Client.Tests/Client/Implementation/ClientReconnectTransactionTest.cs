@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientException cliEx)
             {
-               logger.LogInformation("Caught unexpected error from test", cliEx);
+               logger.LogWarning("Caught unexpected error from test: {0}", cliEx);
                Assert.Fail("Should not have failed to declare transaction");
             }
 

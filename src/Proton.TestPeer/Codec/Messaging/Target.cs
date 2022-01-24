@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public enum TargetField
+   public enum TargetField : uint
    {
       Address,
       Durable,

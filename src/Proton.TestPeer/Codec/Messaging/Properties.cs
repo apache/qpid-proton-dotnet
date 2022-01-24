@@ -21,7 +21,7 @@ using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
-   public enum PropertiesField
+   public enum PropertiesField : uint
    {
       MessageId,
       UserID,
