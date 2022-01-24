@@ -763,7 +763,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Failure processing the declared with null")]
       [Test]
       public void TestTransactionDeclaredDispositionWithoutTxnId()
       {
@@ -795,6 +794,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             catch (ClientException)
             {
                // expected to fail
+            }
+            catch (Exception ex)
+            {
+               Assert.Fail("Should have thrown a client exception but was: {}", ex);
             }
 
             connection.Close();

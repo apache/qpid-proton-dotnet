@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
 
          if (count < MinRequiredListEntries)
          {
-            throw new DecodeException("Not enough entries in Declared list encoding: " + count);
+            throw new DecodeException("The txn-id field cannot be omitted");
          }
          else if (count > MaxRequiredListEntries)
          {
@@ -129,7 +129,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
 
          if (count < MinRequiredListEntries)
          {
-            throw new DecodeException("Not enough entries in Declared list encoding: " + count);
+            throw new DecodeException("The txn-id field cannot be omitted");
          }
          else if (count > MaxRequiredListEntries)
          {
