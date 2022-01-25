@@ -29,12 +29,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          this.value = value;
       }
 
+      public TimestampElement(IElement parent, IElement prev, ulong value) : base(parent, prev)
+      {
+         this.value = (long)value;
+      }
+
       public override uint GetSize()
       {
          return IsElementOfArray() ? 8u : 9u;
       }
 
-      public override object Value => value;
+      public override object Value => (ulong)value;
 
       public DateTime TimeValue => new DateTime(value, DateTimeKind.Utc);
 

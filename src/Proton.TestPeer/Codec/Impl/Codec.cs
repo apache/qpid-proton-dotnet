@@ -604,7 +604,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public void PutTimestamp(DateTime t)
       {
-         PutElement(new TimestampElement(parent, current, new DateTimeOffset(t).ToUnixTimeMilliseconds()));
+         PutElement(new TimestampElement(parent, current, new DateTimeOffset(t).Ticks));
       }
 
       public void PutUnsignedByte(byte ub)

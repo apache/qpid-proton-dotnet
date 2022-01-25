@@ -113,7 +113,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public ulong? CreationTime
       {
-         get => (ulong?)List[((int)PropertiesField.CreationTime)];
+         get =>  (ulong?)List[((int)PropertiesField.CreationTime)];
          set => List[((int)PropertiesField.CreationTime)] = value;
       }
 

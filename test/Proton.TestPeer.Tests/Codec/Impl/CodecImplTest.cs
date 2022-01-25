@@ -322,6 +322,81 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          Assert.AreEqual(new Symbol[] { new Symbol("SOMETHING") }, performative.OfferedCapabilities);
       }
 
+      [Test]
+      public void TestEncodeAndDecodeHeader()
+      {
+         Header header = new Header();
+         header.Durable = true;
+         header.Ttl = 123;
+
+         long expectedRead;
+         Stream encoded = EncodeProtonPerformative(header, out expectedRead);
+         Assert.AreNotEqual(0, expectedRead);
+
+         ICodec codec = CodecFactory.Create();
+
+         Assert.AreEqual(expectedRead, codec.Decode(encoded));
+
+         Header described = (Header)codec.GetDescribedType();
+         Assert.IsNotNull(described);
+         Assert.AreEqual(Header.DESCRIPTOR_SYMBOL, described.Descriptor);
+
+         Assert.AreEqual(header.Ttl, described.Ttl);
+         Assert.AreEqual(header.Durable, described.Durable);
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeProperties()
+      {
+         Properties properties = new Properties();
+         properties.AbsoluteExpiryTime = 123;
+         properties.CreationTime = long.MaxValue;
+
+         long expectedRead;
+         Stream encoded = EncodeProtonPerformative(properties, out expectedRead);
+         Assert.AreNotEqual(0, expectedRead);
+
+         ICodec codec = CodecFactory.Create();
+
+         Assert.AreEqual(expectedRead, codec.Decode(encoded));
+
+         Properties described = (Properties)codec.GetDescribedType();
+         Assert.IsNotNull(described);
+         Assert.AreEqual(Properties.DESCRIPTOR_SYMBOL, described.Descriptor);
+
+         Assert.AreEqual(properties.CreationTime, described.CreationTime);
+         Assert.AreEqual(properties.AbsoluteExpiryTime, described.AbsoluteExpiryTime);
+      }
+
+      [Test]
+      public void TestDecodeExternallyEncodedProperties()
+      {
+         // Frame data for: Properties
+         byte[] encodedProperties = new byte[] {0, 83, 115, 208, 0, 0, 0, 131, 0, 0, 0, 13, 161,
+                                               8, 73, 68, 58, 49, 50, 51, 52, 53, 160, 4, 117, 115,
+                                               101, 114, 161, 14, 116, 104, 101, 45, 109, 97, 110, 97,
+                                               103, 101, 109, 101, 110, 116, 161, 4, 97, 109, 113, 112,
+                                               161, 11, 116, 104, 101, 45, 109, 105, 110, 105, 111, 110,
+                                               115, 161, 3, 97, 98, 99, 163, 4, 103, 122, 105, 112, 161,
+                                               16, 97, 112, 112, 108, 105, 99, 97, 116, 105, 111, 110,
+                                               47, 106, 115, 111, 110, 131, 0, 0, 0, 0, 0, 0, 0, 123,
+                                               131, 0, 0, 0, 0, 0, 0, 0, 1, 161, 11, 100, 105, 115, 103,
+                                               114, 117, 110, 116, 108, 101, 100, 112, 0, 0, 32, 0, 161,
+                                               9, 47, 100, 101, 118, 47, 110, 117, 108, 108, 0, 83, 119,
+                                               161, 11, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100};
+
+         MemoryStream stream = new MemoryStream(encodedProperties);
+         IDescribedType decoded = DecodeProtonPerformative(stream);
+         Assert.IsNotNull(decoded);
+         Assert.IsTrue(decoded is Properties);
+
+         Properties properties = (Properties)decoded;
+
+         Assert.IsTrue(properties.CreationTime.HasValue);
+         Assert.AreEqual(123, properties.AbsoluteExpiryTime);
+         Assert.AreEqual(1, properties.CreationTime);
+      }
+
       private IDescribedType DecodeProtonPerformative(MemoryStream stream)
       {
          IDescribedType performative = null;

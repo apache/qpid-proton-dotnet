@@ -102,7 +102,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Issue in test peer decoding ulong types")]
       [Test]
       public void TestSendMessageWithPropertiesValuesPopulated()
       {
@@ -454,7 +453,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Issue in test peer decoding ulong types")]
       [Test]
       public void TestSendMessageWithMultipleSectionsPopulated()
       {
