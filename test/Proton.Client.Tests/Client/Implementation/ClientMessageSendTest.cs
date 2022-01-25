@@ -1171,5 +1171,215 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      [Test]
+      public void TestSendMessageWithMultipleAmqpValueSections()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(10).Queue();
+            peer.ExpectAttach().Respond();  // Open a receiver to ensure sender link has processed
+            peer.ExpectFlow();              // the inbound flow frame we sent previously before send.
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+
+            ISession session = connection.OpenSession().OpenTask.Result;
+            SenderOptions options = new SenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtMostOnce
+            };
+            ISender sender = session.OpenSender("test-qos", options);
+
+            // Gates send on remote flow having been sent and received
+            session.OpenReceiver("dummy").OpenTask.Wait();
+
+            // Note: This is a specification violation but could be used by other message formats
+            //       and we don't attempt to enforce at the AdvancedMessage API level what users do.
+            AmqpValueMatcher bodyMatcher1 = new AmqpValueMatcher("one", true);
+            AmqpValueMatcher bodyMatcher2 = new AmqpValueMatcher("two", true);
+            AmqpValueMatcher bodyMatcher3 = new AmqpValueMatcher("three", false);
+            TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher1);
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher2);
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher3);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithMessageFormat(17).WithPayload(payloadMatcher).Accept();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IAdvancedMessage<string> message = IAdvancedMessage<string>.Create();
+
+            message.MessageFormat = 17;
+            message.AddBodySection(new AmqpValue("one"));
+            message.AddBodySection(new AmqpValue("two"));
+            message.AddBodySection(new AmqpValue("three"));
+
+            ITracker tracker = sender.Send(message);
+
+            Assert.IsNotNull(tracker);
+            Assert.IsTrue(tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(tracker.SettlementTask.Result.Settled);
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Peer not matching the content correctly, or client send issue")]
+      [Test]
+      public void TestSendMessageWithMultipleAmqpSequenceSections()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(10).Queue();
+            peer.ExpectAttach().Respond();  // Open a receiver to ensure sender link has processed
+            peer.ExpectFlow();              // the inbound flow frame we sent previously before send.
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+
+            ISession session = connection.OpenSession().OpenTask.Result;
+            SenderOptions options = new SenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtMostOnce
+            };
+            ISender sender = session.OpenSender("test-qos", options);
+
+            // Gates send on remote flow having been sent and received
+            session.OpenReceiver("dummy").OpenTask.Wait();
+
+            List<string> list1 = new List<string>();
+            list1.Add("1");
+            List<string> list2 = new List<string>();
+            list2.Add("21");
+            list2.Add("22");
+            List<string> list3 = new List<string>();
+            list3.Add("31");
+            list3.Add("32");
+            list3.Add("33");
+
+            AmqpSequenceMatcher bodyMatcher1 = new AmqpSequenceMatcher(list1, true);
+            AmqpSequenceMatcher bodyMatcher2 = new AmqpSequenceMatcher(list2, true);
+            AmqpSequenceMatcher bodyMatcher3 = new AmqpSequenceMatcher(list3, false);
+            TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher1);
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher2);
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher3);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithPayload(payloadMatcher).Accept();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IAdvancedMessage<List<string>> message = IAdvancedMessage<List<string>>.Create();
+
+            message.AddBodySection(new AmqpSequence(list1));
+            message.AddBodySection(new AmqpSequence(list2));
+            message.AddBodySection(new AmqpSequence(list3));
+
+            ITracker tracker = sender.Send(message);
+
+            Assert.IsNotNull(tracker);
+            Assert.IsTrue(tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(tracker.SettlementTask.Result.Settled);
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Ignore("Peer not matching the content correctly, or client send issue")]
+      [Test]
+      public void TestSendMessageWithMultipleDataSections()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(10).Queue();
+            peer.ExpectAttach().Respond();  // Open a receiver to ensure sender link has processed
+            peer.ExpectFlow();              // the inbound flow frame we sent previously before send.
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+
+            ISession session = connection.OpenSession().OpenTask.Result;
+            SenderOptions options = new SenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtMostOnce
+            };
+            ISender sender = session.OpenSender("test-qos", options);
+
+            // Gates send on remote flow having been sent and received
+            session.OpenReceiver("dummy").OpenTask.Wait();
+
+            byte[] buffer1 = new byte[] { 1 };
+            byte[] buffer2 = new byte[] { 1, 2 };
+            byte[] buffer3 = new byte[] { 1, 2, 3 };
+
+            DataMatcher bodyMatcher1 = new DataMatcher(buffer1, true);
+            DataMatcher bodyMatcher2 = new DataMatcher(buffer2, true);
+            DataMatcher bodyMatcher3 = new DataMatcher(buffer3, false);
+            TransferPayloadCompositeMatcher payloadMatcher = new TransferPayloadCompositeMatcher();
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher1);
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher2);
+            payloadMatcher.AddMessageContentMatcher(bodyMatcher3);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithPayload(payloadMatcher).Accept();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IAdvancedMessage<byte[]> message = IAdvancedMessage<byte[]>.Create();
+
+            message.AddBodySection(new Data(buffer1));
+            message.AddBodySection(new Data(buffer2));
+            message.AddBodySection(new Data(buffer3));
+
+            ITracker tracker = sender.Send(message);
+
+            Assert.IsNotNull(tracker);
+            Assert.IsTrue(tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(tracker.SettlementTask.Result.Settled);
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }
