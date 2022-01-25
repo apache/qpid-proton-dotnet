@@ -269,8 +269,10 @@ namespace Apache.Qpid.Proton.Test.Driver
             {
                input.CopyTo(buffer, (int)bytesRemaining);
 
+               buffer.Seek(0, SeekOrigin.Begin); // Reset to start of buffered frame
+
                // Now we can consume the buffer frame body.
-               decoder.InitializeFrameBodyParsingStage((uint)buffer.Position);
+               decoder.InitializeFrameBodyParsingStage(frameSize);
 
                try
                {

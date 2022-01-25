@@ -215,8 +215,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          Statics.RequireNonNull(disconnectedHandler, "Cannot connect until a disconnected handler is registered");
          Statics.RequireNonNull(readHandler, "Cannot connect when a read handler is registered");
 
-         streamReader = new BufferedStream(new NetworkStream(clientSocket));
-         streamWriter = new BufferedStream(new NetworkStream(clientSocket));
+         streamReader = new NetworkStream(clientSocket);
+         streamWriter = new NetworkStream(clientSocket);
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);

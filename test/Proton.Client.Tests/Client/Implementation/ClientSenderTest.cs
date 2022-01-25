@@ -1760,6 +1760,52 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
+      public void TestSendMessagesWithLargerBytePayload()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithIncomingWindow(1)
+                             .WithDeliveryCount(0)
+                             .WithNextIncomingId(1)
+                             .WithLinkCredit(1).Queue();
+            peer.ExpectTransfer().WithNonNullPayload().WithMore(false)
+                                 .Respond()
+                                 .WithSettled(true).WithState().Accepted();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISender sender = connection.OpenSender("test-queue").OpenTask.Result;
+
+            byte[] payload = new byte[1024];
+            Array.Fill(payload, (byte)1);
+
+            ITracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
+
+            peer.WaitForScriptToComplete();
+
+            tracker.SettlementTask.Wait();
+
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
       public void TestSendBlockedForCreditFailsWhenLinkRemotelyClosed()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
@@ -1926,7 +1972,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Connection drop handling not working right now")]
       [Test]
       public void TestSendAfterConnectionDropsThrowsConnectionRemotelyClosedError()
       {
@@ -1953,7 +1998,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
 
             IClient container = IClient.Create();
-            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;
             ISender sender = session.OpenSender("test").OpenTask.Result;
 
@@ -2400,7 +2445,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   Assert.IsTrue(send1Started.Wait(TimeSpan.FromSeconds(10)));
                   logger.LogInformation("Test send 2 is preparing to fire:");
                   ITracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
-                  tracker.AwaitSettlement(TimeSpan.FromSeconds(10));
+                  tracker.AwaitSettlement(TimeSpan.FromSeconds(50));
                   send2Completed.Signal();
                }
                catch (Exception e)
