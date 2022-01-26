@@ -2317,7 +2317,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Decode error while reading in sent message payload")]
       [Test]
       public void TestConcurrentSendOnlyBlocksForInitialSendInProgress()
       {
@@ -2348,6 +2347,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             byte[] payload = new byte[1024];
             Array.Fill(payload, (byte)1);
 
+            CountdownEvent sendsCompleted = new CountdownEvent(2);
+
             // One should block on the send waiting for the others send to finish
             // otherwise they should not care about concurrency of sends.
 
@@ -2365,6 +2366,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   logger.LogInformation("Test send 1 failed with error: ", e);
                   sendFailed = true;
                }
+
+               sendsCompleted.Signal();
             });
 
             Task.Run(() =>
@@ -2380,12 +2383,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   logger.LogInformation("Test send 2 failed with error: ", e);
                   sendFailed = true;
                }
+
+               sendsCompleted.Signal();
             });
 
             peer.WaitForScriptToComplete();
             peer.ExpectDetach().Respond();
             peer.ExpectClose().Respond();
 
+            Assert.IsTrue(sendsCompleted.Wait(TimeSpan.FromSeconds(20)));
             Assert.IsFalse(sendFailed);
 
             sender.Close();
