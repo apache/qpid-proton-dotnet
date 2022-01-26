@@ -2401,7 +2401,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Sends not firing from Task as expected")]
       [Test]
       public void TestConcurrentSendBlocksBehindSendWaitingForCredit()
       {
@@ -2467,7 +2466,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.RemoteFlow().WithIncomingWindow(1).WithDeliveryCount(1).WithNextIncomingId(2).WithLinkCredit(1).Queue();
             peer.ExpectTransfer().WithNonNullPayload().WithMore(false).Respond().WithSettled(true).WithState().Accepted();
 
-            Assert.IsTrue(send2Completed.Wait(TimeSpan.FromSeconds(10)));
+            Assert.IsTrue(send2Completed.Wait(TimeSpan.FromSeconds(15)));
 
             peer.WaitForScriptToComplete();
             peer.ExpectDetach().Respond();
