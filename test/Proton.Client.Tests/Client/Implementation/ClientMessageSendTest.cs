@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Client.Utilities;
+using System.Collections;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -746,14 +747,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendMessageWithListPayloadArrivesWithAMQPSequenceBodySetFromEmpty()
       {
          DoTestSendMessageWithListPayloadArrivesWithAMQPSequenceBody(true);
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendMessageWithListPayloadArrivesWithAMQPSequenceBodyPopulateOnCreate()
       {
@@ -805,15 +804,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectDetach().Respond();
             peer.ExpectClose().Respond();
 
-            IMessage<List<Guid>> message;
+            IMessage<IList> message;
             if (useSetter)
             {
-               message = IMessage<List<Guid>>.Create();
+               message = IMessage<IList>.Create();
                message.Body = payload;
             }
             else
             {
-               message = IMessage<List<Guid>>.Create(payload);
+               message = IMessage<IList>.Create((IList) payload);
             }
 
             ITracker tracker = sender.Send(message);
@@ -1234,7 +1233,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Peer not matching the content correctly, or client send issue")]
       [Test]
       public void TestSendMessageWithMultipleAmqpSequenceSections()
       {
@@ -1309,7 +1307,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Peer not matching the content correctly, or client send issue")]
       [Test]
       public void TestSendMessageWithMultipleDataSections()
       {

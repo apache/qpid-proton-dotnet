@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Client.Implementation;
 using Apache.Qpid.Proton.Types.Messaging;
 
@@ -68,7 +69,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="value">The list to wrap in the AMQP message body</param>
       /// <returns>a new message instance with the provided body.</returns>
-      static IMessage<IList> Create<E>(IList value)
+      static IMessage<IList> Create(IList value)
       {
          return ClientMessage<IList>.Create(new AmqpSequence(value));
       }
