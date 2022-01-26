@@ -16,6 +16,7 @@
  */
 
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
+using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 {
@@ -38,7 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       /// <param name="expectedValue">The value that should be encoded in the Data section</param>
       /// <param name="permitTrailingBytes">Expect more bytes in the message encoding</param>
       public DataMatcher(byte[] expectedValue, bool permitTrailingBytes) :
-         base(Data.DESCRIPTOR_SYMBOL, Data.DESCRIPTOR_CODE, expectedValue, permitTrailingBytes)
+         base(Data.DESCRIPTOR_SYMBOL, Data.DESCRIPTOR_CODE, new Binary(expectedValue), permitTrailingBytes)
       {
       }
 

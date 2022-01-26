@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives

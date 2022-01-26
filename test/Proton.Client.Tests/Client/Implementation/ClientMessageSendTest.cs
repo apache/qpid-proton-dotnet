@@ -668,14 +668,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendMessageWithByteArrayPayloadArrivesWithDataSectionSetFromEmpty()
       {
          DoTestSendMessageWithByteArrayPayloadArrivesWithDataSection(true);
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendMessageWithByteArrayPayloadArrivesWithDataSectionPopulateOnCreate()
       {
