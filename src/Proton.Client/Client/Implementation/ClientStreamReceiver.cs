@@ -24,6 +24,7 @@ using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
 using System.Linq;
 using System.Threading;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -44,8 +45,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly TaskCompletionSource<IReceiver> openFuture = new TaskCompletionSource<IReceiver>();
       private readonly TaskCompletionSource<IReceiver> closeFuture = new TaskCompletionSource<IReceiver>();
 
-      private readonly IDictionary<TaskCompletionSource<IStreamDelivery>, CancellationTokenSource> receiveRequests =
-        new Dictionary<TaskCompletionSource<IStreamDelivery>, CancellationTokenSource>();
+      private readonly IDeque<TaskCompletionSource<IStreamDelivery>> receiveRequests =
+         new ArrayDeque<TaskCompletionSource<IStreamDelivery>>();
 
       private TaskCompletionSource<IReceiver> drainingFuture;
 
@@ -265,17 +266,62 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamDelivery Receive()
       {
-         throw new NotImplementedException();
-      }
-
-      public IStreamDelivery Receive(TimeSpan timeout)
-      {
-         throw new NotImplementedException();
+         return Receive(TimeSpan.MaxValue);
       }
 
       public IStreamDelivery TryReceive()
       {
-         throw new NotImplementedException();
+         return Receive(TimeSpan.Zero);
+      }
+
+      public IStreamDelivery Receive(TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         TaskCompletionSource<IStreamDelivery> receive = new TaskCompletionSource<IStreamDelivery>();
+
+         session.Execute(() =>
+         {
+            if (NotClosedOrFailed(receive))
+            {
+               IIncomingDelivery delivery = null;
+
+               // Scan all unsettled deliveries in the link and check if any are still
+               // lacking a linked stream delivery instance which indicates they have
+               // not been made part of a receive yet.
+               foreach (IIncomingDelivery candidate in protonReceiver.Unsettled)
+               {
+                  if (candidate.LinkedResource == null)
+                  {
+                     delivery = candidate;
+                     break;
+                  }
+               }
+
+               if (delivery == null)
+               {
+                  if (timeout == TimeSpan.Zero)
+                  {
+                     receive.TrySetResult(null);
+                  }
+                  else if (timeout != TimeSpan.MaxValue)
+                  {
+                     session.Schedule(() =>
+                     {
+                        receiveRequests.Remove(receive);
+                        receive.TrySetResult(null);
+                     }, timeout);
+                  }
+
+                  receiveRequests.Enqueue(receive);
+               }
+               else
+               {
+                  receive.TrySetResult(new ClientStreamDelivery(this, delivery));
+               }
+            }
+         });
+
+         return session.Request(this, receive).Task.GetAwaiter().GetResult();
       }
 
       #region Internal Receiver API
@@ -472,24 +518,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
             session.CloseAsync();
          }
 
-         foreach(KeyValuePair<TaskCompletionSource<IStreamDelivery>, CancellationTokenSource> entry in receiveRequests)
+         if (receiveRequests.TryDequeue(out TaskCompletionSource<IStreamDelivery> entry))
          {
-            if (entry.Value != null)
-            {
-               entry.Value.Cancel();
-            }
-
             if (failureCause != null)
             {
-               entry.Key.TrySetException(failureCause);
+               entry.TrySetException(failureCause);
             }
             else
             {
-               entry.Key.TrySetException(new ClientResourceRemotelyClosedException("The stream receiver was closed"));
+               entry.TrySetException(new ClientResourceRemotelyClosedException("The stream receiver was closed"));
             }
          }
 
-         foreach(IIncomingDelivery delivery in protonReceiver.Unsettled)
+         foreach (IIncomingDelivery delivery in protonReceiver.Unsettled)
          {
             if (delivery.LinkedResource is ClientStreamDelivery streamDelivery)
             {
@@ -647,7 +688,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
             delivery.DefaultDeliveryState = Types.Messaging.Released.Instance;
          }
 
-         // TODO: Stream receiver delivery processing.
+         if (delivery.LinkedResource == null)
+         {
+            if (receiveRequests.TryDequeue(out TaskCompletionSource<IStreamDelivery> entry))
+            {
+               entry.TrySetResult(new ClientStreamDelivery(this, delivery));
+            }
+         }
       }
 
       private void HandleDeliveryAborted(IIncomingDelivery delivery)
