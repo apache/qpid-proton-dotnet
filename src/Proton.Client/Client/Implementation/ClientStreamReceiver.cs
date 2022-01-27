@@ -23,7 +23,6 @@ using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
 using System.Linq;
-using System.Threading;
 using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
