@@ -94,5 +94,78 @@ namespace Apache.Qpid.Proton.Client.Implementation
          buffer.CopyInto(0, result, 0, result.Length);
          return result;
       }
+
+      protected byte[] CreateEncodedMessage(params ISection[] body)
+      {
+         IEncoder encoder = CodecFactory.Encoder;
+         IProtonBuffer buffer = new ProtonByteBufferAllocator().Allocate();
+         foreach (ISection section in body)
+         {
+            encoder.WriteObject(buffer, encoder.NewEncoderState(), section);
+         }
+         byte[] result = new byte[buffer.ReadableBytes];
+         buffer.CopyInto(0, result, 0, result.Length);
+         return result;
+      }
+
+      protected byte[] CreateInvalidHeaderEncoding()
+      {
+         byte[] buffer = new byte[12];
+
+         buffer[0] = 0; // Described Type Indicator
+         buffer[1] = (byte)EncodingCodes.SmallULong;
+         buffer[2] = (byte)Header.DescriptorCode;
+         buffer[3] = (byte)EncodingCodes.Map32; // Should be list based
+
+         return buffer;
+      }
+
+      protected byte[] CreateInvalidDeliveryAnnotationsEncoding()
+      {
+         byte[] buffer = new byte[12];
+
+         buffer[0] = 0; // Described Type Indicator
+         buffer[1] = (byte)EncodingCodes.SmallULong;
+         buffer[2] = (byte)DeliveryAnnotations.DescriptorCode;
+         buffer[3] = (byte)EncodingCodes.List32; // Should be Map based
+
+         return buffer;
+      }
+
+      protected byte[] CreateInvalidMessageAnnotationsEncoding()
+      {
+         byte[] buffer = new byte[12];
+
+         buffer[0] = 0; // Described Type Indicator
+         buffer[1] = (byte)EncodingCodes.SmallULong;
+         buffer[2] = (byte)MessageAnnotations.DescriptorCode;
+         buffer[3] = (byte)EncodingCodes.List32; // Should be Map based
+
+         return buffer;
+      }
+
+      protected byte[] CreateInvalidPropertiesEncoding()
+      {
+         byte[] buffer = new byte[12];
+
+         buffer[0] = 0; // Described Type Indicator
+         buffer[1] = (byte)EncodingCodes.SmallULong;
+         buffer[2] = (byte)Properties.DescriptorCode;
+         buffer[3] = (byte)EncodingCodes.Map32; // Should be list based
+
+         return buffer;
+      }
+
+      protected byte[] CreateInvalidApplicationPropertiesEncoding()
+      {
+         byte[] buffer = new byte[12];
+
+         buffer[0] = 0; // Described Type Indicator
+         buffer[1] = (byte)EncodingCodes.SmallULong;
+         buffer[2] = (byte)ApplicationProperties.DescriptorCode;
+         buffer[3] = (byte)EncodingCodes.List32; // Should be map based
+
+         return buffer;
+      }
    }
 }

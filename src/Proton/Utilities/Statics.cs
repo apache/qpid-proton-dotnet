@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Utilities
 {
@@ -223,6 +224,67 @@ namespace Apache.Qpid.Proton.Utilities
             throw new ArithmeticException("integer overflow");
          }
          return r;
+      }
+
+      /// <summary>
+      /// Used to check that the given sequence within an array of elements is equal
+      /// using the default equality comparison mechanism.
+      /// </summary>
+      /// <param name="a"></param>
+      /// <param name="aFromIndex"></param>
+      /// <param name="aToIndex"></param>
+      /// <param name="b"></param>
+      /// <param name="bFromIndex"></param>
+      /// <param name="bToIndex"></param>
+      /// <returns></returns>
+      public static bool SequenceEquals<T>(T[] a, int aFromIndex, int aToIndex,
+                                           T[] b, int bFromIndex, int bToIndex)
+      {
+         RangeCheck(a.Length, aFromIndex, aToIndex);
+         RangeCheck(b.Length, bFromIndex, bToIndex);
+
+         int aLength = aToIndex - aFromIndex;
+         int bLength = bToIndex - bFromIndex;
+         if (aLength != bLength)
+         {
+            return false;
+         }
+
+         EqualityComparer<T> comparer = EqualityComparer<T>.Default;
+         for (int i = 0; i < aLength; i++)
+         {
+            if (!comparer.Equals(a[aFromIndex + i], b[bFromIndex + i]))
+            {
+               return false;
+            }
+         }
+
+         return false;
+      }
+
+      /// <summary>
+      /// Validate that the range given by a from index and a to index are within the bounds
+      /// of the length value provided.
+      /// </summary>
+      /// <param name="arrayLength"></param>
+      /// <param name="fromIndex"></param>
+      /// <param name="toIndex"></param>
+      /// <exception cref="ArgumentOutOfRangeException"></exception>
+      internal static void RangeCheck(int arrayLength, int fromIndex, int toIndex)
+      {
+         if (fromIndex > toIndex)
+         {
+            throw new ArgumentOutOfRangeException(
+                    "fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+         }
+         if (fromIndex < 0)
+         {
+            throw new ArgumentOutOfRangeException("Given from index is negative: " + fromIndex);
+         }
+         if (toIndex > arrayLength)
+         {
+            throw new ArgumentOutOfRangeException("Given to index is greater than the length: " + fromIndex);
+         }
       }
    }
 }
