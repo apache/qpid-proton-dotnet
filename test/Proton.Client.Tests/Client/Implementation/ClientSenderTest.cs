@@ -2364,7 +2364,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("Test send 1 failed with error: ", e);
+                  logger.LogInformation("Test send 1 failed with error: {0}", e);
                   sendFailed = true;
                }
 
@@ -2381,7 +2381,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("Test send 2 failed with error: ", e);
+                  logger.LogInformation("Test send 2 failed with error: {0}", e);
                   sendFailed = true;
                }
 

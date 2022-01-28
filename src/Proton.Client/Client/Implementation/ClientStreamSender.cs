@@ -41,8 +41,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientSession session;
       private readonly string senderId;
       private readonly bool sendsSettled;
-      private readonly TaskCompletionSource<IStreamSender> openFuture = new TaskCompletionSource<IStreamSender>();
-      private readonly TaskCompletionSource<IStreamSender> closeFuture = new TaskCompletionSource<IStreamSender>();
+      private readonly TaskCompletionSource<ISender> openFuture = new TaskCompletionSource<ISender>();
+      private readonly TaskCompletionSource<ISender> closeFuture = new TaskCompletionSource<ISender>();
 
       private Engine.ISender protonSender;
       private Action<ISender> senderRemotelyClosedHandler;
@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession Session => session;
 
-      public Task<ISender> OpenTask => throw new NotImplementedException();
+      public Task<ISender> OpenTask => openFuture.Task;
 
       public string Address
       {
@@ -129,42 +129,47 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations = null)
-      {
-         CheckClosedOrFailed();
-         DeliveryAnnotations annotations = null;
-
-         if (deliveryAnnotations != null)
-         {
-            annotations = new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations));
-         }
-
-         throw new NotImplementedException();
-      }
-
       public void Close(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         try
+         {
+            CloseAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<ISender> CloseAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         return DoCloseOrDetach(true, error);
       }
 
       public void Detach(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         try
+         {
+            DetachAsync(error).Wait();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public Task<ISender> DetachAsync(IErrorCondition error = null)
       {
-         throw new NotImplementedException();
+         return DoCloseOrDetach(false, error);
       }
 
       public void Dispose()
       {
-         throw new NotImplementedException();
+         try
+         {
+            Close();
+         }
+         catch (Exception)
+         {
+         }
       }
 
       public ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
@@ -175,6 +180,40 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
          throw new NotImplementedException();
+      }
+
+      public IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations = null)
+      {
+         CheckClosedOrFailed();
+         DeliveryAnnotations annotations = null;
+         TaskCompletionSource<IStreamSenderMessage> request = new TaskCompletionSource<IStreamSenderMessage>();
+
+         if (deliveryAnnotations != null)
+         {
+            annotations = new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations));
+         }
+
+         session.Execute(() =>
+         {
+            if (protonSender.Current != null)
+            {
+               request.TrySetException(new ClientIllegalStateException(
+                   "Cannot initiate a new streaming send until the previous one is complete"));
+            }
+            else
+            {
+               // Grab the next delivery and hold for stream writes, no other sends
+               // can occur while we hold the delivery.
+               IOutgoingDelivery streamDelivery = protonSender.Next();
+               ClientStreamTracker streamTracker = new ClientStreamTracker(this, streamDelivery);
+
+               streamDelivery.LinkedResource = streamTracker;
+
+               request.TrySetResult(new ClientStreamSenderMessage(this, streamTracker, annotations));
+            }
+         });
+
+         return session.Request(this, request).Task.GetAwaiter().GetResult();
       }
 
       #region Internal Stream Sender API
@@ -223,6 +262,41 @@ namespace Apache.Qpid.Proton.Client.Implementation
       #endregion
 
       #region Private Receiver Implementation
+
+      private Task<ISender> DoCloseOrDetach(bool close, IErrorCondition error)
+      {
+         if (closed.CompareAndSet(false, true))
+         {
+            // Already closed by failure or shutdown so no need to
+            if (!closeFuture.Task.IsCompleted)
+            {
+               session.Execute(() =>
+               {
+                  if (protonSender.IsLocallyOpen)
+                  {
+                     try
+                     {
+                        protonSender.ErrorCondition = ClientErrorCondition.AsProtonErrorCondition(error);
+                        if (close)
+                        {
+                           protonSender.Close();
+                        }
+                        else
+                        {
+                           protonSender.Detach();
+                        }
+                     }
+                     catch (Exception)
+                     {
+                        // The engine event handlers will deal with errors
+                     }
+                  }
+               });
+            }
+         }
+
+         return closeFuture.Task;
+      }
 
       private void CheckClosedOrFailed()
       {
