@@ -22,14 +22,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 {
    public sealed class ClientNoOpTracker : ITracker
    {
-      private readonly ClientSender sender;
+      private readonly ISender sender;
 
       private IDeliveryState state;
       private bool settled;
 
       private readonly Task<ITracker> completed;
 
-      internal ClientNoOpTracker(ClientSender sender)
+      internal ClientNoOpTracker(ISender sender)
       {
          this.sender = sender;
          this.completed = Task.FromResult<ITracker>(this);

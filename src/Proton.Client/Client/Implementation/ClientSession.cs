@@ -386,7 +386,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientSender InternalOpenSender(string address, SenderOptions senderOptions)
       {
-         return senderBuilder.Sender(address, senderOptions).Open();
+         return senderBuilder.Sender(address, senderOptions).Open() as ClientSender;
       }
 
       internal ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions = null)
@@ -396,7 +396,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          if (connection.HasOpened)
          {
             connection.CheckAnonymousRelaySupported();
-            return senderBuilder.AnonymousSender(senderOptions).Open();
+            return senderBuilder.AnonymousSender(senderOptions).Open() as ClientSender;
          }
          else
          {
@@ -406,7 +406,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientStreamSender InternalOpenStreamSender(string address, StreamSenderOptions senderOptions)
       {
-         return senderBuilder.StreamSender(address, senderOptions).Open();
+         return senderBuilder.StreamSender(address, senderOptions).Open() as ClientStreamSender;
       }
 
       #endregion
