@@ -87,7 +87,7 @@ namespace Apache.Qpid.Proton.Client
       /// connection.  This is an advanced option and should not be used unless the impact of doing so
       /// is understood by the user.
       /// </summary>
-      public uint PendingWriteBufferSize { get; set; }
+      public uint PendingWriteBufferSize { get; set; } = DEFAULT_PENDING_WRITES_BUFFER_SIZE;
 
    }
 }

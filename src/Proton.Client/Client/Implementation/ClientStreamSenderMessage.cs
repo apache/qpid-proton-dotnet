@@ -63,7 +63,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal Engine.IOutgoingDelivery ProtonDelivery => tracker.ProtonDelivery;
 
-      public IStreamTracker Tracker => tracker;
+      public IStreamTracker Tracker => Completed ? tracker : null;
 
       public IStreamSender Sender => sender;
 
