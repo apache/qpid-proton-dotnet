@@ -22,6 +22,7 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Logging;
+using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -77,29 +78,137 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return ClientSession.Request(this, request).Task.GetAwaiter().GetResult();
       }
 
-      protected override ITracker DoSendMessage<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
+      internal IStreamTracker DoStreamMessage<T>(ClientStreamSenderMessage context, IAdvancedMessage<T> message)
       {
-         throw new NotImplementedException();
+         TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
+         IProtonBuffer buffer = message.Encode(null); // Delivery annotations are part of the stream message
+         ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(
+            this, context.ProtonDelivery, message.MessageFormat, buffer, context.Completed, request);
+
+         ClientSession.Execute(() =>
+         {
+            if (NotClosedOrFailed(request))
+            {
+               try
+               {
+                  if (ProtonSender.IsSendable)
+                  {
+                     ClientSession.TransactionContext.Send(envelope, null, IsSendingSettled);
+                  }
+                  else
+                  {
+                     AddToHeadOfBlockedQueue(envelope);
+                  }
+               }
+               catch (Exception error)
+               {
+                  request.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               }
+            }
+         });
+
+         return (IStreamTracker)ClientSession.Request(this, request).Task.Result;
       }
 
       internal override ITracker CreateTracker(IOutgoingDelivery delivery)
       {
-         throw new NotImplementedException();
+         return new ClientStreamTracker(this, delivery);
       }
 
       internal void Abort(IOutgoingDelivery protonDelivery, ClientStreamTracker tracker)
       {
-         throw new NotImplementedException();
-      }
+         CheckClosedOrFailed();
+         TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
+         // TODO Should we update credit state or can we have proton fire an update on any abort
+         // request.Task.ContinueWith(() => {
+         //    ClientSession.Execute(() => base.HandleCreditStateUpdated(ProtonSender);
+         // });
 
-      internal void SendMessage(ClientStreamSenderMessage clientStreamSenderMessage, IAdvancedMessage<object> streamMessagePacket)
-      {
-         throw new NotImplementedException();
+         ClientSession.Execute(() =>
+         {
+            if (protonDelivery.TransferCount == 0)
+            {
+               protonDelivery.Abort();
+               request.TrySetResult(tracker);
+            }
+            else
+            {
+               ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, false, request);
+               envelope.Aborted = true;
+
+               try
+               {
+                  if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
+                  {
+                     envelope.Transmit(protonDelivery.State, protonDelivery.IsSettled);
+                  }
+                  else
+                  {
+                     if (ProtonSender.Current == protonDelivery)
+                     {
+                        AddToHeadOfBlockedQueue(envelope);
+                     }
+                     else
+                     {
+                        AddToTailOfBlockedQueue(envelope);
+                     }
+                  }
+               }
+               catch (Exception error)
+               {
+                  request.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               }
+            }
+         });
+
+         ClientSession.Request(this, request).Task.Wait();
       }
 
       internal void Complete(IOutgoingDelivery protonDelivery, ClientStreamTracker tracker)
       {
-         throw new NotImplementedException();
+         CheckClosedOrFailed();
+         TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
+         // TODO Should we update credit state or can we have proton fire an update on any abort
+         // request.Task.ContinueWith(() => {
+         //    ClientSession.Execute(() => base.HandleCreditStateUpdated(ProtonSender);
+         // });
+
+         ClientSession.Execute(() =>
+         {
+            if (protonDelivery.TransferCount == 0)
+            {
+               protonDelivery.Abort();
+               request.TrySetResult(tracker);
+            }
+            else
+            {
+               ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, false, request);
+               try
+               {
+                  if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
+                  {
+                     envelope.Transmit(protonDelivery.State, protonDelivery.IsSettled);
+                  }
+                  else
+                  {
+                     if (ProtonSender.Current == protonDelivery)
+                     {
+                        AddToHeadOfBlockedQueue(envelope);
+                     }
+                     else
+                     {
+                        AddToTailOfBlockedQueue(envelope);
+                     }
+                  }
+               }
+               catch (Exception error)
+               {
+                  request.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               }
+            }
+         });
+
+         ClientSession.Request(this, request).Task.Wait();
       }
    }
 }

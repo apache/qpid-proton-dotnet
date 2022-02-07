@@ -34,8 +34,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
    {
       private readonly IProtonBuffer payload;
       private readonly TaskCompletionSource<ITracker> request;
-      private readonly ClientSender sender;
+      private readonly ClientAbstractSender sender;
       private readonly uint messageFormat;
+      private readonly bool complete;
 
       // TODO private ScheduledFuture<?> sendTimeout;
       private IOutgoingDelivery delivery;
@@ -50,12 +51,35 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="messageFormat">The AMQP message format to encode the transfer</param>
       /// <param name="payload">The encoded message bytes</param>
       /// <param name="request">The request that is linked to this send event</param>
-      public ClientOutgoingEnvelope(ClientSender sender, uint messageFormat, IProtonBuffer payload, TaskCompletionSource<ITracker> request)
+      public ClientOutgoingEnvelope(ClientAbstractSender sender, uint messageFormat, IProtonBuffer payload, TaskCompletionSource<ITracker> request)
       {
          this.messageFormat = messageFormat;
          this.payload = payload;
          this.request = request;
          this.sender = sender;
+         this.complete = true;
+      }
+
+      /// <summary>
+      /// Create a new In-flight Send instance for a complete message send. No further
+      /// sends can occur after the send completes however if the send cannot be completed
+      /// due to session or link credit issues the send will be requeued at the sender for
+      /// retry when the credit is updated by the remote.
+      /// </summary>
+      /// <param name="sender">The originating sender of the wrapped message payload</param>
+      /// <param name="delivery">The proton delivery that is linked to this outgoing write</param>
+      /// <param name="messageFormat">The AMQP message format to encode the transfer</param>
+      /// <param name="payload">The encoded message bytes</param>
+      /// <param name="complete">Is the delivery considered complete as of this transmission</param>
+      /// <param name="request">The request that is linked to this send event</param>
+      public ClientOutgoingEnvelope(ClientAbstractSender sender, IOutgoingDelivery delivery, uint messageFormat, IProtonBuffer payload, bool complete, TaskCompletionSource<ITracker> request)
+      {
+         this.messageFormat = messageFormat;
+         this.delivery = delivery;
+         this.payload = payload;
+         this.request = request;
+         this.sender = sender;
+         this.complete = complete;
       }
 
       /// <summary>
@@ -68,7 +92,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <summary>
       /// The client sender instance that this envelope is linked to
       /// </summary>
-      public ClientSender Sender => sender;
+      public ClientAbstractSender Sender => sender;
 
       /// <summary>
       /// The encoded message payload this envelope wraps.
@@ -115,7 +139,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          else
          {
-            delivery.StreamBytes(payload, true);
+            delivery.StreamBytes(payload, complete);
             if (payload != null && payload.IsReadable)
             {
                sender.AddToHeadOfBlockedQueue(this);
@@ -140,7 +164,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (delivery != null)
          {
-            ClientTracker tracker = (ClientTracker)delivery.LinkedResource;
+            ClientTrackable tracker = (ClientTrackable)delivery.LinkedResource;
             if (tracker != null)
             {
                tracker.CompleteSettlementTask();

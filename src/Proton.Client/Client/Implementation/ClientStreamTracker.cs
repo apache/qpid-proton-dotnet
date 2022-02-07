@@ -16,190 +16,46 @@
  */
 
 using System;
-using System.Threading.Tasks;
-using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   public sealed class ClientStreamTracker : IStreamTracker
+   public sealed class ClientStreamTracker : ClientTrackable, IStreamTracker
    {
-      private readonly ClientStreamSender sender;
-      private readonly IOutgoingDelivery delivery;
-      private readonly TaskCompletionSource<IStreamTracker> remoteSettlementFuture = new TaskCompletionSource<IStreamTracker>();
-
-      private volatile bool remotelySettled;
-      private volatile IDeliveryState remoteDeliveryState;
-
-      internal ClientStreamTracker(ClientStreamSender sender, IOutgoingDelivery delivery)
+      internal ClientStreamTracker(ClientStreamSender sender, IOutgoingDelivery delivery) : base(sender, delivery)
       {
-         this.sender = sender;
-         this.delivery = delivery;
-         this.delivery.DeliveryStateUpdatedHandler(ProcessDeliveryUpdated);
       }
 
-      internal Engine.IOutgoingDelivery ProtonDelivery => delivery;
+      IStreamSender IStreamTracker.Sender => (IStreamSender)base.Sender;
 
-      public IStreamSender Sender => sender;
-
-      public bool Settled => delivery.IsSettled;
-
-      public IDeliveryState State => delivery.State?.ToClientDeliveryState();
-
-      public bool RemoteSettled => remotelySettled;
-
-      public IDeliveryState RemoteState => remoteDeliveryState;
-
-      public Task<ITracker> SettlementTask => throw new NotImplementedException();
-
-      public IStreamTracker Disposition(IDeliveryState state, bool settle)
+      public override IStreamTracker Disposition(IDeliveryState state, bool settle)
       {
-         try
-         {
-            sender.Disposition(delivery, state?.AsProtonType(), settle);
-         }
-         finally
-         {
-            if (settle)
-            {
-               remoteSettlementFuture.SetResult(this);
-            }
-         }
-
-         return this;
+         return (IStreamTracker)base.Disposition(state, settle);
       }
 
-      public IStreamTracker Settle()
+      public override IStreamTracker Settle()
       {
-         try
-         {
-            sender.Disposition(delivery, null, true);
-         }
-         finally
-         {
-            remoteSettlementFuture.SetResult(this);
-         }
-
-         return this;
+         return (IStreamTracker)base.Settle();
       }
 
-      public IStreamTracker AwaitAccepted()
+      public override IStreamTracker AwaitAccepted()
       {
-         try
-         {
-            if (Settled && !RemoteSettled)
-            {
-               return this;
-            }
-            else
-            {
-               remoteSettlementFuture.Task.Wait();
-
-               if (RemoteState != null && RemoteState.IsAccepted)
-               {
-                  return this;
-               }
-               else
-               {
-                  throw new ClientDeliveryStateException("Remote did not accept the sent message", RemoteState);
-               }
-            }
-         }
-         catch (Exception exe)
-         {
-            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
-         }
+         return (IStreamTracker)base.AwaitAccepted();
       }
 
-      public IStreamTracker AwaitAccepted(TimeSpan timeout)
+      public override IStreamTracker AwaitAccepted(TimeSpan timeout)
       {
-         try
-         {
-            if (Settled && !RemoteSettled)
-            {
-               return this;
-            }
-            else
-            {
-               if (remoteSettlementFuture.Task.Wait(timeout))
-               {
-                  if (RemoteState != null && RemoteState.IsAccepted)
-                  {
-                     return this;
-                  }
-                  else
-                  {
-                     throw new ClientDeliveryStateException("Remote did not accept the sent message", RemoteState);
-                  }
-               }
-               else
-               {
-                  throw new ClientOperationTimedOutException("Timed out waiting for remote Accepted outcome");
-               }
-            }
-         }
-         catch (Exception exe)
-         {
-            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
-         }
+         return (IStreamTracker)base.AwaitAccepted(timeout);
       }
 
-      public IStreamTracker AwaitSettlement()
+      public override IStreamTracker AwaitSettlement()
       {
-         try
-         {
-            if (Settled)
-            {
-               return this;
-            }
-
-            return remoteSettlementFuture.Task.Result;
-         }
-         catch (Exception exe)
-         {
-            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
-         }
+         return (IStreamTracker)base.AwaitSettlement();
       }
 
-      public IStreamTracker AwaitSettlement(TimeSpan timeout)
+      public override IStreamTracker AwaitSettlement(TimeSpan timeout)
       {
-         try
-         {
-            if (Settled)
-            {
-               return this;
-            }
-            else if (!remoteSettlementFuture.Task.Wait(timeout))
-            {
-               throw new ClientOperationTimedOutException("Timed out waiting for remote settlement");
-            }
-
-            return this;
-         }
-         catch (Exception exe)
-         {
-            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
-         }
+         return (IStreamTracker)base.AwaitSettlement(timeout);
       }
-
-      #region Private tracker APIs
-
-      private void ProcessDeliveryUpdated(IOutgoingDelivery delivery)
-      {
-         remotelySettled = delivery.IsRemotelySettled;
-         remoteDeliveryState = delivery.RemoteState?.ToClientDeliveryState();
-
-         if (delivery.IsRemotelySettled)
-         {
-            remoteSettlementFuture.SetResult(this);
-         }
-
-         if (sender.Options.AutoSettle && delivery.IsRemotelySettled)
-         {
-            delivery.Settle();
-         }
-      }
-
-      #endregion
    }
 }

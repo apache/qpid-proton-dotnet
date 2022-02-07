@@ -593,7 +593,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             try
             {
-               sender.SendMessage(this, streamMessagePacket);
+               sender.DoStreamMessage(this, streamMessagePacket);
             }
             finally
             {

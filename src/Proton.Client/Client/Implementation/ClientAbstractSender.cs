@@ -23,6 +23,8 @@ using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Utilities;
+using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -193,8 +195,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return new ClientNoOpTracker(this);
       }
 
-      protected abstract ITracker DoSendMessage<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit);
-
       #endregion
 
       #region Internal Sender API
@@ -290,6 +290,43 @@ namespace Apache.Qpid.Proton.Client.Implementation
       #endregion
 
       #region Abstract sender protected API
+
+      protected virtual ITracker DoSendMessage<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
+      {
+         TaskCompletionSource<ITracker> operation = new TaskCompletionSource<ITracker>();
+
+         IProtonBuffer buffer = message.Encode(deliveryAnnotations);
+
+         ClientSession.Execute(() =>
+         {
+            if (NotClosedOrFailed(operation))
+            {
+               try
+               {
+                  ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, message.MessageFormat, buffer, operation);
+
+                  if (ProtonSender.IsSendable && ProtonSender.Current == null)
+                  {
+                     ClientSession.TransactionContext.Send(envelope, null, ProtonSender.SenderSettleMode == SenderSettleMode.Settled);
+                  }
+                  else if (waitForCredit)
+                  {
+                     AddToTailOfBlockedQueue(envelope);
+                  }
+                  else
+                  {
+                     operation.TrySetResult(null);
+                  }
+               }
+               catch (Exception error)
+               {
+                  operation.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               }
+            }
+         });
+
+         return ClientSession.Request(this, operation).Task.GetAwaiter().GetResult();
+      }
 
       protected void CheckClosedOrFailed()
       {
@@ -396,6 +433,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          catch (Exception)
          {
             // Ignore
+         }
+         finally
+         {
+            // If the parent of this sender is a stream session than this sender owns it
+            // and must close it when it closes itself to ensure that the resources are
+            // cleaned up on the remote for the session.
+            if (session is ClientStreamSession)
+            {
+                session.CloseAsync();
+            }
          }
 
          FailPendingUnsettledAndBlockedSends(

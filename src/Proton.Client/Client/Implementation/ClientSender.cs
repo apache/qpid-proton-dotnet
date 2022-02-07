@@ -51,42 +51,5 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          return new ClientNoOpTracker(this);
       }
-
-      protected override ITracker DoSendMessage<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
-      {
-         TaskCompletionSource<ITracker> operation = new TaskCompletionSource<ITracker>();
-
-         IProtonBuffer buffer = message.Encode(deliveryAnnotations);
-
-         ClientSession.Execute(() =>
-         {
-            if (NotClosedOrFailed(operation))
-            {
-               try
-               {
-                  ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, message.MessageFormat, buffer, operation);
-
-                  if (ProtonSender.IsSendable && ProtonSender.Current == null)
-                  {
-                     ClientSession.TransactionContext.Send(envelope, null, ProtonSender.SenderSettleMode == SenderSettleMode.Settled);
-                  }
-                  else if (waitForCredit)
-                  {
-                     AddToTailOfBlockedQueue(envelope);
-                  }
-                  else
-                  {
-                     operation.TrySetResult(null);
-                  }
-               }
-               catch (Exception error)
-               {
-                  operation.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
-               }
-            }
-         });
-
-         return ClientSession.Request(this, operation).Task.GetAwaiter().GetResult();
-      }
    }
 }
