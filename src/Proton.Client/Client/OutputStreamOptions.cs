@@ -27,6 +27,8 @@ namespace Apache.Qpid.Proton.Client
    {
       public static readonly bool DEFAULT_COMPLETE_SEND_ON_CLOSE = true;
 
+      private int bodyLength;
+
       /// <summary>
       /// Creates a default output stream options instance.
       /// </summary>
@@ -82,7 +84,18 @@ namespace Apache.Qpid.Proton.Client
       /// if the stream is closed before the number of bytes indicated is written the send will
       /// be aborted and an error will be thrown to the caller.
       /// </remarks>
-      public int BodyLength { get; set; }
+      public int BodyLength
+      {
+         get => bodyLength;
+         set
+         {
+            if (value < 0)
+            {
+               throw new ArgumentOutOfRangeException("Cannot set a body length greater than Int32.MaxValue");
+            }
 
+            this.bodyLength = value;
+         }
+      }
    }
 }

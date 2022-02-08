@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       /// <param name="options">options to apply to the created stream</param>
       /// <returns>A write only stream instance used to write the message body</returns>
-      Stream GetBodyStream(OutputStreamOptions options);
+      Stream GetBodyStream(OutputStreamOptions options = null);
 
       /// <summary>
       ///

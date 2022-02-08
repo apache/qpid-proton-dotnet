@@ -50,6 +50,33 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       }
 
       /// <summary>
+      /// Reads a single byte from the given Stream and thrown a DecodeException if the
+      /// Stream indicates an EOF condition was encountered.
+      /// </summary>
+      /// <param name="stream">The stream where the byte should be read from</param>
+      /// <returns>An byte value read from the given stream</returns>
+      /// <exception cref="IOException">If the value cannot be read from the stream</exception>
+      public static EncodingCodes ReadEncodingCode(this Stream stream)
+      {
+         try
+         {
+            int result = stream.ReadByte();
+            if (result >= 0)
+            {
+               return (EncodingCodes)result;
+            }
+            else
+            {
+               throw new EndOfStreamException("Cannot read more type information from stream that has reached its end.");
+            }
+         }
+         catch (IOException ex)
+         {
+            throw new IOException("Caught IO error reading from provided stream", ex);
+         }
+      }
+
+      /// <summary>
       /// Reads the given number of bytes from the provided Stream into an array and return
       /// that to the caller.  If the requested number of bytes cannot be read from the
       /// stream an DecodeException is thrown to indicate an underflow.
