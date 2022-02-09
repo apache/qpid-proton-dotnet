@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public abstract class ClientAbstractSender : ISender
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSender>();
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientAbstractSender>();
 
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private ClientException failureCause;

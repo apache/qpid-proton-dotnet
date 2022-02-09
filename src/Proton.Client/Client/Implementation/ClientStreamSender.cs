@@ -78,12 +78,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return ClientSession.Request(this, request).Task.GetAwaiter().GetResult();
       }
 
-      internal IStreamTracker DoStreamMessage<T>(ClientStreamSenderMessage context, IAdvancedMessage<T> message)
+      internal IStreamTracker DoStreamMessage(ClientStreamSenderMessage context, IProtonBuffer buffer, uint messageFormat)
       {
          TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
-         IProtonBuffer buffer = message.Encode(null); // Delivery annotations are part of the stream message
          ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(
-            this, context.ProtonDelivery, message.MessageFormat, buffer, context.Completed, request);
+            this, context.ProtonDelivery, messageFormat, buffer, context.Completed, request);
 
          ClientSession.Execute(() =>
          {

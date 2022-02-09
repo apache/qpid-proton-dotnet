@@ -90,6 +90,36 @@ namespace Apache.Qpid.Proton.Buffer
       }
 
       /// <summary>
+      /// Creates a new composite buffer that is composed of the given enumeration of buffers.
+      /// </summary>
+      /// <remarks>
+      /// The provided buffers must adhere to the buffer consistency guidelines of the buffer
+      /// implementation that is used to create the composite buffer, if they do not an exception
+      /// may be thrown that indicates the nature of the violation.
+      /// </remarks>
+      /// <param name="buffers">The enumeration of buffers to compose the new composite</param>
+      /// <returns>a new empty composute buffer instance.</returns>
+      public static IProtonCompositeBuffer Compose(params IProtonBuffer[] buffers)
+      {
+         return new ProtonCompositeBuffer(ProtonByteBufferAllocator.Instance, buffers);
+      }
+
+      /// <summary>
+      /// Creates a new composite buffer that is composed of the given enumeration of buffers.
+      /// </summary>
+      /// <remarks>
+      /// The provided buffers must adhere to the buffer consistency guidelines of the buffer
+      /// implementation that is used to create the composite buffer, if they do not an exception
+      /// may be thrown that indicates the nature of the violation.
+      /// </remarks>
+      /// <param name="buffers">The enumeration of buffers to compose the new composite</param>
+      /// <returns>a new empty composute buffer instance.</returns>
+      public static IProtonCompositeBuffer Compose(IEnumerable<IProtonBuffer> buffers)
+      {
+         return new ProtonCompositeBuffer(ProtonByteBufferAllocator.Instance, buffers);
+      }
+
+      /// <summary>
       /// Simpler helper API for user to check if a given buffer is indeed a composite
       /// buffer instance.
       /// </summary>

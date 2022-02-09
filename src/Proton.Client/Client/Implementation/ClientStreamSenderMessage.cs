@@ -19,7 +19,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Exceptions;
+using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 
@@ -27,11 +29,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 {
    public sealed class ClientStreamSenderMessage : IStreamSenderMessage
    {
+      private static readonly int DATA_SECTION_HEADER_ENCODING_SIZE = 8;
+
+      // Standard encoding data for a Data Section (Requires four byte size written before writing the actual data)
+      private static readonly byte[] DATA_SECTION_PREAMBLE = { (byte)EncodingCodes.DescribedTypeIndicator,
+                                                               (byte)EncodingCodes.SmallULong,
+                                                               (byte)Data.DescriptorCode,
+                                                               (byte)EncodingCodes.VBin32 };
+
       private readonly ClientStreamSender sender;
       private readonly DeliveryAnnotations deliveryAnnotations;
       private readonly uint writeBufferSize;
-      private readonly IAdvancedMessage<object> streamMessagePacket; // TODO Temporary variable
-      // TODO private readonly StreamMessagePacket streamMessagePacket = new StreamMessagePacket();
       private readonly ClientStreamTracker tracker;
 
       private Header header;
@@ -142,7 +150,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public Stream RawOutputStream()
       {
-         throw new NotImplementedException();
+         if (Completed)
+         {
+            throw new ClientIllegalStateException("Cannot create an Stream from a completed send context");
+         }
+
+         if (Aborted)
+         {
+            throw new ClientIllegalStateException("Cannot create an Stream from a aborted send context");
+         }
+
+         if (currentState == StreamState.BODY_WRITTING)
+         {
+            throw new ClientIllegalStateException("Cannot add more body sections while an Stream is active");
+         }
+
+         TransitionToWritableState();
+
+         return new SendContextRawBytesOutputStream(
+            this, ProtonByteBufferAllocator.Instance.Allocate(writeBufferSize, writeBufferSize));
       }
 
       #region AMQP Header access APIs
@@ -483,7 +509,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Stream Body
       {
          get => GetBodyStream(new OutputStreamOptions());
-         set => throw new ClientUnsupportedOperationException("Cannot set an OutputStream body on a StreamSenderMessage");
+         set => throw new ClientUnsupportedOperationException("Cannot set an Stream body on a StreamSenderMessage");
       }
 
       public IAdvancedMessage<Stream> ForEachBodySection(Action<ISection> consumer)
@@ -493,7 +519,26 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IAdvancedMessage<Stream> AddBodySection(ISection section)
       {
-         throw new NotImplementedException();
+         if (Completed)
+         {
+            throw new ClientIllegalStateException("Cannot add more body sections to a completed message");
+         }
+
+         if (Aborted)
+         {
+            throw new ClientIllegalStateException("Cannot add more body sections to an aborted message");
+         }
+
+         if (currentState == StreamState.BODY_WRITTING)
+         {
+            throw new ClientIllegalStateException("Cannot add more body sections while an OutputStream is active");
+         }
+
+         TransitionToWritableState();
+
+         AppendDataToBuffer(ClientMessageSupport.EncodeSection(section, ProtonByteBufferAllocator.Instance.Allocate()));
+
+         return this;
       }
 
       public IAdvancedMessage<Stream> ClearBodySections()
@@ -503,7 +548,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IEnumerable<ISection> GetBodySections()
       {
-         return new ISection[0];
+         return new ISection[0]; // Non null empty result to indicate no sections
       }
 
       public IAdvancedMessage<Stream> SetBodySections(IEnumerable<ISection> sections)
@@ -523,7 +568,33 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public Stream GetBodyStream(OutputStreamOptions options)
       {
-         throw new NotImplementedException();
+         if (Completed)
+         {
+            throw new ClientIllegalStateException("Cannot create an OutputStream from a completed send context");
+         }
+
+         if (Aborted)
+         {
+            throw new ClientIllegalStateException("Cannot create an OutputStream from a aborted send context");
+         }
+
+         if (currentState == StreamState.BODY_WRITTING)
+         {
+            throw new ClientIllegalStateException("Cannot add more body sections while an OutputStream is active");
+         }
+
+         TransitionToWritableState();
+
+         IProtonBuffer streamBuffer = ProtonByteBufferAllocator.Instance.Allocate(writeBufferSize, writeBufferSize);
+
+         if (options.BodyLength > 0)
+         {
+            return new SingularDataSectionOutputStream(this, options, streamBuffer);
+         }
+         else
+         {
+            return new MultipleDataSectionsOutputStream(this, options, streamBuffer);
+         }
       }
 
       #endregion
@@ -584,7 +655,38 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void AppendDataToBuffer(IProtonBuffer incoming)
       {
-         throw new NotImplementedException();
+         if (buffer == null)
+         {
+            buffer = incoming;
+         }
+         else
+         {
+            if (buffer is ProtonCompositeBuffer)
+            {
+               ((ProtonCompositeBuffer)buffer).Append(incoming);
+            }
+            else
+            {
+               buffer = IProtonCompositeBuffer.Compose(buffer, incoming);
+            }
+         }
+
+         // Were aren't currently attempting to optimize each outbound chunk of the streaming
+         // send, if the block accumulated is larger than the write buffer we don't try and
+         // split it but instead let the frame writer just write multiple frames.  This can
+         // result in a trailing single tiny frame but for now this case isn't being optimized
+
+         if (buffer.ReadableBytes >= writeBufferSize)
+         {
+            try
+            {
+               sender.DoStreamMessage(this, buffer, messageFormat);
+            }
+            finally
+            {
+               buffer = null;
+            }
+         }
       }
 
       private void DoFlush()
@@ -593,7 +695,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             try
             {
-               sender.DoStreamMessage(this, streamMessagePacket);
+               sender.DoStreamMessage(this, buffer, messageFormat);
             }
             finally
             {
@@ -617,6 +719,302 @@ namespace Apache.Qpid.Proton.Client.Implementation
          AppendDataToBuffer(ClientMessageSupport.EncodeSection(section, ProtonByteBufferAllocator.Instance.Allocate()));
 
          return this;
+      }
+
+      private void TransitionToWritableState()
+      {
+         if (currentState == StreamState.PREAMBLE)
+         {
+
+            if (header != null)
+            {
+               AppendDataToBuffer(
+                  ClientMessageSupport.EncodeSection(header, ProtonByteBufferAllocator.Instance.Allocate()));
+            }
+            if (deliveryAnnotations != null)
+            {
+               AppendDataToBuffer(
+                  ClientMessageSupport.EncodeSection(deliveryAnnotations, ProtonByteBufferAllocator.Instance.Allocate()));
+            }
+            if (annotations != null)
+            {
+               AppendDataToBuffer(
+                  ClientMessageSupport.EncodeSection(annotations, ProtonByteBufferAllocator.Instance.Allocate()));
+            }
+            if (properties != null)
+            {
+               AppendDataToBuffer(
+                  ClientMessageSupport.EncodeSection(properties, ProtonByteBufferAllocator.Instance.Allocate()));
+            }
+            if (applicationProperties != null)
+            {
+               AppendDataToBuffer(
+                  ClientMessageSupport.EncodeSection(applicationProperties, ProtonByteBufferAllocator.Instance.Allocate()));
+            }
+
+            currentState = StreamState.BODY_WRITABLE;
+         }
+      }
+
+      #endregion
+
+      #region Stream implementations used for writing body sections
+
+      private abstract class StreamMessageOutputStream : Stream
+      {
+         protected readonly AtomicBoolean closed = new AtomicBoolean();
+         protected readonly OutputStreamOptions options;
+         protected readonly IProtonBuffer streamBuffer;
+         protected readonly ClientStreamSenderMessage message;
+
+         protected int bytesWritten;
+
+         public StreamMessageOutputStream(ClientStreamSenderMessage message, OutputStreamOptions options, IProtonBuffer buffer)
+         {
+            this.options = options;
+            this.streamBuffer = buffer;
+
+            // Stream takes control of state until closed.
+            message.currentState = StreamState.BODY_WRITTING;
+         }
+
+         #region Stream API implementation
+
+         // The output of the data section on a per frame basis prevents
+         // the stream from being seekable and of course cannot be read from.
+         // Length is never really know because it could be that we've written
+         // one data section and moved onto another, position cannot be changed
+         // because we are writing in batches and cannot go back to a batch that
+         // was written and forgotten.
+
+         public sealed override bool CanTimeout => false;
+
+         public sealed override bool CanRead => false;
+
+         public sealed override bool CanWrite => true;
+
+         public sealed override bool CanSeek => false;
+
+         public sealed override long Length => throw new NotImplementedException("No length value available");
+
+         public sealed override long Position
+         {
+            get => throw new NotImplementedException("Cannot read a position from a streamed message stream");
+            set => throw new NotImplementedException("Cannot assign a position to a streamed message stream");
+         }
+
+         #endregion
+
+         public override void WriteByte(byte value)
+         {
+            CheckClosed();
+            CheckOutputLimitReached(1);
+            streamBuffer.WriteUnsignedByte(value);
+            if (!streamBuffer.IsWritable)
+            {
+               Flush();
+            }
+            bytesWritten++;
+         }
+
+         public override void Write(byte[] bytes, int offset, int length)
+         {
+            CheckClosed();
+            CheckOutputLimitReached(length);
+            if (streamBuffer.WritableBytes >= length)
+            {
+               streamBuffer.WriteBytes(bytes, offset, length);
+               bytesWritten += length;
+               if (!streamBuffer.IsWritable)
+               {
+                  Flush();
+               }
+            }
+            else
+            {
+               int remaining = length;
+
+               while (remaining > 0)
+               {
+                  int toWrite = (int)Math.Min(remaining, streamBuffer.WritableBytes);
+                  bytesWritten += toWrite;
+                  streamBuffer.WriteBytes(bytes, offset + (length - remaining), toWrite);
+                  if (!streamBuffer.IsWritable)
+                  {
+                     Flush();
+                  }
+                  remaining -= toWrite;
+               }
+            }
+         }
+
+         public override void Flush()
+         {
+            CheckClosed();
+
+            if (options.BodyLength <= 0)
+            {
+               DoFlushPending(false);
+            }
+            else
+            {
+               DoFlushPending(bytesWritten == options.BodyLength && options.CompleteSendOnClose);
+            }
+         }
+
+         public override void Close()
+         {
+            if (closed.CompareAndSet(false, true) && !message.Completed)
+            {
+               message.currentState = StreamState.BODY_WRITABLE;
+
+               if (options.BodyLength > 0 && options.BodyLength != bytesWritten)
+               {
+                  // Limit was set but user did not write all of it so we must abort.
+                  try
+                  {
+                     message.Abort();
+                  }
+                  catch (ClientException e)
+                  {
+                     throw new IOException(e.Message, e);
+                  }
+               }
+               else
+               {
+                  // Limit not set or was set and user wrote that many bytes so we can complete.
+                  DoFlushPending(options.CompleteSendOnClose);
+               }
+            }
+         }
+
+         private void CheckOutputLimitReached(int writeSize)
+         {
+            int outputLimit = options.BodyLength;
+
+            if (message.Completed)
+            {
+               throw new IOException("Cannot write to an already completed message output stream");
+            }
+
+            if (outputLimit > 0 && (bytesWritten + writeSize) > outputLimit)
+            {
+               throw new IOException("Cannot write beyond configured stream output limit");
+            }
+         }
+
+         private void CheckClosed()
+         {
+            if (closed.Get())
+            {
+               throw new IOException("The OutputStream has already been closed.");
+            }
+
+            if (message.sender.IsClosed)
+            {
+               throw new IOException("The parent Sender instance has already been closed.");
+            }
+         }
+
+         protected virtual void DoFlushPending(bool complete)
+         {
+            try
+            {
+               if (streamBuffer.IsReadable)
+               {
+                  message.AppendDataToBuffer(streamBuffer);
+               }
+
+               if (complete)
+               {
+                  message.Complete();
+               }
+               else
+               {
+                  message.DoFlush();
+               }
+
+               if (!complete)
+               {
+                  streamBuffer.Reset();
+               }
+            }
+            catch (ClientException e)
+            {
+               throw new IOException(e.Message, e);
+            }
+         }
+
+         public override int Read(byte[] buffer, int offset, int count)
+         {
+            throw new NotImplementedException("Cannot read from a streamed message output stream");
+         }
+
+         public override long Seek(long offset, SeekOrigin origin)
+         {
+            throw new NotImplementedException("Cannot seek within a streamed message output stream");
+         }
+
+         public override void SetLength(long value)
+         {
+            throw new NotImplementedException("Cannot change length of a streamed message output stream");
+         }
+      }
+
+      private sealed class SendContextRawBytesOutputStream : StreamMessageOutputStream
+      {
+         public SendContextRawBytesOutputStream(ClientStreamSenderMessage message, IProtonBuffer buffer)
+             : base(message, new OutputStreamOptions(), buffer)
+         {
+         }
+      }
+
+      private sealed class SingularDataSectionOutputStream : StreamMessageOutputStream
+      {
+         public SingularDataSectionOutputStream(ClientStreamSenderMessage message, OutputStreamOptions options, IProtonBuffer buffer)
+             : base(message, options, buffer)
+         {
+            IProtonBuffer preamble = ProtonByteBufferAllocator.Instance.Allocate(
+               DATA_SECTION_HEADER_ENCODING_SIZE, DATA_SECTION_HEADER_ENCODING_SIZE);
+
+            preamble.WriteBytes(DATA_SECTION_PREAMBLE);
+            preamble.WriteInt(options.BodyLength);
+
+            message.AppendDataToBuffer(preamble);
+         }
+      }
+
+      private sealed class MultipleDataSectionsOutputStream : StreamMessageOutputStream
+      {
+
+         public MultipleDataSectionsOutputStream(ClientStreamSenderMessage message, OutputStreamOptions options, IProtonBuffer buffer)
+              : base(message, options, buffer)
+         {
+         }
+
+         protected override void DoFlushPending(bool complete)
+         {
+            if (streamBuffer.IsReadable)
+            {
+
+               IProtonBuffer preamble = ProtonByteBufferAllocator.Instance.Allocate(
+                  DATA_SECTION_HEADER_ENCODING_SIZE, DATA_SECTION_HEADER_ENCODING_SIZE);
+
+               preamble.WriteBytes(DATA_SECTION_PREAMBLE);
+               preamble.WriteInt((int)streamBuffer.ReadableBytes);
+
+               try
+               {
+                  message.AppendDataToBuffer(preamble);
+               }
+               catch (ClientException e)
+               {
+                  throw new IOException(e.Message, e);
+               }
+            }
+
+            base.DoFlushPending(complete);
+         }
       }
 
       #endregion

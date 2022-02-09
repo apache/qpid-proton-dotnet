@@ -542,7 +542,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (!sender.IsLocallyOpen)
             {
                // TODO Client Stream sender not accounted for yet
-               ClientSender clientSender = (ClientSender)sender.LinkedResource;
+               ClientAbstractSender clientSender = (ClientAbstractSender)sender.LinkedResource;
                if (connection.IsAnonymousRelaySupported)
                {
                   clientSender.Open();

@@ -15,13 +15,8 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
-using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
