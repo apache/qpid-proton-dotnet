@@ -633,13 +633,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private ApplicationProperties LazyCreateApplicationProperties()
       {
          CheckStreamState(StreamState.PREAMBLE, "Cannot write to Message Application Properties after body writing has started.");
-         return applicationProperties ?? (applicationProperties = new ApplicationProperties());
+         return applicationProperties ?? (applicationProperties = new ApplicationProperties(new Dictionary<string, object>()));
       }
 
       private MessageAnnotations LazyCreateMessageAnnotations()
       {
          CheckStreamState(StreamState.PREAMBLE, "Cannot write to Message Annotations after body writing has started.");
-         return annotations ?? (annotations = new MessageAnnotations());
+         return annotations ?? (annotations = new MessageAnnotations(new Dictionary<Symbol, object>()));
       }
 
       private Footer LazyCreateFooter()
@@ -650,7 +650,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                 "Cannot write to Message Footer after message has been marked completed or aborted.");
          }
 
-         return footer ?? (footer = new Footer());
+         return footer ?? (footer = new Footer(new Dictionary<Symbol, object>()));
       }
 
       private void AppendDataToBuffer(IProtonBuffer incoming)
@@ -773,9 +773,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             this.options = options;
             this.streamBuffer = buffer;
+            this.message = message;
 
             // Stream takes control of state until closed.
-            message.currentState = StreamState.BODY_WRITTING;
+            this.message.currentState = StreamState.BODY_WRITTING;
          }
 
          #region Stream API implementation
@@ -815,6 +816,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
                Flush();
             }
             bytesWritten++;
+         }
+
+         public override void Write(ReadOnlySpan<byte> bytes)
+         {
+            Write(bytes.ToArray(), 0, bytes.Length);
          }
 
          public override void Write(byte[] bytes, int offset, int length)

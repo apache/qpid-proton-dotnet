@@ -2679,7 +2679,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestStreamMessageFlushFailsAfterConnectionDropped()
       {
@@ -2744,7 +2743,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestStreamMessageCloseThatFlushesFailsAfterConnectionDropped()
       {
@@ -2809,7 +2807,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestStreamMessageWriteThatFlushesFailsAfterConnectionDropped()
       {
