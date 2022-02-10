@@ -2696,8 +2696,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
 
+            CountdownEvent disconnected = new CountdownEvent(1);
+
             IClient container = IClient.Create();
-            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ConnectionOptions options = new ConnectionOptions();
+            options.DisconnectedHandler = (connection, eventArgs) =>
+            {
+               disconnected.Signal();
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
             IStreamSender sender = connection.OpenStreamSender("test-queue");
             IStreamSenderMessage message = sender.BeginMessage();
 
@@ -2726,6 +2733,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             // Next write should fail as connection should have dropped.
             stream.Write(new byte[] { 8, 9, 10, 11 });
+
+            logger.LogInformation("Waiting for connection to report it was disconnected");
+            Assert.IsTrue(disconnected.Wait(TimeSpan.FromSeconds(5)));
 
             try
             {
