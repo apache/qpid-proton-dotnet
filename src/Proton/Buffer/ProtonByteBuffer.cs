@@ -40,6 +40,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       private byte[] array;
 
+      private int arrayOffset;
       private long readOffset;
       private long writeOffset;
       private long maxCapacity;
@@ -79,6 +80,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
 
          this.array = new byte[initialCapacity];
+         this.arrayOffset = 0;
          this.maxCapacity = maxCapacity;
       }
 
@@ -87,11 +89,8 @@ namespace Apache.Qpid.Proton.Buffer
       /// size determines that largest the buffer can ever be.
       /// </summary>
       /// <param name="backingArray"></param>
-      public ProtonByteBuffer(byte[] backingArray) : base()
+      public ProtonByteBuffer(byte[] backingArray) : this(backingArray, 0, Int32.MaxValue)
       {
-         this.array = backingArray;
-         this.writeOffset = backingArray.LongLength;
-         this.maxCapacity = backingArray.LongLength;
       }
 
       /// <summary>
@@ -100,15 +99,31 @@ namespace Apache.Qpid.Proton.Buffer
       /// how large the buffer could ever grow.
       /// </summary>
       /// <param name="backingArray"></param>
-      public ProtonByteBuffer(byte[] backingArray, long maxCapacity) : base()
+      public ProtonByteBuffer(byte[] backingArray, long maxCapacity) : this(backingArray, 0, maxCapacity)
       {
+      }
+
+      /// <summary>
+      /// Create a new proton byte buffer instance with given backing array as the
+      /// starting backing store and uses the provided max capacity value to control
+      /// how large the buffer could ever grow.
+      /// </summary>
+      /// <param name="backingArray"></param>
+      public ProtonByteBuffer(byte[] backingArray, int arrayOffset, long maxCapacity) : base()
+      {
+         if (arrayOffset > backingArray.Length)
+         {
+            throw new ArgumentOutOfRangeException("Array offset cannot exceed the array length");
+         }
+
          this.array = backingArray;
+         this.arrayOffset = arrayOffset;
          this.maxCapacity = maxCapacity;
       }
 
       #region Buffer State and Management APIs
 
-      public long Capacity => array.Length;
+      public long Capacity => array.Length - arrayOffset;
 
       public bool IsReadable => ReadOffset < WriteOffset;
 
@@ -156,7 +171,7 @@ namespace Apache.Qpid.Proton.Buffer
             // Compress the current readable section into the front of the
             // array and then update the offsets to match the new reality.
             // TODO: Future work item to allow for offset wrapped arrays.
-            Array.Copy(array, readOffset, array, 0, writeOffset - readOffset);
+            Array.Copy(array, Offset(readOffset), array, arrayOffset, writeOffset - readOffset);
             writeOffset -= readOffset;
             readOffset = 0;
          }
@@ -183,7 +198,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (Capacity > 0)
          {
-            Array.Fill<byte>(array, value);
+            Array.Fill<byte>(array, value, (int)arrayOffset, (int)Capacity);
          }
          return this;
       }
@@ -201,7 +216,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          CheckGet(index, length);
          byte[] copyBytes = new byte[length];
-         Array.Copy(array, index, copyBytes, 0, length);
+         Array.Copy(array, Offset(index), copyBytes, 0, length);
 
          IProtonBuffer copy = new ProtonByteBuffer(copyBytes, maxCapacity);
          copy.WriteOffset = length;
@@ -212,7 +227,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer CopyInto(long srcPos, byte[] dest, long destPos, long length)
       {
          CheckCopyIntoArgs(srcPos, length, destPos, dest.LongLength);
-         Array.Copy(array, srcPos, dest, destPos, length);
+         Array.Copy(array, Offset(srcPos), dest, destPos, length);
          return this;
       }
 
@@ -223,7 +238,7 @@ namespace Apache.Qpid.Proton.Buffer
          if (dest is ProtonByteBuffer)
          {
             ProtonByteBuffer destByteBuffer = (ProtonByteBuffer)dest;
-            Array.Copy(array, srcPos, destByteBuffer.array, destPos, length);
+            Array.Copy(array, Offset(srcPos), destByteBuffer.array, destPos, length);
          }
          else
          {
@@ -245,7 +260,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public byte[] ReadableArray => array;
 
-      public int ReadableArrayOffset => (int)readOffset; // Array backing means int casting is ok.
+      public int ReadableArrayOffset => (int)Offset(readOffset); // Array backing means int casting is ok.
 
       public int ReadableArrayLength => (int)ReadableBytes; // Array backing means int casting is ok.
 
@@ -253,7 +268,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public byte[] WritableArray => array;
 
-      public int WritableArrayOffset => (int)writeOffset; // Array backing means int casting is ok.
+      public int WritableArrayOffset => (int)Offset(writeOffset); // Array backing means int casting is ok.
 
       public int WritableArrayLength => (int)WritableBytes; // Array backing means int casting is ok.
 
@@ -276,79 +291,79 @@ namespace Apache.Qpid.Proton.Buffer
       public bool GetBoolean(long index)
       {
          CheckGet(index, sizeof(byte));
-         return ProtonByteUtils.ReadBoolean(array, (int)index);
+         return ProtonByteUtils.ReadBoolean(array, (int)Offset(index));
       }
 
       public sbyte GetByte(long index)
       {
          CheckGet(index, sizeof(sbyte));
-         return ProtonByteUtils.ReadByte(array, (int)index);
+         return ProtonByteUtils.ReadByte(array, (int)Offset(index));
       }
 
       public char GetChar(long index)
       {
          CheckGet(index, sizeof(char));
-         return ProtonByteUtils.ReadChar(array, (int)index);
+         return ProtonByteUtils.ReadChar(array, (int)Offset(index));
       }
 
       public double GetDouble(long index)
       {
          CheckGet(index, sizeof(double));
-         return ProtonByteUtils.ReadDouble(array, (int)index);
+         return ProtonByteUtils.ReadDouble(array, (int)Offset(index));
       }
 
       public float GetFloat(long index)
       {
          CheckGet(index, sizeof(float));
-         return ProtonByteUtils.ReadFloat(array, (int)index);
+         return ProtonByteUtils.ReadFloat(array, (int)Offset(index));
       }
 
       public int GetInt(long index)
       {
          CheckGet(index, sizeof(int));
-         return ProtonByteUtils.ReadInt(array, (int)index);
+         return ProtonByteUtils.ReadInt(array, (int)Offset(index));
       }
 
       public long GetLong(long index)
       {
          CheckGet(index, sizeof(long));
-         return ProtonByteUtils.ReadLong(array, (int)index);
+         return ProtonByteUtils.ReadLong(array, (int)Offset(index));
       }
 
       public short GetShort(long index)
       {
          CheckGet(index, sizeof(short));
-         return ProtonByteUtils.ReadShort(array, (int)index);
+         return ProtonByteUtils.ReadShort(array, (int)Offset(index));
       }
 
       public byte GetUnsignedByte(long index)
       {
          CheckGet(index, sizeof(byte));
-         return ProtonByteUtils.ReadUnsignedByte(array, (int)index);
+         return ProtonByteUtils.ReadUnsignedByte(array, (int)Offset(index));
       }
 
       public uint GetUnsignedInt(long index)
       {
          CheckGet(index, sizeof(uint));
-         return ProtonByteUtils.ReadUnsignedInt(array, (int)index);
+         return ProtonByteUtils.ReadUnsignedInt(array, (int)Offset(index));
       }
 
       public ulong GetUnsignedLong(long index)
       {
          CheckGet(index, sizeof(ulong));
-         return ProtonByteUtils.ReadUnsignedLong(array, (int)index);
+         return ProtonByteUtils.ReadUnsignedLong(array, (int)Offset(index));
       }
 
       public ushort GetUnsignedShort(long index)
       {
          CheckGet(index, sizeof(ushort));
-         return ProtonByteUtils.ReadUnsignedShort(array, (int)index);
+         return ProtonByteUtils.ReadUnsignedShort(array, (int)Offset(index));
       }
 
       public bool ReadBoolean()
       {
          CheckRead(readOffset, sizeof(byte));
-         bool result = ProtonByteUtils.ReadBoolean(array, (int)readOffset);
+         bool result = ProtonByteUtils.ReadBoolean(array, (int)Offset(readOffset));
          readOffset += sizeof(byte);
          return result;
       }
@@ -356,7 +371,7 @@ namespace Apache.Qpid.Proton.Buffer
       public sbyte ReadByte()
       {
          CheckRead(readOffset, sizeof(sbyte));
-         sbyte result = ProtonByteUtils.ReadByte(array, (int)readOffset);
+         sbyte result = ProtonByteUtils.ReadByte(array, (int)Offset(readOffset));
          readOffset += sizeof(sbyte);
          return result;
       }
@@ -364,7 +379,7 @@ namespace Apache.Qpid.Proton.Buffer
       public char ReadChar()
       {
          CheckRead(readOffset, sizeof(char));
-         char result = ProtonByteUtils.ReadChar(array, (int)readOffset);
+         char result = ProtonByteUtils.ReadChar(array, (int)Offset(readOffset));
          readOffset += sizeof(char);
          return result;
       }
@@ -372,7 +387,7 @@ namespace Apache.Qpid.Proton.Buffer
       public double ReadDouble()
       {
          CheckRead(readOffset, sizeof(double));
-         double result = ProtonByteUtils.ReadDouble(array, (int)readOffset);
+         double result = ProtonByteUtils.ReadDouble(array, (int)Offset(readOffset));
          readOffset += sizeof(double);
          return result;
       }
@@ -380,7 +395,7 @@ namespace Apache.Qpid.Proton.Buffer
       public float ReadFloat()
       {
          CheckRead(readOffset, sizeof(float));
-         float result = ProtonByteUtils.ReadFloat(array, (int)readOffset);
+         float result = ProtonByteUtils.ReadFloat(array, (int)Offset(readOffset));
          readOffset += sizeof(float);
          return result;
       }
@@ -388,7 +403,7 @@ namespace Apache.Qpid.Proton.Buffer
       public int ReadInt()
       {
          CheckRead(readOffset, sizeof(int));
-         int result = ProtonByteUtils.ReadInt(array, (int)readOffset);
+         int result = ProtonByteUtils.ReadInt(array, (int)Offset(readOffset));
          readOffset += sizeof(int);
          return result;
       }
@@ -396,7 +411,7 @@ namespace Apache.Qpid.Proton.Buffer
       public long ReadLong()
       {
          CheckRead(readOffset, sizeof(long));
-         long result = ProtonByteUtils.ReadLong(array, (int)readOffset);
+         long result = ProtonByteUtils.ReadLong(array, (int)Offset(readOffset));
          readOffset += sizeof(long);
          return result;
       }
@@ -404,7 +419,7 @@ namespace Apache.Qpid.Proton.Buffer
       public short ReadShort()
       {
          CheckRead(readOffset, sizeof(short));
-         short result = ProtonByteUtils.ReadShort(array, (int)readOffset);
+         short result = ProtonByteUtils.ReadShort(array, (int)Offset(readOffset));
          readOffset += sizeof(short);
          return result;
       }
@@ -412,7 +427,7 @@ namespace Apache.Qpid.Proton.Buffer
       public byte ReadUnsignedByte()
       {
          CheckRead(readOffset, sizeof(byte));
-         byte result = ProtonByteUtils.ReadUnsignedByte(array, (int)readOffset);
+         byte result = ProtonByteUtils.ReadUnsignedByte(array, (int)Offset(readOffset));
          readOffset += sizeof(byte);
          return result;
       }
@@ -420,7 +435,7 @@ namespace Apache.Qpid.Proton.Buffer
       public uint ReadUnsignedInt()
       {
          CheckRead(readOffset, sizeof(uint));
-         uint result = ProtonByteUtils.ReadUnsignedInt(array, (int)readOffset);
+         uint result = ProtonByteUtils.ReadUnsignedInt(array, (int)Offset(readOffset));
          readOffset += sizeof(uint);
          return result;
       }
@@ -428,7 +443,7 @@ namespace Apache.Qpid.Proton.Buffer
       public ulong ReadUnsignedLong()
       {
          CheckRead(readOffset, sizeof(ulong));
-         ulong result = ProtonByteUtils.ReadUnsignedLong(array, (int)readOffset);
+         ulong result = ProtonByteUtils.ReadUnsignedLong(array, (int)Offset(readOffset));
          readOffset += sizeof(ulong);
          return result;
       }
@@ -436,7 +451,7 @@ namespace Apache.Qpid.Proton.Buffer
       public ushort ReadUnsignedShort()
       {
          CheckRead(readOffset, sizeof(ushort));
-         ushort result = ProtonByteUtils.ReadUnsignedShort(array, (int)readOffset);
+         ushort result = ProtonByteUtils.ReadUnsignedShort(array, (int)Offset(readOffset));
          readOffset += sizeof(ushort);
          return result;
       }
@@ -444,91 +459,91 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer SetBoolean(long index, bool value)
       {
          CheckSet(index, sizeof(byte));
-         ProtonByteUtils.WriteBoolean(value, array, (int)index);
+         ProtonByteUtils.WriteBoolean(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetByte(long index, sbyte value)
       {
          CheckSet(index, sizeof(sbyte));
-         ProtonByteUtils.WriteByte(value, array, (int)index);
+         ProtonByteUtils.WriteByte(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetChar(long index, char value)
       {
          CheckSet(index, sizeof(short));
-         ProtonByteUtils.WriteShort((short)value, array, (int)index);
+         ProtonByteUtils.WriteShort((short)value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetDouble(long index, double value)
       {
          CheckSet(index, sizeof(double));
-         ProtonByteUtils.WriteDouble(value, array, (int)index);
+         ProtonByteUtils.WriteDouble(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetFloat(long index, float value)
       {
          CheckSet(index, sizeof(float));
-         ProtonByteUtils.WriteFloat(value, array, (int)index);
+         ProtonByteUtils.WriteFloat(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetInt(long index, int value)
       {
          CheckSet(index, sizeof(int));
-         ProtonByteUtils.WriteInt(value, array, (int)index);
+         ProtonByteUtils.WriteInt(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetLong(long index, long value)
       {
          CheckSet(index, sizeof(long));
-         ProtonByteUtils.WriteLong(value, array, (int)index);
+         ProtonByteUtils.WriteLong(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetShort(long index, short value)
       {
          CheckSet(index, sizeof(short));
-         ProtonByteUtils.WriteShort(value, array, (int)index);
+         ProtonByteUtils.WriteShort(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetUnsignedByte(long index, byte value)
       {
          CheckSet(index, sizeof(byte));
-         ProtonByteUtils.WriteUnsignedByte(value, array, (int)index);
+         ProtonByteUtils.WriteUnsignedByte(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetUnsignedInt(long index, uint value)
       {
          CheckSet(index, sizeof(uint));
-         ProtonByteUtils.WriteUnsignedInt(value, array, (int)index);
+         ProtonByteUtils.WriteUnsignedInt(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetUnsignedLong(long index, ulong value)
       {
          CheckSet(index, sizeof(ulong));
-         ProtonByteUtils.WriteUnsignedLong(value, array, (int)index);
+         ProtonByteUtils.WriteUnsignedLong(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer SetUnsignedShort(long index, ushort value)
       {
          CheckSet(index, sizeof(ushort));
-         ProtonByteUtils.WriteUnsignedShort(value, array, (int)index);
+         ProtonByteUtils.WriteUnsignedShort(value, array, (int)Offset(index));
          return this;
       }
 
       public IProtonBuffer WriteBoolean(bool value)
       {
          CheckWrite(writeOffset, sizeof(byte));
-         ProtonByteUtils.WriteBoolean(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteBoolean(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(byte);
          return this;
       }
@@ -536,7 +551,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteByte(sbyte value)
       {
          CheckWrite(writeOffset, sizeof(byte));
-         ProtonByteUtils.WriteByte(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteByte(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(byte);
          return this;
       }
@@ -544,7 +559,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteDouble(double value)
       {
          CheckWrite(writeOffset, sizeof(double));
-         ProtonByteUtils.WriteDouble(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteDouble(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(double);
          return this;
       }
@@ -552,7 +567,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteFloat(float value)
       {
          CheckWrite(writeOffset, sizeof(float));
-         ProtonByteUtils.WriteFloat(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteFloat(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(float);
          return this;
       }
@@ -560,7 +575,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteInt(int value)
       {
          CheckWrite(writeOffset, sizeof(int));
-         ProtonByteUtils.WriteInt(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteInt(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(int);
          return this;
       }
@@ -568,7 +583,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteLong(long value)
       {
          CheckWrite(writeOffset, sizeof(long));
-         ProtonByteUtils.WriteLong(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteLong(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(long);
          return this;
       }
@@ -576,7 +591,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteShort(short value)
       {
          CheckWrite(writeOffset, sizeof(short));
-         ProtonByteUtils.WriteShort(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteShort(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(short);
          return this;
       }
@@ -584,7 +599,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteUnsignedByte(byte value)
       {
          CheckWrite(writeOffset, sizeof(byte));
-         ProtonByteUtils.WriteUnsignedByte(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteUnsignedByte(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(byte);
          return this;
       }
@@ -592,7 +607,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteUnsignedInt(uint value)
       {
          CheckWrite(writeOffset, sizeof(uint));
-         ProtonByteUtils.WriteUnsignedInt(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteUnsignedInt(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(uint);
          return this;
       }
@@ -600,7 +615,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteUnsignedLong(ulong value)
       {
          CheckWrite(writeOffset, sizeof(ulong));
-         ProtonByteUtils.WriteUnsignedLong(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteUnsignedLong(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(ulong);
          return this;
       }
@@ -608,7 +623,7 @@ namespace Apache.Qpid.Proton.Buffer
       public IProtonBuffer WriteUnsignedShort(ushort value)
       {
          CheckWrite(writeOffset, sizeof(ushort));
-         ProtonByteUtils.WriteUnsignedShort(value, array, (int)writeOffset);
+         ProtonByteUtils.WriteUnsignedShort(value, array, (int)Offset(writeOffset));
          writeOffset += sizeof(ushort);
          return this;
       }
@@ -638,7 +653,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
 
          CheckCopyIntoArgs(offset, length, writeOffset, Capacity);
-         Array.Copy(source, offset, array, writeOffset, length);
+         Array.Copy(source, offset, array, Offset(writeOffset), length);
          writeOffset += length;
          return this;
       }
@@ -647,7 +662,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          long length = source.ReadableBytes;
          CheckWrite(writeOffset, length);
-         source.CopyInto(source.ReadOffset, array, WriteOffset, length);
+         source.CopyInto(source.ReadOffset, array, Offset(writeOffset), length);
          source.ReadOffset += length;
          writeOffset += length;
 
@@ -714,10 +729,10 @@ namespace Apache.Qpid.Proton.Buffer
          }
 
          Decoder decoder = encoding.GetDecoder();
-         int charCount = decoder.GetCharCount(array, (int)readOffset, (int)(writeOffset - readOffset));
+         int charCount = decoder.GetCharCount(array, (int)Offset(readOffset), (int)(writeOffset - readOffset));
          char[] output = new char[charCount];
 
-         int outputChars = decoder.GetChars(array, (int)readOffset, (int)(writeOffset - readOffset), output, 0);
+         int outputChars = decoder.GetChars(array, (int)Offset(readOffset), (int)(writeOffset - readOffset), output, 0);
 
          return new string(output, 0, outputChars);
       }
@@ -733,6 +748,11 @@ namespace Apache.Qpid.Proton.Buffer
       #endregion
 
       #region Internal byte buffer utility methods
+
+      private long Offset(long index)
+      {
+         return index + arrayOffset;
+      }
 
       private IProtonBuffer InternalEnsureWritable(bool allowCompaction, long minimumGrowth, long requiredWritable)
       {
@@ -763,12 +783,13 @@ namespace Apache.Qpid.Proton.Buffer
                throw new ArgumentOutOfRangeException("Buffer size must be positive, but was " + newCapacity + '.');
             }
 
-            int oldCapacity = array.Length;
+            int oldCapacity = array.Length - arrayOffset;
             if (newCapacity > oldCapacity)
             {
                byte[] newArray = new byte[newCapacity];
-               Array.Copy(array, newArray, array.Length);
+               Array.ConstrainedCopy(array, arrayOffset, newArray, 0, array.Length - arrayOffset);
                array = newArray;
+               arrayOffset = 0;
             }
          }
 
@@ -777,7 +798,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       private void CheckWrite(long index, long size)
       {
-         if (index < readOffset || array.LongLength < index + size)
+         if (index < readOffset || (array.Length - arrayOffset) < index + size)
          {
             throw OutOfBounds(index);
          }
@@ -836,7 +857,7 @@ namespace Apache.Qpid.Proton.Buffer
       private Exception OutOfBounds(long index)
       {
          return new IndexOutOfRangeException(
-               "Index " + index + " is out of bounds: [read 0 to " + writeOffset + ", write 0 to " + array.Length + "].");
+               "Index " + index + " is out of bounds: [read 0 to " + writeOffset + ", write 0 to " + Capacity + "].");
       }
 
       private static int Compare(byte x, byte y)

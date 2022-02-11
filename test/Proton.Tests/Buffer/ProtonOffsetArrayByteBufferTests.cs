@@ -22,7 +22,7 @@ using NUnit.Framework;
 namespace Apache.Qpid.Proton.Buffer
 {
    [TestFixture]
-   public class ProtonByteBufferTests : ProtonAbstractByteBufferTests
+   public class ProtonOffsetArrayByteBufferTests : ProtonAbstractByteBufferTests
    {
       [SetUp]
       public override void Setup()
@@ -291,14 +291,18 @@ namespace Apache.Qpid.Proton.Buffer
 
       #region Abstract test class method implementations
 
+      private static readonly int ARRAY_OFFSET = 64;
+
       protected override IProtonBuffer AllocateBuffer(int initialCapacity)
       {
-         return ProtonByteBufferAllocator.Instance.Allocate(initialCapacity);
+         byte[] initialArray = new byte[initialCapacity + ARRAY_OFFSET];
+         return new ProtonByteBuffer(initialArray, ARRAY_OFFSET, Int32.MaxValue);
       }
 
       protected override IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
       {
-         return ProtonByteBufferAllocator.Instance.Allocate(initialCapacity, maxCapacity);
+         byte[] initialArray = new byte[initialCapacity + ARRAY_OFFSET];
+         return new ProtonByteBuffer(initialArray, ARRAY_OFFSET, maxCapacity);
       }
 
       protected override IProtonBuffer WrapBuffer(byte[] array)

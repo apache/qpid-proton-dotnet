@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Text;
 using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Buffer

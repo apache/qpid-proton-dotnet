@@ -1514,12 +1514,14 @@ namespace Apache.Qpid.Proton.Buffer
          buffer.Reset();
          buffer.WriteBytes(value);
 
-         Assert.AreEqual(0, buffer.CompareTo(new ProtonByteBuffer(value)));
+         IProtonBuffer wrapped = ProtonByteBufferAllocator.Instance.Wrap(value);
+
+         Assert.AreEqual(0, buffer.CompareTo(wrapped));
 
          value[0]++;
-         Assert.IsTrue(buffer.CompareTo(new ProtonByteBuffer(value)) < 0);
+         Assert.IsTrue(buffer.CompareTo(wrapped) < 0);
          value[0] -= 2;
-         Assert.IsTrue(buffer.CompareTo(new ProtonByteBuffer(value)) > 0);
+         Assert.IsTrue(buffer.CompareTo(wrapped) > 0);
          value[0]++;
 
          IProtonBuffer compared = new ProtonByteBuffer();
