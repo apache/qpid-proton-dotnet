@@ -91,7 +91,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
          }
          else
          {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
          }
       }
 
@@ -447,7 +447,6 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
       private sealed class AdvancedExternalMessage<E> : ExternalMessage<E>, IAdvancedMessage<E>
       {
-         private readonly ExternalMessage<E> message;
          private List<ISection> bodySections;
          private uint messageFormat;
 
@@ -459,7 +458,12 @@ namespace Apache.Qpid.Proton.Client.Utilities
           */
          public AdvancedExternalMessage(ExternalMessage<E> message)
          {
-            this.message = message;
+            this.body = message.body;
+            this.header = message.header?.Copy();
+            this.messageAnnotations = message.messageAnnotations?.Copy();
+            this.applicationProperties = message.applicationProperties?.Copy();
+            this.properties = message.properties?.Copy();
+            this.footer = message.footer?.Copy();
          }
 
          public override E Body

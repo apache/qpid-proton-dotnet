@@ -828,14 +828,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendMessageWithMapPayloadArrivesWithAMQPValueBodySetFromEmpty()
       {
          DoTestSendMessageWithMapPayloadArrivesWithAMQPValueBody(true);
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendMessageWithMapPayloadArrivesWithAMQPValueBodyPopulateOnCreate()
       {
@@ -983,28 +981,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendOfExternalMessageWithoutAdvancedConversionSupport()
       {
          DoTestSendOfExternalMessage(false, false);
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestSendOfExternalMessageWithAdvancedConversionSupport()
       {
          DoTestSendOfExternalMessage(true, false);
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestTrySendOfExternalMessageWithoutAdvancedConversionSupport()
       {
          DoTestSendOfExternalMessage(false, true);
       }
 
-      [Ignore("Peer not matching the content correctly")]
       [Test]
       public void TestTrySendOfExternalMessageWithAdvancedConversionSupport()
       {

@@ -71,7 +71,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
          {
             bool? result = comparer.Equals(lhs, rhs, mismatchDescription);
             if (result.HasValue)
+            {
                return result.Value;
+            }
          }
 
          // When all else fails try the built in equality check, maybe it will

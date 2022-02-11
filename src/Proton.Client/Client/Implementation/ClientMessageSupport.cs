@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                return message.ToAdvancedMessage();
             }
-            catch (NotImplementedException)
+            catch (Exception ex) when (ex is NotImplementedException || ex is NotSupportedException)
             {
                return ConvertFromOutsideMessage(message);
             }

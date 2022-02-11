@@ -21,6 +21,7 @@ using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec;
 using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Comparators;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 {
@@ -97,47 +98,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
                   return false;
                }
             }
-            else if (expectedValue is IEnumerable exEnumerable &&
-                     decodedDescribedType.Described is IEnumerable actEnumerable)
+            else
             {
-               IEnumerator expectedEnum = exEnumerable.GetEnumerator();
-               IEnumerator actualEnum = actEnumerable.GetEnumerator();
-
-               for (int count = 0; ; count++)
-               {
-                  bool expectedHasData = expectedEnum.MoveNext();
-                  bool actualHasData = actualEnum.MoveNext();
-
-                  if (!expectedHasData && !actualHasData)
-                  {
-                     return true;
-                  }
-
-                  if (expectedHasData != actualHasData)
-                  {
-                     return false;
-                  }
-
-                  object expectedValue = expectedEnum.Current;
-                  object actualValue = actualEnum.Current;
-
-                  if (expectedValue == null && actualValue == null)
-                  {
-                     continue;
-                  }
-                  else if (expectedValue != null && expectedValue.Equals(actualValue))
-                  {
-                     continue;
-                  }
-                  else
-                  {
-                     return false;
-                  }
-               }
-            }
-            else if (!expectedValue.Equals(decodedDescribedType.Described))
-            {
-               return false;
+               return new PeerEqualityComparator().AreEqual(expectedValue, decodedDescribedType.Described);
             }
          }
 
