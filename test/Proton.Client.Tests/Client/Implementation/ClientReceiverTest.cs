@@ -750,7 +750,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test peer matching on dictionary equality not worked out yet")]
       [Test]
       public void TestCreateDynamicReceiverWthNodeProperties()
       {
