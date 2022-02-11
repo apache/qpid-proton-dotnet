@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections;
+using Apache.Qpid.Proton.Test.Driver.Matchers.Comparators;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
@@ -56,64 +55,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
             return false;
          }
 
-         if (expected is Array && actual is Array)
-         {
-            return ArraysMatch((Array)expected, (Array)actual);
-         }
-         else if(expected is IDictionary && actual is IDictionary)
-         {
-            return DictionariesMatch((IDictionary)expected, (IDictionary)actual);
-         }
-         else
-         {
-            return actual.Equals(expected);
-         }
+         PeerEqualityComparator comparer = new PeerEqualityComparator();
+
+         return comparer.AreEqual(expected, actual);
       }
 
       public static IMatcher EqualTo(object operand)
       {
          return new IsEqualMatcher(operand);
-      }
-
-      public static bool ArraysMatch(Array expected, Array actual)
-      {
-         if (expected.Length != actual.Length)
-         {
-            return false;
-         }
-
-         for (int i = 0; i < expected.Length; ++i)
-         {
-            object expectedN = expected.GetValue(i);
-            object actualN = actual.GetValue(i);
-
-            if (ReferenceEquals(actualN, expectedN))
-            {
-               return true;
-            }
-
-            if (ReferenceEquals(null, actualN) || ReferenceEquals(null, expectedN))
-            {
-               return false;
-            }
-
-            if (!actualN.Equals(expectedN))
-            {
-               return false;
-            }
-         }
-
-         return true;
-      }
-
-      public static bool DictionariesMatch(IDictionary expected, IDictionary actual)
-      {
-         if (expected.Count != actual.Count)
-         {
-            return false;
-         }
-
-         return false;
       }
    }
 }

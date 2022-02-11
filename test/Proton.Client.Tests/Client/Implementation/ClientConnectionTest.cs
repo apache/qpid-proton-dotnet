@@ -475,7 +475,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                // Should close normally and not throw error as we initiated the close.
                _ = connection.OpenTask.Result;
-               // TODO Passes if given time: Task.Delay(100).Wait();
                _ = connection.CloseAsync().Result;
             }
 
@@ -1177,7 +1176,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test peer can't match dynamic node properties yet")]
       [Test]
       public void TestCreateDynamicReceiverWithNodeProperties()
       {
