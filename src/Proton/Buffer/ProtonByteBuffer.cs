@@ -125,7 +125,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="arrayOffset">The offset into the backing array where the buffer starts</param>
       /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
       public ProtonByteBuffer(byte[] backingArray, int arrayOffset, long maxCapacity)
-       : this(backingArray, arrayOffset, backingArray.Length, maxCapacity)
+       : this(backingArray, arrayOffset, backingArray.Length - arrayOffset, maxCapacity)
       {
       }
 
@@ -135,19 +135,25 @@ namespace Apache.Qpid.Proton.Buffer
       /// how large the buffer could ever grow.
       /// </summary>
       /// <param name="backingArray">The actual byte array that backs this buffer</param>
-      /// <param name="arrayOffset">The offset into the backing array where the buffer starts</param>
-      /// <param name="arrayOffset">The limit into the array that this buffer can view</param>
+      /// <param name="arrayOffset">The offset index into the backing array where the buffer starts</param>
+      /// <param name="capacity">The capacity limit for this view of the assigned array</param>
       /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
-      public ProtonByteBuffer(byte[] backingArray, int arrayOffset, int arraylimit, long maxCapacity) : base()
+      public ProtonByteBuffer(byte[] backingArray, int arrayOffset, int capacity, long maxCapacity) : base()
       {
          if (arrayOffset > backingArray.Length)
          {
             throw new ArgumentOutOfRangeException("Array offset cannot exceed the array length");
          }
 
+         if (capacity > backingArray.Length - arrayOffset)
+         {
+            throw new ArgumentOutOfRangeException(
+               "Array segment capacity cannot exceed the configured array length minus the offset");
+         }
+
          this.array = backingArray;
          this.arrayOffset = arrayOffset;
-         this.arrayLimit = arraylimit;
+         this.arrayLimit = arrayOffset + capacity;
          this.maxCapacity = maxCapacity;
       }
 
@@ -200,7 +206,6 @@ namespace Apache.Qpid.Proton.Buffer
          {
             // Compress the current readable section into the front of the
             // array and then update the offsets to match the new reality.
-            // TODO: Future work item to allow for offset wrapped arrays.
             Array.Copy(array, Offset(readOffset), array, arrayOffset, writeOffset - readOffset);
             writeOffset -= readOffset;
             readOffset = 0;
