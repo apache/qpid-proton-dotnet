@@ -2835,8 +2835,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
 
+            CountdownEvent disconnected = new CountdownEvent(1);
             IClient container = IClient.Create();
-            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ConnectionOptions connectionOptions = new ConnectionOptions();
+            connectionOptions.DisconnectedHandler = (connection, eventArgs) => disconnected.Signal();
+            IConnection connection = container.Connect(remoteAddress, remotePort, connectionOptions);
             StreamSenderOptions options = new StreamSenderOptions()
             {
                WriteBufferSize = 1024
@@ -2853,6 +2856,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Stream stream = message.GetBodyStream(streamOptions);
 
             peer.WaitForScriptToComplete();
+
+            Assert.IsTrue(disconnected.Wait(TimeSpan.FromSeconds(10)));
 
             try
             {

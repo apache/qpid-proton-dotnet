@@ -40,7 +40,18 @@ namespace Apache.Qpid.Proton.Buffer
 
       private byte[] array;
 
+      /// <summary>
+      /// How far into the array does position zero begin
+      /// </summary>
       private int arrayOffset;
+
+      /// <summary>
+      /// Limits the usable region of the array if not set to the array length.
+      /// This allows the window of operations to exists in a subregion of the
+      /// array.
+      /// </summary>
+      private int arrayLimit;
+
       private long readOffset;
       private long writeOffset;
       private long maxCapacity;
@@ -81,6 +92,7 @@ namespace Apache.Qpid.Proton.Buffer
 
          this.array = new byte[initialCapacity];
          this.arrayOffset = 0;
+         this.arrayLimit = array.Length;
          this.maxCapacity = maxCapacity;
       }
 
@@ -88,7 +100,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// Create a new proton byte buffer instance with given backing array whose
       /// size determines that largest the buffer can ever be.
       /// </summary>
-      /// <param name="backingArray"></param>
+      /// <param name="backingArray">The actual byte array that backs this buffer</param>
       public ProtonByteBuffer(byte[] backingArray) : this(backingArray, 0, Int32.MaxValue)
       {
       }
@@ -98,7 +110,8 @@ namespace Apache.Qpid.Proton.Buffer
       /// starting backing store and uses the provided max capacity value to control
       /// how large the buffer could ever grow.
       /// </summary>
-      /// <param name="backingArray"></param>
+      /// <param name="backingArray">The actual byte array that backs this buffer</param>
+      /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
       public ProtonByteBuffer(byte[] backingArray, long maxCapacity) : this(backingArray, 0, maxCapacity)
       {
       }
@@ -108,8 +121,24 @@ namespace Apache.Qpid.Proton.Buffer
       /// starting backing store and uses the provided max capacity value to control
       /// how large the buffer could ever grow.
       /// </summary>
-      /// <param name="backingArray"></param>
-      public ProtonByteBuffer(byte[] backingArray, int arrayOffset, long maxCapacity) : base()
+      /// <param name="backingArray">The actual byte array that backs this buffer</param>
+      /// <param name="arrayOffset">The offset into the backing array where the buffer starts</param>
+      /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
+      public ProtonByteBuffer(byte[] backingArray, int arrayOffset, long maxCapacity)
+       : this(backingArray, arrayOffset, backingArray.Length, maxCapacity)
+      {
+      }
+
+      /// <summary>
+      /// Create a new proton byte buffer instance with given backing array as the
+      /// starting backing store and uses the provided max capacity value to control
+      /// how large the buffer could ever grow.
+      /// </summary>
+      /// <param name="backingArray">The actual byte array that backs this buffer</param>
+      /// <param name="arrayOffset">The offset into the backing array where the buffer starts</param>
+      /// <param name="arrayOffset">The limit into the array that this buffer can view</param>
+      /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
+      public ProtonByteBuffer(byte[] backingArray, int arrayOffset, int arraylimit, long maxCapacity) : base()
       {
          if (arrayOffset > backingArray.Length)
          {
@@ -118,12 +147,13 @@ namespace Apache.Qpid.Proton.Buffer
 
          this.array = backingArray;
          this.arrayOffset = arrayOffset;
+         this.arrayLimit = arraylimit;
          this.maxCapacity = maxCapacity;
       }
 
       #region Buffer State and Management APIs
 
-      public long Capacity => array.Length - arrayOffset;
+      public long Capacity => arrayLimit - arrayOffset;
 
       public bool IsReadable => ReadOffset < WriteOffset;
 
@@ -783,13 +813,14 @@ namespace Apache.Qpid.Proton.Buffer
                throw new ArgumentOutOfRangeException("Buffer size must be positive, but was " + newCapacity + '.');
             }
 
-            int oldCapacity = array.Length - arrayOffset;
+            int oldCapacity = arrayLimit - arrayOffset;
             if (newCapacity > oldCapacity)
             {
                byte[] newArray = new byte[newCapacity];
-               Array.ConstrainedCopy(array, arrayOffset, newArray, 0, array.Length - arrayOffset);
+               Array.ConstrainedCopy(array, arrayOffset, newArray, 0, arrayLimit - arrayOffset);
                array = newArray;
                arrayOffset = 0;
+               arrayLimit = newArray.Length;
             }
          }
 
@@ -798,7 +829,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       private void CheckWrite(long index, long size)
       {
-         if (index < readOffset || (array.Length - arrayOffset) < index + size)
+         if (index < readOffset || (arrayLimit - arrayOffset) < index + size)
          {
             throw OutOfBounds(index);
          }
