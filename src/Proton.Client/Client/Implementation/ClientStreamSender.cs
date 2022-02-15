@@ -181,7 +181,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             else
             {
-               ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, false, request);
+               ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, true, request);
                try
                {
                   if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))

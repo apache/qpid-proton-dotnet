@@ -1494,7 +1494,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender not completed yet")]
       [Test]
       public void TestStreamSenderMessageCanOperatesWithinTransaction()
       {
