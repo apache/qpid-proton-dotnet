@@ -436,7 +436,7 @@ namespace Apache.Qpid.Proton.Buffer
          try
          {
             buffer.WriteBytes(payload, 0, payload.LongLength + 1);
-            Assert.Fail("Should not write when length given is to large.");
+            Assert.Fail("Should not write when.Length given is to large.");
          }
          catch (ArgumentOutOfRangeException) { }
       }
@@ -454,7 +454,7 @@ namespace Apache.Qpid.Proton.Buffer
          try
          {
             buffer.WriteBytes(payload, 0, -1);
-            Assert.Fail("Should not write when length given is negative.");
+            Assert.Fail("Should not write when.Length given is negative.");
          }
          catch (ArgumentOutOfRangeException) { }
       }
@@ -495,7 +495,7 @@ namespace Apache.Qpid.Proton.Buffer
          try
          {
             buffer.WriteBytes(payload, 0, payload.LongLength + 1);
-            Assert.Fail("Should not write when length given is to large.");
+            Assert.Fail("Should not write when.Length given is to large.");
          }
          catch (ArgumentOutOfRangeException) { }
 
@@ -509,7 +509,7 @@ namespace Apache.Qpid.Proton.Buffer
          try
          {
             buffer.WriteBytes(payload, 0, -1);
-            Assert.Fail("Should not write when length given is negative.");
+            Assert.Fail("Should not write when.Length given is negative.");
          }
          catch (ArgumentOutOfRangeException) { }
 
@@ -2057,9 +2057,9 @@ namespace Apache.Qpid.Proton.Buffer
          for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
          {
             random.NextBytes(expectedValue);
-            int valueOffset = random.Next(BlockSize);
-            buffer.CopyInto(i, value, valueOffset, BlockSize);
-            for (int j = valueOffset; j < valueOffset + BlockSize; j++)
+            int Lookupfset = random.Next(BlockSize);
+            buffer.CopyInto(i, value, Lookupfset, BlockSize);
+            for (int j = Lookupfset; j < Lookupfset + BlockSize; j++)
             {
                Assert.AreEqual(expectedValue[j], value[j]);
             }
@@ -2114,9 +2114,9 @@ namespace Apache.Qpid.Proton.Buffer
          for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
          {
             random.NextBytes(expectedValueContent);
-            int valueOffset = random.Next(BlockSize);
-            buffer.CopyInto(i, value, valueOffset, BlockSize);
-            for (int j = valueOffset; j < valueOffset + BlockSize; j++)
+            int Lookupfset = random.Next(BlockSize);
+            buffer.CopyInto(i, value, Lookupfset, BlockSize);
+            for (int j = Lookupfset; j < Lookupfset + BlockSize; j++)
             {
                Assert.AreEqual(expectedValue.GetUnsignedByte(j), value[j]);
             }
@@ -2224,11 +2224,11 @@ namespace Apache.Qpid.Proton.Buffer
          for (int i = 0; i < buffer.Capacity - BlockSize + 1; i += BlockSize)
          {
             random.NextBytes(expectedValueContent);
-            int valueOffset = random.Next(BlockSize);
+            int Lookupfset = random.Next(BlockSize);
             Assert.AreEqual(i, buffer.ReadOffset);
             Assert.AreEqual(LargeCapacity, buffer.WriteOffset);
-            buffer.CopyInto(i, value, valueOffset, BlockSize);
-            for (int j = valueOffset; j < valueOffset + BlockSize; j++)
+            buffer.CopyInto(i, value, Lookupfset, BlockSize);
+            for (int j = Lookupfset; j < Lookupfset + BlockSize; j++)
             {
                Assert.AreEqual(expectedValue.GetByte(j), value.GetByte(j));
             }
@@ -2236,6 +2236,299 @@ namespace Apache.Qpid.Proton.Buffer
             Assert.AreEqual(valueContent.LongLength, value.WriteOffset);
             buffer.ReadOffset += BlockSize;
          }
+      }
+
+      #endregion
+
+      #region Test For buffer split behavior
+
+      [Test]
+      public void TestReadSplit()
+      {
+         DoTestReadSplit(3, 3, 1, 1);
+      }
+
+      [Test]
+      public void TestReadSplitWriteOffsetLessThanCapacity()
+      {
+         DoTestReadSplit(5, 4, 2, 1);
+      }
+
+      [Test]
+      public void TestReadSplitOffsetZero()
+      {
+         DoTestReadSplit(3, 3, 1, 0);
+      }
+
+      [Test]
+      public void TestReadSplitOffsetToWriteOffset()
+      {
+         DoTestReadSplit(3, 3, 1, 2);
+      }
+
+      private void DoTestReadSplit(int capacity, int writeUnsignedBytes, int readBytes, int offset)
+      {
+         IProtonBuffer buffer = AllocateBuffer(capacity);
+         WriteRandomBytes(buffer, writeUnsignedBytes);
+         Assert.AreEqual(writeUnsignedBytes, buffer.WriteOffset);
+
+         for (int i = 0; i < readBytes; i++)
+         {
+            buffer.ReadByte();
+         }
+
+         Assert.AreEqual(readBytes, buffer.ReadOffset);
+
+         IProtonBuffer split = buffer.ReadSplit(offset);
+         Assert.AreEqual(readBytes + offset, split.Capacity);
+         Assert.AreEqual(split.Capacity, split.WriteOffset);
+         Assert.AreEqual(readBytes, split.ReadOffset);
+
+         Assert.AreEqual(capacity - split.Capacity, buffer.Capacity);
+         Assert.AreEqual(writeUnsignedBytes - split.Capacity, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestWriteSplit()
+      {
+         DoTestWriteSplit(5, 3, 1, 1);
+      }
+
+      [Test]
+      public void TestWriteSplitWriteOffsetLessThanCapacity()
+      {
+         DoTestWriteSplit(5, 2, 2, 2);
+      }
+
+      [Test]
+      public void TestWriteSplitOffsetZero()
+      {
+         DoTestWriteSplit(3, 3, 1, 0);
+      }
+
+      [Test]
+      public void TestWriteSplitOffsetToCapacity()
+      {
+         DoTestWriteSplit(3, 1, 1, 2);
+      }
+
+      private void DoTestWriteSplit(int capacity, int writeUnsignedBytes, int readBytes, int offset)
+      {
+         IProtonBuffer buffer = AllocateBuffer(capacity);
+         WriteRandomBytes(buffer, writeUnsignedBytes);
+         Assert.AreEqual(writeUnsignedBytes, buffer.WriteOffset);
+
+         for (int i = 0; i < readBytes; i++)
+         {
+            buffer.ReadByte();
+         }
+
+         Assert.AreEqual(readBytes, buffer.ReadOffset);
+
+         IProtonBuffer split = buffer.WriteSplit(offset);
+         Assert.AreEqual(writeUnsignedBytes + offset, split.Capacity);
+         Assert.AreEqual(writeUnsignedBytes, split.WriteOffset);
+         Assert.AreEqual(readBytes, split.ReadOffset);
+
+         Assert.AreEqual(capacity - split.Capacity, buffer.Capacity);
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestSplitPostFull()
+      {
+         DoTestSplitPostFullOrRead(false);
+      }
+
+      [Test]
+      public void TestSplitPostFullAndRead()
+      {
+         DoTestSplitPostFullOrRead(true);
+      }
+
+      private void DoTestSplitPostFullOrRead(bool read)
+      {
+         const int capacity = 3;
+         IProtonBuffer buffer = AllocateBuffer(capacity);
+         WriteRandomBytes(buffer, capacity);
+         Assert.AreEqual(buffer.Capacity, buffer.WriteOffset);
+
+         if (read)
+         {
+            for (int i = 0; i < capacity; i++)
+            {
+               buffer.ReadByte();
+            }
+         }
+
+         Assert.AreEqual(read ? buffer.Capacity : 0, buffer.ReadOffset);
+
+         IProtonBuffer split = buffer.Split();
+         Assert.AreEqual(capacity, split.Capacity);
+         Assert.AreEqual(split.Capacity, split.WriteOffset);
+         Assert.AreEqual(read ? split.Capacity : 0, split.ReadOffset);
+
+         Assert.AreEqual(0, buffer.Capacity);
+         Assert.AreEqual(0, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+      }
+
+      [Test]
+      public void TestSplitWithNegativeOffsetMustThrow()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8);
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Split(-1));
+      }
+
+      [Test]
+      public void TestSplitWithOversizedOffsetMustThrow()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8);
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Split(9));
+      }
+
+      [Test]
+      public void TestSplitOnOffsetMustTruncateGreaterOffsets()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8);
+         buffer.WriteInt(0x01020304);
+         buffer.WriteByte((sbyte)0x05L);
+         buffer.ReadInt();
+
+         IProtonBuffer split = buffer.Split(2);
+         Assert.AreEqual(buffer.ReadOffset, 2);
+         Assert.AreEqual(buffer.WriteOffset, 3);
+
+         Assert.AreEqual(split.ReadOffset, 2);
+         Assert.AreEqual(split.WriteOffset, 2);
+      }
+
+      [Test]
+      public void TestSplitOnOffsetMustExtendLesserOffsets()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8);
+         buffer.WriteInt(0x01020304);
+         buffer.ReadInt();
+         IProtonBuffer split = buffer.Split(6);
+
+         Assert.AreEqual(buffer.ReadOffset, 0);
+         Assert.AreEqual(buffer.WriteOffset, 0);
+
+         Assert.AreEqual(split.ReadOffset, 4);
+         Assert.AreEqual(split.WriteOffset, 4);
+      }
+
+      [Test]
+      public void TestSplitPartMustContainFirstHalfOfBuffer()
+      {
+         IProtonBuffer buffer = AllocateBuffer(16);
+         buffer.WriteLong(0x0102030405060708L);
+         Assert.AreEqual(buffer.ReadByte(), 0x01);
+         IProtonBuffer split = buffer.Split();
+         // Original buffer:
+         Assert.AreEqual(buffer.Capacity, 8);
+         Assert.AreEqual(buffer.ReadOffset, 0);
+         Assert.AreEqual(buffer.WriteOffset, 0);
+         Assert.AreEqual(buffer.ReadableBytes, 0);
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
+
+         // Split part:
+         Assert.AreEqual(split.Capacity, 8);
+         Assert.AreEqual(split.ReadOffset, 1);
+         Assert.AreEqual(split.WriteOffset, 8);
+         Assert.AreEqual(split.ReadableBytes, 7);
+         Assert.AreEqual(split.ReadByte(), 0x02);
+         Assert.AreEqual(split.ReadInt(), 0x03040506);
+         Assert.AreEqual(split.ReadByte(), 0x07);
+         Assert.AreEqual(split.ReadByte(), 0x08);
+         Assert.Throws<IndexOutOfRangeException>(() => split.ReadByte());
+
+         // Re-test original split end to see if it was unaffected
+         Assert.AreEqual(buffer.Capacity, 8);
+         Assert.AreEqual(buffer.ReadOffset, 0);
+         Assert.AreEqual(buffer.WriteOffset, 0);
+         Assert.AreEqual(buffer.ReadableBytes, 0);
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
+      }
+
+      [Test]
+      public void TestMustBePossibleToSplitMoreThanOnce()
+      {
+         IProtonBuffer buffer = AllocateBuffer(16);
+         buffer.WriteLong(0x0102030405060708L);
+         IProtonBuffer a = buffer.Split();
+         a.WriteOffset = 4;
+
+         IProtonBuffer b = a.Split();
+         Assert.AreEqual(0x01020304, b.ReadInt());
+         a.WriteOffset = 4;
+         Assert.AreEqual(0x05060708, a.ReadInt());
+         Assert.Throws<IndexOutOfRangeException>(() => b.ReadByte());
+         Assert.Throws<IndexOutOfRangeException>(() => a.ReadByte());
+         buffer.WriteUnsignedLong(0xA1A2A3A4A5A6A7A8UL);
+         buffer.WriteOffset = 4;
+
+         IProtonBuffer c = buffer.Split();
+         Assert.AreEqual(0xA1A2A3A4u, c.ReadUnsignedInt());
+         buffer.WriteOffset = 4;
+         Assert.AreEqual(0xA5A6A7A8u, buffer.ReadUnsignedInt());
+         Assert.Throws<IndexOutOfRangeException>(() => c.ReadByte());
+         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
+      }
+
+      [Test]
+      public void TestMustBePossibleToSplitCopies()
+      {
+         IProtonBuffer buffer = AllocateBuffer(16);
+         buffer.WriteLong(0x0102030405060708L);
+
+         IProtonBuffer copy = buffer.Copy();
+         IProtonBuffer split = copy.Split(4);
+         split.Reset().EnsureWritable(sizeof(ulong));
+         copy.Reset().EnsureWritable(sizeof(ulong));
+
+         Assert.AreEqual(split.Capacity, sizeof(ulong));
+         Assert.AreEqual(copy.Capacity, sizeof(ulong));
+         Assert.AreEqual(0x01020304, split.GetInt(0));
+         Assert.AreEqual(0x05060708, copy.GetInt(0));
+      }
+
+      [Test]
+      public void TestEnsureWritableOnSplitBuffers()
+      {
+         IProtonBuffer buffer = AllocateBuffer(8);
+         buffer.WriteUnsignedLong(0x0102030405060708UL);
+         IProtonBuffer a = buffer.Split();
+         Assert.AreEqual(0x0102030405060708UL, a.ReadUnsignedLong());
+
+         a.EnsureWritable(8);
+         a.WriteUnsignedLong(0xA1A2A3A4A5A6A7A8UL);
+         Assert.AreEqual(0xA1A2A3A4A5A6A7A8UL, a.ReadUnsignedLong());
+
+         buffer.EnsureWritable(8);
+         buffer.WriteUnsignedLong(0xA1A2A3A4A5A6A7A8UL);
+         Assert.AreEqual(0xA1A2A3A4A5A6A7A8UL, buffer.ReadUnsignedLong());
+      }
+
+      [Test]
+      public void TestEnsureWritableOnSplitBuffersWithOddOffsets()
+      {
+         IProtonBuffer buffer = AllocateBuffer(10);
+         buffer.WriteUnsignedLong(0x0102030405060708L);
+         buffer.WriteByte(0x09);
+         buffer.ReadByte();
+         IProtonBuffer a = buffer.Split();
+
+         Assert.AreEqual(0x0203040506070809UL, a.ReadUnsignedLong());
+         a.EnsureWritable(8);
+         a.WriteUnsignedLong(0xA1A2A3A4A5A6A7A8UL);
+         Assert.AreEqual(0xA1A2A3A4A5A6A7A8UL, a.ReadUnsignedLong());
+
+         buffer.EnsureWritable(8);
+         buffer.WriteUnsignedLong(0xA1A2A3A4A5A6A7A8UL);
+         Assert.AreEqual(0xA1A2A3A4A5A6A7A8UL, buffer.ReadUnsignedLong());
       }
 
       #endregion
@@ -2283,5 +2576,16 @@ namespace Apache.Qpid.Proton.Buffer
 
       #endregion
 
+      #region Test utility methods accessable to all subclasses
+
+      protected static void WriteRandomBytes(IProtonBuffer buf, int length)
+      {
+         byte[] data = new byte[length];
+         Random random = new Random(Environment.TickCount);
+         random.NextBytes(data);
+         buf.WriteBytes(data);
+      }
+
+      #endregion
    }
 }

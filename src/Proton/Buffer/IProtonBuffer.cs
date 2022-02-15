@@ -205,6 +205,88 @@ namespace Apache.Qpid.Proton.Buffer
       IProtonBuffer Compact();
 
       /// <summary>
+      /// Splits the buffer into two distinct buffers at the given index plus the current read
+      /// offset. The returned buffer will retain the read offset and write offset of this buffer
+      /// but will be truncated to match the capacity provided by the split index, which implies
+      /// that they might both be set to the capacity if they were previously set beyond the split
+      /// index. The returned buffer will set its read and write offsets to zero if they fell prior
+      /// to the given index otherwise they will be truncated to match the new buffer capacity.
+      /// <para/>
+      /// Split buffers support the standard buffer operations including resizing to ensure
+      /// writable regions which implies that a buffer resize on either will cause them to
+      /// no longer reference the same underlying memory region.  If buffer implementations
+      /// implement pooling then they must ensure proper release of shared buffer regions
+      /// once both buffers no longer reference them.
+      /// </summary>
+      /// </summary>
+      /// <param name="offset">The offset to split beyond the current read offset</param>
+      /// <returns>A new buffer that access the front portion of the buffer split</returns>
+      IProtonBuffer ReadSplit(long offset)
+      {
+         return Split(ReadOffset + offset);
+      }
+
+      /// <summary>
+      /// Splits the buffer into two distinct buffers at the given index plus the current write
+      /// offset. The returned buffer will retain the read offset and write offset of this buffer
+      /// but will be truncated to match the capacity provided by the split index, which implies
+      /// that they might both be set to the capacity if they were previously set to the split
+      /// index. The returned buffer will set its read and write offsets to zero if they fell prior
+      /// to the given index otherwise they will be truncated to match the new buffer capacity.
+      /// <para/>
+      /// Split buffers support the standard buffer operations including resizing to ensure
+      /// writable regions which implies that a buffer resize on either will cause them to
+      /// no longer reference the same underlying memory region.  If buffer implementations
+      /// implement pooling then they must ensure proper release of shared buffer regions
+      /// once both buffers no longer reference them.
+      /// </summary>
+      /// </summary>
+      /// <param name="offset">The offset to split beyond the current write offset</param>
+      /// <returns>A new buffer that access the front portion of the buffer split</returns>
+      IProtonBuffer WriteSplit(long offset)
+      {
+         return Split(WriteOffset + offset);
+      }
+
+      /// <summary>
+      /// Splits the buffer into two buffers at the write offset.  The resulting buffer
+      /// will comprise the read and readable portions of this buffer with the write offset
+      /// and capacity set to the current write offset.  This buffer will lose access to the
+      /// split region and its read offset will be set to the current write offset.  This
+      /// buffer will also have its capacity reduced by the number of bytes in the returned
+      /// buffer (i.e. the current number of read and readable bytes).
+      /// <para/>
+      /// Split buffers support the standard buffer operations including resizing to ensure
+      /// writable regions which implies that a buffer resize on either will cause them to
+      /// no longer reference the same underlying memory region.  If buffer implementations
+      /// implement pooling then they must ensure proper release of shared buffer regions
+      /// once both buffers no longer reference them.
+      /// </summary>
+      /// <returns>A new buffer that access the front portion of the buffer split</returns>
+      IProtonBuffer Split()
+      {
+         return Split(WriteOffset);
+      }
+
+      /// <summary>
+      /// Splits the buffer into two distinct buffers at the given index. The returned buffer will
+      /// retain the read offset and write offset of this buffer but will be truncated to match
+      /// the capacity provided by the split index, which implies that they might both be set to
+      /// the capacity if they were previously set beyond the split index.  The returned buffer
+      /// will set its read and write offsets to zero if they fell prior to the given index
+      /// otherwise they will be truncated to match the new buffer capacity.
+      /// <para/>
+      /// Split buffers support the standard buffer operations including resizing to ensure
+      /// writable regions which implies that a buffer resize on either will cause them to
+      /// no longer reference the same underlying memory region.  If buffer implementations
+      /// implement pooling then they must ensure proper release of shared buffer regions
+      /// once both buffers no longer reference them.
+      /// </summary>
+      /// <param name="index">The index in this buffer where the split occurs</param>
+      /// <returns>A new buffer that access the front portion of the buffer split</returns>
+      IProtonBuffer Split(long index);
+
+      /// <summary>
       /// Returns the number of component buffers in this buffer. If this is not a composite
       /// buffer instance then the count will always be one. For a composite buffer this will
       /// be the count of the current number of component buffers contained within.

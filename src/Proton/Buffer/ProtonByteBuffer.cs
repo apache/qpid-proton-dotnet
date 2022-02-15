@@ -214,6 +214,53 @@ namespace Apache.Qpid.Proton.Buffer
          return this;
       }
 
+      public IProtonBuffer Split(long offset)
+      {
+         if (offset > Int32.MaxValue)
+         {
+            throw new ArgumentOutOfRangeException("Proton byte buffer cannot exceed Int32.MaxValue bytes in capacity");
+         }
+
+         if (offset < 0 || offset > Capacity)
+         {
+            throw new ArgumentOutOfRangeException("The buffer split offset must be within the current buffer capacity");
+         }
+
+         int iOffset = (int)offset;
+
+         // Conceptual definition of the split buffer outcome
+         //-----------------------------------------------------------------
+         //         This buffer:
+         //         +--------------------------------+
+         //         0|               |splitOffset     |cap
+         //         +---------------+----------------+
+         //         /               / \               \
+         //        /               /   \               \
+         //       /               /     \               \
+         //      /               /       \               \
+         //     /               /         \               \
+         //    +---------------+           +---------------+
+         //    |0              |cap        |0              |cap
+         //    +---------------+           +---------------+
+         //    Returned buffer.            This buffer.
+
+         // The new buffer can only view the portion of the array before the split.
+         ProtonByteBuffer front = new ProtonByteBuffer(array, arrayOffset, iOffset, maxCapacity);
+
+         // This buffer is adjusted to view only the portion of the array after the split
+         arrayOffset = arrayOffset + iOffset;
+
+         // TODO compute the index values
+
+         front.readOffset = Math.Min(readOffset, front.Capacity);
+         front.writeOffset = Math.Min(writeOffset, front.Capacity);
+
+         this.readOffset = Math.Max(0, readOffset - iOffset);
+         this.writeOffset = Math.Max(0, writeOffset - iOffset);
+
+         return front;
+      }
+
       public IProtonBuffer Reset()
       {
          ReadOffset = 0;

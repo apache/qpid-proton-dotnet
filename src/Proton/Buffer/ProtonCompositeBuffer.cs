@@ -248,6 +248,21 @@ namespace Apache.Qpid.Proton.Buffer
          throw new NotImplementedException();
       }
 
+      public IProtonBuffer Split(long offset)
+      {
+         if (offset > Int32.MaxValue)
+         {
+            throw new ArgumentOutOfRangeException("Proton byte buffer cannot exceed Int32.MaxValue bytes in capacity");
+         }
+
+         if (offset < 0 || offset > Capacity)
+         {
+            throw new ArgumentOutOfRangeException("The buffer split offset must be within the current buffer capacity");
+         }
+
+         throw new NotImplementedException();
+      }
+
       public IEnumerable<IProtonBuffer> DecomposeBuffer()
       {
          IProtonBuffer[] result = buffers;
