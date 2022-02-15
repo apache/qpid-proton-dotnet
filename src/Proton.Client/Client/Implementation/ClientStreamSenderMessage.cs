@@ -661,13 +661,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          else
          {
+            // When appending buffers we should ensure that the buffer instance is only
+            // readable to ensure that the composite will accept a chain of buffers which
+            // must not have any unwritten gaps.
             if (buffer is ProtonCompositeBuffer)
             {
-               ((ProtonCompositeBuffer)buffer).Append(incoming);
+               ((ProtonCompositeBuffer)buffer).Append(incoming.Split());
             }
             else
             {
-               buffer = IProtonCompositeBuffer.Compose(buffer, incoming);
+               buffer = IProtonCompositeBuffer.Compose(buffer.Split(), incoming.Split());
             }
          }
 

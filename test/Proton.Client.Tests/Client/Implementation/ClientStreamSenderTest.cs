@@ -269,7 +269,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestSendCustomMessageWithMultipleAmqpValueSections()
       {
@@ -598,7 +597,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestCannotModifyMessagePreambleAfterWritesHaveStarted()
       {
@@ -1195,7 +1193,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestCloseAfterSingleWriteEncodesAndCompletesTransferWhenNoStreamSizeConfigured()
       {
@@ -1406,7 +1403,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestIncompleteStreamClosureWithNoWritesAbortsTransfer()
       {
@@ -1776,7 +1772,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestStreamSenderWritesFooterAfterStreamClosed()
       {
@@ -1864,7 +1859,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectClose().Respond();
 
             Assert.IsNotNull(message.Tracker);
-            Assert.IsTrue(message.Tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(message.Tracker.SettlementTask.Result.RemoteSettled);
             Assert.IsTrue(message.Tracker.SettlementTask.Result.Settled);
 
             sender.Close();
@@ -1874,7 +1869,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestStreamSenderWritesFooterAfterMessageCompleted()
       {
@@ -1961,7 +1955,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectClose().Respond();
 
             Assert.IsNotNull(message.Tracker);
-            Assert.IsTrue(message.Tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(message.Tracker.SettlementTask.Result.RemoteSettled);
             Assert.IsTrue(message.Tracker.SettlementTask.Result.Settled);
 
             sender.Close();
@@ -2038,7 +2032,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestConcurrentMessageSendOnlyBlocksForInitialSendInProgress()
       {
@@ -2289,7 +2282,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestMessageSendWhileStreamSendIsOpenShouldBlock()
       {
@@ -2770,8 +2762,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
 
+            CountdownEvent disconnected = new CountdownEvent(1);
+
             IClient container = IClient.Create();
-            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ConnectionOptions options = new ConnectionOptions();
+            options.DisconnectedHandler = (conn, ev) => disconnected.Signal();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
             IStreamSender sender = connection.OpenStreamSender("test-queue");
             IStreamSenderMessage message = sender.BeginMessage();
 
@@ -2800,6 +2796,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             // Next write should fail as connection should have dropped.
             stream.Write(new byte[] { 8, 9, 10, 11 });
+
+            Assert.IsTrue(disconnected.Wait(TimeSpan.FromSeconds(10)));
 
             try
             {
@@ -2969,7 +2967,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestBatchAddBodySectionsWritesEach()
       {
