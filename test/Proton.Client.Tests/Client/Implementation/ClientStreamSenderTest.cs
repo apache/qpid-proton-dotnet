@@ -1604,7 +1604,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestStreamSenderMessageWithDeliveryAnnotations()
       {
@@ -1736,9 +1735,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.AreEqual(1, message.GetProperty("ap1"));
             Assert.IsTrue(message.HasProperty("ap1"));
             message.SetProperty("ap2", 2);
-            Assert.AreEqual(2, message.HasProperty("ap2"));
+            Assert.IsTrue(message.HasProperty("ap2"));
+            Assert.AreEqual(2, message.GetProperty("ap2"));
             message.SetProperty("ap3", 3);
-            Assert.AreEqual(3, message.HasProperty("ap3"));
+            Assert.IsTrue(message.HasProperty("ap3"));
+            Assert.AreEqual(3, message.GetProperty("ap3"));
             Assert.IsTrue(message.HasProperties);
 
             Stream stream = message.Body;
