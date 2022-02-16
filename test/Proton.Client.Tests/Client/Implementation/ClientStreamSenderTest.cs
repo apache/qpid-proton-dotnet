@@ -1753,7 +1753,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectClose().Respond();
 
             Assert.IsNotNull(message.Tracker);
-            Assert.IsTrue(message.Tracker.SettlementTask.IsCompleted);
+            Assert.IsTrue(message.Tracker.SettlementTask.Result.RemoteSettled);
             Assert.IsTrue(message.Tracker.SettlementTask.Result.Settled);
 
             sender.Close();
