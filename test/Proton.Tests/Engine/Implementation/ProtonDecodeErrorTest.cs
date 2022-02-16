@@ -221,7 +221,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails due to missing handle in Transfer")]
       public void TestEmptyTransferProvokesDecodeError()
       {
          // Provide the bytes for Transfer, but omit any fields to provoke a decode error.
@@ -230,7 +229,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x14, 0x45};// Described-type, ulong type, Transfer descriptor, list0.
 
-         DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "The handle field cannot be omitted");
+         DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "The handle field cannot be omitted from the Transfer");
       }
 
       [Test]
@@ -247,7 +246,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Test fails due to wrong type error")]
       public void TestTransferWithWrongHandleTypeCodeProvokesDecodeError()
       {
          // Provide the bytes for Transfer, but give the wrong type code for a not-really-present handle. Provokes a decode error.
@@ -257,7 +255,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x53, 0x14, (byte) 0xC0, // Described-type, ulong type, Transfer descriptor, list8.
             0x03, 0x01, (byte) 0xA3 }; // size (3), count (1), handle (invalid sym8 type constructor given, not really present).
 
-         DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "Expected Unsigned Integer type but found encoding: SYM8:0xa3");
+         DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "Expected Unsigned Integer type but found encoding: Sym8");
       }
 
       private void DoInvalidTransferProvokesDecodeErrorTestImpl(byte[] bytes, String errorDescription)
@@ -288,7 +286,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to issues in test peer state tracking")]
       public void TestEmptyDispositionProvokesDecodeError()
       {
          // Provide the bytes for Disposition, but omit any fields to provoke a decode error.
@@ -301,7 +298,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Fails due to issues in test peer state tracking")]
       public void TestTruncatedDispositionProvokesDecodeError()
       {
          // Provide the bytes for Disposition, but only give a null/not-present for the 'first' field. Provokes a decode error as there must be a role and 'first'.

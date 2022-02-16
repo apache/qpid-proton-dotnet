@@ -200,7 +200,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return null;
             default:
-               throw new DecodeException("Expected UByte type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode);
          }
       }
 
@@ -215,7 +215,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return defaultValue;
             default:
-               throw new DecodeException("Expected UByte type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode);
          }
       }
 
@@ -335,7 +335,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return null;
             default:
-               throw new DecodeException("Expected UShort type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode);
          }
       }
 
@@ -350,7 +350,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return defaultValue;
             default:
-               throw new DecodeException("Expected UShort type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode);
          }
       }
 
@@ -403,7 +403,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return null;
             default:
-               throw new DecodeException("Expected UInt type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode);
          }
       }
 
@@ -422,7 +422,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return defaultValue;
             default:
-               throw new DecodeException("Expected UInt type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode);
          }
       }
 
@@ -475,7 +475,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return null;
             default:
-               throw new DecodeException("Expected ULong type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode);
          }
       }
 
@@ -494,7 +494,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return defaultValue;
             default:
-               throw new DecodeException("Expected ULong type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode);
          }
       }
 
@@ -588,7 +588,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return null;
             default:
-               throw new DecodeException("Expected string type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected String type but found encoding: " + encodingCode);
          }
       }
 
@@ -605,7 +605,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             case EncodingCodes.Null:
                return null;
             default:
-               throw new DecodeException("Expected symbol type but found encoding: " + encodingCode);
+               throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode);
          }
       }
 

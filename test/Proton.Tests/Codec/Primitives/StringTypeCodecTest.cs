@@ -533,7 +533,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
             catch (DecodeException ex)
             {
                // Should indicate the type that it found in the error
-               Assert.IsTrue(ex.Message.Contains("Expected string"));
+               Assert.IsTrue(ex.Message.Contains("Expected String"));
             }
          }
          else
@@ -545,7 +545,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
             catch (DecodeException ex)
             {
                // Should indicate the type that it found in the error
-               Assert.IsTrue(ex.Message.Contains("Expected string"));
+               Assert.IsTrue(ex.Message.Contains("Expected String"));
             }
          }
       }
