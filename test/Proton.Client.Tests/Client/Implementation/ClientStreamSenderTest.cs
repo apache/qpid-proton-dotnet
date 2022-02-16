@@ -2901,7 +2901,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                     .WithMore(true)
                                     .WithPayload(matcher);
             }
-            // A small number of trailing bytes will be transmitted in the  frame.
+            // A small number of trailing bytes will be transmitted in the frame.
             peer.ExpectTransfer().WithDeliveryId(0)
                                  .WithMore(false)
                                  .WithPayload(matcher);

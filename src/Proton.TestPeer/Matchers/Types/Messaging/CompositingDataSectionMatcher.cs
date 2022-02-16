@@ -17,6 +17,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Apache.Qpid.Proton.Test.Driver.Codec;
 using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
@@ -111,7 +112,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
             byte[] expectedValueChunk = expectedValueStream.ReadBytes(currentChunkSize);
             byte[] currentChunk = receivedBinary.ReadBytes(currentChunkSize);
 
-            if (!Array.Equals(expectedValueChunk, currentChunk))
+            if (!expectedValueChunk.SequenceEqual(currentChunk))
             {
                return false;
             }
