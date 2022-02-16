@@ -962,7 +962,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestAutoFlushDuringWriteThatExceedConfiguredBufferLimit()
       {
@@ -1063,7 +1062,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestAutoFlushDuringWriteThatExceedConfiguredBufferLimitSessionCreditLimitOnTransfer()
       {

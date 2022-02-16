@@ -734,7 +734,7 @@ namespace Apache.Qpid.Proton.Buffer
                                                   (source.LongLength - offset));
          }
 
-         CheckCopyIntoArgs(offset, length, writeOffset, Capacity);
+         CheckWriteIntoArgs(source.LongLength, offset, length, writeOffset, Capacity);
          Array.Copy(source, offset, array, Offset(writeOffset), length);
          writeOffset += length;
          return this;
@@ -924,6 +924,32 @@ namespace Apache.Qpid.Proton.Buffer
          if (Capacity < srcPos + length)
          {
             throw new ArgumentOutOfRangeException("The srcPos + length is beyond the end of the buffer: " +
+                                                  "srcPos = " + srcPos + ", length = " + length + '.');
+         }
+         if (destPos < 0)
+         {
+            throw new ArgumentOutOfRangeException("The destPos cannot be negative: " + destPos + '.');
+         }
+         if (destLength < destPos + length)
+         {
+            throw new ArgumentOutOfRangeException("The destPos + length is beyond the end of the destination: " +
+                                                  "destPos = " + destPos + ", length = " + length + '.');
+         }
+      }
+
+      private void CheckWriteIntoArgs(long srcCapacity, long srcPos, long length, long destPos, long destLength)
+      {
+         if (srcPos < 0)
+         {
+            throw new ArgumentOutOfRangeException("The srcPos cannot be negative: " + srcPos + '.');
+         }
+         if (length < 0)
+         {
+            throw new ArgumentOutOfRangeException("The length cannot be negative: " + length + '.');
+         }
+         if (srcCapacity < srcPos + length)
+         {
+            throw new ArgumentOutOfRangeException("The srcPos + length is beyond the end of the source buffer: " +
                                                   "srcPos = " + srcPos + ", length = " + length + '.');
          }
          if (destPos < 0)

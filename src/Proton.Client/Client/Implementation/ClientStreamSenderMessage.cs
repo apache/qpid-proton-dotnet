@@ -536,7 +536,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          TransitionToWritableState();
 
-         AppendDataToBuffer(ClientMessageSupport.EncodeSection(section, ProtonByteBufferAllocator.Instance.Allocate()));
+         AppendDataToBuffer(ClientMessageSupport.EncodeSection(section, ProtonByteBufferAllocator.Instance.Allocate()).Split());
 
          return this;
       }
@@ -666,11 +666,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // must not have any unwritten gaps.
             if (buffer is ProtonCompositeBuffer)
             {
-               ((ProtonCompositeBuffer)buffer).Append(incoming.Split());
+               ((ProtonCompositeBuffer)buffer).Append(incoming);
             }
             else
             {
-               buffer = IProtonCompositeBuffer.Compose(buffer.Split(), incoming.Split());
+               buffer = IProtonCompositeBuffer.Compose(buffer, incoming);
             }
          }
 
@@ -719,7 +719,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new ClientIllegalStateException("Cannot write a Section to an already completed send context");
          }
 
-         AppendDataToBuffer(ClientMessageSupport.EncodeSection(section, ProtonByteBufferAllocator.Instance.Allocate()));
+         AppendDataToBuffer(ClientMessageSupport.EncodeSection(section, ProtonByteBufferAllocator.Instance.Allocate()).Split());
 
          return this;
       }
@@ -732,27 +732,27 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (header != null)
             {
                AppendDataToBuffer(
-                  ClientMessageSupport.EncodeSection(header, ProtonByteBufferAllocator.Instance.Allocate()));
+                  ClientMessageSupport.EncodeSection(header, ProtonByteBufferAllocator.Instance.Allocate()).Split());
             }
             if (deliveryAnnotations != null)
             {
                AppendDataToBuffer(
-                  ClientMessageSupport.EncodeSection(deliveryAnnotations, ProtonByteBufferAllocator.Instance.Allocate()));
+                  ClientMessageSupport.EncodeSection(deliveryAnnotations, ProtonByteBufferAllocator.Instance.Allocate()).Split());
             }
             if (annotations != null)
             {
                AppendDataToBuffer(
-                  ClientMessageSupport.EncodeSection(annotations, ProtonByteBufferAllocator.Instance.Allocate()));
+                  ClientMessageSupport.EncodeSection(annotations, ProtonByteBufferAllocator.Instance.Allocate()).Split());
             }
             if (properties != null)
             {
                AppendDataToBuffer(
-                  ClientMessageSupport.EncodeSection(properties, ProtonByteBufferAllocator.Instance.Allocate()));
+                  ClientMessageSupport.EncodeSection(properties, ProtonByteBufferAllocator.Instance.Allocate()).Split());
             }
             if (applicationProperties != null)
             {
                AppendDataToBuffer(
-                  ClientMessageSupport.EncodeSection(applicationProperties, ProtonByteBufferAllocator.Instance.Allocate()));
+                  ClientMessageSupport.EncodeSection(applicationProperties, ProtonByteBufferAllocator.Instance.Allocate()).Split());
             }
 
             currentState = StreamState.BODY_WRITABLE;
@@ -767,7 +767,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          protected readonly AtomicBoolean closed = new AtomicBoolean();
          protected readonly OutputStreamOptions options;
-         protected readonly IProtonBuffer streamBuffer;
+         protected IProtonBuffer streamBuffer;
          protected readonly ClientStreamSenderMessage message;
 
          protected int bytesWritten;
@@ -931,7 +931,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                if (streamBuffer.IsReadable)
                {
-                  message.AppendDataToBuffer(streamBuffer);
+                  // Copy the buffer as it will be reset and reused and we cannot
+                  // assume that the buffer will be fully written by the IO layer
+                  // before the next write operation is allowed to proceed.
+                  message.AppendDataToBuffer(streamBuffer.Copy());
                }
 
                if (complete)
@@ -1005,7 +1008,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (streamBuffer.IsReadable)
             {
-
                IProtonBuffer preamble = ProtonByteBufferAllocator.Instance.Allocate(
                   DATA_SECTION_HEADER_ENCODING_SIZE, DATA_SECTION_HEADER_ENCODING_SIZE);
 
