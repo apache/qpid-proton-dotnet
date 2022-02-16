@@ -2273,7 +2273,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test is failing intermittently")]
       [Test]
       public void TestMessageSendWhileStreamSendIsOpenShouldBlock()
       {

@@ -118,10 +118,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
-         // TODO Should we update credit state or can we have proton fire an update on any abort
-         // request.Task.ContinueWith(() => {
-         //    ClientSession.Execute(() => base.HandleCreditStateUpdated(ProtonSender);
-         // });
+         request.Task.ContinueWith((tracker) =>
+         {
+            ClientSession.Execute(() => base.HandleCreditStateUpdated(ProtonSender));
+         });
 
          ClientSession.Execute(() =>
          {
@@ -167,10 +167,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
-         // TODO Should we update credit state or can we have proton fire an update on any abort
-         // request.Task.ContinueWith(() => {
-         //    ClientSession.Execute(() => base.HandleCreditStateUpdated(ProtonSender);
-         // });
+         request.Task.ContinueWith((tracker) =>
+         {
+            ClientSession.Execute(() => base.HandleCreditStateUpdated(ProtonSender));
+         });
 
          ClientSession.Execute(() =>
          {

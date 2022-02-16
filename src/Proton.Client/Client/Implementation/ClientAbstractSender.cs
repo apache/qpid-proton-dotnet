@@ -591,7 +591,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleCreditStateUpdated(Engine.ISender sender)
+      internal void HandleCreditStateUpdated(Engine.ISender sender)
       {
          if (!blocked.IsEmpty)
          {
