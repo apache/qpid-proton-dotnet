@@ -175,7 +175,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
                case EncodingCodes.ULong0:
                   return 0;
                case EncodingCodes.SmallULong:
-                  return data.ReadUnsignedByte();
+                  return (ulong)data.ReadUnsignedByte();
                case EncodingCodes.ULong:
                   return (ulong)data.ReadUnsignedLong();
                case EncodingCodes.Sym8:

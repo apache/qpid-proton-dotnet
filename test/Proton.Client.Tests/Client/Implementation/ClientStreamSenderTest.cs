@@ -1328,7 +1328,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestIncompleteStreamClosureCausesTransferAbort()
       {
@@ -1461,7 +1460,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestCompleteStreamClosureCausesTransferCompleted()
       {

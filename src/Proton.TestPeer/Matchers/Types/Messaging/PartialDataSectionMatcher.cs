@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-using System;
+using System.Linq;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec;
 using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
@@ -113,7 +113,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          if (expectedValue != null)
          {
             byte[] payload = receivedBinary.ReadBytes(expectedValue.Length);
-            if (!Array.Equals(payload, expectedValue))
+            if (!expectedValue.SequenceEqual(payload))
             {
                return false;
             }
@@ -168,7 +168,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
                case EncodingCodes.ULong0:
                   return 0;
                case EncodingCodes.SmallULong:
-                  return data.ReadUnsignedByte();
+                  return (ulong)data.ReadUnsignedByte();
                case EncodingCodes.ULong:
                   return (ulong)data.ReadUnsignedLong();
                case EncodingCodes.Sym8:
