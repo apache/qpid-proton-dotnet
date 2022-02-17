@@ -170,7 +170,7 @@ namespace Apache.Qpid.Proton.Buffer
          IProtonBuffer buffer = AllocateBuffer(3, 13);
          Assert.AreEqual(3, buffer.Capacity);
 
-         Assert.DoesNotThrow(() => buffer.EnsureWritable(-1));
+         Assert.Throws<ArgumentOutOfRangeException>(() => buffer.EnsureWritable(-1));
       }
 
       [Test]
@@ -1488,15 +1488,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          IProtonBuffer buffer = AllocateBuffer(LargeCapacity);
 
-         try
-         {
-            buffer.CompareTo(null);
-            Assert.Fail();
-         }
-         catch (NullReferenceException)
-         {
-            // Expected
-         }
+         Assert.Throws<ArgumentNullException>(() => buffer.CompareTo(null));
 
          // Fill the random stuff
          byte[] value = new byte[32];
@@ -2529,6 +2521,31 @@ namespace Apache.Qpid.Proton.Buffer
          buffer.EnsureWritable(8);
          buffer.WriteUnsignedLong(0xA1A2A3A4A5A6A7A8UL);
          Assert.AreEqual(0xA1A2A3A4A5A6A7A8UL, buffer.ReadUnsignedLong());
+      }
+
+      #endregion
+
+      #region Test for buffer compaction
+
+      [Test]
+      public void TestCompactMustDiscardReadBytes()
+      {
+         IProtonBuffer buffer = AllocateBuffer(16);
+
+         buffer.WriteUnsignedLong(0x0102030405060708L).WriteInt(0x090A0B0C);
+         Assert.AreEqual(0x01020304, buffer.ReadInt());
+         Assert.AreEqual(12, buffer.WriteOffset);
+         Assert.AreEqual(4, buffer.ReadOffset);
+         Assert.AreEqual(4, buffer.WritableBytes);
+         Assert.AreEqual(8, buffer.ReadableBytes);
+         Assert.AreEqual(16, buffer.Capacity);
+         buffer.Compact();
+         Assert.AreEqual(8, buffer.WriteOffset);
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(8, buffer.WritableBytes);
+         Assert.AreEqual(8, buffer.ReadableBytes);
+         Assert.AreEqual(16, buffer.Capacity);
+         Assert.AreEqual(0x05060708090A0B0CL, buffer.ReadLong());
       }
 
       #endregion

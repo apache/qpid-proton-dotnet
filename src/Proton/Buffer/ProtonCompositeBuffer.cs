@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// Limit capcity to a value that might still allow for a non-composite
       /// buffer copy of this buffer to be made if requested.
       /// </summary>
-      private static readonly long MAX_CAPACITY = Int32.MaxValue;
+      private const long MAX_CAPACITY = Int64.MaxValue;
 
       private static readonly IProtonBuffer[] EMPTY_BUFFER_ARRAY = new IProtonBuffer[0];
 
@@ -48,6 +48,7 @@ namespace Apache.Qpid.Proton.Buffer
       private long readOffset;
       private long writeOffset;
       private long capacity;
+      private long maxCapacity;
 
       /// <summary>
       /// Before any read or write the composite must determine an index into the
@@ -55,21 +56,22 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       private long nextComputedAccessIndex;
 
-      internal ProtonCompositeBuffer() : this(ProtonByteBufferAllocator.Instance, EMPTY_BUFFER_ARRAY)
+      internal ProtonCompositeBuffer(long maxCapacity = MAX_CAPACITY) : this(ProtonByteBufferAllocator.Instance, EMPTY_BUFFER_ARRAY, maxCapacity)
       {
       }
 
-      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator) : this(allocator, EMPTY_BUFFER_ARRAY)
+      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator) : this(allocator, EMPTY_BUFFER_ARRAY, MAX_CAPACITY)
       {
       }
 
-      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator, IEnumerable<IProtonBuffer> buffers)
+      internal ProtonCompositeBuffer(IProtonBufferAllocator allocator, IEnumerable<IProtonBuffer> buffers, long maxCapacity = MAX_CAPACITY)
       {
          if (allocator == null)
          {
             throw new ArgumentNullException("Cannot create a composite buffer with a null allocator");
          }
 
+         this.maxCapacity = maxCapacity;
          this.allocator = allocator;
          this.buffers = FilterIncomingBuffers(buffers);
          this.splitBufferAccessor = new SplitBufferAccessor(this);
@@ -245,7 +247,29 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Compact()
       {
-         throw new NotImplementedException();
+         if (readOffset == 0)
+         {
+            return this;
+         }
+
+         int unused = 0;
+         int position = 0;
+         long oldReadOffset = readOffset;
+
+         ForEachReadableComponent(unused, (index, component) =>
+         {
+            for (int i = 0; i < component.ReadableArrayLength; ++i)
+            {
+               SetUnsignedByte(position++, component.ReadableArray[component.ReadableArrayOffset + i]);
+            }
+
+            return true;
+         });
+
+         ReadOffset = 0;
+         WriteOffset = writeOffset - oldReadOffset;
+
+         return this;
       }
 
       public IProtonBuffer Split(long offset)
@@ -260,7 +284,27 @@ namespace Apache.Qpid.Proton.Buffer
             throw new ArgumentOutOfRangeException("The buffer split offset must be within the current buffer capacity");
          }
 
-         throw new NotImplementedException();
+         long splitAtBuffer = SearchIndexTracker(offset);
+
+         // This value will either be the start of the buffer or some offset into it
+         // which means either we can easily split here or possible need to split this
+         // buffer to compose the two halves we will create.
+         long bufferSplitPoint = offset - indexTracker[splitAtBuffer];
+
+         // Either we can copy everything up to the split at point or we need to copy
+         // the split at buffer into both array and then split it to complete the operation.
+         IProtonBuffer[] result = Statics.CopyOf(buffers, (int)(bufferSplitPoint == 0 ? splitAtBuffer : 1 + splitAtBuffer));
+         buffers = Statics.CopyOfRange(buffers,
+            (int)(bufferSplitPoint == buffers[splitAtBuffer].Capacity ? 1 + splitAtBuffer : splitAtBuffer), buffers.Length);
+
+         if (bufferSplitPoint > 0 && result.Length > 0 && bufferSplitPoint < result[result.Length - 1].Capacity)
+         {
+            result[result.Length - 1] = buffers[0].Split(bufferSplitPoint);
+         }
+
+         ComputeOffsetsAndIndexes();
+
+         return new ProtonCompositeBuffer(allocator, result);
       }
 
       public IEnumerable<IProtonBuffer> DecomposeBuffer()
@@ -338,7 +382,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             // Given a required length of zero choose buffer always gives a direct
             // access buffer form the array of buffers.
-            IProtonBuffer buf = (IProtonBuffer) ChooseBuffer(srcPos, 0);
+            IProtonBuffer buf = (IProtonBuffer)ChooseBuffer(srcPos, 0);
 
             // Delegate to each subregion for a copy into the array, moving the array
             // offset by the copy amount with each iteration.
@@ -373,7 +417,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             // Given a required length of zero choose buffer always gives a direct
             // access buffer form the array of buffers.
-            IProtonBuffer buf = (IProtonBuffer) ChooseBuffer(srcPos, 0);
+            IProtonBuffer buf = (IProtonBuffer)ChooseBuffer(srcPos, 0);
 
             // Delegate to each subregion for a copy into the array, moving the array
             // offset by the copy amount with each iteration.
@@ -389,6 +433,11 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer EnsureWritable(long amount)
       {
+         return DoEnsureWritable(amount);
+      }
+
+      private IProtonBuffer DoEnsureWritable(long amount, bool allowCompaction = true, long minimumGrowth = 1)
+      {
          if (amount < 0)
          {
             throw new ArgumentOutOfRangeException("Growth amount must be greater than zero");
@@ -399,7 +448,78 @@ namespace Apache.Qpid.Proton.Buffer
             return this;
          }
 
-         throw new NotImplementedException();
+         if (minimumGrowth < 0)
+         {
+            throw new ArgumentOutOfRangeException("The minimum growth cannot be negative: " + minimumGrowth + '.');
+         }
+
+         if (allowCompaction && amount <= readOffset)
+         {
+            int compactableBuffers = 0;
+            foreach (IProtonBuffer candidate in buffers)
+            {
+               if (candidate.Capacity != candidate.ReadOffset)
+               {
+                  break;
+               }
+               compactableBuffers++;
+            }
+
+            if (compactableBuffers > 0)
+            {
+               IProtonBuffer[] compactable;
+               if (compactableBuffers < buffers.Length)
+               {
+                  compactable = new IProtonBuffer[compactableBuffers];
+                  Array.ConstrainedCopy(buffers, 0, compactable, 0, compactable.Length);
+                  Array.ConstrainedCopy(buffers, compactable.Length, buffers, 0, buffers.Length - compactable.Length);
+                  Array.ConstrainedCopy(compactable, 0, buffers, buffers.Length - compactable.Length, compactable.Length);
+               }
+               else
+               {
+                  compactable = buffers;
+               }
+
+               foreach (IProtonBuffer target in compactable)
+               {
+                  target.Reset();
+               }
+
+               ComputeOffsetsAndIndexes();
+               if (WritableBytes >= amount)
+               {
+                  return this;
+               }
+            }
+            else if (buffers.Length == 1)
+            {
+               // If we only have a single component buffer, then we can safely compact that in-place.
+               buffers[0].Compact();
+               ComputeOffsetsAndIndexes();
+               if (WritableBytes >= amount)
+               {
+                  return this;
+               }
+            }
+         }
+
+         long growth = Math.Max(amount - WritableBytes, minimumGrowth);
+
+         if (growth < 0)
+         {
+            throw new ArgumentOutOfRangeException("Buffer size must not be negative, but was " + growth + '.');
+         }
+
+         if ((ulong)(growth + Capacity) > (ulong)maxCapacity)
+         {
+            throw new ArgumentOutOfRangeException(
+                    "Buffer size cannot be made greater than " + maxCapacity +
+                    ", but was requested to grow to" + (ulong)(growth + Capacity) + '.');
+         }
+
+         IProtonBuffer extension = allocator.Allocate(growth);
+         AppendValidatedBuffer(extension);
+         return this;
       }
 
       public int CompareTo(object obj)
@@ -471,62 +591,62 @@ namespace Apache.Qpid.Proton.Buffer
 
       public bool GetBoolean(long index)
       {
-         return PrepareForRead(index, sizeof(byte)).GetBoolean(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(byte)).GetBoolean(nextComputedAccessIndex);
       }
 
       public sbyte GetByte(long index)
       {
-         return PrepareForRead(index, sizeof(byte)).GetByte(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(byte)).GetByte(nextComputedAccessIndex);
       }
 
       public char GetChar(long index)
       {
-         return PrepareForRead(index, sizeof(char)).GetChar(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(char)).GetChar(nextComputedAccessIndex);
       }
 
       public double GetDouble(long index)
       {
-         return PrepareForRead(index, sizeof(double)).GetDouble(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(double)).GetDouble(nextComputedAccessIndex);
       }
 
       public float GetFloat(long index)
       {
-         return PrepareForRead(index, sizeof(float)).GetFloat(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(float)).GetFloat(nextComputedAccessIndex);
       }
 
       public short GetShort(long index)
       {
-         return PrepareForRead(index, sizeof(short)).GetShort(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(short)).GetShort(nextComputedAccessIndex);
       }
 
       public int GetInt(long index)
       {
-         return PrepareForRead(index, sizeof(int)).GetInt(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(int)).GetInt(nextComputedAccessIndex);
       }
 
       public long GetLong(long index)
       {
-         return PrepareForRead(index, sizeof(long)).GetLong(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(long)).GetLong(nextComputedAccessIndex);
       }
 
       public byte GetUnsignedByte(long index)
       {
-         return PrepareForRead(index, sizeof(byte)).GetUnsignedByte(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(byte)).GetUnsignedByte(nextComputedAccessIndex);
       }
 
       public ushort GetUnsignedShort(long index)
       {
-         return PrepareForRead(index, sizeof(ushort)).GetUnsignedShort(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(ushort)).GetUnsignedShort(nextComputedAccessIndex);
       }
 
       public uint GetUnsignedInt(long index)
       {
-         return PrepareForRead(index, sizeof(int)).GetUnsignedInt(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(int)).GetUnsignedInt(nextComputedAccessIndex);
       }
 
       public ulong GetUnsignedLong(long index)
       {
-         return PrepareForRead(index, sizeof(ulong)).GetUnsignedLong(nextComputedAccessIndex);
+         return PrepareForGet(index, sizeof(ulong)).GetUnsignedLong(nextComputedAccessIndex);
       }
 
       public bool ReadBoolean()
@@ -687,7 +807,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer WriteShort(short value)
       {
-         PrepareForWrite(sizeof(short)).WriteFloat(value);
+         PrepareForWrite(sizeof(short)).WriteShort(value);
          return this;
       }
 
@@ -739,6 +859,12 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer WriteBytes(byte[] source, long offset, long length)
       {
+         if (source == null)
+         {
+            throw new ArgumentNullException("Cannot write a null array into this buffer");
+         }
+
+         CheckWriteIntoArgs(source.LongLength, offset, length, writeOffset, Capacity);
          // Inefficient but workable solution that should be optimized later
          long woff = WriteOffset;
          WriteOffset = woff + length;
@@ -960,6 +1086,32 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
+      private void CheckWriteIntoArgs(long srcCapacity, long srcPos, long length, long destPos, long destLength)
+      {
+         if (srcPos < 0)
+         {
+            throw new ArgumentOutOfRangeException("The srcPos cannot be negative: " + srcPos + '.');
+         }
+         if (length < 0)
+         {
+            throw new ArgumentOutOfRangeException("The length cannot be negative: " + length + '.');
+         }
+         if (srcCapacity < srcPos + length)
+         {
+            throw new ArgumentOutOfRangeException("The srcPos + length is beyond the end of the source buffer: " +
+                                                  "srcPos = " + srcPos + ", length = " + length + '.');
+         }
+         if (destPos < 0)
+         {
+            throw new ArgumentOutOfRangeException("The destPos cannot be negative: " + destPos + '.');
+         }
+         if (destLength < destPos + length)
+         {
+            throw new ArgumentOutOfRangeException("The destPos + length is beyond the end of the destination: " +
+                                                  "destPos = " + destPos + ", length = " + length + '.');
+         }
+      }
+
       private Exception IndexOutOfBounds(long index, bool write)
       {
          return new IndexOutOfRangeException(
@@ -999,6 +1151,12 @@ namespace Apache.Qpid.Proton.Buffer
          // state such that it can produce a write of the requested bytes across
          // more than one contained buffer.
          CheckWriteBounds(index, size);
+         return ChooseBuffer(index, size);
+      }
+
+      private IProtonBufferAccessors PrepareForGet(long index, int size)
+      {
+         CheckGetBounds(index, size);
          return ChooseBuffer(index, size);
       }
 

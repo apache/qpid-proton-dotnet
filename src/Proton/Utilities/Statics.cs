@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Utilities
             throw new ArgumentOutOfRangeException("Value of " + from + " > " + to);
          }
 
-         T[] copy = new T[newLength];
+         T[] copy = newLength == 0 ? Array.Empty<T>() : new T[newLength];
          Array.ConstrainedCopy(original, from, copy, 0, Math.Min(original.Length - from, newLength));
          return copy;
       }

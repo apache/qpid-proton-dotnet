@@ -22,7 +22,7 @@ using NUnit.Framework;
 namespace Apache.Qpid.Proton.Buffer
 {
    [TestFixture]
-   public class ProtonCompositeBufferTest
+   public class ProtonCompositeBufferTest : ProtonAbstractByteBufferTests
    {
       #region Composite Buffer create tests
 
@@ -1032,22 +1032,22 @@ namespace Apache.Qpid.Proton.Buffer
 
       #region The Abstract methods needed for the base buffers tests.
 
-      protected bool CanBufferCapacityBeChanged()
+      protected override bool CanBufferCapacityBeChanged()
       {
-         return false; // Cannot resize the composite at the moment
+         return true; // Cannot resize the composite at the moment
       }
 
-      protected IProtonBuffer AllocateBuffer(int initialCapacity)
+      protected override IProtonBuffer AllocateBuffer(int initialCapacity)
       {
          return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
       }
 
-      protected IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
+      protected override IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
       {
-         return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity, maxCapacity));
+         return new ProtonCompositeBuffer(maxCapacity).Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
       }
 
-      protected IProtonBuffer WrapBuffer(byte[] array)
+      protected override IProtonBuffer WrapBuffer(byte[] array)
       {
          return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Wrap(array));
       }

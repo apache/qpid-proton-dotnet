@@ -17,6 +17,7 @@
 
 using System;
 using System.Text;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Buffer
 {
@@ -757,6 +758,8 @@ namespace Apache.Qpid.Proton.Buffer
 
       public int CompareTo(object obj)
       {
+         Statics.RequireNonNull(obj, "Cannot compare a buffer with null");
+
          if (obj is IProtonBuffer)
          {
             return CompareTo(obj as IProtonBuffer);
@@ -767,6 +770,8 @@ namespace Apache.Qpid.Proton.Buffer
 
       public int CompareTo(IProtonBuffer other)
       {
+         Statics.RequireNonNull(other, "Cannot compare a buffer with null");
+
          long stopIndex = ReadOffset + Math.Min(ReadableBytes, other.ReadableBytes);
 
          for (long i = ReadOffset, j = other.ReadOffset; i < stopIndex; i++, j++)
@@ -838,6 +843,16 @@ namespace Apache.Qpid.Proton.Buffer
 
       private IProtonBuffer InternalEnsureWritable(bool allowCompaction, long minimumGrowth, long requiredWritable)
       {
+         if (requiredWritable < 0)
+         {
+            throw new ArgumentOutOfRangeException("Requested writable bytes cannot be negative");
+         }
+
+         if (minimumGrowth < 0)
+         {
+            throw new ArgumentOutOfRangeException("Requested minimum growth bytes cannot be negative");
+         }
+
          // Called when we know that we don't need to validate if the minimum writable
          // value is negative.
          if (requiredWritable <= WritableBytes)
