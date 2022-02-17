@@ -2138,7 +2138,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReceiverReportsDeliveryUpdatedNextFrameForMultiFrameTransfer()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2222,7 +2221,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReceiverReportsUpdateWhenLastFrameOfMultiFrameTransferHasNoPayload()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2479,7 +2477,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReceiverDeliveryIdTrackingHandlesAbortedDelivery()
       {
          // Check aborted=true, more=false, settled=true.
@@ -4439,7 +4436,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestIncomingDeliveryTracksTransferInCount()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -4550,28 +4546,24 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndLinkIsClosed()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(true, false, false, false);
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndSessionIsClosed()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(false, true, false, false);
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndConnectionIsClosed()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(false, false, true, false);
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestReadAllDeliveryDataWhenSessionWindowInForceAndEngineIsShutdown()
       {
          TestReadAllDeliveryDataWhenSessionWindowInForceButLinkCannotWrite(false, false, false, true);
