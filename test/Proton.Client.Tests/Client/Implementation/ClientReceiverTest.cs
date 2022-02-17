@@ -1621,7 +1621,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Proton composite buffer copy not yet fully implemented")]
       [Test]
       public void TestReceiveMessageInSplitTransferFrames()
       {
@@ -2710,7 +2709,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Proton Composite Buffer not fully implemented yet")]
       [Test]
       public void TestSessionWindowExpandedAsIncomingFramesArrive()
       {

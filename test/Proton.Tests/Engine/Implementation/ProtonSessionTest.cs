@@ -898,7 +898,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Probable issue with test peer validating Dictionary expectations")]
       public void TestPropertiesArePopulatedAndAccessible()
       {
          Symbol clientPropertyName = Symbol.Lookup("ClientPropertyName");
