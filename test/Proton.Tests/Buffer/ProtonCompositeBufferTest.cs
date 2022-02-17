@@ -329,7 +329,6 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadLong());
       }
 
-      [Ignore("CopyInto is not yet implemented")]
       [Test]
       public void TestGetWritableBufferWithContentsInSeveralArrays()
       {
@@ -349,14 +348,14 @@ namespace Apache.Qpid.Proton.Buffer
 
          for (int i = 0; i < size; i++)
          {
-            Assert.AreEqual(buffer.ReadOffset, i);
-            IProtonBuffer self = buffer.CopyInto(buffer.ReadOffset, destination, 0, 1);
+            Assert.AreEqual(buffer.ReadOffset, 0);
+            IProtonBuffer self = buffer.CopyInto(i, destination, 0, 1);
             Assert.AreEqual(destination.GetByte(0), buffer.GetByte(i));
             Assert.AreSame(self, buffer);
             destination.WriteOffset = 0;
          }
 
-         Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadByte());
+         Assert.DoesNotThrow(() => buffer.ReadByte());
       }
 
       [Test]
@@ -903,7 +902,6 @@ namespace Apache.Qpid.Proton.Buffer
 
       #region Tests for string reads from buffer
 
-      [Ignore("Not yet implemented")]
       [Test]
       public void TestReadStringFromEmptyBuffer()
       {
