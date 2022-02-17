@@ -174,36 +174,28 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          ClientSession.Execute(() =>
          {
-            if (protonDelivery.TransferCount == 0)
+            ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, true, request);
+            try
             {
-               protonDelivery.Abort();
-               request.TrySetResult(tracker);
-            }
-            else
-            {
-               ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, true, request);
-               try
+               if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
                {
-                  if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
+                  envelope.Transmit(protonDelivery.State, protonDelivery.IsSettled);
+               }
+               else
+               {
+                  if (ProtonSender.Current == protonDelivery)
                   {
-                     envelope.Transmit(protonDelivery.State, protonDelivery.IsSettled);
+                     AddToHeadOfBlockedQueue(envelope);
                   }
                   else
                   {
-                     if (ProtonSender.Current == protonDelivery)
-                     {
-                        AddToHeadOfBlockedQueue(envelope);
-                     }
-                     else
-                     {
-                        AddToTailOfBlockedQueue(envelope);
-                     }
+                     AddToTailOfBlockedQueue(envelope);
                   }
                }
-               catch (Exception error)
-               {
-                  request.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
-               }
+            }
+            catch (Exception error)
+            {
+               request.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
             }
          });
 
