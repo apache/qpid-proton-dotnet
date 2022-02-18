@@ -256,15 +256,18 @@ namespace Apache.Qpid.Proton.Buffer
          int position = 0;
          long oldReadOffset = readOffset;
 
-         ForEachReadableComponent(unused, (index, component) =>
+         if (IsReadable)
          {
-            for (int i = 0; i < component.ReadableArrayLength; ++i)
+            ForEachReadableComponent(unused, (index, component) =>
             {
-               SetUnsignedByte(position++, component.ReadableArray[component.ReadableArrayOffset + i]);
-            }
+               for (int i = 0; i < component.ReadableArrayLength; ++i)
+               {
+                  SetUnsignedByte(position++, component.ReadableArray[component.ReadableArrayOffset + i]);
+               }
 
-            return true;
-         });
+               return true;
+            });
+         }
 
          ReadOffset = 0;
          WriteOffset = writeOffset - oldReadOffset;

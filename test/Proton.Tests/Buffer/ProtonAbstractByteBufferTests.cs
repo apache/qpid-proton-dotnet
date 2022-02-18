@@ -2528,6 +2528,24 @@ namespace Apache.Qpid.Proton.Buffer
       #region Test for buffer compaction
 
       [Test]
+      public void TestCompactBufferWithOneByteWrittenAndRead()
+      {
+         IProtonBuffer buffer = AllocateBuffer(16);
+
+         buffer.WriteByte(127);
+         Assert.AreEqual(127, buffer.ReadByte());
+
+         Assert.AreEqual(1, buffer.ReadOffset);
+         Assert.AreEqual(1, buffer.WriteOffset);
+         Assert.AreEqual(16, buffer.Capacity);
+
+         Assert.AreSame(buffer, buffer.Compact());
+
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(0, buffer.WriteOffset);
+      }
+
+      [Test]
       public void TestCompactMustDiscardReadBytes()
       {
          IProtonBuffer buffer = AllocateBuffer(16);

@@ -671,7 +671,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream access not yet implemented.")]
       [Test]
       public void TestStreamDeliveryRawInputStreamWithCompleteDeliveryReadByte()
       {
@@ -791,7 +790,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
       [Test]
       public void TestStreamDeliveryRawInputStreamWithCompleteDeliveryReadBytes()
       {
@@ -1373,7 +1371,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
       [Test]
       public void TestStreamDeliveryUserAppliedDispositionBeforeStreamRead()
       {
@@ -1501,7 +1498,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadHeaderFromStreamMessageWithoutHeaderSection()
       {
@@ -1560,7 +1556,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestTryReadSectionBeyondWhatIsEncodedIntoMessage()
       {
@@ -2674,7 +2669,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamDeliveryHandlesInvalidHeaderEncoding()
       {
@@ -2726,7 +2720,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamDeliveryHandlesInvalidDeliveryAnnotationsEncoding()
       {
@@ -2778,7 +2771,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamDeliveryHandlesInvalidMessageAnnotationsEncoding()
       {
@@ -2830,7 +2822,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamDeliveryHandlesInvalidPropertiesEncoding()
       {
@@ -2882,7 +2873,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamDeliveryHandlesInvalidApplicationPropertiesEncoding()
       {
@@ -2934,7 +2924,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamDeliveryHandlesInvalidHeaderEncodingDuringBodyStreamOpen()
       {
@@ -2986,7 +2975,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestConnectionDropsDuringStreamedBodyRead()
       {
@@ -4029,6 +4017,5 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
-
    }
 }
