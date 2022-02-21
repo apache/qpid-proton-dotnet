@@ -275,6 +275,41 @@ namespace Apache.Qpid.Proton.Buffer
          return this;
       }
 
+      public IProtonBuffer Reclaim()
+      {
+         if (readOffset != 0)
+         {
+            int readIsInBuffer = (int) SearchIndexTracker(readOffset);
+            if (readIsInBuffer > 0)
+            {
+               buffers = Statics.CopyOfRange(buffers, readIsInBuffer, buffers.Length);
+            }
+            else if (readOffset == Capacity)
+            {
+               buffers = EMPTY_BUFFER_ARRAY;
+            }
+
+            ComputeOffsetsAndIndexes();
+         }
+
+         return this;
+      }
+
+      public IProtonBuffer WriteSplit(long offset)
+      {
+         return Split(WriteOffset + offset);
+      }
+
+      public IProtonBuffer ReadSplit(long offset)
+      {
+         return Split(ReadOffset + offset);
+      }
+
+      public IProtonBuffer Split()
+      {
+         return Split(WriteOffset);
+      }
+
       public IProtonBuffer Split(long offset)
       {
          if (offset > Int32.MaxValue)

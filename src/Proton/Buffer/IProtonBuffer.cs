@@ -205,6 +205,19 @@ namespace Apache.Qpid.Proton.Buffer
       IProtonBuffer Compact();
 
       /// <summary>
+      /// Reclaims read buffer space and returns it to the operating system or other pooling
+      /// mechanisms if those are in place, then compacts the remaining buffer contents.
+      /// <para/>
+      /// For a non-composite buffer this operation could consist of allocating a smaller
+      /// buffer to house any remaining unread bytes and freeing the larger backing buffer in
+      /// some cases or it may result in a no-op depending on the buffer implementation. For
+      /// the composite buffer case this operation provides an API which allows for fully read
+      /// buffer constituents to be released and returned to a memory pool or back to the O/S.
+      /// </summary>
+      /// <returns>this buffer instance</returns>
+      IProtonBuffer Reclaim();
+
+      /// <summary>
       /// Splits the buffer into two distinct buffers at the given index plus the current read
       /// offset. The returned buffer will retain the read offset and write offset of this buffer
       /// but will be truncated to match the capacity provided by the split index, which implies
@@ -221,10 +234,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       /// <param name="offset">The offset to split beyond the current read offset</param>
       /// <returns>A new buffer that access the front portion of the buffer split</returns>
-      IProtonBuffer ReadSplit(long offset)
-      {
-         return Split(ReadOffset + offset);
-      }
+      IProtonBuffer ReadSplit(long offset);
 
       /// <summary>
       /// Splits the buffer into two distinct buffers at the given index plus the current write
@@ -243,10 +253,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       /// <param name="offset">The offset to split beyond the current write offset</param>
       /// <returns>A new buffer that access the front portion of the buffer split</returns>
-      IProtonBuffer WriteSplit(long offset)
-      {
-         return Split(WriteOffset + offset);
-      }
+      IProtonBuffer WriteSplit(long offset);
 
       /// <summary>
       /// Splits the buffer into two buffers at the write offset.  The resulting buffer
@@ -263,10 +270,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// once both buffers no longer reference them.
       /// </summary>
       /// <returns>A new buffer that access the front portion of the buffer split</returns>
-      IProtonBuffer Split()
-      {
-         return Split(WriteOffset);
-      }
+      IProtonBuffer Split();
 
       /// <summary>
       /// Splits the buffer into two distinct buffers at the given index. The returned buffer will

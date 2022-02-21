@@ -849,7 +849,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
       [Test]
       public void TestStreamDeliveryRawInputStreamWithInCompleteDeliveryReadBytes()
       {
@@ -925,7 +924,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
       [Test]
       public void TestStreamDeliveryRawInputStreamReadBytesSignalsEOFOnEmptyCompleteTransfer()
       {
@@ -979,7 +977,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             // Should block until more data arrives.
             byte[] deliveryBytes2 = new byte[payload1.Length];
-            Assert.AreEqual(-1, stream.Read(deliveryBytes2));
+            Assert.AreEqual(0, stream.Read(deliveryBytes2));
             Assert.AreEqual(0, stream.Length - stream.Position);
 
             Assert.IsTrue(delivery.Completed);
@@ -1149,7 +1147,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
       [Test]
       public void TestStreamDeliveryRawInputStreamBlockedReadBytesAborted()
       {
@@ -1204,6 +1201,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (IOException ioe)
             {
+               logger.LogInformation("Stream read threw Ex with inner type: {0}", ioe.InnerException.GetType());
                Assert.IsTrue(ioe.InnerException is ClientDeliveryAbortedException);
             }
 

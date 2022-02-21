@@ -215,6 +215,29 @@ namespace Apache.Qpid.Proton.Buffer
          return this;
       }
 
+      public IProtonBuffer Reclaim()
+      {
+         // For now we do nothing, but in the future some logic might be added
+         // to compact and or reallocate to a smaller buffer in order to free
+         // some memory space.
+         return this;
+      }
+
+      public IProtonBuffer WriteSplit(long offset)
+      {
+         return Split(WriteOffset + offset);
+      }
+
+      public IProtonBuffer ReadSplit(long offset)
+      {
+         return Split(ReadOffset + offset);
+      }
+
+      public IProtonBuffer Split()
+      {
+         return Split(WriteOffset);
+      }
+
       public IProtonBuffer Split(long offset)
       {
          if (offset > Int32.MaxValue)

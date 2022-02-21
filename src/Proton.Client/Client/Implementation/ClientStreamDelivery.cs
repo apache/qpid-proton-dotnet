@@ -27,6 +27,7 @@ using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -40,6 +41,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientStreamDelivery : IStreamDelivery
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSession>();
+
       private readonly ClientStreamReceiver receiver;
       private readonly IIncomingDelivery protonDelivery;
 
@@ -223,7 +226,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                CheckStreamStateIsValid();
                if (buffer.IsReadable)
                {
-                  return buffer.ReadableBytes;
+                  return buffer.WriteOffset;
                }
                else
                {
@@ -235,13 +238,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      {
                         if (protonDelivery.Available > 0)
                         {
-                           buffer.Append(protonDelivery.ReadAll());
+                           buffer.Append(protonDelivery.ReadAll().Split());
                         }
 
-                        request.TrySetResult((int)buffer.ReadableBytes);
+                        request.TrySetResult((int)buffer.WriteOffset);
                      });
 
-                     return connection.Request(receiver, request).Task.Result;
+                     return connection.Request(receiver, request).Task.GetAwaiter().GetResult();
                   }
                   catch (Exception e)
                   {
@@ -345,7 +348,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                int result = ReadByte();
                if (result >= 0)
                {
-                  buffer[bytesRead] = (byte) result;
+                  buffer[bytesRead] = (byte)result;
                }
                else
                {
@@ -442,7 +445,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   if (delivery.Available > 0)
                   {
-                     buffer.Append(protonDelivery.ReadAll());
+                     buffer.Append(protonDelivery.ReadAll().Split());
                      readRequest.TrySetResult((int)buffer.ReadableBytes);
                      readRequest = null;
                   }
@@ -477,7 +480,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if ((buffer.ReadOffset - markIndex) > markLimit)
             {
                markIndex = INVALID_MARK;
-               buffer.Compact();
+               buffer.Reclaim();
             }
          }
 
@@ -495,7 +498,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                   else if (protonDelivery.Available > 0)
                   {
-                     buffer.Append(protonDelivery.ReadAll());
+                     buffer.Append(protonDelivery.ReadAll().Split());
                      request.TrySetResult((int)buffer.ReadableBytes);
                   }
                   else if (protonDelivery.IsAborted)
@@ -513,7 +516,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                });
 
-               return connection.Request(receiver, request).Task.Result;
+               return connection.Request(receiver, request).Task.GetAwaiter().GetResult();
             }
             catch (Exception e)
             {

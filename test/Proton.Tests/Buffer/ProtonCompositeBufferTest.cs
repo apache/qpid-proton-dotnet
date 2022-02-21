@@ -1026,6 +1026,103 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(3, buffer.DecomposeBuffer().Count());
       }
 
+      [Test]
+      public void TestCompactReadBufferAndAppendAnother()
+      {
+         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         byte[] data2 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1));
+
+         Assert.AreEqual(255, appendTo.ReadUnsignedByte());
+         Assert.AreEqual(255, appendTo.ReadUnsignedByte());
+
+         appendTo.ReadOffset = data1.LongLength;
+
+         Assert.AreEqual(1, appendTo.ComponentCount);
+         Assert.AreEqual(0, appendTo.ReadableBytes);
+         Assert.AreEqual(0, appendTo.WritableBytes);
+
+         appendTo.Compact();
+
+         Assert.AreEqual(1, appendTo.ComponentCount);
+         Assert.AreEqual(0, appendTo.ReadableBytes);
+         Assert.AreEqual(data1.Length, appendTo.WritableBytes);
+
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data2).Reset());
+
+         Assert.AreEqual(2, appendTo.ComponentCount);
+         Assert.AreEqual(0, appendTo.ReadableBytes);
+         Assert.AreEqual(data1.Length + data2.Length, appendTo.WritableBytes);
+      }
+
+      [Test]
+      public void TestSplitReadBufferAndAppendAnother()
+      {
+         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         byte[] data2 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1));
+
+         Assert.AreEqual(255, appendTo.ReadUnsignedByte());
+         Assert.AreEqual(255, appendTo.ReadUnsignedByte());
+
+         appendTo.ReadOffset = data1.LongLength;
+
+         Assert.AreEqual(1, appendTo.ComponentCount);
+         Assert.AreEqual(0, appendTo.ReadableBytes);
+         Assert.AreEqual(0, appendTo.WritableBytes);
+
+         appendTo.Split();
+
+         Assert.AreEqual(0, appendTo.ComponentCount);
+         Assert.AreEqual(0, appendTo.ReadableBytes);
+         Assert.AreEqual(0, appendTo.WritableBytes);
+
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data2).Reset());
+
+         Assert.AreEqual(1, appendTo.ComponentCount);
+         Assert.AreEqual(0, appendTo.ReadableBytes);
+         Assert.AreEqual(data2.Length, appendTo.WritableBytes);
+      }
+
+      #endregion
+
+      #region Tests buffer reclaim
+
+      [Test]
+      public void TestReclaimReadBuffer()
+      {
+         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+         byte[] data2 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
+
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1));
+         appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data2));
+
+         Assert.AreEqual(2, appendTo.ComponentCount);
+         appendTo.Reclaim();
+         Assert.AreEqual(2, appendTo.ComponentCount);
+
+         appendTo.ReadOffset = data1.LongLength - 1;
+         appendTo.Reclaim();
+         Assert.AreEqual(2, appendTo.ComponentCount);
+
+         appendTo.ReadOffset = data1.LongLength;
+         appendTo.Reclaim();
+         Assert.AreEqual(1, appendTo.ComponentCount);
+
+         appendTo.ReadOffset = data2.LongLength;
+         appendTo.Reclaim();
+         Assert.AreEqual(0, appendTo.ComponentCount);
+
+         appendTo.EnsureWritable(1);
+         appendTo.WriteBoolean(true);
+         Assert.IsTrue(appendTo.ReadBoolean());
+      }
+
       #endregion
 
       #region The Abstract methods needed for the base buffers tests.

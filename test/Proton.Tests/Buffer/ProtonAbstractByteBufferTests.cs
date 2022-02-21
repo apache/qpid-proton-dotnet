@@ -2568,6 +2568,32 @@ namespace Apache.Qpid.Proton.Buffer
 
       #endregion
 
+      #region
+
+      [Test]
+      public void TestReadByteAndTryToReclaim()
+      {
+         byte[] source = new byte[] { 0, 1, 2, 3, 4, 5 };
+         IProtonBuffer buffer = WrapBuffer(source);
+
+         Assert.AreEqual(source.LongLength, buffer.ReadableBytes);
+
+         for (int i = 0; i < source.LongLength; ++i)
+         {
+            Assert.AreEqual(source[i], buffer.ReadByte());
+            buffer.Reclaim();
+         }
+
+         try
+         {
+            buffer.ReadByte();
+            Assert.Fail("Should not be able to read beyond current capacity");
+         }
+         catch (IndexOutOfRangeException) { }
+      }
+
+      #endregion
+
       #region Tests need to define these allocation methods
 
       /// <summary>
