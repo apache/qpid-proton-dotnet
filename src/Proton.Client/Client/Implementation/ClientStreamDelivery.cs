@@ -337,6 +337,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
             return result;
          }
 
+         public override int Read(Span<byte> buffer)
+         {
+            int bytesRead = 0;
+            for (; bytesRead < buffer.Length; ++bytesRead)
+            {
+               int result = ReadByte();
+               if (result >= 0)
+               {
+                  buffer[bytesRead] = (byte) result;
+               }
+               else
+               {
+                  break;
+               }
+            }
+
+            return bytesRead;
+         }
+
          public override int Read(byte[] target, int offset, int length)
          {
             CheckStreamStateIsValid();
@@ -384,7 +403,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override long Seek(long offset, SeekOrigin origin)
          {
-            switch(origin)
+            switch (origin)
             {
                // TODO
                case SeekOrigin.Begin:
