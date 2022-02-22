@@ -996,7 +996,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream from streaming receiver cannot seek, Delete test?")]
+      [Ignore("Test fails intermittently for not sending disposition")]
       [Test]
       public void TestStreamDeliveryRawInputStreamWithInCompleteDeliverySkipBytes()
       {
@@ -1037,7 +1037,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNotNull(stream);
 
             Assert.AreEqual(payload1.Length, stream.Length);
-            stream.Position = payload1.Length;
+            stream.Read(new byte[payload1.Length]);
             Assert.AreEqual(0, stream.Length - stream.Position);
 
             peer.RemoteTransfer().WithHandle(0)
@@ -1047,7 +1047,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                  .WithPayload(payload2).Later(50);
 
             // Should block until more data arrives.
-            stream.Position = payload2.Length;
+            stream.Read(new byte[payload1.Length]);
             Assert.AreEqual(0, stream.Length - stream.Position);
 
             Assert.IsTrue(delivery.Completed);
@@ -2015,7 +2015,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream does not support seek operations, delete?")]
       [Test]
       public void TestSkipPayloadInChunksFromSingleTransferMessage()
       {
@@ -2066,16 +2065,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNull(delivery.Annotations);
 
             int skipSize = 10;
+            byte[] scratchBuffer = new byte[skipSize];
 
             for (int i = 0; i < body.Length; i += skipSize)
             {
-               bodyStream.Position += 10;
+               Assert.AreNotEqual(0, bodyStream.Read(scratchBuffer));
             }
 
-            byte[] scratchBuffer = new byte[10];
-
-            Assert.AreEqual(-1, bodyStream.Read(scratchBuffer, 0, scratchBuffer.Length));
-            Assert.AreEqual(-1, bodyStream.Read(scratchBuffer));
+            Assert.AreEqual(0, bodyStream.Read(scratchBuffer, 0, scratchBuffer.Length));
+            Assert.AreEqual(0, bodyStream.Read(scratchBuffer));
             Assert.AreEqual(-1, bodyStream.ReadByte());
             Assert.IsNull(message.Footer);
 
