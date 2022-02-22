@@ -1066,7 +1066,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
       [Test]
       public void TestStreamDeliveryRawInputStreamReadOpensSessionWindowForAdditionalInAdd()
       {

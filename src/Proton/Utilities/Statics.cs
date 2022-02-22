@@ -259,7 +259,7 @@ namespace Apache.Qpid.Proton.Utilities
             }
          }
 
-         return false;
+         return true;
       }
 
       /// <summary>
