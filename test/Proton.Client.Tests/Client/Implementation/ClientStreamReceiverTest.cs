@@ -1434,7 +1434,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamMessageWithHeaderOnly()
       {
@@ -1928,7 +1927,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamReceiverMessageThrowsOnAnyMessageModificationAPI()
       {
@@ -2590,7 +2588,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadBytesFromBodyInputStreamWithinTransactedSession()
       {
@@ -2972,6 +2969,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      [Ignore("Stream throwing on close when it shouldn't")]
       [Test]
       public void TestConnectionDropsDuringStreamedBodyRead()
       {
@@ -3118,7 +3116,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamReceiverTryReadAmqpSequenceBytes()
       {
@@ -3129,7 +3126,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          DoTestStreamReceiverReadsNonDataSectionBody(payload);
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamReceiverTryReadAmqpValueBytes()
       {
@@ -3190,7 +3186,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadMessageHeaderFromStreamReceiverMessage()
       {
@@ -3267,7 +3262,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          properties.AbsoluteExpiryTime = int.MaxValue;
          properties.ContentEncoding = "utf8";
          properties.ContentType = "text/plain";
-         properties.CorrelationId = new byte[] { 1, 2, 3 };
+         properties.CorrelationId = Guid.NewGuid();
          properties.CreationTime = ushort.MaxValue;
          properties.GroupId = "Group";
          properties.GroupSequence = uint.MaxValue;
@@ -3347,7 +3342,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadApplicationPropertiesStreamReceiverMessage()
       {

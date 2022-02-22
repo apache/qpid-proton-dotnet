@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientStreamDelivery : IStreamDelivery
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSession>();
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamDelivery>();
 
       private readonly ClientStreamReceiver receiver;
       private readonly IIncomingDelivery protonDelivery;

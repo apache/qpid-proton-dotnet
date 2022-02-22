@@ -24,6 +24,7 @@ using Apache.Qpid.Proton.Codec;
 using Apache.Qpid.Proton.Codec.Decoders;
 using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 
@@ -31,6 +32,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 {
    public sealed class ClientStreamReceiverMessage : IStreamReceiverMessage
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamReceiverMessage>();
+
       private readonly ClientStreamReceiver receiver;
       private readonly ClientStreamDelivery delivery;
       private readonly Stream deliveryStream;
@@ -70,7 +73,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public uint MessageFormat
       {
          get => protonDelivery?.MessageFormat ?? 0;
-         set => new ClientUnsupportedOperationException("Cannot write to a StreamReceiverMessage");
+         set => throw new ClientUnsupportedOperationException("Cannot write to a StreamReceiverMessage");
       }
 
       public IProtonBuffer Encode(IDictionary<string, object> deliveryAnnotations)
@@ -604,6 +607,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             this.message = message;
             this.rawInputStream = message.deliveryStream;
+
+            ValidateAndScanNextSection();
          }
 
          public override bool CanRead => true;
@@ -670,6 +675,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
 
+         public override int Read(Span<byte> buffer)
+         {
+            CheckClosed();
+
+            int bytesRead = 0;
+            for (; bytesRead < buffer.Length; ++bytesRead)
+            {
+               if (remainingSectionBytes == 0 && !TryMoveToNextBodySection())
+               {
+                  break; // We are at the end of the body sections
+               }
+
+               int result = ReadByte();
+               if (result >= 0)
+               {
+                  buffer[bytesRead] = (byte)result;
+               }
+               else
+               {
+                  break;
+               }
+            }
+
+            return bytesRead;
+         }
+
          public override int Read(byte[] buffer, int offset, int count)
          {
             CheckClosed();
@@ -680,7 +711,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                if (remainingSectionBytes == 0 && !TryMoveToNextBodySection())
                {
-                  bytesRead = bytesRead > 0 ? bytesRead : -1;
+                  bytesRead = bytesRead > 0 ? bytesRead : 0;
                   break; // We are at the end of the body sections
                }
 
@@ -761,14 +792,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             if (typeDecoder.DecodesType == typeof(IProtonBuffer))
             {
-               // LOG.trace("Data Section of size {} ready for read.", remainingSectionBytes);
+               LOG.Trace("Data Section of size {0} ready for read.", remainingSectionBytes);
                IBinaryTypeDecoder binaryDecoder = (IBinaryTypeDecoder)typeDecoder;
                remainingSectionBytes = (uint)binaryDecoder.ReadSize(rawInputStream, message.decoderState);
             }
             else if (typeDecoder.DecodesType == typeof(void))
             {
                // Null body in the Data section which can be skipped.
-               // LOG.trace("Data Section with no Binary payload read and skipped.");
+               LOG.Trace("Data Section with no Binary payload read and skipped.");
                remainingSectionBytes = 0;
             }
             else
