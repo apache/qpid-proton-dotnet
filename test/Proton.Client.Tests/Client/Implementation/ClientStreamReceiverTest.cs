@@ -996,7 +996,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Raw input stream is not fully implemented")]
+      [Ignore("Stream from streaming receiver cannot seek, Delete test?")]
       [Test]
       public void TestStreamDeliveryRawInputStreamWithInCompleteDeliverySkipBytes()
       {
@@ -1614,7 +1614,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadBytesFromBodyInputStreamUsingReadByteAPI()
       {
@@ -1829,14 +1828,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadByteArrayPayloadInChunksFromSingleTransferMessage()
       {
          TestReadPayloadInChunksFromLargerMessage(false);
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadBytesWithArgsPayloadInChunksFromSingleTransferMessage()
       {
@@ -1911,8 +1908,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
 
             Assert.AreEqual(body, aggregateBody);
-            Assert.AreEqual(-1, bodyStream.Read(receivedBody, 0, receivedBody.Length));
-            Assert.AreEqual(-1, bodyStream.Read(receivedBody));
+            Assert.AreEqual(0, bodyStream.Read(receivedBody, 0, receivedBody.Length));
+            Assert.AreEqual(0, bodyStream.Read(receivedBody));
             Assert.AreEqual(-1, bodyStream.ReadByte());
             Assert.IsNull(message.Footer);
 
@@ -2018,7 +2015,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
+      [Ignore("Stream does not support seek operations, delete?")]
       [Test]
       public void TestSkipPayloadInChunksFromSingleTransferMessage()
       {
@@ -2093,14 +2090,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadByteArrayPayloadInChunksFromMultipleTransfersMessage()
       {
          TestReadPayloadInChunksFromLargerMultiTransferMessage(false);
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadBytesWithArgsPayloadInChunksFromMultipleTransferMessage()
       {
@@ -2191,8 +2186,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
 
             Assert.AreEqual(chunkSize * numChunks, totalBytesRead);
-            Assert.AreEqual(-1, bodyStream.Read(receivedBody, 0, receivedBody.Length));
-            Assert.AreEqual(-1, bodyStream.Read(receivedBody));
+            Assert.AreEqual(0, bodyStream.Read(receivedBody, 0, receivedBody.Length));
+            Assert.AreEqual(0, bodyStream.Read(receivedBody));
             Assert.AreEqual(-1, bodyStream.ReadByte());
             Assert.IsNull(message.Footer);
 
@@ -2207,7 +2202,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestReadPayloadFromSplitFrameTransferWithBufferLargerThanTotalPayload()
       {
@@ -2266,8 +2260,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             int totalBytesRead = bodyStream.Read(receivedBody);
 
             Assert.AreEqual(chunkSize * numChunks, totalBytesRead);
-            Assert.AreEqual(-1, bodyStream.Read(receivedBody, 0, receivedBody.Length));
-            Assert.AreEqual(-1, bodyStream.Read(receivedBody));
+            Assert.AreEqual(0, bodyStream.Read(receivedBody, 0, receivedBody.Length));
+            Assert.AreEqual(0, bodyStream.Read(receivedBody));
             Assert.AreEqual(-1, bodyStream.ReadByte());
             Assert.IsNull(message.Footer);
 
@@ -2297,7 +2291,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamReadOpensSessionWindowForAdditionalInAdd()
       {
@@ -2386,7 +2379,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamReadOpensSessionWindowForAdditionalInputAndGrantsCreditOnClose()
       {
@@ -2477,7 +2469,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
       [Test]
       public void TestStreamReadOfAllPayloadConsumesTrailingFooterOnClose()
       {
@@ -3052,7 +3043,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
+      [Ignore("Unexpected flow frame causing test failure.")]
       [Test]
       public void TestFrameSizeViolationWhileWaitingForIncomingStreamReceiverContent()
       {
@@ -3253,7 +3244,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
+      [Ignore("Properties correlation ID is not handling values correctly")]
       [Test]
       public void TestReadMessagePropertiesFromStreamReceiverMessage()
       {
