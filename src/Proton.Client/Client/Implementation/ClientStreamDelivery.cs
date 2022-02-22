@@ -517,9 +517,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   {
                      receiver.Disposition(protonDelivery, Accepted.Instance, receiver.ReceiverOptions.AutoSettle);
                   }
-                  catch (Exception)
+                  catch (Exception error)
                   {
-                     // TODO : LOG.trace("Caught error while attempting to auto accept the fully read delivery.", error);
+                     LOG.Trace("Caught error while attempting to auto accept the fully read delivery.", error);
                   }
                }
             }

@@ -86,6 +86,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                throw new DecodeEOFException("Cannot read more type information from stream that has reached its end.");
             }
          }
+         catch (IndexOutOfRangeException error)
+         {
+            throw new DecodeEOFException("Read of new type failed because stream exhausted.", error);
+         }
          catch (IOException ex)
          {
             throw new DecodeException("Caught IO error reading from provided stream", ex);

@@ -123,7 +123,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public bool? ReadBoolean(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public bool ReadBoolean(Stream stream, IStreamDecoderState state, bool defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -161,7 +161,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public sbyte? ReadByte(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -176,7 +176,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public sbyte ReadByte(Stream stream, IStreamDecoderState state, sbyte defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -191,7 +191,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public byte? ReadUnsignedByte(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -206,7 +206,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public byte ReadUnsignedByte(Stream stream, IStreamDecoderState state, byte defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -221,7 +221,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public char? ReadCharacter(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -236,7 +236,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public char ReadCharacter(Stream stream, IStreamDecoderState state, char defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -251,7 +251,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public Decimal32 ReadDecimal32(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -266,7 +266,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public Decimal64 ReadDecimal64(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -281,7 +281,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public Decimal128 ReadDecimal128(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -296,7 +296,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public short? ReadShort(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -311,7 +311,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public short ReadShort(Stream stream, IStreamDecoderState state, short defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -326,7 +326,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public ushort? ReadUnsignedShort(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -341,7 +341,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public ushort ReadUnsignedShort(Stream stream, IStreamDecoderState state, ushort defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -356,7 +356,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public int? ReadInt(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -373,7 +373,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public int ReadInt(Stream stream, IStreamDecoderState state, int defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -390,7 +390,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public uint? ReadUnsignedInteger(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -409,7 +409,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public uint ReadUnsignedInteger(Stream stream, IStreamDecoderState state, uint defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -428,7 +428,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public long? ReadLong(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -445,7 +445,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public long ReadLong(Stream stream, IStreamDecoderState state, long defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -462,7 +462,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public ulong? ReadUnsignedLong(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -481,7 +481,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public ulong ReadUnsignedLong(Stream stream, IStreamDecoderState state, ulong defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -500,7 +500,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public float? ReadFloat(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -515,7 +515,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public float ReadFloat(Stream stream, IStreamDecoderState state, float defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -530,7 +530,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public double? ReadDouble(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -545,7 +545,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public double ReadDouble(Stream stream, IStreamDecoderState state, double defaultValue)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -560,7 +560,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public IProtonBuffer ReadBinary(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -577,7 +577,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public string ReadString(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -594,7 +594,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public Symbol ReadSymbol(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -616,7 +616,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public ulong? ReadTimestamp(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -631,7 +631,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public Guid? ReadGuid(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -646,7 +646,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public IDictionary<K, V> ReadMap<K, V>(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -663,7 +663,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -750,7 +750,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public IDeliveryTag ReadDeliveryTag(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          switch (encodingCode)
          {
@@ -767,7 +767,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public IStreamTypeDecoder ReadNextTypeDecoder(Stream stream, IStreamDecoderState state)
       {
-         EncodingCodes encodingCode = ReadEncodingCode(stream);
+         EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
          if (encodingCode == EncodingCodes.DescribedTypeIndicator)
          {
@@ -878,24 +878,6 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          describedTypeDecoders[describedTypeDecoder.DescriptorSymbol] = describedTypeDecoder;
 
          return this;
-      }
-
-      private static EncodingCodes ReadEncodingCode(Stream stream)
-      {
-         try
-         {
-            int result = stream.ReadByte();
-
-            if (result >= 0) {
-                return (EncodingCodes) result;
-            } else {
-                throw new DecodeEOFException("Cannot read more type information from stream that has reached its end.");
-            }
-         }
-         catch (IndexOutOfRangeException error)
-         {
-            throw new DecodeEOFException("Read of new type failed because stream exhausted.", error);
-         }
       }
 
       private InvalidCastException SignalUnexpectedType(in Type type)

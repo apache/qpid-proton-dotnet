@@ -2958,7 +2958,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream throwing on close when it shouldn't")]
       [Test]
       public void TestConnectionDropsDuringStreamedBodyRead()
       {
