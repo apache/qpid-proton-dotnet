@@ -357,7 +357,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             CheckStreamStateIsValid();
 
-            Statics.CheckFromIndexSize(offset, length, (int)buffer.ReadableBytes);
+            Statics.CheckFromIndexSize(offset, length, target.Length);
 
             int remaining = length;
             int bytesRead = 0;

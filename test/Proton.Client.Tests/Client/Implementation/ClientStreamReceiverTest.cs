@@ -1681,23 +1681,23 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
+      [Ignore("Test Peer delayed actions not queuing correctly")]
       [Test]
       public void TestReadBytesFromInputStreamUsingReadByteWithSingleByteSplitTransfers()
       {
          TestReadBytesFromBodyInputStreamWithSplitSingleByteTransfers(1);
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
+      [Ignore("Test Peer delayed actions not queuing correctly")]
       [Test]
       public void TestReadBytesFromInputStreamUsingSingleReadBytesWithSingleByteSplitTransfers()
       {
          TestReadBytesFromBodyInputStreamWithSplitSingleByteTransfers(2);
       }
 
-      [Ignore("Stream Receiver is not fully implemented")]
+      [Ignore("Test Peer delayed actions not queuing correctly")]
       [Test]
-      public void TestSkipBytesFromInputStreamWithSingleByteSplitTransfers()
+      public void TestReadBytesArrayFromInputStreamUsingSingleReadBytesWithSingleByteSplitTransfers()
       {
          TestReadBytesFromBodyInputStreamWithSplitSingleByteTransfers(3);
       }
@@ -1721,13 +1721,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                     .WithDeliveryTag(new byte[] { 1 })
                                     .WithMore(true)
                                     .WithMessageFormat(0)
-                                    .WithPayload(new byte[] { payload[i] }).AfterDelay(3).Queue();
+                                    .WithPayload(new byte[] { payload[i] }).AfterDelay(6 + i * 10).Queue();
             }
             peer.RemoteTransfer().WithHandle(0)
                                  .WithDeliveryId(0)
                                  .WithDeliveryTag(new byte[] { 1 })
                                  .WithMore(false)
-                                 .WithMessageFormat(0).AfterDelay(5).Queue();
+                                 .WithMessageFormat(0).AfterDelay(1000).Queue();
             peer.ExpectDisposition().WithFirst(0).WithSettled(true);
             peer.Start();
 
@@ -1760,7 +1760,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             else if (option == 3)
             {
-               bodyStream.Position += body.Length; // TODO: Validate invariants of complete skip
+               Assert.AreEqual(body.Length, bodyStream.Read(receivedBody, 0, receivedBody.Length));
                Assert.AreEqual(body.Length, bodyStream.Length);
             }
             else

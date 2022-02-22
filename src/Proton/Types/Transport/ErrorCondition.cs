@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return new ErrorCondition(this);
       }
 
-      public new string ToString()
+      public override string ToString()
       {
          return "Error{" +
                 "condition=" + Condition +
