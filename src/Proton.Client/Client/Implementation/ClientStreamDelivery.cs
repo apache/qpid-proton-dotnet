@@ -201,9 +201,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          private TaskCompletionSource<int> readRequest;
 
-         private long markIndex = INVALID_MARK;
-         private int markLimit;
-
          public RawDeliveryInputStream(ClientStreamDelivery delivery)
          {
             this.delivery = delivery;
@@ -215,7 +212,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override bool CanRead => true;
 
-         public override bool CanSeek => true;
+         public override bool CanSeek => false;
 
          public override bool CanWrite => false;
 
@@ -256,15 +253,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override long Position
          {
-            get => markIndex = buffer.ReadOffset;
+            get => buffer.ReadOffset;
             set => Seek(value, SeekOrigin.Begin);
          }
 
          public override void Close()
          {
-            markLimit = 0;
-            markIndex = INVALID_MARK;
-
             if (closed.CompareAndSet(false, true))
             {
                try
@@ -406,16 +400,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public override long Seek(long offset, SeekOrigin origin)
          {
-            switch (origin)
-            {
-               // TODO
-               case SeekOrigin.Begin:
-               case SeekOrigin.Current:
-               case SeekOrigin.End:
-                  break;
-            }
-
-            throw new NotImplementedException();
+            throw new NotSupportedException("Cannot seek within the large message byte stream");
          }
 
          public override void SetLength(long value)
@@ -477,11 +462,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          private void TryReleaseReadBuffers()
          {
-            if ((buffer.ReadOffset - markIndex) > markLimit)
-            {
-               markIndex = INVALID_MARK;
-               buffer.Reclaim();
-            }
+            buffer.Reclaim();
          }
 
          private int RequestMoreData()

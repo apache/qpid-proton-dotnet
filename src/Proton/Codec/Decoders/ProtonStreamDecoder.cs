@@ -813,7 +813,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          switch (encodingCode)
          {
             case EncodingCodes.SmallULong:
-               descriptor = ProtonStreamReadUtils.ReadUnsignedByte(stream);
+               descriptor = (ulong)ProtonStreamReadUtils.ReadUnsignedByte(stream);
                break;
             case EncodingCodes.ULong:
                descriptor = ProtonStreamReadUtils.ReadUnsignedLong(stream);
