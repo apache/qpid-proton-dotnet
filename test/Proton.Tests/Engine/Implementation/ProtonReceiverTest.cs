@@ -2315,14 +2315,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestMultiplexMultiFrameDeliveriesOnSingleSessionIncoming()
       {
          DoMultiplexMultiFrameDeliveryOnSingleSessionIncomingTestImpl(true);
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestMultiplexMultiFrameDeliveryOnSingleSessionIncoming()
       {
          DoMultiplexMultiFrameDeliveryOnSingleSessionIncomingTestImpl(false);
@@ -2447,8 +2445,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.IsFalse(receivedDelivery1.IsPartial, "Delivery on Receiver 1 Should be complete");
          Assert.IsFalse(receivedDelivery2.IsPartial, "Delivery on Receiver 2 Should be complete");
 
-         Assert.IsTrue(delivery1Updated);
-         Assert.IsTrue(delivery2Updated);
+         Assert.IsFalse(delivery1Updated);
+         Assert.IsFalse(delivery2Updated);
 
          peer.ExpectDisposition().WithFirst(1)
                                  .WithSettled(true)
@@ -2470,6 +2468,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          receivedDelivery2.Disposition(Accepted.Instance, true);
          receivedDelivery1.Disposition(Accepted.Instance, true);
+
+         Assert.IsFalse(delivery1Updated);
+         Assert.IsFalse(delivery2Updated);
 
          // Check post conditions and done.
          peer.WaitForScriptToComplete();
@@ -2699,7 +2700,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestDeliveryWithIdOmittedOnContinuationTransfers()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
@@ -2835,8 +2835,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.AreNotSame(receivedDelivery1, receivedDelivery2);
          Assert.IsFalse(receivedDelivery1.IsPartial, "Delivery on Receiver 1 Should be complete");
          Assert.IsFalse(receivedDelivery2.IsPartial, "Delivery on Receiver 2 Should be complete");
-         Assert.IsTrue(delivery1Updated);
-         Assert.IsTrue(delivery2Updated);
+         Assert.IsFalse(delivery1Updated);
+         Assert.IsFalse(delivery2Updated);
 
          Assert.AreEqual(Encoding.UTF8.GetBytes(deliveryTag1), receivedDelivery1.DeliveryTag.TagBytes);
          Assert.AreEqual(Encoding.UTF8.GetBytes(deliveryTag2), receivedDelivery2.DeliveryTag.TagBytes);
@@ -4896,7 +4896,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
-      [Ignore("Composite buffer not implemented yet which fails the test")]
       public void TestIncomingWindowRefilledWithBytesPreviouslyReadOnAbortedTransfer()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();

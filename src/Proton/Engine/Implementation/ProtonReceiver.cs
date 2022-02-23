@@ -296,7 +296,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             delivery.RemotelySettled();
          }
 
-         if (payload != null && !transfer.Aborted)
+         if (payload != null)
          {
             delivery.AppendTransferPayload(payload);
          }
