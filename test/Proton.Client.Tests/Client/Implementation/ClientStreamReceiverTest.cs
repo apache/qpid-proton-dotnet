@@ -996,7 +996,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test fails intermittently for not sending disposition")]
       [Test]
       public void TestStreamDeliveryRawInputStreamWithInCompleteDeliverySkipBytes()
       {
@@ -3040,7 +3039,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Unexpected flow frame causing test failure.")]
       [Test]
       public void TestFrameSizeViolationWhileWaitingForIncomingStreamReceiverContent()
       {
@@ -3241,7 +3239,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Properties correlation ID is not handling values correctly")]
       [Test]
       public void TestReadMessagePropertiesFromStreamReceiverMessage()
       {
@@ -3309,7 +3306,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.AreEqual(int.MaxValue, message.AbsoluteExpiryTime);
             Assert.AreEqual("utf8", message.ContentEncoding);
             Assert.AreEqual("text/plain", message.ContentType);
-            Assert.AreEqual(new byte[] { 1, 2, 3 }, (byte[])message.CorrelationId);
+            Assert.AreEqual(properties.CorrelationId, message.CorrelationId);
             Assert.AreEqual(ushort.MaxValue, message.CreationTime);
             Assert.AreEqual(uint.MaxValue, message.GroupSequence);
             Assert.AreEqual(properties.MessageId, message.MessageId);

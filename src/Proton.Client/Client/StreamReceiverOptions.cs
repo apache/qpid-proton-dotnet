@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Client
       /// of memory errors that might otherwise arise as the remote attempts to immediately send
       /// all contents of very large message payloads.
       /// </remarks>
-      public uint ReadBufferSize { get; set; }
+      public uint ReadBufferSize { get; set; } = DEFAULT_READ_BUFFER_SIZE;
 
    }
 }
