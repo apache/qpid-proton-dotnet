@@ -342,7 +342,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       protected bool NotClosedOrFailed<T>(TaskCompletionSource<T> request)
       {
-         if (IsClosed)
+         return NotClosedOrFailed(request, ProtonSender);
+      }
+
+      protected bool NotClosedOrFailed<T>(TaskCompletionSource<T> request, Engine.ISender sender)
+      {
+         if (IsClosed || sender.IsLocallyClosedOrDetached)
          {
             request.TrySetException(new ClientIllegalStateException("The Sender was explicitly closed", failureCause));
             return false;

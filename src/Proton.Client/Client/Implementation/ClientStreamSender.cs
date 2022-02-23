@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          ClientSession.Execute(() =>
          {
-            if (NotClosedOrFailed(request))
+            if (NotClosedOrFailed(request, context.ProtonDelivery.Sender))
             {
                try
                {

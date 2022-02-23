@@ -27,7 +27,6 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   [Ignore("Tests are unstable and need investigation")]
    [TestFixture, Timeout(20000)]
    public class ClientReconnectStreamSenderTest : ClientBaseTestFixture
    {
@@ -90,10 +89,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             stream.Write(new byte[] { 4, 5, 6, 7 });
             stream.Flush();
 
-            firstPeer.WaitForScriptToComplete();
+            firstPeer.WaitForScriptToComplete(TimeSpan.FromSeconds(5));
             // Reconnection should have occurred now and we should not be able to flush data from
             // the stream as its initial sender instance was closed on disconnect.
-            secondPeer.WaitForScriptToComplete();
+            secondPeer.WaitForScriptToComplete(TimeSpan.FromSeconds(5));
             secondPeer.ExpectClose().Respond();
 
             // Next write should fail as connection should have dropped.
