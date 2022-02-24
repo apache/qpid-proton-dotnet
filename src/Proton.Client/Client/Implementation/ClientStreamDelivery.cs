@@ -285,8 +285,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      // Clear anything that wasn't yet read and then clear any pending read request as EOF
                      buffer.WriteOffset = buffer.Capacity;
                      buffer.ReadOffset = buffer.Capacity;
-
-                     buffer.Compact();
+                     buffer.Reclaim();
 
                      if (readRequest != null)
                      {
@@ -297,7 +296,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      closeRequest.TrySetResult(true);
                   });
 
-                  connection.Request(receiver, closeRequest);
+                  connection.Request(receiver, closeRequest).Task.GetAwaiter().GetResult();
                }
                finally
                {
@@ -519,7 +518,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                   catch (Exception error)
                   {
-                     LOG.Trace("Caught error while attempting to auto accept the fully read delivery.", error);
+                     LOG.Warn("Caught error while attempting to auto accept the fully read delivery: {0}", error.Message);
                   }
                }
             }

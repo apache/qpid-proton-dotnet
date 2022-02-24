@@ -96,7 +96,7 @@ namespace Apache.Qpid.Proton.Buffer
          get => readOffset;
          set
          {
-            _ = PrepareForRead(value, 0);
+            CheckReadBounds(value, 0);
             long remaining = value;
             foreach (IProtonBuffer buffer in buffers)
             {

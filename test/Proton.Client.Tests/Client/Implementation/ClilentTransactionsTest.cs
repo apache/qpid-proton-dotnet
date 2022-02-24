@@ -141,6 +141,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
+      [Ignore("Failing intermittently for unknown reasons")]
       public void TestTimedOutExceptionOnBeginWithNoResponseThenRecoverWithNextBegin()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))

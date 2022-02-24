@@ -99,6 +99,24 @@ namespace Apache.Qpid.Proton.Buffer
          Assert.AreEqual(0, buffer2.WritableComponentCount);
       }
 
+      [Test]
+      public void TestCreateEmptyBufferAndOperateOnIt()
+      {
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
+
+         Assert.IsFalse(buffer.IsReadable);
+         Assert.IsFalse(buffer.IsWritable);
+
+         Assert.AreEqual(0, buffer.ReadableBytes);
+         Assert.AreEqual(0, buffer.WritableBytes);
+         Assert.AreEqual(0, buffer.ReadOffset);
+         Assert.AreEqual(0, buffer.WriteOffset);
+
+         buffer.WriteOffset = buffer.Capacity;
+         buffer.ReadOffset = buffer.Capacity;
+         buffer.Reclaim();
+      }
+
       #endregion
 
       #region Composite buffer read indexed tests
