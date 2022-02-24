@@ -410,7 +410,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
             // Populate the fields of the response with defaults if non set by the test script
             if (response.Performative.Handle == null)
             {
-               response.WithHandle((uint)attach.Handle);
+               response.WithHandle(session.FindFreeLocalHandle());
             }
             if (response.Performative.Name == null)
             {

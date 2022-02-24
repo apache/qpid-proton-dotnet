@@ -140,7 +140,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Issue with link not waiting for detach before using old handle")]
       [Test]
       public void TestTimedOutExceptionOnBeginWithNoResponseThenRecoverWithNextBegin()
       {
@@ -152,7 +151,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectCoordinatorAttach().Respond();
             peer.RemoteFlow().WithLinkCredit(2).Queue();
             peer.ExpectDeclare();
-            peer.ExpectDetach().Respond().AfterDelay(25);
+            peer.ExpectDetach().Respond().AfterDelay(10);
             peer.Start();
 
             string remoteAddress = peer.ServerAddress;
