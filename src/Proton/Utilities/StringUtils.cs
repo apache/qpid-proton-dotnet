@@ -192,7 +192,7 @@ namespace Apache.Qpid.Proton.Utilities
                if (size + 4 <= quotedStringLimit)
                {
                   size += 4;
-                  str.Append(string.Format("\\x%02x", c));
+                  str.Append(string.Format("%{0:x2}", c));
                }
                else
                {
