@@ -2519,7 +2519,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Stream sender message not fully implemented yet")]
+     // [Ignore("Stream sender message not fully implemented yet")]
       [Test]
       public void TestWriteToCreditLimitFramesOfMessagePayloadOneBytePerWrite()
       {
@@ -2570,6 +2570,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   stream.WriteByte(value);
                }
                stream.Flush();
+               Thread.Sleep(5);  // TODO Is the race on the client or server side ?
             }
 
             peer.WaitForScriptToComplete();

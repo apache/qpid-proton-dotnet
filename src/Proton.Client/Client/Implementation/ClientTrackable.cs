@@ -87,14 +87,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
          remotelySettled = delivery.IsRemotelySettled;
          remoteDeliveryState = delivery.RemoteState?.ToClientDeliveryState();
 
-         if (delivery.IsRemotelySettled)
-         {
-            remoteSettlementFuture.SetResult(this);
-         }
-
          if (sender.Options.AutoSettle && delivery.IsRemotelySettled)
          {
             delivery.Settle();
+         }
+
+         if (delivery.IsRemotelySettled)
+         {
+            remoteSettlementFuture.SetResult(this);
          }
       }
 
