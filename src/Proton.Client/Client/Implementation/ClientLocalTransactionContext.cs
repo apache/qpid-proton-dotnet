@@ -84,6 +84,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   try
                   {
+                     LOG.Trace("Commit of transaction timed out and the controller will be closed");
+                     txnController.ErrorCondition = new Types.Transport.ErrorCondition("Timed out waiting for transaction to be committed");
                      txnController.Close();
                   }
                   catch (Exception)
@@ -132,6 +134,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   try
                   {
+                     LOG.Trace("Rollback of transaction timed out and the controller will be closed");
+                     txnController.ErrorCondition = new Types.Transport.ErrorCondition("Timed out waiting for transaction to be rolled back");
                      txnController.Close();
                   }
                   catch (Exception)
@@ -245,6 +249,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                try
                {
+                  LOG.Trace("Begin of new transaction timed out and the controller will be closed");
+                  txnController.ErrorCondition = new Types.Transport.ErrorCondition("Timed out waiting for transaction to be declared");
                   txnController.Close();
                }
                catch (Exception)
@@ -479,6 +485,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleCoordinatorLocalClose(Engine.ITransactionController controller)
       {
+         /// Ensure that the controller is disconnected from this context's event points
+         /// so that if any events happen after this they don't affect any newly created
+         /// resources in this context.
+         controller.DeclaredHandler(null)
+                   .DeclareFailedHandler(null)
+                   .DischargedHandler(null)
+                   .DischargeFailedHandler(null)
+                   .OpenHandler(null)
+                   .CloseHandler(null)
+                   .LocalCloseHandler(null)
+                   .ParentEndpointClosedHandler(null)
+                   .EngineShutdownHandler(null);
+
          if (currentTxn != null)
          {
             TaskCompletionSource<ISession> future = null;

@@ -141,7 +141,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
-      [Ignore("Failing intermittently for unknown reasons")]
       public void TestTimedOutExceptionOnBeginWithNoResponseThenRecoverWithNextBegin()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
@@ -152,7 +151,81 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectCoordinatorAttach().Respond();
             peer.RemoteFlow().WithLinkCredit(2).Queue();
             peer.ExpectDeclare();
-            peer.ExpectDetach().Respond().AfterDelay(10);
+            peer.ExpectDetach().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               RequestTimeout = 150
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            ISession session = connection.OpenSession().OpenTask.Result;
+
+            try
+            {
+               session.BeginTransaction();
+               Assert.Fail("Begin should have timed out after no response.");
+            }
+            catch (ClientTransactionDeclarationException)
+            {
+               // Expect this to time out.
+            }
+
+            try
+            {
+               session.CommitTransaction();
+               Assert.Fail("Commit should have failed due to no active transaction.");
+            }
+            catch (ClientIllegalStateException)
+            {
+               // Expect this to fail since transaction not declared
+            }
+
+            try
+            {
+               session.RollbackTransaction();
+               Assert.Fail("Rollback should have failed due to no active transaction.");
+            }
+            catch (ClientIllegalStateException)
+            {
+               // Expect this to fail since transaction not declared
+            }
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectCoordinatorAttach().Respond();
+            peer.RemoteFlow().WithLinkCredit(2).Queue();
+            peer.ExpectDeclare().Accept();
+            peer.ExpectDischarge().Accept();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            session.BeginTransaction();
+            session.CommitTransaction();
+            session.CloseAsync().Wait();
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestTimedOutExceptionOnBeginWithNoResponseThenRecoverWithNextBeginAndDelayedDetachResponse()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectCoordinatorAttach().Respond();
+            peer.RemoteFlow().WithLinkCredit(2).Queue();
+            peer.ExpectDeclare();
+            peer.ExpectDetach().Respond().AfterDelay(20);
             peer.Start();
 
             string remoteAddress = peer.ServerAddress;

@@ -108,6 +108,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          set => sender.OfferedCapabilities = value;
       }
 
+      public override ErrorCondition ErrorCondition
+      {
+         get => sender.ErrorCondition;
+         set => sender.ErrorCondition = value;
+      }
+
       public override Symbol[] RemoteOfferedCapabilities => sender.RemoteOfferedCapabilities;
 
       public override Symbol[] DesiredCapabilities
