@@ -178,8 +178,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             throw;
          }
 
-         streamReader = new BufferedStream(new NetworkStream(clientSocket));
-         streamWriter = new BufferedStream(new NetworkStream(clientSocket));
+         streamReader = new NetworkStream(clientSocket);
+         streamWriter = new NetworkStream(clientSocket);
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
@@ -271,7 +271,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                      readBuffer = Statics.CopyOf(readBuffer, bytesRead);
                   }
 
-                  readHandler(this, readBuffer);
+                  try
+                  {
+                     readHandler(this, readBuffer);
+                  }
+                  catch(Exception readError)
+                  {
+                     logger.LogWarning("I/O Read handler failed with error: {0}", readError.Message);
+                     throw new IOException("Read handler threw unexpected error", readError);
+                  }
                }
             }
             catch (IOException)
