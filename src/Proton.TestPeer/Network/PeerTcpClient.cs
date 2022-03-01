@@ -45,6 +45,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private Task readLoop;
       private Task writeLoop;
 
+      private bool traceBytes = false;
+
       private ILogger<PeerTcpClient> logger;
 
       /// <summary>
@@ -109,6 +111,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       public IPEndPoint LocalEndpoint => (IPEndPoint)clientSocket.LocalEndPoint;
 
       public IPEndPoint RemoteEndpoint => (IPEndPoint)clientSocket.RemoteEndPoint;
+
+      public bool TraceBytes
+      {
+         get => traceBytes;
+         set => traceBytes = value;
+      }
 
       public void Close()
       {
@@ -269,6 +277,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                   if (bytesRead < readBuffer.Length)
                   {
                      readBuffer = Statics.CopyOf(readBuffer, bytesRead);
+                  }
+
+                  if (traceBytes)
+                  {
+                     logger.LogTrace("IO Transport read {0}", BitConverter.ToString(readBuffer));
                   }
 
                   try
