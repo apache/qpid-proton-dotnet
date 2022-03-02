@@ -1891,7 +1891,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Intermittent failure due to race on transport close not allowing final writes.")]
       [Test]
       public void TestSendBlockedForCreditFailsWhenConnectionRemotelyClosed()
       {

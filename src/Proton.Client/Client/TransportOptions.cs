@@ -36,6 +36,7 @@ namespace Apache.Qpid.Proton.Client
       public static readonly int DEFAULT_LOCAL_PORT = 0;
       public static readonly bool DEFAULT_USE_WEBSOCKETS = false;
       public static readonly int DEFAULT_WEBSOCKET_MAX_FRAME_SIZE = 65535;
+      public static readonly bool DEFAULT_TRACE_BYTES = false;
 
       /// <summary>
       /// Creates a default transport options instance.
@@ -68,6 +69,7 @@ namespace Apache.Qpid.Proton.Client
          other.DefaultTcpPort = DefaultTcpPort;
          other.LocalAddress = LocalAddress;
          other.LocalPort = LocalPort;
+         other.TraceBytes = TraceBytes;
 
          return this;
       }
@@ -92,6 +94,14 @@ namespace Apache.Qpid.Proton.Client
       /// port is free otherwise an error will be thrown on connect.
       /// </summary>
       public int LocalPort { get; set; } = DEFAULT_LOCAL_PORT;
+
+      /// <summary>
+      /// Configures whether the IO layer should write the incoming and outgoing
+      /// bytes to the logging framework.  By default this option is configured to
+      /// not trace the bytes as this is a high impact operation and will result
+      /// in a large amount of additional logging noise.
+      /// </summary>
+      public bool TraceBytes { get; set; } = DEFAULT_TRACE_BYTES;
 
    }
 }

@@ -1937,7 +1937,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Intermittent failure due to race on transport close not writing the Close")]
       [Test]
       public void TestReceiveBlockedForMessageFailsWhenConnectionRemotelyClosed()
       {
@@ -1959,7 +1958,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
             logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
 
             IClient container = IClient.Create();
-            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ConnectionOptions options = new ConnectionOptions();
+            options.TransportOptions.TraceBytes = false;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
             ISession session = connection.OpenSession();
             IReceiver receiver = session.OpenReceiver("test-queue").OpenTask.Result;
 
@@ -1979,7 +1980,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Intermittent failure due to race on transport close not writing the Close")]
       [Test]
       public void TestTimedReceiveBlockedForMessageFailsWhenConnectionRemotelyClosed()
       {

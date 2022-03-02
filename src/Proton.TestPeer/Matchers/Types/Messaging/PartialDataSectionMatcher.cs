@@ -30,7 +30,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
    {
       private static readonly Symbol DescriptorSymbol = new Symbol("amqp:data:binary");
       private static readonly ulong DescriptorCode = 0x0000000000000075UL;
-      private static readonly uint DescribedTypeIndicator = 0;
 
       private readonly bool expectDataSectionPreamble;
       private readonly byte[] expectedValue;

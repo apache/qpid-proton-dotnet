@@ -39,8 +39,8 @@ namespace Apache.Qpid.Proton.Client.Transport
    {
       private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<TcpTransport>();
 
-      private readonly ChannelReader<ChannelWrite> channelOutputSink;
-      private readonly ChannelWriter<ChannelWrite> channelOutputSource;
+      private readonly ChannelReader<IChannelTask> channelOutputSink;
+      private readonly ChannelWriter<IChannelTask> channelOutputSource;
 
       private readonly AtomicBoolean closed = new AtomicBoolean();
 
@@ -48,7 +48,6 @@ namespace Apache.Qpid.Proton.Client.Transport
       private readonly TransportOptions options;
       private readonly SslOptions sslOptions;
 
-      private EndPoint channelEndpoint;
       private Task readLoop;
       private Task writeLoop;
       private Socket channel;
@@ -57,6 +56,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       private volatile bool connected;
       private string host;
       private int port = -1;
+      private bool traceBytes;
 
       private Action<ITransport> connectedHandler;
       private Action<ITransport, Exception> connectFailedHandler;
@@ -73,7 +73,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       public IEventLoop EventLoop => eventLoop;
 
-      public EndPoint EndPoint => channelEndpoint;
+      public EndPoint EndPoint => channel?.RemoteEndPoint;
 
       public IPrincipal LocalPrincipal => null; // TODO
 
@@ -85,7 +85,7 @@ namespace Apache.Qpid.Proton.Client.Transport
          this.options = options;
          this.sslOptions = sslOptions;
 
-         Channel<ChannelWrite> outputChannel = Channel.CreateUnbounded<ChannelWrite>(
+         Channel<IChannelTask> outputChannel = Channel.CreateUnbounded<IChannelTask>(
             new UnboundedChannelOptions
             {
                AllowSynchronousContinuations = false,
@@ -95,6 +95,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          this.channelOutputSink = outputChannel.Reader;
          this.channelOutputSource = outputChannel.Writer;
+         this.traceBytes = options.TraceBytes;
       }
 
       public void Close()
@@ -107,8 +108,13 @@ namespace Apache.Qpid.Proton.Client.Transport
             // since we are shutting down anyway.
             try
             {
+               ChannelTermination termination = new ChannelTermination();
+               if ((!channelOutputSource?.TryWrite(termination) ?? true) || !connected)
+               {
+                  termination.Execute();
+               }
                channelOutputSource?.TryComplete();
-               writeLoop?.GetAwaiter().GetResult();
+               termination.Completion.GetAwaiter().GetResult();
             }
             catch (Exception)
             {
@@ -126,7 +132,7 @@ namespace Apache.Qpid.Proton.Client.Transport
             try
             {
                // Close with a bit of time to allow queued writes to complete.
-               channel?.Close(50);
+               channel?.Close(100);
             }
             catch (Exception)
             {
@@ -205,11 +211,12 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       public ITransport Write(IProtonBuffer buffer, Action writeCompleteAction)
       {
+         CheckConnected(buffer);
          LOG.Trace("Transport write dispatching buffer of size : {0}", buffer.ReadableBytes);
 
          try
          {
-            channelOutputSource.TryWrite(new ChannelWrite(buffer, writeCompleteAction));
+            channelOutputSource.TryWrite(new ChannelWrite(this, buffer, writeCompleteAction));
          }
          catch (Exception)
          {
@@ -222,6 +229,8 @@ namespace Apache.Qpid.Proton.Client.Transport
       {
          return "TcpTransport:[remote = " + host + ":" + port + "]";
       }
+
+      #region Transport private API
 
       private IPAddress ResolveIPAddress(string address)
       {
@@ -245,6 +254,46 @@ namespace Apache.Qpid.Proton.Client.Transport
          return result;
       }
 
+      private void CheckConnected(IProtonBuffer output)
+      {
+         if (!connected || !channel.Connected)
+         {
+            throw new IOException("Cannot send to a non-connected transport.");
+         }
+      }
+
+      private bool WriteComponent(IReadableComponent component)
+      {
+         if (component.HasReadableArray)
+         {
+            if (traceBytes)
+            {
+               LOG.Trace("IO Transport writing bytes: {0}",
+                  BitConverter.ToString(component.ReadableArray, component.ReadableArrayOffset, component.ReadableArrayLength));
+            }
+
+            try
+            {
+               socketWriter.Write(component.ReadableArray,
+                                  component.ReadableArrayOffset,
+                                  component.ReadableArrayLength);
+            }
+            catch (Exception writeError)
+            {
+               LOG.Trace("Failed to write to IO layer with error: {0}", writeError.Message);
+               throw;
+            }
+         }
+         else
+         {
+            throw new NotImplementedException("Need a buffer copy operation in the readable component");
+         }
+
+         return true;
+      }
+
+      #endregion
+
       #region Async callbacks for socket operations
 
       private void CompleteConnection()
@@ -254,6 +303,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
+
+         connected = true;
 
          eventLoop.Execute(() => connectedHandler(this));
       }
@@ -275,7 +326,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       #endregion
 
-      #region Channel Read Task
+      #region Channel Read and Write loops
 
       private void ChannelReadLoop()
       {
@@ -292,40 +343,105 @@ namespace Apache.Qpid.Proton.Client.Transport
                   channel.Shutdown(SocketShutdown.Both);
                }
                catch (Exception)
-               { }
+               {
+               }
+
+               connected = false;
 
                // End of stream
-               // TODO mark as disconnected to fail writes
                if (!closed)
                {
                   eventLoop.Execute(() => disconnectedHandler(this));
                }
 
-               break;  // TODO more graceful error handling.
+               break;
             }
             else
             {
+               if (traceBytes)
+               {
+                  LOG.Trace("IO Transport read {0}", BitConverter.ToString(readBuffer, 0, bytesRead));
+               }
+
                eventLoop.Execute(() => readHandler(
                   this, ProtonByteBufferAllocator.Instance.Wrap(readBuffer, 0, bytesRead)));
             }
          }
       }
 
+      // The write loop using an async channel write pattern to wait on new writes and then
+      // fires those bytes into the socket output stream as they arrive.
+      private async Task ChannelWriteLoop()
+      {
+         while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
+         {
+            IChannelTask task = null;
+
+            while (channelOutputSink.TryRead(out task))
+            {
+               task.Execute();
+            }
+         }
+      }
+
       #endregion
 
-      #region Channel Write holder and channel write loop
+      #region Channel Write Tasks that can be written into the write channel
 
-      private sealed class ChannelWrite
+      private interface IChannelTask
+      {
+         /// <summary>
+         /// Execute the task from the transport write channel
+         /// </summary>
+         public void Execute();
+      }
+
+      private sealed class ChannelTermination : IChannelTask
+      {
+         private readonly TaskCompletionSource writesCompleted = new TaskCompletionSource();
+
+         public void Execute()
+         {
+            writesCompleted.TrySetResult();
+         }
+
+         public Task Completion => writesCompleted.Task;
+
+      }
+
+      private sealed class ChannelWrite : IChannelTask
       {
          private readonly IProtonBuffer buffer;
          private readonly Action completion;
          private readonly bool flush;
+         private readonly TcpTransport transport;
 
-         public ChannelWrite(IProtonBuffer buffer, Action completion, bool flush = true)
+         public ChannelWrite(TcpTransport transport, IProtonBuffer buffer, Action completion, bool flush = true)
          {
+            this.transport = transport;
             this.buffer = buffer;
             this.completion = completion;
             this.flush = flush;
+         }
+
+         public void Execute()
+         {
+            if (buffer != null)
+            {
+               buffer.ForEachReadableComponent(0, (idx, x) => transport.WriteComponent(x));
+            }
+
+            // The bytes have hit the socket layer so we can now trigger any
+            // write completion callbacks from this write,
+            if (HasCompletion)
+            {
+               transport.eventLoop.Execute(Completion);
+            }
+
+            if (IsFlushRequired)
+            {
+               transport.socketWriter.Flush();
+            }
          }
 
          public IProtonBuffer Buffer => buffer;
@@ -335,49 +451,6 @@ namespace Apache.Qpid.Proton.Client.Transport
          public bool HasCompletion => completion != null;
 
          public Action Completion => completion;
-      }
-
-      // The write loop using an async channel write pattern to wait on new writes and then
-      // fires those bytes into the socket output stream as they arrive.
-      private async Task ChannelWriteLoop()
-      {
-         while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
-         {
-            ChannelWrite write = null;
-
-            while (channelOutputSink.TryRead(out write))
-            {
-               write.Buffer.ForEachReadableComponent(0, (idx, x) => WriteComponent(x));
-
-               // The bytes have hit the socket layer so we can now trigger any
-               // write completion callbacks from this write,
-               if (write.HasCompletion)
-               {
-                  eventLoop.Execute(write.Completion);
-               }
-            }
-
-            if (write?.IsFlushRequired ?? false)
-            {
-               await socketWriter.FlushAsync().ConfigureAwait(false);
-            }
-         }
-      }
-
-      private bool WriteComponent(IReadableComponent component)
-      {
-         if (component.HasReadableArray)
-         {
-            socketWriter.Write(component.ReadableArray,
-                               component.ReadableArrayOffset,
-                               component.ReadableArrayLength);
-         }
-         else
-         {
-            throw new NotImplementedException("Need a buffer copy operation in the readable component");
-         }
-
-         return true;
       }
 
       #endregion

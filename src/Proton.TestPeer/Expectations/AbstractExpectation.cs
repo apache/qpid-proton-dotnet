@@ -88,7 +88,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
             {
                MatcherAssert.AssertThat("Payload does not match expectation", payload, GetPayloadMatcher());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                try
                {
@@ -100,12 +100,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
                   }
                   else
                   {
-                     throw ex;  // Failed because it shouldn't be null
+                     throw;  // Failed because it shouldn't be null
                   }
                }
                catch (Exception)
                {
-                  throw ex; // Honer the original error
+                  throw; // Honer the original error
                }
             }
          }
