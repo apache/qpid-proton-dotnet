@@ -115,5 +115,51 @@ namespace Apache.Qpid.Proton.Buffer
          }
          catch (ArgumentOutOfRangeException) { }
       }
+
+      [Test]
+      public void TestWrapByteArrayWithOffsetAndLength()
+      {
+         byte[] source = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Wrap(source, 0, source.Length);
+
+         Assert.IsNotNull(buffer);
+         Assert.AreNotEqual(ProtonByteBuffer.DefaultCapacity, buffer.Capacity);
+         Assert.AreNotEqual(ProtonByteBuffer.DefaultMaximumCapacity, buffer.Capacity);
+
+         Assert.AreEqual(source.Length, buffer.Capacity);
+         Assert.AreEqual(1, buffer.ReadableComponentCount);
+
+         int index = 0;
+         buffer.ForEachReadableComponent(index, (i, component) =>
+         {
+            Assert.AreSame(source, component.ReadableArray);
+            Assert.AreEqual(0, component.ReadableArrayOffset);
+            Assert.AreEqual(source.Length, component.ReadableArrayLength);
+            return true;
+         });
+      }
+
+      [Test]
+      public void TestWrapByteArrayWithOffsetAndLengthSubset()
+      {
+         byte[] source = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Wrap(source, 1, source.Length - 2);
+
+         Assert.IsNotNull(buffer);
+         Assert.AreNotEqual(ProtonByteBuffer.DefaultCapacity, buffer.Capacity);
+         Assert.AreNotEqual(ProtonByteBuffer.DefaultMaximumCapacity, buffer.Capacity);
+
+         Assert.AreEqual(source.Length - 2, buffer.Capacity);
+         Assert.AreEqual(1, buffer.ReadableComponentCount);
+
+         int index = 0;
+         buffer.ForEachReadableComponent(index, (i, component) =>
+         {
+            Assert.AreSame(source, component.ReadableArray);
+            Assert.AreEqual(1, component.ReadableArrayOffset);
+            Assert.AreEqual(source.Length - 2, component.ReadableArrayLength);
+            return true;
+         });
+      }
    }
 }

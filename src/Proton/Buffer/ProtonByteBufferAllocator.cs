@@ -60,5 +60,15 @@ namespace Apache.Qpid.Proton.Buffer
 
          return wrapper;
       }
+
+      public IProtonBuffer Wrap(byte[] buffer, int offset, int length)
+      {
+         // Wrap assign a max capacity to prevent reallocation of the buffer
+         // for writes, the buffer operations can only be on the original.
+         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, offset, length, length);
+         wrapper.WriteOffset = length;
+
+         return wrapper;
+      }
    }
 }

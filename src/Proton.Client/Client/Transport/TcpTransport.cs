@@ -235,8 +235,6 @@ namespace Apache.Qpid.Proton.Client.Transport
          socketReader = new NetworkStream(channel);
          socketWriter = new NetworkStream(channel);
 
-         // TODO: This currently creates two threads for each transport which could
-         //       be reduced to one or none at some point using async Tasks
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
 
@@ -290,15 +288,8 @@ namespace Apache.Qpid.Proton.Client.Transport
             }
             else
             {
-               // TODO : Use a wrapped buffer that accepts offset and size
-               if (bytesRead < readBuffer.Length)
-               {
-                  readBuffer = Statics.CopyOf(readBuffer, bytesRead);
-               }
-
-               IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Wrap(readBuffer);
-
-               eventLoop.Execute(() => readHandler(this, buffer));
+               eventLoop.Execute(() => readHandler(
+                  this, ProtonByteBufferAllocator.Instance.Wrap(readBuffer, 0, bytesRead)));
             }
          }
       }
