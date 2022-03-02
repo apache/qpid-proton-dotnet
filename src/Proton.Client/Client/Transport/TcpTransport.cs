@@ -154,25 +154,20 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          LOG.Debug("Transport attempting connection to: {0}:{1}", host, port);
 
-         IPHostEntry entry = Dns.GetHostEntry(host);
-         IPAddress address = default(IPAddress);
+         IPAddress remote = ResolveIPAddress(host);
 
-         foreach (IPAddress ipAddress in entry.AddressList)
+         channel = new Socket(remote.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+         if (!String.IsNullOrEmpty(options.LocalAddress) || options.LocalPort > 0)
          {
-            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
-            {
-               address = ipAddress;
-            }
+            IPAddress localAddress = String.IsNullOrEmpty(options.LocalAddress) ?
+               IPAddress.Any : ResolveIPAddress(options.LocalAddress);
+            int localPort = options.LocalPort > 0 ? options.LocalPort : 0;
+
+            channel.Bind(new IPEndPoint(localAddress, localPort));
          }
 
-         if (address == default(IPAddress))
-         {
-            throw new IOException(
-               string.Format("Could not resolve a remote address from the given host: {0}", host));
-         }
-
-         channel = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-         channel.BeginConnect(address, port, new AsyncCallback(ConnectCallback), this);
+         channel.BeginConnect(remote, port, new AsyncCallback(ConnectCallback), this);
 
          this.host = host;
          this.port = port;
@@ -226,6 +221,28 @@ namespace Apache.Qpid.Proton.Client.Transport
       public override string ToString()
       {
          return "TcpTransport:[remote = " + host + ":" + port + "]";
+      }
+
+      private IPAddress ResolveIPAddress(string address)
+      {
+         IPHostEntry entry = Dns.GetHostEntry(address);
+         IPAddress result = default(IPAddress);
+
+         foreach (IPAddress ipAddress in entry.AddressList)
+         {
+            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+            {
+               result = ipAddress;
+            }
+         }
+
+         if (result == default(IPAddress))
+         {
+            throw new IOException(
+               string.Format("Could not resolve a remote address from the given host: {0}", address));
+         }
+
+         return result;
       }
 
       #region Async callbacks for socket operations

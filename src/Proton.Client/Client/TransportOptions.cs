@@ -66,6 +66,8 @@ namespace Apache.Qpid.Proton.Client
       internal TransportOptions CopyInto(TransportOptions other)
       {
          other.DefaultTcpPort = DefaultTcpPort;
+         other.LocalAddress = LocalAddress;
+         other.LocalPort = LocalPort;
 
          return this;
       }
@@ -89,7 +91,7 @@ namespace Apache.Qpid.Proton.Client
       /// connect to the remote.  The user is responsible for ensuring this local
       /// port is free otherwise an error will be thrown on connect.
       /// </summary>
-      public int LocalPort { get; set; } = -1;
+      public int LocalPort { get; set; } = DEFAULT_LOCAL_PORT;
 
    }
 }
