@@ -63,6 +63,42 @@ namespace Apache.Qpid.Proton.Test.Driver
       }
 
       [Test]
+      public void TestReceiverTrackingWithClientOpensReceiverWithDelayedResponses()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         using (ProtonTestClient client = new ProtonTestClient(loggerFactory))
+         {
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().OnChannel(0).Respond();
+            peer.ExpectAttach().OfReceiver().WithHandle(0).OnChannel(0).Respond();
+            peer.ExpectEnd().OnChannel(0).Respond().AfterDelay(50);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            client.Connect(remoteAddress, remotePort);
+            client.ExpectAMQPHeader();
+            client.ExpectOpen();
+            client.ExpectBegin().OnChannel(0);
+            client.ExpectAttach().OfSender().OnChannel(0).WithHandle(0);
+            client.ExpectEnd().OnChannel(0);
+            client.RemoteHeader(AMQPHeader.Header).Now();
+            client.RemoteOpen().Now();
+            client.RemoteBegin().Now();
+            client.RemoteAttach().OfReceiver().Now();
+            client.RemoteEnd().Now();
+            client.WaitForScriptToComplete();
+            client.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
       public void TestAttachResponseUsesScriptedChannel()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))

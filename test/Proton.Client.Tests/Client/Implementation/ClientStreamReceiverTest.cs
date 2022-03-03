@@ -1680,21 +1680,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Ignore("Test Peer delayed actions not queuing correctly")]
       [Test]
       public void TestReadBytesFromInputStreamUsingReadByteWithSingleByteSplitTransfers()
       {
          TestReadBytesFromBodyInputStreamWithSplitSingleByteTransfers(1);
       }
 
-      [Ignore("Test Peer delayed actions not queuing correctly")]
       [Test]
       public void TestReadBytesFromInputStreamUsingSingleReadBytesWithSingleByteSplitTransfers()
       {
          TestReadBytesFromBodyInputStreamWithSplitSingleByteTransfers(2);
       }
 
-      [Ignore("Test Peer delayed actions not queuing correctly")]
       [Test]
       public void TestReadBytesArrayFromInputStreamUsingSingleReadBytesWithSingleByteSplitTransfers()
       {
@@ -1760,7 +1757,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             else if (option == 3)
             {
                Assert.AreEqual(body.Length, bodyStream.Read(receivedBody, 0, receivedBody.Length));
-               Assert.AreEqual(body.Length, bodyStream.Length);
+               Assert.AreEqual(body, receivedBody);
             }
             else
             {

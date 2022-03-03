@@ -39,6 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly String driverName;
       private readonly FrameDecoder frameParser;
       private readonly FrameEncoder frameEncoder;
+      private readonly DriverTaskScheduler scheduler;
 
       private Open localOpen;
       private Open remoteOpen;
@@ -90,6 +91,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.loggerFactory = logFactory ?? NullLoggerFactory.Instance;
          this.logger = loggerFactory.CreateLogger<AMQPTestDriver>();
 
+         this.scheduler = new DriverTaskScheduler(this);
          this.frameEncoder = new FrameEncoder(this);
          this.frameParser = new FrameDecoder(this);
       }
@@ -133,11 +135,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       internal void AfterDelay(long delay, ScriptedAction action)
       {
-         Task.Delay((int)delay).ContinueWith((x) =>
-         {
-            logger.LogTrace("{} running delayed action: {}", driverName, action);
-            action.Perform(this);
-         });
+         scheduler.Schedule(action, delay);
       }
 
       internal void AddScriptedElement(IScriptedElement element)

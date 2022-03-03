@@ -28,7 +28,7 @@ using NUnit.Framework;
 namespace Apache.Qpid.Proton.Test.Driver
 {
    [TestFixture, Timeout(20000)]
-   public class frameHandlerTests
+   public class FrameHandlerTests
    {
       [Test]
       public void TestDecodeMultipleEmptyFrames()
