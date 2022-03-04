@@ -80,6 +80,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal IStreamTracker DoStreamMessage(ClientStreamSenderMessage context, IProtonBuffer buffer, uint messageFormat)
       {
+         CheckClosedOrFailed();
+
          TaskCompletionSource<ITracker> request = new TaskCompletionSource<ITracker>();
          ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(
             this, context.ProtonDelivery, messageFormat, buffer, context.Completed, request);
