@@ -642,7 +642,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
          }
 
-         // TODO Async shutdown of the event loop should eventually go here.
+         ioContext.Shutdown();  // No more events accepted after this point
 
          if (failureCause.Get() != null)
          {
@@ -758,29 +758,29 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             finally
             {
-               try
-               {
-                  // TODO: Blocking here isn't ideal but for now we want to await
-                  ///      the remote sending the close performative back to us
-                  ///      before dropping the connection. We should probably schedule
-                  ///      a task that closes the connection and completes the close
-                  ///      future if the remote hasn't responded by then.
-                  closeFuture.Task.GetAwaiter().GetResult();
-               }
-               catch (Exception)
-               {
-                  // Ignore error as we are closed regardless
-               }
-               finally
-               {
-                  try
-                  {
-                     transport.Close();
-                  }
-                  catch (Exception) { }
+               // try
+               // {
+               //    // TODO: Blocking here isn't ideal but for now we want to await
+               //    ///      the remote sending the close performative back to us
+               //    ///      before dropping the connection. We should probably schedule
+               //    ///      a task that closes the connection and completes the close
+               //    ///      future if the remote hasn't responded by then.
+               //    closeFuture.Task.GetAwaiter().GetResult();
+               // }
+               // catch (Exception)
+               // {
+               //    // Ignore error as we are closed regardless
+               // }
+               // finally
+               // {
+               //    try
+               //    {
+               //       transport.Close();
+               //    }
+               //    catch (Exception) { }
 
-                  ioContext.Shutdown();
-               }
+               //    ioContext.Shutdown();
+               // }
             }
          }
 

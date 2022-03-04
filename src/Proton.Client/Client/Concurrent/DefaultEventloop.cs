@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Client.Concurrent
       {
          if (shutdown.CompareAndSet(false, true))
          {
-            eventWriter.Complete();
+            eventWriter.TryComplete();
          }
       }
 
