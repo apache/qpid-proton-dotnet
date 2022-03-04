@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
       private ITransport transport;
-      private AtomicReference<Exception> failureCause = new AtomicReference<Exception>();
+      private AtomicReference<ClientIOException> failureCause = new AtomicReference<ClientIOException>();
       private ClientSession connectionSession;
       private ClientSender connectionSender;
       private long totalConnections;
@@ -626,31 +626,41 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="engine"></param>
       private void HandleEngineShutdown(Engine.IEngine engine)
       {
-         // Only handle this on normal shutdown failure will perform its own controlled shutdown
-         // and or reconnection logic which this method should avoid interfering with.
-         if (engine.FailureCause == null)
+         try
          {
-            try
-            {
-               protonConnection.Close();
-            }
-            catch (Exception)
-            {
-            }
+            protonConnection.Close();
+         }
+         catch (Exception)
+         {
+         }
 
-            try
-            {
-               transport.Close();
-            }
-            catch (Exception)
-            {
-            }
+         try
+         {
+            transport.Close();
+         }
+         catch (Exception)
+         {
+         }
 
-            client.UnregisterClosedConnection(this);
+         // TODO Async shutdown of the event loop should eventually go here.
 
+         if (failureCause.Get() != null)
+         {
+            _ = openFuture.TrySetException(failureCause.Get());
+            _ = closeFuture.TrySetResult(this);
+
+            LOG.Warn("Connection {0} has failed due to: {1}", ConnectionId, failureCause != null ?
+                     failureCause.Get().GetType().Name + " -> " + failureCause.Get().Message : "No failure details provided.");
+
+            SubmitDisconnectionEvent(options.DisconnectedHandler, transport.Host, transport.Port, failureCause.Get());
+         }
+         else
+         {
             _ = openFuture.TrySetResult(this);
             _ = closeFuture.TrySetResult(this);
          }
+
+         client.UnregisterClosedConnection(this);
       }
 
       private void HandleEngineFailure(Engine.IEngine engine)
@@ -674,6 +684,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (IsReconnectAllowed(failureCause))
          {
+            // Disconnect the failed engine for this connection's event handling
+            // to prevent cleanup processing of that engine instance from triggering
+            // normal connection shutdown processing.
+            engine.ShutdownHandler(null);
+
             LOG.Info("Connection {0} interrupted to server: {1}", ConnectionId, transport.EndPoint);
             SubmitDisconnectionEvent(options.InterruptedHandler, transport.Host, transport.Port, failureCause);
 
@@ -689,16 +704,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientException initError)
             {
-               FailConnection(ClientExceptionSupport.CreateOrPassthroughFatal(initError));
+               this.failureCause.CompareAndSet(null, ClientExceptionSupport.CreateOrPassthroughFatal(initError));
+               this.engine.Shutdown();  // Close down the engine created for reconnect
             }
             finally
             {
-               engine.Shutdown();
+               engine.Shutdown(); // Ensure the old engine gets fully closed down.
             }
          }
          else
          {
-            FailConnection(failureCause);
+            this.failureCause.CompareAndSet(null, ClientExceptionSupport.CreateOrPassthroughFatal(failureCause));
+            this.engine.Shutdown();  // Close down the engine created for reconnect
          }
       }
 
@@ -872,31 +889,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                throw failureCause.Value ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
             }
          }
-      }
-
-      private void FailConnection(ClientIOException cause)
-      {
-         failureCause.CompareAndSet(null, cause);
-
-         try
-         {
-            protonConnection.Close();
-         }
-         catch (Exception) { }
-
-         try
-         {
-            engine.Shutdown();
-         }
-         catch (Exception) { }
-
-         _ = openFuture.TrySetException(failureCause);
-         _ = closeFuture.TrySetResult(this);
-
-         LOG.Warn("Connection {0} has failed due to: {1}", ConnectionId, failureCause != null ?
-                  failureCause.Get().GetType().Name + " -> " + failureCause.Get().Message : "No failure details provided.");
-
-         SubmitDisconnectionEvent(options.DisconnectedHandler, transport.Host, transport.Port, cause);
       }
 
       #endregion
