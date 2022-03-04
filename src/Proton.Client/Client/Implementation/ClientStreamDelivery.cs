@@ -298,6 +298,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                   connection.Request(receiver, closeRequest).Task.GetAwaiter().GetResult();
                }
+               catch (Exception error)
+               {
+                  LOG.Trace("Ignoring error on RawInputStream close: ", error.Message);
+               }
                finally
                {
                   base.Close();
