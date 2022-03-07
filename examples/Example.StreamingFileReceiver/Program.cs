@@ -31,7 +31,10 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
             Environment.Exit(1);
          }
 
-         if (!File.Exists(args[0]) || ((FileAttributes.Directory & File.GetAttributes(args[0])) == FileAttributes.Directory))
+         Console.WriteLine("User specified output directory: {0}", args[0]);
+         Console.WriteLine("Is param an existing file: {0}", Directory.Exists(args[0]));
+
+         if (!Directory.Exists(args[0]))
          {
             Console.WriteLine("Example requires a valid / writable directory to transfer to");
             Environment.Exit(1);
