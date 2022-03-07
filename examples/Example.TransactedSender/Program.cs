@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          ITracker tracker = sender.Send(message);
          tracker.AwaitSettlement();
 
-         Console.WriteLine(string.Format("Sent message to %s: %s", sender.Address, message.Body));
+         Console.WriteLine(string.Format("Sent message to {0}: {1}", sender.Address, message.Body));
 
          session.CommitTransaction();
       }

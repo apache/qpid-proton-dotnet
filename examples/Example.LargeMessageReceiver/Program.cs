@@ -45,9 +45,9 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          byte[] chunk = new byte[10];
          int readCount = 0;
 
-         while (inputStream.Read(chunk) != -1)
+         while (inputStream.Read(chunk) != 0)
          {
-            Console.WriteLine(string.Format("Read data chunk [%2d]: %s", ++readCount, chunk));
+            Console.WriteLine(string.Format("Read data chunk [{0:D2}]: size => {1}", ++readCount, chunk.Length));
          }
 
          inputStream.Close();

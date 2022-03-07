@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
 
          requestor.Send(request);
 
-         IDelivery response = dynamicReceiver.Receive(TimeSpan.FromMilliseconds(10));
+         IDelivery response = dynamicReceiver.Receive(TimeSpan.FromSeconds(10));
          IMessage<object> received = response.Message();
 
          Console.WriteLine("Received message with body: " + received.Body);

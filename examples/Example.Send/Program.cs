@@ -41,11 +41,11 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
 
          for (int i = 0; i < MessageCount; ++i)
          {
-            IMessage<string> message = IMessage<string>.Create(string.Format("Hello World! [%s]", i));
+            IMessage<string> message = IMessage<string>.Create(string.Format("Hello World! [{0}]", i));
             ITracker tracker = sender.Send(message);
             tracker.AwaitSettlement();
 
-            Console.WriteLine(string.Format("Sent message to %s: %s", sender.Address, message.Body));
+            Console.WriteLine(string.Format("Sent message to {0}: {1}", sender.Address, message.Body));
          }
       }
    }
