@@ -308,7 +308,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-
       internal class FrameBufferingStage : FrameParserStage
       {
          private IProtonBuffer buffer;
@@ -325,7 +324,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             }
             else
             {
-               input.CopyInto(input.ReadOffset, input, input.WriteOffset, buffer.WritableBytes);
+               input.CopyInto(input.ReadOffset, buffer, buffer.WriteOffset, buffer.WritableBytes);
 
                // Advance the buffer offsets to reflect what was copied.
                input.ReadOffset += buffer.WritableBytes;

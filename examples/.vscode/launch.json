@@ -10,9 +10,9 @@
          "request": "launch",
          "preLaunchTask": "build",
          // If you have changed target frameworks, make sure to update the program path.
-         "program": "${workspaceFolder}/Example.ReconnectSender/bin/Debug/net5.0/Example.ReconnectSender.dll",
-         "args": [],
-         "cwd": "${workspaceFolder}/Example.ReconnectSender",
+         "program": "${workspaceFolder}/Example.StreamingFileReceiver/bin/Debug/net5.0/Example.StreamingFileReceiver.dll",
+         "args": ["/home/timothy/Temporary"],
+         "cwd": "${workspaceFolder}/Example.StreamingFileReceiver",
          // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
          "console": "internalConsole",
          "stopAtEntry": false

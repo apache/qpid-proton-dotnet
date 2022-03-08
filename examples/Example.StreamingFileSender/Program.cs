@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
          using FileStream inputStream = File.OpenRead(fileName);
 
          IStreamSenderMessage message = sender.BeginMessage();
-         message.SetProperty(fileNameKey, fileName);
+         message.SetProperty(fileNameKey, Path.GetFileName(fileName));
 
          // Creates an OutputStream that writes the file in smaller data sections which allows for
          // larger file sizes than the single AMQP Data section bounded configuration might allow.
