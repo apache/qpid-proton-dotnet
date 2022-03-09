@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
 using System.Linq;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
+using Apache.Qpid.Proton.Client.TestSupport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -1851,6 +1852,72 @@ namespace Apache.Qpid.Proton.Client.Implementation
             receiver.CloseAsync().Wait();
 
             connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionSendsHeartbeatFrames()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond().WithIdleTimeOut(200);
+            peer.ExpectEmptyFrame();
+            peer.ExpectEmptyFrame();
+            peer.ExpectEmptyFrame();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.CloseAsync().Wait();
+
+            Wait.AssertTrue(() => peer.EmptyFrameCount == 3);
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionDropsIfRemoteDoesNotHonorIdleTimeoutRequest()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            CountdownEvent failed = new CountdownEvent(1);
+            ConnectionOptions options = ConnectionOptions();
+
+            options.IdleTimeout = 200;
+            options.DisconnectedHandler = (connection, location) =>
+            {
+               logger.LogInformation("Connection signaled that it has failed");
+               failed.Signal();
+            };
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+
+            Assert.IsTrue(failed.Wait(TimeSpan.FromSeconds(10)));
 
             peer.WaitForScriptToComplete();
          }

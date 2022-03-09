@@ -26,6 +26,7 @@ using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine.Sasl.Client;
 using Apache.Qpid.Proton.Client.Transport;
 using Apache.Qpid.Proton.Logging;
+using System.Threading;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -52,6 +53,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly TaskCompletionSource<IConnection> closeFuture = new TaskCompletionSource<IConnection>();
       private readonly IOContext ioContext;
 
+      private Timer idleTimer;
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
       private ITransport transport;
@@ -69,6 +71,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.connectionId = client.NextConnectionId();
          this.sessionBuilder = new ClientSessionBuilder(this);
          this.ioContext = new IOContext(options.TransportOptions, options.SslOptions);
+         this.idleTimer = new Timer(ScheduleEngineTick, this, Timeout.Infinite, Timeout.Infinite);
 
          reconnectPool.Add(new ReconnectLocation(host, port));
          reconnectPool.AddAll(options.ReconnectOptions.ReconnectLocations);
@@ -493,8 +496,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalOpen(Engine.IConnection connection)
       {
-         // TODO connection.TickAuto(Scheduler);
-
          if (options.OpenTimeout > 0)
          {
             Schedule(() =>
@@ -557,6 +558,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleRemoteOpen(Engine.IConnection connection)
       {
+         DoEngineTickAndReschedule();
          ConnectionEstablished();
          capabilities.DetermineCapabilities(connection);
 
@@ -626,6 +628,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="engine"></param>
       private void HandleEngineShutdown(Engine.IEngine engine)
       {
+         idleTimer.Dispose(); // Disable any new idle timeout checks
+
          try
          {
             protonConnection.Close();
@@ -888,6 +892,39 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                throw failureCause.Value ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
             }
+         }
+      }
+
+      private void ScheduleEngineTick(object state)
+      {
+         try
+         {
+            // All work must take place on the event loop
+            Execute(() => DoEngineTickAndReschedule());
+
+            // TBD: Scheduling in the event loop itself to
+            //      avoid the need for thread jumping.
+         }
+         catch (RejectedExecutionException)
+         {
+            // Connection likely closed during this callback
+         }
+      }
+
+      private void DoEngineTickAndReschedule()
+      {
+         long localTime = Environment.TickCount64;
+         long nextTickDeadline = engine.Tick(Environment.TickCount64);
+         if (nextTickDeadline > 0)
+         {
+            idleTimer.Change(nextTickDeadline - localTime, Timeout.Infinite);
+         }
+         else
+         {
+            // Not strictly necessary but calls out that we are not going
+            // to do any more idle processing since neither side seems to
+            // have asked for any.
+            idleTimer.Change(Timeout.Infinite, Timeout.Infinite);
          }
       }
 
