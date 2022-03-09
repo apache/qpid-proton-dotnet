@@ -347,7 +347,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       protected bool NotClosedOrFailed<T>(TaskCompletionSource<T> request, Engine.ISender sender)
       {
-         if (IsClosed || sender.IsLocallyClosedOrDetached)
+         if (IsClosed)
          {
             request.TrySetException(new ClientIllegalStateException("The Sender was explicitly closed", failureCause));
             return false;
@@ -355,6 +355,26 @@ namespace Apache.Qpid.Proton.Client.Implementation
          else if (failureCause != null)
          {
             request.TrySetException(failureCause);
+            return false;
+         }
+         else if (sender.IsLocallyClosedOrDetached)
+         {
+            if (sender.Connection.RemoteErrorCondition != null)
+            {
+               request.TrySetException(ClientExceptionSupport.ConvertToConnectionClosedException(sender.Connection.RemoteErrorCondition));
+            }
+            else if (sender.Session.RemoteErrorCondition != null)
+            {
+               request.TrySetException(ClientExceptionSupport.ConvertToSessionClosedException(sender.Session.RemoteErrorCondition));
+            }
+            else if (sender.Engine.FailureCause != null)
+            {
+               request.TrySetException(ClientExceptionSupport.ConvertToConnectionClosedException(sender.Engine.FailureCause));
+            }
+            else
+            {
+               request.TrySetException(new ClientIllegalStateException("Sender closed without a specific error condition"));
+            }
             return false;
          }
          else
@@ -446,7 +466,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // cleaned up on the remote for the session.
             if (session is ClientStreamSession)
             {
-                session.CloseAsync();
+               session.CloseAsync();
             }
          }
 
