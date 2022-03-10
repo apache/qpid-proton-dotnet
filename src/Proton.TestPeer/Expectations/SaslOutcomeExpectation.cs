@@ -35,9 +35,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected override IMatcher GetExpectationMatcher() => matcher;
 
-      public SaslOutcomeExpectation WithCode(SaslCode code)
+      public SaslOutcomeExpectation WithCode(byte code)
       {
          return WithCode(Is.EqualTo(code));
+      }
+
+      public SaslOutcomeExpectation WithCode(SaslCode code)
+      {
+         return WithCode(Is.EqualTo((byte)code));
       }
 
       public SaslOutcomeExpectation WithAdditionalData(byte[] additionalData)

@@ -423,6 +423,13 @@ namespace Apache.Qpid.Proton.Test.Driver
             {
                try
                {
+                  // When the outcome of SASL is read the decoder should revert to initial state
+                  // as the only valid next incoming value is an AMQP header.
+                  if (sasl is SaslOutcome)
+                  {
+                     frameParser.ResetToExpectingHeader();
+                  }
+
                   sasl.Invoke(expectation, frameSize, payload, channel, this);
                }
                catch (UnexpectedPerformativeError unexpected)

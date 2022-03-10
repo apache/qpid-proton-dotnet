@@ -114,14 +114,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public void HandleRead(IEngineHandlerContext context, SaslEnvelope envelope)
       {
          envelope.Body.Invoke(this, context);
-         ((ProtonEngineHandlerContext)context).InterestMask = ProtonEngineHandlerContext.HANDLER_READS;
          context.FireRead(envelope);
       }
 
       public void HandleWrite(IEngineHandlerContext context, SaslEnvelope envelope)
       {
          envelope.Invoke(this, context);
-         ((ProtonEngineHandlerContext)context).InterestMask = ProtonEngineHandlerContext.HANDLER_READS;
          context.FireWrite(envelope);
       }
 
@@ -231,6 +229,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                {
                   handler.decoder = CodecFactory.Decoder;
                   handler.decoderState = handler.decoder.NewDecoderState();
+                  ((ProtonEngineHandlerContext)context).InterestMask = ProtonEngineHandlerContext.HANDLER_READS;
                   context.FireRead(HeaderEnvelope.AMQP_HEADER_ENVELOPE);
                }
             }
