@@ -59,7 +59,10 @@ namespace Apache.Qpid.Proton.Client
 
       /// <summary>
       /// Creates a new connection to the designated remote host on the provided port. The connection
-      /// is configured using the provided connection options.
+      /// is configured using the provided connection options.  This method does not block waiting for
+      /// the actual IO level connection to be established, a new IConnection instance will be return
+      /// which the caller can begin using.  To await full connection to the remote the caller should
+      /// use the open task exposed by the IConnection to wait the outcome.
       /// </summary>
       /// <param name="host">The remote host this connection should connect to</param>
       /// <param name="port">The port on the remote host where the connection is established</param>
@@ -69,7 +72,10 @@ namespace Apache.Qpid.Proton.Client
 
       /// <summary>
       /// Creates a new connection to the designated remote host on the default AMQP port. The connection
-      /// is configured using the provided connection options.
+      /// is configured using the provided connection options.  This method does not block waiting for
+      /// the actual IO level connection to be established, a new IConnection instance will be return
+      /// which the caller can begin using.  To await full connection to the remote the caller should
+      /// use the open task exposed by the IConnection to wait the outcome.
       /// </summary>
       /// <param name="host">The remote host this connection should connect to</param>
       /// <param name="options">Optional connection options to use to configure the connection</param>
