@@ -218,7 +218,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public Task<IReceiver> Drain()
+      public Task<IReceiver> DrainAsync()
       {
          CheckClosedOrFailed();
          TaskCompletionSource<IReceiver> drainComplete = new TaskCompletionSource<IReceiver>();

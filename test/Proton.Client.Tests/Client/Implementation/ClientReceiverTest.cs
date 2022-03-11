@@ -515,7 +515,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                              .Respond()
                              .WithDrain(true).WithLinkCredit(0).WithDeliveryCount(credit);
 
-            Task<IReceiver> draining = receiver.Drain();
+            Task<IReceiver> draining = receiver.DrainAsync();
             draining.Wait(TimeSpan.FromSeconds(5));
 
             // Close things down
@@ -553,7 +553,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             peer.WaitForScriptToComplete();
 
-            Task<IReceiver> draining = receiver.Drain();
+            Task<IReceiver> draining = receiver.DrainAsync();
             draining.Wait(TimeSpan.FromSeconds(5));
 
             // Close things down
@@ -588,11 +588,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             ISession session = connection.OpenSession().OpenTask.Result;
             IReceiver receiver = session.OpenReceiver("test-queue").OpenTask.Result;
 
-            receiver.Drain();
+            receiver.DrainAsync();
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail since already draining.");
             }
             catch (Exception cliEx)
@@ -649,7 +649,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectFlow().WithDrain(true).WithLinkCredit(credit).WithDeliveryCount(20);
             peer.ExpectClose().Respond();
 
-            Task<IReceiver> draining = receiver.Drain();
+            Task<IReceiver> draining = receiver.DrainAsync();
             Assert.IsFalse(draining.IsCompleted);
 
             try
@@ -2135,7 +2135,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait(TimeSpan.FromSeconds(10));
+               receiver.DrainAsync().Wait(TimeSpan.FromSeconds(10));
                Assert.Fail("Drain call should fail when link closed or detached.");
             }
             catch (Exception cliEx)
@@ -2192,7 +2192,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait(TimeSpan.FromSeconds(10));
+               receiver.DrainAsync().Wait(TimeSpan.FromSeconds(10));
                Assert.Fail("Drain call should fail when link closed or detached.");
             }
             catch (Exception cliEx)
@@ -2236,7 +2236,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait(TimeSpan.FromSeconds(10));
+               receiver.DrainAsync().Wait(TimeSpan.FromSeconds(10));
                Assert.Fail("Drain call should fail when session closed by remote.");
             }
             catch (Exception cliEx)
@@ -2277,7 +2277,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait(TimeSpan.FromSeconds(10));
+               receiver.DrainAsync().Wait(TimeSpan.FromSeconds(10));
                Assert.Fail("Drain call should fail when the connection drops.");
             }
             catch (Exception cliEx)
@@ -2322,7 +2322,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail timeout exceeded.");
             }
             catch (Exception cliEx)
@@ -2367,7 +2367,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail timeout exceeded.");
             }
             catch (Exception cliEx)
@@ -2412,7 +2412,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail timeout exceeded.");
             }
             catch (Exception cliEx)

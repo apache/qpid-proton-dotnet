@@ -3424,7 +3424,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail timeout exceeded.");
             }
             catch (Exception cliEx)
@@ -3468,7 +3468,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail timeout exceeded.");
             }
             catch (Exception cliEx)
@@ -3509,7 +3509,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             peer.WaitForScriptToComplete();
 
-            receiver.Drain().Wait(TimeSpan.FromSeconds(10));
+            receiver.DrainAsync().Wait(TimeSpan.FromSeconds(10));
 
             // Close things down
             peer.ExpectClose().Respond();
@@ -3543,11 +3543,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             StreamReceiverOptions receiverOptions = new StreamReceiverOptions();
             IReceiver receiver = connection.OpenStreamReceiver("test-queue", receiverOptions).OpenTask.Result;
 
-            receiver.Drain();
+            receiver.DrainAsync();
 
             try
             {
-               receiver.Drain().Wait();
+               receiver.DrainAsync().Wait();
                Assert.Fail("Drain call should fail since already draining.");
             }
             catch (Exception cliEx)

@@ -171,7 +171,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
-               receiver.Drain();
+               receiver.DrainAsync();
                Assert.Fail("Should not be able to drain as dynamic receiver not recovered");
             }
             catch (ClientConnectionRemotelyClosedException ex)

@@ -198,7 +198,7 @@ namespace Apache.Qpid.Proton.Client
       /// remote reports drained or once the configured drain timeout is reached.
       /// </summary>
       /// <returns>A Task that will be completed when the remote reports drained.</returns>
-      Task<IReceiver> Drain();
+      Task<IReceiver> DrainAsync();
 
       /// <summary>
       /// A count of the currently queued deliveries which can be read immediately without

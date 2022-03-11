@@ -181,7 +181,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return session.Request(this, creditAdded).Task.GetAwaiter().GetResult();
       }
 
-      public Task<IReceiver> Drain()
+      public Task<IReceiver> DrainAsync()
       {
          CheckClosedOrFailed();
          TaskCompletionSource<IReceiver> drainComplete = new TaskCompletionSource<IReceiver>();
