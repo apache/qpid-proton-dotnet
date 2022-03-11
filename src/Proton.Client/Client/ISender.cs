@@ -162,6 +162,18 @@ namespace Apache.Qpid.Proton.Client
       ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
 
       /// <summary>
+      /// Send the given message immediately if there is credit available or waits if the link
+      /// has not yet been granted credit. If a send timeout has been configured then this method
+      /// will fail the returned Task with a timed out error after that if the message cannot be sent.
+      /// The returned Task will be completed once the message has been sent.
+      /// </summary>
+      /// <typeparam name="T">The type that describes the message body</typeparam>
+      /// <param name="message">The message object that will be sent</param>
+      /// <param name="deliveryAnnotations">Optional delivery annotation to include with the message</param>
+      /// <returns>A Task that is completed with a Tracker once the send completes</returns>
+      Task<ITracker> SendAsync<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
+
+      /// <summary>
       /// Send the given message if credit is available or returns null if no credit has been
       /// granted to the link at the time of the send attempt.
       /// </summary>
@@ -170,6 +182,16 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="deliveryAnnotations">Optional delivery annotation to include with the message</param>
       /// <returns>A Tracker for the sent message or null if no credit to send is available</returns>
       ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
+
+      /// <summary>
+      /// Send the given message if credit is available or completes the returned Task with null if no credit
+      /// has been granted to the link at the time of the send attempt.
+      /// </summary>
+      /// <typeparam name="T">The type that describes the message body</typeparam>
+      /// <param name="message">The message object that will be sent</param>
+      /// <param name="deliveryAnnotations">Optional delivery annotation to include with the message</param>
+      /// <returns>A Task that provides a tracker if the send completes or null if no credit</returns>
+      Task<ITracker> TrySendAsync<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
 
    }
 }

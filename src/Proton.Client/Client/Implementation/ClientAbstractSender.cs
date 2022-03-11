@@ -175,13 +175,27 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public ITracker Send<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
          CheckClosedOrFailed();
-         return DoSendMessage(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, true);
+         return DoSendMessageAsync(
+            ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, true).GetAwaiter().GetResult();
       }
 
       public ITracker TrySend<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
       {
          CheckClosedOrFailed();
-         return DoSendMessage(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, false);
+         return DoSendMessageAsync(
+            ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, false).GetAwaiter().GetResult();
+      }
+
+      public Task<ITracker> SendAsync<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
+      {
+         CheckClosedOrFailed();
+         return DoSendMessageAsync(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, true);
+      }
+
+      public Task<ITracker> TrySendAsync<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null)
+      {
+         CheckClosedOrFailed();
+         return DoSendMessageAsync(ClientMessageSupport.ConvertMessage(message), deliveryAnnotations, false);
       }
 
       #region Abstract and Virtual sender API that must be implemented by subclasses
@@ -291,7 +305,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Abstract sender protected API
 
-      protected virtual ITracker DoSendMessage<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
+      protected virtual Task<ITracker> DoSendMessageAsync<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
       {
          TaskCompletionSource<ITracker> operation = new TaskCompletionSource<ITracker>();
 
@@ -325,7 +339,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return ClientSession.Request(this, operation).Task.GetAwaiter().GetResult();
+         return ClientSession.Request(this, operation).Task;
       }
 
       protected void CheckClosedOrFailed()

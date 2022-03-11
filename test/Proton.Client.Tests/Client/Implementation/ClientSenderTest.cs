@@ -581,6 +581,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       [Test]
       public void TestSendCompletesWhenCreditEventuallyOffered()
       {
+         DoTestSendCompletesWhenCreditEventuallyOffered(false);
+      }
+
+      [Test]
+      public void TestSendAsyncCompletesWhenCreditEventuallyOffered()
+      {
+         DoTestSendCompletesWhenCreditEventuallyOffered(true);
+      }
+
+      private void DoTestSendCompletesWhenCreditEventuallyOffered(bool sendAsync)
+      {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
          {
             peer.ExpectSASLAnonymousConnect();
@@ -621,7 +632,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
             try
             {
                logger.LogDebug("Attempting send with sender: {}", sender);
-               sender.Send(message);
+               if (sendAsync)
+               {
+                  Assert.DoesNotThrowAsync(async () => await sender.SendAsync(message));
+               }
+               else
+               {
+                  sender.Send(message);
+               }
             }
             catch (ClientSendTimedOutException)
             {
@@ -753,6 +771,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       [Test]
       public void TestTrySendWhenNoCreditAvailable()
       {
+         DoTestTrySendWhenNoCreditAvailable(false);
+      }
+
+      [Test]
+      public void TestTrySendAsyncWhenNoCreditAvailable()
+      {
+         DoTestTrySendWhenNoCreditAvailable(true);
+      }
+
+      private void DoTestTrySendWhenNoCreditAvailable(bool sendAsync)
+      {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
          {
             peer.ExpectSASLAnonymousConnect();
@@ -778,7 +807,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             ISender sender = session.OpenSender("test-queue").OpenTask.Result;
 
             IMessage<string> message = IMessage<string>.Create("Hello World");
-            Assert.IsNull(sender.TrySend(message));
+
+            if (sendAsync)
+            {
+               Assert.IsNull(sender.TrySendAsync(message).GetAwaiter().GetResult());
+            }
+            else
+            {
+               Assert.IsNull(sender.TrySend(message));
+            }
 
             sender.Close();
             connection.Close();
@@ -2787,6 +2824,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       [Test]
       public void TestWaitForAcceptanceFailsIfRemoteSendsNoDisposition()
       {
+         DoTestWaitForAcceptanceFailsIfRemoteSendsNoDisposition(false);
+      }
+
+      [Test]
+      public void TestWaitForAcceptanceFailsIfRemoteSendsNoDispositionAsyncSend()
+      {
+         DoTestWaitForAcceptanceFailsIfRemoteSendsNoDisposition(true);
+      }
+
+      private void DoTestWaitForAcceptanceFailsIfRemoteSendsNoDisposition(bool sendAsync)
+      {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
          {
             peer.ExpectSASLAnonymousConnect();
@@ -2805,7 +2853,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
             ISender sender = connection.OpenSender("test-queue").OpenTask.Result;
-            ITracker tracker = sender.Send(IMessage<string>.Create("Hello World"));
+
+            ITracker tracker;
+
+            if (sendAsync)
+            {
+               tracker = sender.Send(IMessage<string>.Create("Hello World"));
+            }
+            else
+            {
+               tracker = sender.SendAsync(IMessage<string>.Create("Hello World")).GetAwaiter().GetResult();
+            }
 
             try
             {
