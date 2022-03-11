@@ -628,6 +628,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="engine"></param>
       private void HandleEngineShutdown(Engine.IEngine engine)
       {
+         LOG.Trace("Client connection {0} handling engine shutdown.", connectionId);
+
          idleTimer.Dispose(); // Disable any new idle timeout checks
 
          try
