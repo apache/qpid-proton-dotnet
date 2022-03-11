@@ -243,7 +243,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
-      internal void Disposition(IOutgoingDelivery delivery, Types.Transport.IDeliveryState state, bool settled)
+      internal void DispositionAsync(IOutgoingDelivery delivery, Types.Transport.IDeliveryState state, bool settled)
       {
          CheckClosedOrFailed();
          session.Execute(() =>

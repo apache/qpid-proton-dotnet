@@ -31,12 +31,6 @@ namespace Apache.Qpid.Proton.Client
       ISender Sender { get; }
 
       /// <summary>
-      /// Settles the sent delivery if not performing auto-settlement on the sender.
-      /// </summary>
-      /// <returns>This tracker instance</returns>
-      ITracker Settle();
-
-      /// <summary>
       /// Indicates if the sent delivery has already been locally settled.
       /// </summary>
       bool Settled { get; }
@@ -57,12 +51,36 @@ namespace Apache.Qpid.Proton.Client
       IDeliveryState RemoteState { get; }
 
       /// <summary>
+      /// Settles the sent delivery if not performing auto-settlement on the sender.
+      /// </summary>
+      /// <returns>This tracker instance</returns>
+      ITracker Settle();
+
+      /// <summary>
+      /// Settles the sent delivery if not performing auto-settlement on the sender
+      /// and returns a Task that will be completed once any IO operations required
+      /// by the settlement have compelted.
+      /// </summary>
+      /// <returns>This tracker instance</returns>
+      Task<ITracker> SettleAsync();
+
+      /// <summary>
       /// Apply the delivery state and optionally settle the sent delivery with the remote
       /// </summary>
       /// <param name="state">The delivery state to apply to the sent delivery</param>
       /// <param name="settle">Optionally settle the delivery that was sent</param>
       /// <returns>This tracker instance</returns>
       ITracker Disposition(IDeliveryState state, bool settle);
+
+      /// <summary>
+      /// Apply the delivery state and optionally settle the sent delivery with the remote.
+      /// The method returns a Task that will be completed once any required IO operations
+      /// in order to apply the dispostion have been completed.
+      /// </summary>
+      /// <param name="state">The delivery state to apply to the sent delivery</param>
+      /// <param name="settle">Optionally settle the delivery that was sent</param>
+      /// <returns>This tracker instance</returns>
+      Task<ITracker> DispositionAsync(IDeliveryState state, bool settle);
 
       /// <summary>
       /// Gets a task that will be completed once the remote has settled the sent

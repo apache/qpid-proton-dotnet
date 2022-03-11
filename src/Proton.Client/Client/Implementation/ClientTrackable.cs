@@ -106,7 +106,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          try
          {
-            sender.Disposition(delivery, state?.AsProtonType(), settle);
+            sender.DispositionAsync(delivery, state?.AsProtonType(), settle);
          }
          finally
          {
@@ -121,16 +121,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual ITracker Settle()
       {
-         try
-         {
-            sender.Disposition(delivery, null, true);
-         }
-         finally
-         {
-            remoteSettlementFuture.SetResult(this);
-         }
+         return Disposition(null, true);
+      }
 
-         return this;
+      public virtual Task<ITracker> SettleAsync()
+      {
+         return Task.FromResult(this.Settle());
+      }
+
+      public virtual Task<ITracker> DispositionAsync(IDeliveryState state, bool settle)
+      {
+         return Task.FromResult(this.Disposition(state, settle));
       }
 
       public virtual ITracker AwaitAccepted()

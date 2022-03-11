@@ -769,6 +769,80 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
+      public void TestSendAndApplyDisposition()
+      {
+         DoTestSendAndApplyDisposition(false);
+      }
+
+      [Test]
+      public void TestSendAndApplyDispositionAsync()
+      {
+         DoTestSendAndApplyDisposition(true);
+      }
+
+      private void DoTestSendAndApplyDisposition(bool dispositionAsync)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithDeliveryCount(0)
+                             .WithLinkCredit(10)
+                             .WithIncomingWindow(1024)
+                             .WithOutgoingWindow(10)
+                             .WithNextIncomingId(0)
+                             .WithNextOutgoingId(1).Queue();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test-queue").OpenTask.Result;
+
+            // This ensures that the flow to sender is processed before we try-send
+            IReceiver receiver = session.OpenReceiver("test-queue", new ReceiverOptions()
+            {
+               CreditWindow = 0
+            }
+            ).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithNonNullPayload();
+            peer.ExpectDisposition().WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+
+            ITracker tracker = sender.Send(message);
+
+            if (dispositionAsync)
+            {
+               Assert.DoesNotThrowAsync(async () => await tracker.DispositionAsync(IDeliveryState.Accepted(), true));
+            }
+            else
+            {
+               tracker.Disposition(IDeliveryState.Accepted(), true);
+            }
+
+            Assert.IsNotNull(tracker);
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
       public void TestTrySendWhenNoCreditAvailable()
       {
          DoTestTrySendWhenNoCreditAvailable(false);
@@ -881,16 +955,28 @@ namespace Apache.Qpid.Proton.Client.Implementation
       [Test]
       public void TestSendAutoSettlesOnceRemoteSettles()
       {
-         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(false);
+         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(false, false);
       }
 
       [Test]
       public void TestTrySendAutoSettlesOnceRemoteSettles()
       {
-         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(true);
+         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(true, false);
       }
 
-      private void DoTestSentMessageGetsAutoSettledAfterRemoteSettles(bool trySend)
+      [Test]
+      public void TestSendAsyncAutoSettlesOnceRemoteSettles()
+      {
+         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(false, true);
+      }
+
+      [Test]
+      public void TestTrySendAsyncAutoSettlesOnceRemoteSettles()
+      {
+         DoTestSentMessageGetsAutoSettledAfterRemoteSettles(true, true);
+      }
+
+      private void DoTestSentMessageGetsAutoSettledAfterRemoteSettles(bool trySend, bool useAsync)
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
          {
@@ -933,14 +1019,28 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IMessage<string> message = IMessage<string>.Create("Hello World");
 
-            ITracker tracker;
+            ITracker tracker = null;
             if (trySend)
             {
-               tracker = sender.TrySend(message);
+               if (useAsync)
+               {
+                  tracker = sender.TrySend(message);
+               }
+               else
+               {
+                  Assert.DoesNotThrowAsync(async () => tracker = await sender.TrySendAsync(message));
+               }
             }
             else
             {
-               tracker = sender.Send(message);
+               if (useAsync)
+               {
+                  tracker = sender.Send(message);
+               }
+               else
+               {
+                  Assert.DoesNotThrowAsync(async () => tracker = await sender.SendAsync(message));
+               }
             }
 
             Assert.IsNotNull(tracker);

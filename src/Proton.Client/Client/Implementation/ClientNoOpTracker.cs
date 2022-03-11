@@ -75,11 +75,21 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
+      public Task<ITracker> DispositionAsync(IDeliveryState state, bool settle)
+      {
+         return Task.FromResult((ITracker)this);
+      }
+
       public ITracker Settle()
       {
          this.settled = true;
 
          return this;
+      }
+
+      public Task<ITracker> SettleAsync()
+      {
+         return Task.FromResult((ITracker)this);
       }
    }
 }
