@@ -121,6 +121,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
+         return OpenDurableReceiverAsync(address, subscriptionName, options).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> OpenDurableReceiverAsync(string address, string subscriptionName, ReceiverOptions options = null)
+      {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a durable receiver with a null address");
          Objects.RequireNonNull(address, "Cannot create a durable receiver with a null subscription name");
@@ -140,10 +145,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return connection.Request(this, createReceiver).Task;
       }
 
       public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
+      {
+         return OpenDynamicReceiverAsync(options, dynamicNodeProperties).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
@@ -161,10 +171,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return connection.Request(this, createReceiver).Task;
       }
 
       public virtual IReceiver OpenReceiver(string address, ReceiverOptions options = null)
+      {
+         return OpenReceiverAsync(address, options).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> OpenReceiverAsync(string address, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
@@ -184,10 +199,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return connection.Request(this, createReceiver).Task;
       }
 
       public virtual ISender OpenAnonymousSender(SenderOptions options = null)
+      {
+         return OpenAnonymousSenderAsync(options).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
@@ -205,10 +225,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createSender).Task.GetAwaiter().GetResult();
+         return connection.Request(this, createSender).Task;
       }
 
       public virtual ISender OpenSender(string address, SenderOptions options = null)
+      {
+         return OpenSenderAsync(address, options).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<ISender> OpenSenderAsync(string address, SenderOptions options = null)
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a sender with a null address");
@@ -228,10 +253,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createSender).Task.GetAwaiter().GetResult();
+         return connection.Request(this, createSender).Task;
       }
 
       public ISession BeginTransaction()
+      {
+         return BeginTransactionAsync().GetAwaiter().GetResult();
+      }
+
+      public Task<ISession> BeginTransactionAsync()
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISession> beginFuture = new TaskCompletionSource<ISession>();
@@ -253,10 +283,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, beginFuture).Task.GetAwaiter().GetResult();
+         return connection.Request(this, beginFuture).Task;
       }
 
       public ISession CommitTransaction()
+      {
+         return CommitTransactionAsync().GetAwaiter().GetResult();
+      }
+
+      public Task<ISession> CommitTransactionAsync()
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISession> commitFuture = new TaskCompletionSource<ISession>();
@@ -274,10 +309,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, commitFuture).Task.GetAwaiter().GetResult();
+         return connection.Request(this, commitFuture).Task;
       }
 
       public ISession RollbackTransaction()
+      {
+         return RollbackTransactionAsync().GetAwaiter().GetResult();
+      }
+
+      public Task<ISession> RollbackTransactionAsync()
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISession> rollbackFuture = new TaskCompletionSource<ISession>();
@@ -295,7 +335,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, rollbackFuture).Task.GetAwaiter().GetResult();
+         return connection.Request(this, rollbackFuture).Task;
       }
 
       #region Internal client session API

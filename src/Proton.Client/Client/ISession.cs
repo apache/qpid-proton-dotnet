@@ -76,6 +76,21 @@ namespace Apache.Qpid.Proton.Client
       IReceiver OpenReceiver(string address, ReceiverOptions options = null);
 
       /// <summary>
+      /// Creates a receiver used to consume messages from the given node address. The
+      /// returned Task will allow the caller to wait for the creation of the receiver
+      /// configured using the provided receiver options.
+      ///
+      /// The returned receiver may not have been opened on the remote when it is returned. Some
+      /// methods of the receiver can block until the remote fully opens the receiver, the user can
+      /// wait for the remote to respond to the open request by obtaining the open task from the
+      /// receiver and using it to await the completion of the receiver open.
+      /// </summary>
+      /// <param name="address">The address of the node the receiver attaches to</param>
+      /// <param name="options">Optional receiver options to use for configuration</param>
+      /// <returns>A new Task<Receiver> instance that can be awaited</returns>
+      Task<IReceiver> OpenReceiverAsync(string address, ReceiverOptions options = null);
+
+      /// <summary>
       /// Creates a receiver used to consume messages from the given node address.  The
       /// returned receiver will be configured using the provided receiver options.
       ///
@@ -89,6 +104,22 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="options">Optional receiver options to use for configuration</param>
       /// <returns>A new receiver instance</returns>
       IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null);
+
+      /// <summary>
+      /// Creates a receiver used to consume messages from the given node address. The
+      /// returned Task will allow the caller to wait for the creation of the receiver
+      /// configured using the provided receiver options.
+      ///
+      /// The returned receiver may not have been opened on the remote when it is returned.  Some
+      /// methods of the receiver can block until the remote fully opens the receiver, the user can
+      /// wait for the remote to respond to the open request by obtaining the open task from the
+      /// receiver and using it to await the completion of the receiver open.
+      /// </summary>
+      /// <param name="address">The address of the node the receiver attaches to</param>
+      /// <param name="subscriptionName">The subscription name to use for the receiver</param>
+      /// <param name="options">Optional receiver options to use for configuration</param>
+      /// <returns>A new Task<Receiver> instance that can be awaited</returns>
+      Task<IReceiver> OpenDurableReceiverAsync(string address, string subscriptionName, ReceiverOptions options = null);
 
       /// <summary>
       /// Creates a dynamic receiver used to consume messages from the dynamically generated node.
@@ -105,6 +136,21 @@ namespace Apache.Qpid.Proton.Client
       IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null);
 
       /// <summary>
+      /// Creates a dynamic receiver used to consume messages from the dynamically generated node.
+      /// on the remote. The returned Task will allow the caller to wait for the creation of the
+      /// receiver configured using the provided receiver options.
+      ///
+      /// The returned receiver may not have been opened on the remote when it is returned.  Some
+      /// methods of the receiver can block until the remote fully opens the receiver, the user can
+      /// wait for the remote to respond to the open request by obtaining the open task from the
+      /// receiver and using it to await the completion of the receiver open.
+      /// </summary>
+      /// <param name="options">Optional receiver options to use for configuration</param>
+      /// <param name="dynamicNodeProperties">Optional properties to assign to the node create</param>
+      /// <returns>A new Task<Receiver> instance that can be awaited</returns>
+      Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null);
+
+      /// <summary>
       /// Creates a sender used to send messages to the given node address.  The returned sender
       /// will be configured using configuration options provided.
       ///
@@ -119,6 +165,21 @@ namespace Apache.Qpid.Proton.Client
       ISender OpenSender(string address, SenderOptions options = null);
 
       /// <summary>
+      /// Creates a sender used to send messages to the given node address. The returned Task
+      /// will allow the caller to wait for the creation of the receiver configured using the
+      /// provided receiver options.
+      ///
+      /// The returned sender may not have been opened on the remote when it is returned.  Some
+      /// methods of the sender can block until the remote fully opens the sender, the user can
+      /// wait for the remote to respond to the open request by obtaining the open task from the
+      /// sender and using it to await the completion of the sender open.
+      /// </summary>
+      /// <param name="address">The address of the node the sender attaches to</param>
+      /// <param name="options">Optional sender options to use for configuration</param>
+      /// <returns>A new Task<ISender> instance.</returns>
+      Task<ISender> OpenSenderAsync(string address, SenderOptions options = null);
+
+      /// <summary>
       /// Creates a anonymous sender used to send messages to the "anonymous relay" on the
       /// remote. Each message sent must include a "to" address for the remote to route the
       /// message. The returned sender will be configured using the provided sender options.
@@ -131,6 +192,21 @@ namespace Apache.Qpid.Proton.Client
       /// <param name="options">Optional sender options to use for configuration</param>
       /// <returns>A new sender instance.</returns>
       ISender OpenAnonymousSender(SenderOptions options = null);
+
+      /// <summary>
+      /// Creates a anonymous sender used to send messages to the "anonymous relay" on the
+      /// remote. Each message sent must include a "to" address for the remote to route the
+      /// message. The returned Task will allow the caller to wait for the creation of the
+      /// receiver configured using the provided receiver options.
+      ///
+      /// The returned sender may not have been opened on the remote when it is returned. Some
+      /// methods of the sender can block until the remote fully opens the sender, the user can
+      /// wait for the remote to respond to the open request by obtaining the open task from the
+      /// sender and using it to await the completion of the sender open.
+      /// </summary>
+      /// <param name="options">Optional sender options to use for configuration</param>
+      /// <returns>A new Task<ISender> instance.</returns>
+      Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null);
 
       /// <summary>
       /// Returns the properties that the remote provided upon successfully opening the session.
@@ -176,6 +252,22 @@ namespace Apache.Qpid.Proton.Client
       ISession BeginTransaction();
 
       /// <summary>
+      /// Opens a new transaction scoped to this {@link Session} if one is not already active.
+      /// The transaction will not be considered active until the returned Task is completed.
+      /// <para>
+      /// A Session that has an active transaction will perform all sends and all delivery
+      /// dispositions under that active transaction. If the user wishes to send with the same
+      /// session but outside of a transaction they user must commit the active transaction and
+      /// not request that a new one be started. A session can only have one active transaction
+      /// at a time and as such any call to begin while there is a currently active transaction
+      /// will throw an ClientTransactionNotActiveException to indicate that the operation being
+      /// requested is not valid at that time.
+      /// </para>
+      /// </summary>
+      /// <returns>A Task whose result is the Session instance now under a transaction</returns>
+      Task<ISession> BeginTransactionAsync();
+
+      /// <summary>
       /// Commit the currently active transaction in this Session.
       /// <para>
       /// Commit the currently active transaction in this Session but does not start a new
@@ -196,6 +288,23 @@ namespace Apache.Qpid.Proton.Client
       ISession CommitTransaction();
 
       /// <summary>
+      /// Asynchronously commit the currently active transaction in this Session, the transaction
+      /// cannot be considered retired until the Task has been compeleted.
+      /// <para>
+      /// Commit the currently active transaction in this Session but does not start a new
+      /// transaction automatically. If there is no current transaction this method fails the returned
+      /// Task with an ClientTransactionNotActiveException to indicate this error. If the active
+      /// transaction has entered an in doubt state or was remotely rolled back this method fail the
+      /// Task with an error to indicate that the commit failed and that a new transaction need to be
+      /// started by the user. When a transaction rolled back error occurs the user should assume that
+      /// all work performed under that transaction has failed and will need to be attempted under a
+      /// new transaction.
+      /// </para>
+      /// </summary>
+      /// <returns>A Task whose result is the Session no longer under a transaction</returns>
+      Task<ISession> CommitTransactionAsync();
+
+      /// <summary>
       /// Roll back the currently active transaction in this Session.
       /// <para>
       /// Roll back the currently active transaction in this Session but does not automatically
@@ -212,6 +321,20 @@ namespace Apache.Qpid.Proton.Client
       /// </remarks>
       /// <returns>This Session instance</returns>
       ISession RollbackTransaction();
+
+      /// <summary>
+      /// Asynchronously roll back the currently active transaction in this Session.
+      /// <para>
+      /// Roll back the currently active transaction in this Session but does not automatically
+      /// start a new transaction. If there is no current transaction this method fails the returned
+      /// Task an ClientTransactionNotActiveException to indicate this error. If the active transaction
+      /// has entered an in doubt state or was remotely rolled back this method will fail the returned
+      /// Task with an error to indicate that the roll back failed and that a new transaction need to
+      /// be started by the user.
+      /// </para>
+      /// </summary>
+      /// <returns>A Task whose result is the Session no longer under a transaction</returns>
+      Task<ISession> RollbackTransactionAsync();
 
    }
 }

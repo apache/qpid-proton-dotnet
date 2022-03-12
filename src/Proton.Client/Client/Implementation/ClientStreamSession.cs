@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -52,6 +53,36 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       public override ISender OpenAnonymousSender(SenderOptions options = null)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
+      }
+
+      public override Task<IReceiver> OpenDurableReceiverAsync(string address, string subscriptionName, ReceiverOptions options = null)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
+      }
+
+      public override Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
+      }
+
+      public override Task<IReceiver> OpenReceiverAsync(string address, ReceiverOptions options = null)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot create a receiver from a streaming resource session");
+      }
+
+      public override Task<ISender> OpenSenderAsync(string address, SenderOptions options = null)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
+      }
+
+      public override Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
