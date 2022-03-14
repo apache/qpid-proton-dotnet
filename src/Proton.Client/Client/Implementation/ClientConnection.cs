@@ -432,24 +432,46 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ITracker Send<T>(IMessage<T> message)
       {
+         return SendAsync(message).GetAwaiter().GetResult();
+      }
+
+      public Task<ITracker> SendAsync<T>(IMessage<T> message)
+      {
          CheckClosedOrFailed();
          Objects.RequireNonNull(message, "Cannot send a null message");
-         TaskCompletionSource<ISender> result = new TaskCompletionSource<ISender>();
+         TaskCompletionSource<ITracker> result = new TaskCompletionSource<ITracker>();
 
-         Execute(() =>
+         DefaultSenderAsync().ContinueWith(sender =>
          {
-            try
+            if (sender.IsCompletedSuccessfully)
             {
-               CheckClosedOrFailed();
-               result.TrySetResult(LazyCreateConnectionSender());
+               sender.Result.SendAsync(message).ContinueWith(tracker =>
+               {
+                  if (tracker.IsCompletedSuccessfully)
+                  {
+                     result.TrySetResult(tracker.Result);
+                  }
+                  else if (tracker.IsCanceled)
+                  {
+                     result.TrySetCanceled();
+                  }
+                  else
+                  {
+                     result.TrySetException(tracker.Exception.InnerException);
+                  }
+               });
             }
-            catch (Exception error)
+            else if (sender.IsCanceled)
             {
-               result.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               result.TrySetCanceled();
+            }
+            else
+            {
+               result.TrySetException(sender.Exception.InnerException);
             }
          });
 
-         return Request(this, result).Task.GetAwaiter().GetResult().Send(message);
+         return Request(this, result).Task;
       }
 
       public override string ToString()

@@ -324,6 +324,17 @@ namespace Apache.Qpid.Proton.Client
       ITracker Send<T>(IMessage<T> message);
 
       /// <summary>
+      /// Asynchronously sends the given message using the connection scoped default sender
+      /// instance. The connection send uses the remote "anonymous relay" to route messages
+      /// which requires that the sent message have a valid "To" address set and that the
+      /// remote supports the anonymous relay.
+      /// </summary>
+      /// <typeparam name="T">The type of body the message carries</typeparam>
+      /// <param name="message">The message to be sent</param>
+      /// <returns>A Task that results in a tracker instance that can be used to track the send outcome</returns>
+      Task<ITracker> SendAsync<T>(IMessage<T> message);
+
+      /// <summary>
       /// Returns the properties that the remote provided upon successfully opening the connection.
       /// If the open has not completed yet this method will block to await the open response which
       /// carries the remote properties.  If the remote provides no properties this method will
