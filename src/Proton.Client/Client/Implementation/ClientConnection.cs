@@ -142,6 +142,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISender DefaultSender()
       {
+         return DefaultSenderAsync().GetAwaiter().GetResult();
+
+      }
+
+      public Task<ISender> DefaultSenderAsync()
+      {
          CheckClosedOrFailed();
          TaskCompletionSource<ISender> defaultSender = new TaskCompletionSource<ISender>();
 
@@ -158,10 +164,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, defaultSender).Task.GetAwaiter().GetResult();
+         return Request(this, defaultSender).Task;
       }
 
       public ISession DefaultSession()
+      {
+         return DefaultSessionAsync().GetAwaiter().GetResult();
+      }
+
+      public Task<ISession> DefaultSessionAsync()
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISession> defaultSession = new TaskCompletionSource<ISession>();
@@ -179,10 +190,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, defaultSession).Task.GetAwaiter().GetResult();
+         return Request(this, defaultSession).Task;
       }
 
       public ISession OpenSession(SessionOptions options = null)
+      {
+         return OpenSessionAsync(options).GetAwaiter().GetResult();
+      }
+
+      public Task<ISession> OpenSessionAsync(SessionOptions options = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISession> createSession = new TaskCompletionSource<ISession>();
@@ -200,10 +216,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSession).Task.GetAwaiter().GetResult();
+         return Request(this, createSession).Task;
       }
 
       public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
+      {
+         return OpenDurableReceiverAsync(address, subscriptionName, options).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> OpenDurableReceiverAsync(string address, string subscriptionName, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
@@ -222,15 +243,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return Request(this, createReceiver).Task;
       }
 
-      public IReceiver OpenDynamicReceiver(IDictionary<string, object> dynamicNodeProperties = null)
+      public IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
-         return OpenDynamicReceiver(null, dynamicNodeProperties);
+         return OpenDynamicReceiverAsync(options, dynamicNodeProperties).GetAwaiter().GetResult();
       }
 
-      public IReceiver OpenDynamicReceiver(ReceiverOptions options, IDictionary<string, object> dynamicNodeProperties = null)
+      public Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
@@ -248,10 +269,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return Request(this, createReceiver).Task;
       }
 
       public IReceiver OpenReceiver(string address, ReceiverOptions options = null)
+      {
+         return OpenReceiverAsync(address, options).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> OpenReceiverAsync(string address, ReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
@@ -270,10 +296,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return Request(this, createReceiver).Task;
       }
 
       public ISender OpenAnonymousSender(SenderOptions options = null)
+      {
+         return OpenAnonymousSenderAsync(options).GetAwaiter().GetResult();
+      }
+
+      public Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
@@ -291,10 +322,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSender).Task.GetAwaiter().GetResult();
+         return Request(this, createSender).Task;
       }
 
       public ISender OpenSender(string address, SenderOptions options = null)
+      {
+         return OpenSenderAsync(address, options).GetAwaiter().GetResult();
+      }
+
+      public Task<ISender> OpenSenderAsync(string address, SenderOptions options = null)
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a sender with a null address");
@@ -313,10 +349,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSender).Task.GetAwaiter().GetResult();
+         return Request(this, createSender).Task;
       }
 
       public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options = null)
+      {
+         return OpenStreamReceiverAsync(address, options).GetAwaiter().GetResult();
+      }
+
+      public Task<IStreamReceiver> OpenStreamReceiverAsync(string address, StreamReceiverOptions options = null)
       {
          CheckClosedOrFailed();
          TaskCompletionSource<IStreamReceiver> createReceiver = new TaskCompletionSource<IStreamReceiver>();
@@ -346,10 +387,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task.GetAwaiter().GetResult();
+         return Request(this, createReceiver).Task;
       }
 
       public IStreamSender OpenStreamSender(string address, StreamSenderOptions options = null)
+      {
+         return OpenStreamSenderAsync(address, options).GetAwaiter().GetResult();
+      }
+
+      public Task<IStreamSender> OpenStreamSenderAsync(string address, StreamSenderOptions options = null)
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a sender with a null address");
@@ -381,7 +427,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSender).Task.GetAwaiter().GetResult();
+         return Request(this, createSender).Task;
       }
 
       public ITracker Send<T>(IMessage<T> message)

@@ -1209,7 +1209,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
             connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
 
-            IReceiver receiver = connection.OpenDynamicReceiver(dynamicNodeProperties);
+            IReceiver receiver = connection.OpenDynamicReceiver(null, dynamicNodeProperties);
             receiver.OpenTask.Wait(TimeSpan.FromSeconds(10));
 
             Assert.IsNotNull(receiver.Address, "Remote should have assigned the address for the dynamic receiver");
