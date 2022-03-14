@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client
 {

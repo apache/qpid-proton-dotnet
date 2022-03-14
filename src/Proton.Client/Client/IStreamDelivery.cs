@@ -80,8 +80,7 @@ namespace Apache.Qpid.Proton.Client
 
       IMessage<object> IDelivery.Message()
       {
-         // TODO
-         throw new InvalidOperationException("Cannot conert to base IMessage from stream receiver version");
+         throw new NotSupportedException("Must use the IStreamDelivery Message implementation directly");
       }
 
       IDelivery IDelivery.Modified(bool deliveryFailed, bool undeliverableHere)
