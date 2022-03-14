@@ -338,10 +338,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
-      internal void Disposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
+      internal Task<IDelivery> DispositionAsync(ClientDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
          CheckClosedOrFailed();
-         AsyncApplyDisposition(delivery, state, settle);
+         AsyncApplyDisposition(delivery.ProtonDelivery, state, settle);
+         return Task.FromResult((IDelivery)delivery);
       }
 
       internal String ReceiverId => receiverId;

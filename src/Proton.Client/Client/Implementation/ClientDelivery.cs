@@ -17,6 +17,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
@@ -105,38 +106,62 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IDelivery Disposition(IDeliveryState state, bool settled)
       {
-         receiver.Disposition(delivery, state?.AsProtonType(), settled);
-         return this;
+         return receiver.DispositionAsync(this, state?.AsProtonType(), settled).GetAwaiter().GetResult();
       }
 
       public IDelivery Settle()
       {
-         receiver.Disposition(delivery, null, true);
-         return this;
+         return receiver.DispositionAsync(this, null, true).GetAwaiter().GetResult();
       }
 
       public IDelivery Accept()
       {
-         receiver.Disposition(delivery, Accepted.Instance, true);
-         return this;
+         return receiver.DispositionAsync(this, Accepted.Instance, true).GetAwaiter().GetResult();
       }
 
       public IDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         receiver.Disposition(delivery, new Modified(deliveryFailed, undeliverableHere), true);
-         return this;
+         return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).GetAwaiter().GetResult();
       }
 
       public IDelivery Reject(string condition, string description)
       {
-         receiver.Disposition(delivery, new Rejected(new ErrorCondition(condition, description)), true);
-         return this;
+         return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).GetAwaiter().GetResult();
       }
 
       public IDelivery Release()
       {
-         receiver.Disposition(delivery, Released.Instance, true);
-         return this;
+         return receiver.DispositionAsync(this, Released.Instance, true).GetAwaiter().GetResult();
+      }
+
+      public Task<IDelivery> AcceptAsync()
+      {
+         return receiver.DispositionAsync(this, Accepted.Instance, true);
+      }
+
+      public Task<IDelivery> ReleaseAsync()
+      {
+         return receiver.DispositionAsync(this, Released.Instance, true);
+      }
+
+      public Task<IDelivery> RejectAsync(string condition, string description)
+      {
+         return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true);
+      }
+
+      public Task<IDelivery> ModifiedAsync(bool deliveryFailed, bool undeliverableHere)
+      {
+         return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true);
+      }
+
+      public Task<IDelivery> DispositionAsync(IDeliveryState state, bool settled)
+      {
+         return receiver.DispositionAsync(this, state?.AsProtonType(), settled);
+      }
+
+      public Task<IDelivery> SettleAsync()
+      {
+         return receiver.DispositionAsync(this, null, true);
       }
 
       #region Internal API for client objects

@@ -17,6 +17,7 @@
 
 using System.IO;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -79,10 +80,24 @@ namespace Apache.Qpid.Proton.Client
       IDelivery Accept();
 
       /// <summary>
+      /// Accepts and settles this delivery asynchronously ensuring that the call does not
+      /// block on any IO or other client operations.
+      /// </summary>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IDelivery> AcceptAsync();
+
+      /// <summary>
       /// Releases and settles this delivery.
       /// </summary>
       /// <returns>This delivery instance</returns>
       IDelivery Release();
+
+      /// <summary>
+      /// Releases and settles this delivery asynchronously ensuring that the call does not
+      /// block on any IO or other client operations.
+      /// </summary>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IDelivery> ReleaseAsync();
 
       /// <summary>
       /// Rejects the delivery with an ErrorCondition that contains the provided condition
@@ -94,12 +109,30 @@ namespace Apache.Qpid.Proton.Client
       IDelivery Reject(string condition, string description);
 
       /// <summary>
+      /// Asynchronously rejects the delivery with an ErrorCondition that contains the provided
+      /// condition and description information and settles.
+      /// </summary>
+      /// <param name="condition">The condition that defines this rejection error</param>
+      /// <param name="description">A description of the rejection cause.</param>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IDelivery> RejectAsync(string condition, string description);
+
+      /// <summary>
       /// Modifies and settles the delivery applying the failure and routing options.
       /// </summary>
       /// <param name="deliveryFailed">If the delivery failed on this receiver for some reason</param>
       /// <param name="undeliverableHere">If the delivery should not be routed back to this receiver.</param>
       /// <returns>This delivery instance</returns>
       IDelivery Modified(bool deliveryFailed, bool undeliverableHere);
+
+      /// <summary>
+      /// Modifies and settles the delivery asynchronously applying the failure and routing
+      /// options without any blocking due to IO or other client internal operations.
+      /// </summary>
+      /// <param name="deliveryFailed">If the delivery failed on this receiver for some reason</param>
+      /// <param name="undeliverableHere">If the delivery should not be routed back to this receiver.</param>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IDelivery> ModifiedAsync(bool deliveryFailed, bool undeliverableHere);
 
       /// <summary>
       /// Applies the given delivery state to the delivery if not already settled and
@@ -111,11 +144,28 @@ namespace Apache.Qpid.Proton.Client
       IDelivery Disposition(IDeliveryState state, bool settled);
 
       /// <summary>
+      /// Applies the given delivery state to the delivery if not already settled and
+      /// optionally settles it performing all IO and client work asynchronously
+      /// ensuring that any calls to this method do not block.
+      /// </summary>
+      /// <param name="state">delivery state to apply to this delivery</param>
+      /// <param name="settled">optionally settles the delivery</param>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IDelivery> DispositionAsync(IDeliveryState state, bool settled);
+
+      /// <summary>
       /// Settles the delivery with the remote which prevents any further delivery
       /// state updates.
       /// </summary>
       /// <returns>This delivery instance</returns>
       IDelivery Settle();
+
+      /// <summary>
+      /// Settles the delivery with the remote which prevents any further delivery
+      /// state updates asynchronously.
+      /// </summary>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IDelivery> SettleAsync();
 
       /// <summary>
       /// Returns true if this delivery has already been settled.

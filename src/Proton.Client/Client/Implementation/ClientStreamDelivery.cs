@@ -125,38 +125,62 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamDelivery Accept()
       {
-         receiver.Disposition(protonDelivery, Accepted.Instance, true);
-         return this;
+         return (IStreamDelivery)receiver.DispositionAsync(this, Accepted.Instance, true).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Disposition(IDeliveryState state, bool settled)
       {
-         receiver.Disposition(protonDelivery, state?.AsProtonType(), true);
-         return this;
+         return (IStreamDelivery)receiver.DispositionAsync(this, state?.AsProtonType(), true).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         receiver.Disposition(protonDelivery, new Modified(deliveryFailed, undeliverableHere), true);
-         return this;
+         return (IStreamDelivery)receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Reject(string condition, string description)
       {
-         receiver.Disposition(protonDelivery, new Rejected(new ErrorCondition(condition, description)), true);
-         return this;
+         return (IStreamDelivery)receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Release()
       {
-         receiver.Disposition(protonDelivery, Released.Instance, true);
-         return this;
+         return (IStreamDelivery)receiver.DispositionAsync(this, Released.Instance, true).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Settle()
       {
-         receiver.Disposition(protonDelivery, null, true);
-         return this;
+         return (IStreamDelivery)receiver.DispositionAsync(this, null, true).GetAwaiter().GetResult();
+      }
+
+      public Task<IDelivery> AcceptAsync()
+      {
+         return receiver.DispositionAsync(this, Accepted.Instance, true);
+      }
+
+      public Task<IDelivery> ReleaseAsync()
+      {
+         return receiver.DispositionAsync(this, Released.Instance, true);
+      }
+
+      public Task<IDelivery> RejectAsync(string condition, string description)
+      {
+         return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true);
+      }
+
+      public Task<IDelivery> ModifiedAsync(bool deliveryFailed, bool undeliverableHere)
+      {
+         return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true);
+      }
+
+      public Task<IDelivery> DispositionAsync(IDeliveryState state, bool settled)
+      {
+         return receiver.DispositionAsync(this, state?.AsProtonType(), true);
+      }
+
+      public Task<IDelivery> SettleAsync()
+      {
+         return receiver.DispositionAsync(this, null, true);
       }
 
       #region Internal Stream Delivery API
@@ -518,7 +542,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                   try
                   {
-                     receiver.Disposition(protonDelivery, Accepted.Instance, receiver.ReceiverOptions.AutoSettle);
+                     receiver.DispositionAsync(delivery, Accepted.Instance, receiver.ReceiverOptions.AutoSettle);
                   }
                   catch (Exception error)
                   {
