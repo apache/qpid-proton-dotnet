@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -28,6 +29,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientRedirect
    {
+      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientRedirect>();
+
       private readonly Dictionary<Symbol, object> redirect;
 
       internal ClientRedirect(IEnumerable<KeyValuePair<Symbol, object>> redirect)
@@ -61,7 +64,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new IOException("Redirection information contained invalid port.");
          }
 
-         // TODO LOG.trace("Redirect issued host and port as follows: {}:{}", networkHost, networkPort);
+         LOG.Trace("Redirect issued host and port as follows: {0}:{1}", networkHost, networkPort);
 
          return this;
       }

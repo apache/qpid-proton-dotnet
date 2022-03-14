@@ -17,12 +17,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Utilities
 {
    public sealed class ReconnectLocationPool
    {
-      private readonly LinkedList<ReconnectLocation> entries = new LinkedList<ReconnectLocation>();
+      private readonly ArrayDeque<ReconnectLocation> entries = new ArrayDeque<ReconnectLocation>();
 
       /// <summary>
       /// Create a default empty reconnect location pool
@@ -41,7 +43,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
          {
             foreach (ReconnectLocation item in locations)
             {
-               entries.AddLast(item);
+               entries.EnqueueBack(item);
             }
          }
       }
@@ -87,9 +89,8 @@ namespace Apache.Qpid.Proton.Client.Utilities
             {
                if (entries.Count > 0)
                {
-                  ReconnectLocation entry = entries.First.Value;
-                  entries.RemoveFirst();
-                  entries.AddLast(entry);
+                  ReconnectLocation entry = entries.Dequeue();
+                  entries.Enqueue(entry);
 
                   return entry;
                }
@@ -107,7 +108,23 @@ namespace Apache.Qpid.Proton.Client.Utilities
       {
          lock (entries)
          {
-            // TODO
+            Random rand = new Random();
+            int n = entries.Count;
+            ReconnectLocation[] pool = entries.ToArray();
+            entries.Clear();
+
+            while (n > 1)
+            {
+               int k = rand.Next(n--);
+               ReconnectLocation temp = pool[n];
+               pool[n] = pool[k];
+               pool[k] = temp;
+            }
+
+            foreach(ReconnectLocation location in pool)
+            {
+               entries.Enqueue(location);
+            }
          }
       }
 
@@ -122,7 +139,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
          {
             if (!entries.Contains(location))
             {
-               entries.AddLast(location);
+               entries.Enqueue(location);
             }
          }
 
@@ -142,7 +159,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
             {
                if (!entries.Contains(location))
                {
-                  entries.AddLast(location);
+                  entries.Enqueue(location);
                }
             }
          }
@@ -161,7 +178,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
          {
             if (!entries.Contains(location))
             {
-               entries.AddFirst(location);
+               entries.EnqueueFront(location);
             }
          }
 

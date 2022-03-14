@@ -23,7 +23,6 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   // TODO
    /// <summary>
    /// Conversion utilities useful for multiple client operations.
    /// </summary>

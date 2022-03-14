@@ -516,7 +516,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          if (connection.ConnectionState == ConnectionState.Active && !IsShutdown)
          {
             // Using nano time since it is not related to the wall clock, which may change
-            long now = 0; // TODO Tick TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+            long now = Environment.TickCount64;
 
             try
             {
