@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Client
 
       public bool Equals(ReconnectLocation other)
       {
-         return other.Host.Equals(Host) && other.Port == Port;
+         return Host.Equals(other.Host) && Port == other.Port;
       }
 
       public override bool Equals(object other)

@@ -353,7 +353,7 @@ namespace Apache.Qpid.Proton.Utilities
          {
             int range = count;
 
-            for (int i = head, j = 0; j < range; i = CircularAdvance(i, range))
+            for (int i = head, j = 0; j < range; i = CircularAdvance(i, range), j++)
             {
                if (elements[i]?.Equals(item) ?? false)
                {

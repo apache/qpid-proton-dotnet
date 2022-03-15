@@ -22,6 +22,7 @@ using NUnit.Framework;
 
 namespace Apache.Qpid.Proton.Client.Utilities
 {
+   [TestFixture]
    public class IdGeneratorTests
    {
       private IdGenerator generator;

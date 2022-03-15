@@ -428,6 +428,27 @@ namespace Apache.Qpid.Proton.Utilities
       }
 
       [Test]
+      public void TestRemoveSingularItemFromElementOneQueue()
+      {
+         IDeque<string> testQ = new ArrayDeque<string>();
+
+         testQ.Add("x");
+
+         Assert.IsTrue(testQ.Remove("x"));
+         Assert.IsFalse(testQ.Remove("x"));
+      }
+
+      [Test]
+      public void TestTryRemoveFromQueueWhenNotInQueue()
+      {
+         IDeque<string> testQ = new ArrayDeque<string>();
+
+         testQ.Add("y");
+
+         Assert.IsFalse(testQ.Remove("x"));
+      }
+
+      [Test]
       public void TestClearQueueAllInsertsAtFront()
       {
          IDeque<string> testQ = new ArrayDeque<string>();

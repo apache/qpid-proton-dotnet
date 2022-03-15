@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
                pool[k] = temp;
             }
 
-            foreach(ReconnectLocation location in pool)
+            foreach (ReconnectLocation location in pool)
             {
                entries.Enqueue(location);
             }
@@ -137,7 +137,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       {
          lock (entries)
          {
-            if (!entries.Contains(location))
+            if (!entries.Contains(location) && location != default(ReconnectLocation))
             {
                entries.Enqueue(location);
             }
@@ -153,13 +153,16 @@ namespace Apache.Qpid.Proton.Client.Utilities
       /// <returns>This reconnect locations pool</returns>
       public ReconnectLocationPool AddAll(IEnumerable<ReconnectLocation> locations)
       {
-         lock (entries)
+         if (locations != null)
          {
-            foreach (ReconnectLocation location in locations)
+            lock (entries)
             {
-               if (!entries.Contains(location))
+               foreach (ReconnectLocation location in locations)
                {
-                  entries.Enqueue(location);
+                  if (!entries.Contains(location) && location != default(ReconnectLocation))
+                  {
+                     entries.Enqueue(location);
+                  }
                }
             }
          }
@@ -176,7 +179,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       {
          lock (entries)
          {
-            if (!entries.Contains(location))
+            if (!entries.Contains(location) && location != default(ReconnectLocation))
             {
                entries.EnqueueFront(location);
             }
@@ -204,7 +207,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       /// </summary>
       /// <param name="location">The location to remove</param>
       /// <returns>This reconnection location pool instance</returns>
-      public ReconnectLocationPool RemoveAll(ReconnectLocation location)
+      public ReconnectLocationPool RemoveAll()
       {
          lock (entries)
          {
@@ -212,6 +215,20 @@ namespace Apache.Qpid.Proton.Client.Utilities
          }
 
          return this;
+      }
+
+      /// <summary>
+      /// Removes all currently configured ReconnectLocation values from the pool and replaces them with
+      /// the new set given.
+      /// </summary>
+      /// <param name="replacements">The new set of ReconnectLocation values to serve from this pool</param>
+      public void ReplaceAll(IEnumerable<ReconnectLocation> replacements)
+      {
+         lock (entries)
+         {
+            entries.Clear();
+            AddAll(replacements);
+         }
       }
 
       /// <summary>
