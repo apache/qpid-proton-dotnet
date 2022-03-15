@@ -173,12 +173,24 @@ namespace Apache.Qpid.Proton.Client.Transport
             channel.Bind(new IPEndPoint(localAddress, localPort));
          }
 
+         ConfigureSocket(channel);
+
          channel.BeginConnect(remote, port, new AsyncCallback(ConnectCallback), this);
 
          this.host = host;
          this.port = port;
 
          return this;
+      }
+
+      internal void ConfigureSocket(Socket socket)
+      {
+         socket.NoDelay = options.TcpNoDelay;
+         socket.SendBufferSize = options.SendBufferSize;
+         socket.ReceiveBufferSize = options.ReceiveBufferSize;
+         socket.LingerState = new LingerOption(options.SoLinger > 0, (int)options.SoLinger);
+         socket.SendTimeout = (int)options.SendTimeout;
+         socket.ReceiveTimeout = (int)options.ReceiveTimeout;
       }
 
       public ITransport TransportConnectedHandler(Action<ITransport> connectedHandler)

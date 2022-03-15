@@ -26,12 +26,10 @@ namespace Apache.Qpid.Proton.Client
    {
       public static readonly int DEFAULT_SEND_BUFFER_SIZE = 64 * 1024;
       public static readonly int DEFAULT_RECEIVE_BUFFER_SIZE = DEFAULT_SEND_BUFFER_SIZE;
-      public static readonly int DEFAULT_TRAFFIC_CLASS = 0;
       public static readonly bool DEFAULT_TCP_NO_DELAY = true;
       public static readonly bool DEFAULT_TCP_KEEP_ALIVE = false;
-      public static readonly int DEFAULT_SO_LINGER = Int32.MinValue;
-      public static readonly int DEFAULT_SO_TIMEOUT = -1;
-      public static readonly int DEFAULT_CONNECT_TIMEOUT = 60000;
+      public static readonly uint DEFAULT_SO_LINGER = UInt32.MinValue;
+      public static readonly uint DEFAULT_SO_TIMEOUT = 0;
       public static readonly int DEFAULT_TCP_PORT = 5672;
       public static readonly int DEFAULT_LOCAL_PORT = 0;
       public static readonly bool DEFAULT_USE_WEBSOCKETS = false;
@@ -70,6 +68,12 @@ namespace Apache.Qpid.Proton.Client
          other.LocalAddress = LocalAddress;
          other.LocalPort = LocalPort;
          other.TraceBytes = TraceBytes;
+         other.TcpNoDelay = TcpNoDelay;
+         other.SendBufferSize = SendBufferSize;
+         other.ReceiveBufferSize = ReceiveBufferSize;
+         other.SoLinger = SoLinger;
+         other.SendTimeout = SendTimeout;
+         other.ReceiveTimeout = ReceiveTimeout;
 
          return this;
       }
@@ -102,6 +106,40 @@ namespace Apache.Qpid.Proton.Client
       /// in a large amount of additional logging noise.
       /// </summary>
       public bool TraceBytes { get; set; } = DEFAULT_TRACE_BYTES;
+
+      /// <summary>
+      /// Configures whether the TCP_NO_DELAY options is set on the created
+      /// TCP connection (defaults to true).
+      /// </summary>
+      public bool TcpNoDelay { get; set; } = DEFAULT_TCP_NO_DELAY;
+
+      /// <summary>
+      /// Configures the send buffer size for the underlying transport.
+      /// </summary>
+      public int SendBufferSize { get; set; } = DEFAULT_SEND_BUFFER_SIZE;
+
+      /// <summary>
+      /// Configures the receive buffer size for the underlying transport.
+      /// </summary>
+      public int ReceiveBufferSize { get; set; } = DEFAULT_RECEIVE_BUFFER_SIZE;
+
+      /// <summary>
+      /// Configures the linger value applied to the underlying transport which by
+      /// default is disabled.
+      /// </summary>
+      public uint SoLinger { get; set; } = DEFAULT_SO_LINGER;
+
+      /// <summary>
+      /// Configures the transport level send timeout value which by default is set
+      /// to infinite wait.
+      /// </summary>
+      public uint SendTimeout { get; set; } = DEFAULT_SO_TIMEOUT;
+
+      /// <summary>
+      /// Configures the transport level receive timeout value which by default is set
+      /// to infinite wait.
+      /// </summary>
+      public uint ReceiveTimeout { get; set; } = DEFAULT_SO_TIMEOUT;
 
    }
 }
