@@ -763,6 +763,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // normal connection shutdown processing.
             engine.ShutdownHandler(null);
 
+            // Disable any AMQP Idle processing as we are disconnected
+            idleTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+
             LOG.Info("Connection {0} interrupted to server: {1}", ConnectionId, transport.EndPoint);
             SubmitDisconnectionEvent(options.InterruptedHandler, transport.Host, transport.Port, failureCause);
 
@@ -983,18 +986,23 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void DoEngineTickAndReschedule()
       {
-         long localTime = Environment.TickCount64;
-         long nextTickDeadline = engine.Tick(Environment.TickCount64);
-         if (nextTickDeadline > 0)
+         // Prevent a tick that was queued on the event loop from occuring if the
+         // connection dropped and a new engine was created for a reconnect attempt.
+         if (engine.Connection.IsRemotelyOpen && engine.Connection.IsLocallyOpen)
          {
-            idleTimer.Change(nextTickDeadline - localTime, Timeout.Infinite);
-         }
-         else
-         {
-            // Not strictly necessary but calls out that we are not going
-            // to do any more idle processing since neither side seems to
-            // have asked for any.
-            idleTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            long localTime = Environment.TickCount64;
+            long nextTickDeadline = engine.Tick(Environment.TickCount64);
+            if (nextTickDeadline > 0)
+            {
+               idleTimer.Change(nextTickDeadline - localTime, Timeout.Infinite);
+            }
+            else
+            {
+               // Not strictly necessary but calls out that we are not going
+               // to do any more idle processing since neither side seems to
+               // have asked for any.
+               idleTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
          }
       }
 
