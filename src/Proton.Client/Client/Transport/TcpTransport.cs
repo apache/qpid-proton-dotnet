@@ -310,8 +310,15 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private void CompleteConnection()
       {
-         socketReader = new BufferedStream(new NetworkStream(channel), channel.ReceiveBufferSize);
-         socketWriter = new BufferedStream(new NetworkStream(channel), channel.SendBufferSize);
+         Stream netStream = new NetworkStream(channel);
+
+         if (sslOptions.SslEnabled)
+         {
+            netStream = PerformTlsHandshake(channel, netStream);
+         }
+
+         socketReader = new BufferedStream(netStream, channel.ReceiveBufferSize);
+         socketWriter = new BufferedStream(netStream, channel.SendBufferSize);
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
@@ -394,6 +401,15 @@ namespace Apache.Qpid.Proton.Client.Transport
                task.Execute();
             }
          }
+      }
+
+      #endregion
+
+      #region TLS handshaking API
+
+      private Stream PerformTlsHandshake(Socket channel, Stream networkStream)
+      {
+         throw new NotImplementedException("SSL Support not yet implemented");
       }
 
       #endregion
