@@ -125,32 +125,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamDelivery Accept()
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, Accepted.Instance, true).GetAwaiter().GetResult();
+         return (IStreamDelivery)receiver.DispositionAsync(this, Accepted.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Disposition(IDeliveryState state, bool settled)
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, state?.AsProtonType(), true).GetAwaiter().GetResult();
+         return (IStreamDelivery)receiver.DispositionAsync(this, state?.AsProtonType(), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).GetAwaiter().GetResult();
+         return (IStreamDelivery)receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Reject(string condition, string description)
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).GetAwaiter().GetResult();
+         return (IStreamDelivery)receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Release()
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, Released.Instance, true).GetAwaiter().GetResult();
+         return (IStreamDelivery)receiver.DispositionAsync(this, Released.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Settle()
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, null, true).GetAwaiter().GetResult();
+         return (IStreamDelivery)receiver.DispositionAsync(this, null, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IDelivery> AcceptAsync()
@@ -265,7 +265,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                         request.TrySetResult((int)buffer.WriteOffset);
                      });
 
-                     return connection.Request(receiver, request).Task.GetAwaiter().GetResult();
+                     return connection.Request(receiver, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
                   }
                   catch (Exception e)
                   {
@@ -320,7 +320,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      closeRequest.TrySetResult(true);
                   });
 
-                  connection.Request(receiver, closeRequest).Task.GetAwaiter().GetResult();
+                  connection.Request(receiver, closeRequest).Task.ConfigureAwait(false).GetAwaiter().GetResult();
                }
                catch (Exception error)
                {
@@ -524,7 +524,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                });
 
-               return connection.Request(receiver, request).Task.GetAwaiter().GetResult();
+               return connection.Request(receiver, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {

@@ -114,7 +114,7 @@ namespace Apache.Qpid.Proton.Client.Transport
                   termination.Execute();
                }
                channelOutputSource?.TryComplete();
-               termination.Completion.GetAwaiter().GetResult();
+               termination.Completion.ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception)
             {

@@ -116,7 +116,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          try
          {
-            DoCloseAsync(error).GetAwaiter().GetResult();
+            DoCloseAsync(error).ConfigureAwait(false).GetAwaiter().GetResult();
          }
          catch (Exception)
          {
@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISender DefaultSender()
       {
-         return DefaultSenderAsync().GetAwaiter().GetResult();
+         return DefaultSenderAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
       }
 
@@ -169,7 +169,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession DefaultSession()
       {
-         return DefaultSessionAsync().GetAwaiter().GetResult();
+         return DefaultSessionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISession> DefaultSessionAsync()
@@ -195,7 +195,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession OpenSession(SessionOptions options = null)
       {
-         return OpenSessionAsync(options).GetAwaiter().GetResult();
+         return OpenSessionAsync(options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISession> OpenSessionAsync(SessionOptions options = null)
@@ -221,7 +221,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
-         return OpenDurableReceiverAsync(address, subscriptionName, options).GetAwaiter().GetResult();
+         return OpenDurableReceiverAsync(address, subscriptionName, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IReceiver> OpenDurableReceiverAsync(string address, string subscriptionName, ReceiverOptions options = null)
@@ -248,7 +248,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
-         return OpenDynamicReceiverAsync(options, dynamicNodeProperties).GetAwaiter().GetResult();
+         return OpenDynamicReceiverAsync(options, dynamicNodeProperties).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
@@ -274,7 +274,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
-         return OpenReceiverAsync(address, options).GetAwaiter().GetResult();
+         return OpenReceiverAsync(address, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IReceiver> OpenReceiverAsync(string address, ReceiverOptions options = null)
@@ -301,7 +301,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISender OpenAnonymousSender(SenderOptions options = null)
       {
-         return OpenAnonymousSenderAsync(options).GetAwaiter().GetResult();
+         return OpenAnonymousSenderAsync(options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
@@ -327,7 +327,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISender OpenSender(string address, SenderOptions options = null)
       {
-         return OpenSenderAsync(address, options).GetAwaiter().GetResult();
+         return OpenSenderAsync(address, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISender> OpenSenderAsync(string address, SenderOptions options = null)
@@ -354,7 +354,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options = null)
       {
-         return OpenStreamReceiverAsync(address, options).GetAwaiter().GetResult();
+         return OpenStreamReceiverAsync(address, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IStreamReceiver> OpenStreamReceiverAsync(string address, StreamReceiverOptions options = null)
@@ -392,7 +392,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamSender OpenStreamSender(string address, StreamSenderOptions options = null)
       {
-         return OpenStreamSenderAsync(address, options).GetAwaiter().GetResult();
+         return OpenStreamSenderAsync(address, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IStreamSender> OpenStreamSenderAsync(string address, StreamSenderOptions options = null)
@@ -432,7 +432,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ITracker Send<T>(IMessage<T> message)
       {
-         return SendAsync(message).GetAwaiter().GetResult();
+         return SendAsync(message).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ITracker> SendAsync<T>(IMessage<T> message)
@@ -842,7 +842,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   ///      before dropping the connection. We should probably schedule
                   ///      a task that closes the connection and completes the close
                   ///      future if the remote hasn't responded by then.
-                  closeFuture.Task.GetAwaiter().GetResult();
+                  closeFuture.Task.ConfigureAwait(false).GetAwaiter().GetResult();
                }
                catch (Exception)
                {
@@ -959,7 +959,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             try
             {
-               openFuture.Task.GetAwaiter().GetResult();
+               openFuture.Task.ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {

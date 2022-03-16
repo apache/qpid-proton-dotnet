@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          try
          {
-            CloseAsync().GetAwaiter().GetResult();
+            CloseAsync().ConfigureAwait(false).GetAwaiter().GetResult();
          }
          catch (Exception)
          {

@@ -178,7 +178,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return session.Request(this, creditAdded).Task.GetAwaiter().GetResult();
+         return session.Request(this, creditAdded).Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IReceiver> DrainAsync()
@@ -320,7 +320,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return session.Request(this, receive).Task.GetAwaiter().GetResult();
+         return session.Request(this, receive).Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       #region Internal Receiver API

@@ -122,13 +122,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       {
          if (closed.CompareAndSet(false, true))
          {
-            Task.Delay(20).GetAwaiter().GetResult();
+            Task.Delay(20).ConfigureAwait(false).GetAwaiter().GetResult();
 
             try
             {
                // Stop additional writes but wait for queued writes to complete.
                channelOutputSource?.TryComplete();
-               writeLoop?.GetAwaiter().GetResult();
+               writeLoop?.ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception)
             {

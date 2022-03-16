@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return ClientSession.Request(this, request).Task.GetAwaiter().GetResult();
+         return ClientSession.Request(this, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       internal IStreamTracker DoStreamMessage(ClientStreamSenderMessage context, IProtonBuffer buffer, uint messageFormat)
@@ -108,7 +108,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return (IStreamTracker)ClientSession.Request(this, request).Task.GetAwaiter().GetResult();
+         return (IStreamTracker)ClientSession.Request(this, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       internal override ITracker CreateTracker(IOutgoingDelivery delivery)
@@ -162,7 +162,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         ClientSession.Request(this, request).Task.GetAwaiter().GetResult();
+         ClientSession.Request(this, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       internal void Complete(IOutgoingDelivery protonDelivery, ClientStreamTracker tracker)
@@ -201,7 +201,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         ClientSession.Request(this, request).Task.GetAwaiter().GetResult();
+         ClientSession.Request(this, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
    }
 }

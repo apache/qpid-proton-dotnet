@@ -106,32 +106,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IDelivery Disposition(IDeliveryState state, bool settled)
       {
-         return receiver.DispositionAsync(this, state?.AsProtonType(), settled).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, state?.AsProtonType(), settled).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IDelivery Settle()
       {
-         return receiver.DispositionAsync(this, null, true).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, null, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IDelivery Accept()
       {
-         return receiver.DispositionAsync(this, Accepted.Instance, true).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, Accepted.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IDelivery Reject(string condition, string description)
       {
-         return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IDelivery Release()
       {
-         return receiver.DispositionAsync(this, Released.Instance, true).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, Released.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<IDelivery> AcceptAsync()

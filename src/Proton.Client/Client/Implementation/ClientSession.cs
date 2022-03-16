@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
       {
-         return OpenDurableReceiverAsync(address, subscriptionName, options).GetAwaiter().GetResult();
+         return OpenDurableReceiverAsync(address, subscriptionName, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public virtual Task<IReceiver> OpenDurableReceiverAsync(string address, string subscriptionName, ReceiverOptions options = null)
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
-         return OpenDynamicReceiverAsync(options, dynamicNodeProperties).GetAwaiter().GetResult();
+         return OpenDynamicReceiverAsync(options, dynamicNodeProperties).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public virtual Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
@@ -176,7 +176,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual IReceiver OpenReceiver(string address, ReceiverOptions options = null)
       {
-         return OpenReceiverAsync(address, options).GetAwaiter().GetResult();
+         return OpenReceiverAsync(address, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public virtual Task<IReceiver> OpenReceiverAsync(string address, ReceiverOptions options = null)
@@ -204,7 +204,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual ISender OpenAnonymousSender(SenderOptions options = null)
       {
-         return OpenAnonymousSenderAsync(options).GetAwaiter().GetResult();
+         return OpenAnonymousSenderAsync(options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public virtual Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
@@ -230,7 +230,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public virtual ISender OpenSender(string address, SenderOptions options = null)
       {
-         return OpenSenderAsync(address, options).GetAwaiter().GetResult();
+         return OpenSenderAsync(address, options).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public virtual Task<ISender> OpenSenderAsync(string address, SenderOptions options = null)
@@ -258,7 +258,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession BeginTransaction()
       {
-         return BeginTransactionAsync().GetAwaiter().GetResult();
+         return BeginTransactionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISession> BeginTransactionAsync()
@@ -288,7 +288,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession CommitTransaction()
       {
-         return CommitTransactionAsync().GetAwaiter().GetResult();
+         return CommitTransactionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISession> CommitTransactionAsync()
@@ -314,7 +314,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession RollbackTransaction()
       {
-         return RollbackTransactionAsync().GetAwaiter().GetResult();
+         return RollbackTransactionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public Task<ISession> RollbackTransactionAsync()
