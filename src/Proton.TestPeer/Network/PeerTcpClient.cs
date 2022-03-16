@@ -186,8 +186,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             throw;
          }
 
-         streamReader = new NetworkStream(clientSocket);
-         streamWriter = new NetworkStream(clientSocket);
+         streamReader = new BufferedStream(new NetworkStream(clientSocket), clientSocket.ReceiveBufferSize);
+         streamWriter = new BufferedStream(new NetworkStream(clientSocket), clientSocket.SendBufferSize);
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);

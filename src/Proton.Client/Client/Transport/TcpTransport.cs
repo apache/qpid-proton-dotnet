@@ -310,8 +310,8 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private void CompleteConnection()
       {
-         socketReader = new NetworkStream(channel);
-         socketWriter = new NetworkStream(channel);
+         socketReader = new BufferedStream(new NetworkStream(channel), channel.ReceiveBufferSize);
+         socketWriter = new BufferedStream(new NetworkStream(channel), channel.SendBufferSize);
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);
