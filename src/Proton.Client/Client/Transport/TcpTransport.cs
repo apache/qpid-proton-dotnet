@@ -18,7 +18,9 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -409,7 +411,49 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private Stream PerformTlsHandshake(Socket channel, Stream networkStream)
       {
-         throw new NotImplementedException("SSL Support not yet implemented");
+         SslStream sslStream = new SslStream(networkStream, false, HandleRemoteCertificateValidation, HandleLocalCertificateSelection);
+
+         SslClientAuthenticationOptions clientSslOptions = new SslClientAuthenticationOptions();
+
+         sslStream.AuthenticateAsClient(
+            sslOptions.SelectServerName(host), null, sslOptions.TlsVersionOverride, sslOptions.EnableCertificateRevocationChecks);
+
+         return sslStream;
+      }
+
+      public bool HandleRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+      {
+         if (sslOptions.RemoteValidationCallbackOverride != null)
+         {
+            return sslOptions.RemoteValidationCallbackOverride(sender, certificate, chain, sslPolicyErrors);
+         }
+         else
+         {
+            if (sslPolicyErrors == SslPolicyErrors.None)
+            {
+               return true;
+            }
+            else if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && !sslOptions.VerifyHost)
+            {
+               return true;
+            }
+            else
+            {
+               return false;
+            }
+         }
+      }
+
+      public X509Certificate HandleLocalCertificateSelection(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+      {
+         if (sslOptions.LocalCertificateSelectionOverride != null)
+         {
+            return sslOptions.LocalCertificateSelectionOverride(sender, targetHost, localCertificates, remoteCertificate, acceptableIssuers);
+         }
+         else
+         {
+            return null;
+         }
       }
 
       #endregion

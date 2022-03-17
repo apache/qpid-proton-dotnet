@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Client
          other.SslEnabled = SslEnabled;
          other.VerifyHost = VerifyHost;
          other.EnableCertificateRevocationChecks = EnableCertificateRevocationChecks;
-         other.CommonNameOverride = CommonNameOverride;
+         other.ServerNameOverride = ServerNameOverride;
          other.RemoteValidationCallbackOverride = RemoteValidationCallbackOverride;
          other.LocalCertificateSelectionOverride = LocalCertificateSelectionOverride;
          other.TlsVersionOverride = TlsVersionOverride;
@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Client
       /// servers certificate instead of using the value provided in the connection address.
       /// This option is only used when the verify host option is enabled.
       /// </summary>
-      public string CommonNameOverride { get; set; } = null;
+      public string ServerNameOverride { get; set; } = null;
 
       /// <summary>
       /// Controls if the client will enable the system's certificate revocation checking
