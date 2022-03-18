@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private Socket serverListener;
       private AtomicBoolean closed = new AtomicBoolean();
 
-      private Action<PeerTcpClient> clientConnectedHandler;
+      private Action<PeerTcpTransport> clientConnectedHandler;
       private Action<PeerTcpServer, Exception> serverFailedHandler;
 
       private ILoggerFactory loggerFactory;
@@ -82,7 +82,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          {
             serverListener.BeginAccept(new AsyncCallback(NewTcpClientConnection), this);
          }
-         catch(Exception ex)
+         catch (Exception ex)
          {
             logger.LogWarning(ex, "Peer TCP Server failed on begin accept : {0}", ex.Message);
          }
@@ -99,7 +99,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             {
                serverListener.Shutdown(SocketShutdown.Both);
             }
-            catch(Exception)
+            catch (Exception)
             {
             }
 
@@ -107,13 +107,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             {
                serverListener.Close(1);
             }
-            catch(Exception)
+            catch (Exception)
             {
             }
          }
       }
 
-      public PeerTcpServer ClientConnectedHandler(Action<PeerTcpClient> clientConnectedHandler)
+      public PeerTcpServer ClientConnectedHandler(Action<PeerTcpTransport> clientConnectedHandler)
       {
          this.clientConnectedHandler = clientConnectedHandler;
          return this;
@@ -135,8 +135,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
             server.logger.LogInformation("Peer Tcp Server accepted new connection: {0}", client.RemoteEndPoint);
 
+            // TODO - SSL server authentication
+
             // Signal that the client has connected and is ready for scripted action.
-            server.clientConnectedHandler(new PeerTcpClient(server.loggerFactory, client));
+            server.clientConnectedHandler(
+               new PeerTcpTransport(server.loggerFactory, PeerTransportRole.Server, client, new NetworkStream(client)));
          }
          catch (SocketException sockEx)
          {
@@ -149,7 +152,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
                   server.serverFailedHandler(server, sockEx);
                }
                catch (Exception)
-               {}
+               { }
             }
          }
          catch (Exception ex)
@@ -171,8 +174,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             {
                server.Stop(); // Only accept one connection.
             }
-            catch(Exception)
-            {}
+            catch (Exception)
+            { }
          }
       }
    }

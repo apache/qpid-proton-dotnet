@@ -24,6 +24,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    {
       private static readonly int SERVER_CHOOSES_PORT = 0;
 
+      public static readonly bool DEFAULT_NEEDS_CLIENT_AUTH = false;
       public static readonly int DEFAULT_SERVER_PORT = SERVER_CHOOSES_PORT;
 
       /// <summary>
@@ -35,5 +36,30 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       public int ServerPort { get; set; } = DEFAULT_SERVER_PORT;
 
+      /// <summary>
+      /// When true the server requires that the client provides a known trusted
+      /// certificate in order to authenticate.
+      /// </summary>
+      public bool NeedClientAuth { get; set; } = DEFAULT_NEEDS_CLIENT_AUTH;
+
+      /// <summary>
+      /// Configures the certificate used when the server sends its certificate
+      /// to the connecting client.
+      /// </summary>
+      public string ServerCertificatePath
+      {
+         get { return CertificatePath; }
+         set { CertificatePath = value; }
+      }
+
+      /// <summary>
+      /// Configures the certificate password used to unlock the server
+      /// certificate when performing the TLS handshake with the client.
+      /// </summary>
+      public string ServerCertificatePassword
+      {
+         get { return CertificatePassword; }
+         set { CertificatePassword = value; }
+      }
    }
 }

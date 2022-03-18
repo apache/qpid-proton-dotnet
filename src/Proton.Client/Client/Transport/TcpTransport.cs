@@ -319,8 +319,8 @@ namespace Apache.Qpid.Proton.Client.Transport
             netStream = PerformTlsHandshake(channel, netStream);
          }
 
-         socketReader = new BufferedStream(netStream, channel.ReceiveBufferSize);
-         socketWriter = new BufferedStream(netStream, channel.SendBufferSize);
+         socketReader = netStream;
+         socketWriter = netStream;
 
          readLoop = Task.Factory.StartNew(ChannelReadLoop, TaskCreationOptions.LongRunning);
          writeLoop = Task.Factory.StartNew(ChannelWriteLoop, TaskCreationOptions.LongRunning);

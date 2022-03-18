@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Apache.Qpid.Proton.Test.Driver
 {
@@ -27,7 +28,6 @@ namespace Apache.Qpid.Proton.Test.Driver
    {
       public static readonly int DEFAULT_SEND_BUFFER_SIZE = 64 * 1024;
       public static readonly int DEFAULT_RECEIVE_BUFFER_SIZE = DEFAULT_SEND_BUFFER_SIZE;
-      public static readonly int DEFAULT_TRAFFIC_CLASS = 0;
       public static readonly bool DEFAULT_TCP_NO_DELAY = true;
       public static readonly bool DEFAULT_TCP_KEEP_ALIVE = false;
       public static readonly int DEFAULT_SO_LINGER = int.MinValue;
@@ -36,17 +36,20 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly string DEFAULT_CONTEXT_PROTOCOL = "TLS";
       public static readonly bool DEFAULT_TRUST_ALL = false;
       public static readonly bool DEFAULT_VERIFY_HOST = true;
+      public static readonly bool DEFAULT_CHECK_CERT_REVOCATION = false;
       public static readonly int DEFAULT_LOCAL_PORT = 0;
       public static readonly bool DEFAULT_USE_WEBSOCKETS = false;
       public static readonly bool DEFAULT_FRAGMENT_WEBSOCKET_WRITES = false;
       public static readonly bool DEFAULT_SECURE_SERVER = false;
-      public static readonly bool DEFAULT_NEEDS_CLIENT_AUTH = false;
+
+      /// <summary>
+      /// Used by either client or server for TLS handshake
+      /// </summary>
+      private X509CertificateCollection certificateCollection;
 
       public int SendBufferSize { get; set; } = DEFAULT_SEND_BUFFER_SIZE;
 
       public int ReceiveBufferSize { get; set; } = DEFAULT_RECEIVE_BUFFER_SIZE;
-
-      public int TrafficClass { get; set; } = DEFAULT_TRAFFIC_CLASS;
 
       public int SoTimeout { get; set; } = DEFAULT_SO_TIMEOUT;
 
@@ -66,9 +69,57 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public bool FragmentWebSocketWrites { get; set; } = DEFAULT_FRAGMENT_WEBSOCKET_WRITES;
 
+      /// <summary>
+      /// Should TLS host verification occur during the TLS handshake
+      /// </summary>
+      public bool VerifyHost { get; set; } = DEFAULT_VERIFY_HOST;
+
+      /// <summary>
+      /// Should the TLS handshake perform a check for certificate revocation.
+      /// </summary>
+      public bool CheckForCertificateRevocation { get; set; } = DEFAULT_CHECK_CERT_REVOCATION;
+
       public virtual object Clone()
       {
          return base.MemberwiseClone();
       }
+
+      #region Internal API used by subclasses
+
+      /// <summary>
+      /// Called from the client ond server options to present a collection
+      /// to store server trusted certificates or client certificates for
+      /// selection during TLS handshake.
+      /// </summary>
+      protected X509CertificateCollection CertificateCollection
+      {
+         get
+         {
+            X509CertificateCollection result = certificateCollection;
+
+            if (result == null && !string.IsNullOrEmpty(CertificatePath))
+            {
+               result = new X509CertificateCollection();
+               result.Add(new X509Certificate2(CertificatePath, CertificatePassword));
+            }
+
+            return result;
+         }
+         set { certificateCollection = value; }
+      }
+
+      /// <summary>
+      /// Call from the client and server options to present a location for the
+      /// server certificate or the client certificate
+      /// </summary>
+      protected string CertificatePath { get; set; }
+
+      /// <summary>
+      /// Call from the client and server options to present a password used
+      /// to access the client or server certificate.
+      /// </summary>
+      protected string CertificatePassword { get; set; }
+
+      #endregion
    }
 }

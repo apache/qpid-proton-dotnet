@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly ProtonTestServerOptions options;
       private readonly PeerTcpServer server;
 
-      private PeerTcpClient client;
+      private PeerTcpTransport transport;
 
       private ILoggerFactory loggerFactory;
       private ILogger<ProtonTestServer> logger;
@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public int ServerPort => server.ListeningOnPort;
 
-      public int ClientPort => client.RemoteEndpoint.Port;
+      public int ClientPort => transport.RemoteEndpoint.Port;
 
       public void Start()
       {
@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       protected override void ProcessCloseRequest()
       {
          server.Stop();
-         client?.Close();
+         transport?.Close();
       }
 
       protected override void ProcessConnectionEstablished()
@@ -94,7 +94,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       protected override void ProcessDriverOutput(Stream output)
       {
-         client.Write(output);
+         transport.Write(output);
       }
 
       private void ProcessDriverAssertion(Exception error)
@@ -106,14 +106,14 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       #region TCP Server event handlers
 
-      private void HandleClientConnected(PeerTcpClient client)
+      private void HandleClientConnected(PeerTcpTransport transport)
       {
-         // Configure the client
-         client.TransportDisconnectedHandler(DisconnectedHandler);
-         client.TransportReadHandler(ClientReadHandler);
+         this.transport = transport;
 
-         this.client = client;
-         this.client.Start();
+         // Configure the client
+         this.transport.TransportDisconnectedHandler(this.DisconnectedHandler);
+         this.transport.TransportReadHandler(this.ClientReadHandler);
+         this.transport.Start();
 
          ProcessConnectionEstablished();
       }
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       #region Connected TCP Client event handlers
 
-      private void DisconnectedHandler(PeerTcpClient client)
+      private void DisconnectedHandler(PeerTcpTransport transport)
       {
          if (!closed)
          {
@@ -137,7 +137,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          Close();
       }
 
-      private void ClientReadHandler(PeerTcpClient client, byte[] buffer)
+      private void ClientReadHandler(PeerTcpTransport transport, byte[] buffer)
       {
          if (!closed)
          {

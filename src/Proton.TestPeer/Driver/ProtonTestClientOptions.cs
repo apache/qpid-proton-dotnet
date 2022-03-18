@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace Apache.Qpid.Proton.Test.Driver
 {
    /// <summary>
@@ -22,5 +24,30 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public sealed class ProtonTestClientOptions : ProtonNetworkPeerOptions
    {
+      /// <summary>
+      /// A Collection of certificates used to select from when performing
+      /// the TLS handshake with the remote.
+      /// </summary>
+      public X509CertificateCollection ClientCertificates { get; set; }
+
+      /// <summary>
+      /// Configures the certificate used when the server requests client
+      /// authentication via a client certificate.
+      /// </summary>
+      public string ClientCertificatePath
+      {
+         get { return CertificatePath; }
+         set { CertificatePath = value; }
+      }
+
+      /// <summary>
+      /// Configures the certificate password used to unlock the client
+      /// certificate when doing client authentication.
+      /// </summary>
+      public string ClientCertificatePassword
+      {
+         get { return CertificatePassword; }
+         set { CertificatePassword = value; }
+      }
    }
 }

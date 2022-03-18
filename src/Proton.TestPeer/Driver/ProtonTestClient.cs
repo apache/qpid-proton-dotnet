@@ -35,6 +35,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly ProtonTestClientOptions options;
       private readonly PeerTcpClient client;
 
+      private PeerTcpTransport transport;
+
       private ILoggerFactory loggerFactory;
       private ILogger<ProtonTestClient> logger;
 
@@ -48,10 +50,6 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
          this.logger = loggerFactory.CreateLogger<ProtonTestClient>();
          this.client = new PeerTcpClient(this.loggerFactory);
-         this.client.TransportConnectedHandler(HandleClientConnected);
-         this.client.TransportConnectFailedHandler(HandleClientConnectFailed);
-         this.client.TransportDisconnectedHandler(HandleClientDisconnected);
-         this.client.TransportReadHandler(HandleClientRead);
          this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, loggerFactory);
       }
 
@@ -64,7 +62,13 @@ namespace Apache.Qpid.Proton.Test.Driver
       public void Connect(string addres, int port)
       {
          CheckClosed();
-         client.Connect(addres, port);
+
+         transport = client.Connect(addres, port);
+         transport.TransportConnectedHandler(HandleClientConnected);
+         transport.TransportConnectFailedHandler(HandleClientConnectFailed);
+         transport.TransportDisconnectedHandler(HandleClientDisconnected);
+         transport.TransportReadHandler(HandleClientRead);
+         transport.Start();
       }
 
       public void Close()
@@ -78,7 +82,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       protected override void ProcessCloseRequest()
       {
-         client?.Close();
+         transport?.Close();
       }
 
       protected override void ProcessConnectionEstablished()
@@ -90,7 +94,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       protected override void ProcessDriverOutput(Stream output)
       {
          logger.LogTrace("AMQP Client Channel writing: {0} bytes", output.Length);
-         client.Write(output);
+         transport.Write(output);
       }
 
       private void ProcessDriverAssertion(Exception error)
@@ -101,22 +105,22 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       #region TCP Client handler methods
 
-      private void HandleClientConnected(PeerTcpClient client)
+      private void HandleClientConnected(PeerTcpTransport transport)
       {
          ProcessConnectionEstablished();
       }
 
-      private void HandleClientConnectFailed(PeerTcpClient client, Exception exception)
+      private void HandleClientConnectFailed(PeerTcpTransport transport, Exception exception)
       {
          driver.SignalFailure(exception);
       }
 
-      private void HandleClientDisconnected(PeerTcpClient client)
+      private void HandleClientDisconnected(PeerTcpTransport transport)
       {
          logger.LogTrace("Client connection failed before channel closed");
       }
 
-      private void HandleClientRead(PeerTcpClient client, byte[] buffer)
+      private void HandleClientRead(PeerTcpTransport transport, byte[] buffer)
       {
          logger.LogTrace("AMQP Test Client Channel processing: {0} bytes", buffer.Length);
          driver.Ingest(new MemoryStream(buffer));
