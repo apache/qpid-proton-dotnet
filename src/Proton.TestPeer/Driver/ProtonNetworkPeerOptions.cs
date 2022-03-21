@@ -30,8 +30,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly int DEFAULT_RECEIVE_BUFFER_SIZE = DEFAULT_SEND_BUFFER_SIZE;
       public static readonly bool DEFAULT_TCP_NO_DELAY = true;
       public static readonly bool DEFAULT_TCP_KEEP_ALIVE = false;
-      public static readonly int DEFAULT_SO_LINGER = int.MinValue;
-      public static readonly int DEFAULT_SO_TIMEOUT = -1;
+      public static readonly uint DEFAULT_SO_LINGER = UInt32.MinValue;
+      public static readonly uint DEFAULT_SO_TIMEOUT = 0;
       public static readonly bool DEFAULT_TRACE_BYTES = false;
       public static readonly string DEFAULT_CONTEXT_PROTOCOL = "TLS";
       public static readonly bool DEFAULT_TRUST_ALL = false;
@@ -51,9 +51,11 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public int ReceiveBufferSize { get; set; } = DEFAULT_RECEIVE_BUFFER_SIZE;
 
-      public int SoTimeout { get; set; } = DEFAULT_SO_TIMEOUT;
+      public uint SendTimeout { get; set; } = DEFAULT_SO_TIMEOUT;
 
-      public int SoLinger { get; set; } = DEFAULT_SO_LINGER;
+      public uint ReceiveTimeout { get; set; } = DEFAULT_SO_TIMEOUT;
+
+      public uint SoLinger { get; set; } = DEFAULT_SO_LINGER;
 
       public bool TcpKeepAlive { get; set; } = DEFAULT_TCP_KEEP_ALIVE;
 

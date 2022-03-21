@@ -27,14 +27,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
    {
       private readonly ILoggerFactory loggerFactory;
       private readonly ILogger<PeerTcpClient> logger;
+      private readonly ProtonTestClientOptions options;
 
       /// <summary>
       /// Create a new peer Tcp client instance that can be used to connect to a remote.
       /// </summary>
-      public PeerTcpClient(in ILoggerFactory loggerFactory)
+      public PeerTcpClient(ProtonTestClientOptions options, in ILoggerFactory loggerFactory)
       {
          this.loggerFactory = loggerFactory;
-         this.logger = loggerFactory.CreateLogger<PeerTcpClient>();
+         this.logger = loggerFactory?.CreateLogger<PeerTcpClient>();
+         this.options = options;
       }
 
       public PeerTcpTransport Connect(IPEndPoint endpoint)
@@ -46,6 +48,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          try
          {
             clientSocket.Connect(endpoint);
+
+            // Configure socket options from configuration options
+            clientSocket.SendBufferSize = options.SendBufferSize;
+            clientSocket.ReceiveBufferSize = options.ReceiveBufferSize;
+            clientSocket.NoDelay = options.TcpNoDelay;
+            clientSocket.LingerState = new LingerOption(options.SoLinger > 0, (int)options.SoLinger);
+            clientSocket.SendTimeout = (int)options.SendTimeout;
+            clientSocket.ReceiveTimeout = (int)options.ReceiveTimeout;
          }
          catch (Exception)
          {

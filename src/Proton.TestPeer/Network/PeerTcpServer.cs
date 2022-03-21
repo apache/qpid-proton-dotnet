@@ -35,17 +35,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private Action<PeerTcpTransport> clientConnectedHandler;
       private Action<PeerTcpServer, Exception> serverFailedHandler;
 
-      private ILoggerFactory loggerFactory;
-      private ILogger<PeerTcpServer> logger;
+      private readonly ILoggerFactory loggerFactory;
+      private readonly ILogger<PeerTcpServer> logger;
+      private readonly ProtonTestServerOptions options;
 
       private string listenAddress;
       private int listenPort;
       private IPEndPoint listenEndpoint;
 
-      public PeerTcpServer(in ILoggerFactory loggerFactory)
+      public PeerTcpServer(ProtonTestServerOptions options, in ILoggerFactory loggerFactory)
       {
          this.loggerFactory = loggerFactory;
-         this.logger = loggerFactory.CreateLogger<PeerTcpServer>();
+         this.logger = loggerFactory?.CreateLogger<PeerTcpServer>();
+         this.options = options;
 
          IPEndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 0);
          serverListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -134,6 +136,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             Socket client = server.serverListener.EndAccept(result);
 
             server.logger.LogInformation("Peer Tcp Server accepted new connection: {0}", client.RemoteEndPoint);
+
+            client.SendBufferSize = server.options.SendBufferSize;
+            client.ReceiveBufferSize = server.options.ReceiveBufferSize;
+            client.NoDelay = server.options.TcpNoDelay;
+            client.LingerState = new LingerOption(server.options.SoLinger > 0, (int)server.options.SoLinger);
+            client.SendTimeout = (int)server.options.SendTimeout;
+            client.ReceiveTimeout = (int)server.options.ReceiveTimeout;
 
             // TODO - SSL server authentication
 

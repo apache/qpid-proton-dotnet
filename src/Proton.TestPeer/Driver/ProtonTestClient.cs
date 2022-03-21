@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          this.options = options;
          this.loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
          this.logger = loggerFactory.CreateLogger<ProtonTestClient>();
-         this.client = new PeerTcpClient(this.loggerFactory);
+         this.client = new PeerTcpClient(options, this.loggerFactory);
          this.driver = new AMQPTestDriver(PeerName, ProcessDriverOutput, ProcessDriverAssertion, loggerFactory);
       }
 
