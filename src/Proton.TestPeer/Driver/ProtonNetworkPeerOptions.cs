@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Apache.Qpid.Proton.Test.Driver
@@ -40,12 +41,15 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly int DEFAULT_LOCAL_PORT = 0;
       public static readonly bool DEFAULT_USE_WEBSOCKETS = false;
       public static readonly bool DEFAULT_FRAGMENT_WEBSOCKET_WRITES = false;
-      public static readonly bool DEFAULT_SECURE_SERVER = false;
+      public static readonly bool DEFAULT_SSL_ENABLED = false;
+      public static readonly SslProtocols DEFAULT_SSL_PROTOCOLS = SslProtocols.None;
 
       /// <summary>
       /// Used by either client or server for TLS handshake
       /// </summary>
       private X509CertificateCollection certificateCollection;
+
+      public bool SslEnabled { get; set; } = DEFAULT_SSL_ENABLED;
 
       public int SendBufferSize { get; set; } = DEFAULT_SEND_BUFFER_SIZE;
 
@@ -80,6 +84,12 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// Should the TLS handshake perform a check for certificate revocation.
       /// </summary>
       public bool CheckForCertificateRevocation { get; set; } = DEFAULT_CHECK_CERT_REVOCATION;
+
+      /// <summary>
+      /// Configures the SSL protocol value to provide for the TLS handshake which by
+      /// default allows the underlying SSL layer to choose the best version.
+      /// </summary>
+      public SslProtocols SslProtocol { get; set; } = DEFAULT_SSL_PROTOCOLS;
 
       public virtual object Clone()
       {

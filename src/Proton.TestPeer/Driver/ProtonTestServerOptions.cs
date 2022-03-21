@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace Apache.Qpid.Proton.Test.Driver
 {
    /// <summary>
@@ -26,6 +28,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public static readonly bool DEFAULT_NEEDS_CLIENT_AUTH = false;
       public static readonly int DEFAULT_SERVER_PORT = SERVER_CHOOSES_PORT;
+
+      private X509Certificate serverCertificate;
 
       /// <summary>
       /// The port that the test peer server will listen on for an incoming
@@ -41,6 +45,28 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// certificate in order to authenticate.
       /// </summary>
       public bool NeedClientAuth { get; set; } = DEFAULT_NEEDS_CLIENT_AUTH;
+
+      /// <summary>
+      /// Returns the configured server certificate which has either been set
+      /// programmatically, or is loaded from a configured path and accessed
+      /// using the configured password.
+      /// </summary>
+      public X509Certificate ServerCertificate
+      {
+         get
+         {
+            X509Certificate certificate = serverCertificate;
+
+            if (serverCertificate == null && !string.IsNullOrEmpty(CertificatePath))
+            {
+               certificate = new X509Certificate(CertificatePath, CertificatePassword);
+            }
+
+            return certificate;
+         }
+
+         set { serverCertificate = value; }
+      }
 
       /// <summary>
       /// Configures the certificate used when the server sends its certificate

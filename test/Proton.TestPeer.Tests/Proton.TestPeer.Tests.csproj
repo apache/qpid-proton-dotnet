@@ -33,6 +33,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Certificates\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Proton.TestPeer\Proton.TestPeer.csproj" />
   </ItemGroup>
 

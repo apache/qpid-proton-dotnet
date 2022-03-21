@@ -16,8 +16,11 @@
  */
 
 using System;
+using System.IO;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using Apache.Qpid.Proton.Test.Driver.Utilities;
 using Microsoft.Extensions.Logging;
 
@@ -29,6 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private readonly ILogger<PeerTcpClient> logger;
       private readonly ProtonTestClientOptions options;
 
+      private string address;
+
       /// <summary>
       /// Create a new peer Tcp client instance that can be used to connect to a remote.
       /// </summary>
@@ -37,6 +42,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          this.loggerFactory = loggerFactory;
          this.logger = loggerFactory?.CreateLogger<PeerTcpClient>();
          this.options = options;
+      }
+
+      public PeerTcpTransport Connect(string address, int port)
+      {
+         this.address = address;
+
+         IPHostEntry entry = Dns.GetHostEntry(address);
+         foreach (IPAddress ipAddress in entry.AddressList)
+         {
+            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+            {
+               return Connect(new IPEndPoint(ipAddress, port));
+            }
+         }
+
+         throw new InvalidOperationException("Could not resolve the address into an IPV4 IP Address");
       }
 
       public PeerTcpTransport Connect(IPEndPoint endpoint)
@@ -69,23 +90,40 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             throw;
          }
 
-         // TODO - SSL client authentication
+         Stream ioStream = new NetworkStream(clientSocket);
+         if (options.SslEnabled)
+         {
+            ioStream = AuthenticateAsClient(ioStream);
+         }
 
          return new PeerTcpTransport(loggerFactory, PeerTransportRole.Client, clientSocket, new NetworkStream(clientSocket));
       }
 
-      public PeerTcpTransport Connect(string address, int port)
+      private Stream AuthenticateAsClient(Stream ioStream)
       {
-         IPHostEntry entry = Dns.GetHostEntry(address);
-         foreach (IPAddress ipAddress in entry.AddressList)
+         SslStream sslStream = new SslStream(ioStream,
+                                             false,
+                                             RemoteCertificateValidationCallback,
+                                             LocalCertificateSelectionCallback);
+
+         sslStream.AuthenticateAsClient(address, options.ClientCertificates, options.CheckForCertificateRevocation);
+
+         return sslStream;
+      }
+
+      public bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+      {
+         if (sslPolicyErrors != SslPolicyErrors.None)
          {
-            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
-            {
-               return Connect(new IPEndPoint(ipAddress, port));
-            }
+            return false; // TODO options to ignore some errors
          }
 
-         throw new InvalidOperationException("Could not resolve the address into an IPV4 IP Address");
+         return true;
+      }
+
+      public X509Certificate LocalCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+      {
+         return null;
       }
    }
 }

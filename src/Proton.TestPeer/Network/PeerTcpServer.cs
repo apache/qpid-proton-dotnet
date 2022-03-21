@@ -20,6 +20,9 @@ using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using Apache.Qpid.Proton.Test.Driver.Utilities;
+using System.IO;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Apache.Qpid.Proton.Test.Driver.Network
 {
@@ -127,6 +130,28 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          return this;
       }
 
+      private Stream AuthenticateAsSslServer(Stream ioStream)
+      {
+         SslStream sslStream = new SslStream(ioStream, true, RemoteCertificateValidationCallback, null);
+
+         sslStream.AuthenticateAsServer(options.ServerCertificate,
+                                        options.NeedClientAuth,
+                                        options.SslProtocol,
+                                        options.CheckForCertificateRevocation);
+
+         return sslStream;
+      }
+
+      private bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+      {
+         if (sslPolicyErrors != SslPolicyErrors.None)
+         {
+            // TODO checks if the errors are allowed
+         }
+
+         return true;
+      }
+
       private static void NewTcpClientConnection(IAsyncResult result)
       {
          PeerTcpServer server = (PeerTcpServer)result.AsyncState;
@@ -144,11 +169,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             client.SendTimeout = (int)server.options.SendTimeout;
             client.ReceiveTimeout = (int)server.options.ReceiveTimeout;
 
-            // TODO - SSL server authentication
+            Stream ioStream = new NetworkStream(client);
+
+            if (server.options.SslEnabled)
+            {
+               ioStream = server.AuthenticateAsSslServer(ioStream);
+            }
 
             // Signal that the client has connected and is ready for scripted action.
             server.clientConnectedHandler(
-               new PeerTcpTransport(server.loggerFactory, PeerTransportRole.Server, client, new NetworkStream(client)));
+               new PeerTcpTransport(server.loggerFactory, PeerTransportRole.Server, client, ioStream));
          }
          catch (SocketException sockEx)
          {
