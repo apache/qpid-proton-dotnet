@@ -96,7 +96,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             ioStream = AuthenticateAsClient(ioStream);
          }
 
-         return new PeerTcpTransport(loggerFactory, PeerTransportRole.Client, clientSocket, new NetworkStream(clientSocket));
+         return new PeerTcpTransport(loggerFactory, PeerTransportRole.Client, clientSocket, ioStream);
       }
 
       private Stream AuthenticateAsClient(Stream ioStream)
@@ -111,19 +111,72 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          return sslStream;
       }
 
-      public bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+      private bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
       {
-         if (sslPolicyErrors != SslPolicyErrors.None)
+         if (sslPolicyErrors == SslPolicyErrors.None)
          {
-            return false; // TODO options to ignore some errors
+            return true;
          }
 
-         return true;
+         bool validated = true;
+
+         bool remoteCertificateNotAvailable = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable);
+         bool remoteCertificateNameMismatch = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch);
+         bool remoteCertificateChainErrors = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors);
+
+         if (remoteCertificateNotAvailable &&
+             !options.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable))
+         {
+            logger.LogTrace("Server certificate authentication failed due lack of provided certificate: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (remoteCertificateChainErrors &&
+             !options.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors))
+         {
+            logger.LogTrace("Server certificate authentication failed due certificate chain error: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (remoteCertificateNameMismatch && options.VerifyHost &&
+             !options.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch))
+         {
+            logger.LogTrace("Server certificate authentication failed due remote certificate name mismatch: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (!validated)
+         {
+            logger.LogDebug("Server authentication had SSL policy error(s): {0}", sslPolicyErrors);
+         }
+
+         return validated;
       }
 
       public X509Certificate LocalCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
       {
-         return null;
+         X509Certificate result = null;
+
+         if (acceptableIssuers != null && acceptableIssuers.Length > 0 &&
+             localCertificates != null && localCertificates.Count > 0)
+         {
+            foreach (X509Certificate certificate in localCertificates)
+            {
+               string issuer = certificate.Issuer;
+               if (Array.IndexOf(acceptableIssuers, issuer) != -1)
+               {
+                  result = certificate;
+                  break;
+               }
+            }
+         }
+
+         if (result == null && localCertificates != null && localCertificates.Count > 0)
+         {
+            result = localCertificates[0];
+         }
+
+         return result;
       }
    }
 }

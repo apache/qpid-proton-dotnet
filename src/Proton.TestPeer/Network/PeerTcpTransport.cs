@@ -196,10 +196,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             try
             {
                int bytesRead = streamReader.Read(readBuffer, 0, readBuffer.Length);
-               if (bytesRead == readBuffer.Length)
-               {
-                  logger.LogTrace("Read a chunk");
-               }
+
                if (bytesRead == 0)
                {
                   _ = channelOutputSource.TryComplete();

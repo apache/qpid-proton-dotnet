@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 
@@ -25,7 +26,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// Base options class for common options that can be configured for test
    /// peer implementations that operate over a network connection.
    /// </summary>
-   public abstract class ProtonNetworkPeerOptions : ICloneable
+   public abstract class ProtonPeerNetworkOptions : ICloneable
    {
       public static readonly int DEFAULT_SEND_BUFFER_SIZE = 64 * 1024;
       public static readonly int DEFAULT_RECEIVE_BUFFER_SIZE = DEFAULT_SEND_BUFFER_SIZE;
@@ -43,6 +44,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly bool DEFAULT_FRAGMENT_WEBSOCKET_WRITES = false;
       public static readonly bool DEFAULT_SSL_ENABLED = false;
       public static readonly SslProtocols DEFAULT_SSL_PROTOCOLS = SslProtocols.None;
+      public static readonly SslPolicyErrors DEFAULT_ALLOWED_SSL_POLICY_ERRORS = SslPolicyErrors.None;
 
       /// <summary>
       /// Used by either client or server for TLS handshake
@@ -90,6 +92,12 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// default allows the underlying SSL layer to choose the best version.
       /// </summary>
       public SslProtocols SslProtocol { get; set; } = DEFAULT_SSL_PROTOCOLS;
+
+      /// <summary>
+      /// Override which allows the peer to ignore some SSL policy errors when validating
+      /// the outcome of the SSL handshake.
+      /// </summary>
+      public SslPolicyErrors AllowedSslPolicyErrorsOverride { get; set; } = DEFAULT_ALLOWED_SSL_POLICY_ERRORS;
 
       public virtual object Clone()
       {

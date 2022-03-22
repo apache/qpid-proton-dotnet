@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// <summary>
    /// Provides options for the proton TCP test client
    /// </summary>
-   public sealed class ProtonTestServerOptions : ProtonNetworkPeerOptions
+   public sealed class ProtonTestServerOptions : ProtonPeerNetworkOptions
    {
       private static readonly int SERVER_CHOOSES_PORT = 0;
 
@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
             if (serverCertificate == null && !string.IsNullOrEmpty(CertificatePath))
             {
-               certificate = new X509Certificate(CertificatePath, CertificatePassword);
+               certificate = new X509Certificate2(CertificatePath, CertificatePassword);
             }
 
             return certificate;

@@ -118,6 +118,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private void HandleClientDisconnected(PeerTcpTransport transport)
       {
          logger.LogTrace("Client connection failed before channel closed");
+         driver.SignalFailure(new IOException("Connection to remote dropped"));
       }
 
       private void HandleClientRead(PeerTcpTransport transport, byte[] buffer)

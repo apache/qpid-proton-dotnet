@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// <summary>
    /// Provides options for the proton TCP test client
    /// </summary>
-   public sealed class ProtonTestClientOptions : ProtonNetworkPeerOptions
+   public sealed class ProtonTestClientOptions : ProtonPeerNetworkOptions
    {
       /// <summary>
       /// A Collection of certificates used to select from when performing

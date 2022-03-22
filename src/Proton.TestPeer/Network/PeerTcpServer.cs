@@ -144,12 +144,44 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       private bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
       {
-         if (sslPolicyErrors != SslPolicyErrors.None)
+         if (sslPolicyErrors == SslPolicyErrors.None)
          {
-            // TODO checks if the errors are allowed
+            return true;
          }
 
-         return true;
+         bool validated = true;
+
+         bool remoteCertificateNotAvailable = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable);
+         bool remoteCertificateNameMismatch = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch);
+         bool remoteCertificateChainErrors = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors);
+
+         if (remoteCertificateNotAvailable && options.NeedClientAuth &&
+               !options.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable))
+         {
+            logger.LogTrace("Client certificate authentication failed due lack of provided certificate: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (remoteCertificateChainErrors &&
+               !options.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors))
+         {
+            logger.LogTrace("Client certificate authentication failed due certificate chain error: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (remoteCertificateNameMismatch && options.VerifyHost &&
+               !options.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch))
+         {
+            logger.LogTrace("Client certificate authentication failed due remote certificate name mismatch: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (!validated)
+         {
+            logger.LogDebug("Client certificate authentication had SSL policy error(s): {0}", sslPolicyErrors);
+         }
+
+         return validated;
       }
 
       private static void NewTcpClientConnection(IAsyncResult result)
@@ -173,7 +205,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
             if (server.options.SslEnabled)
             {
-               ioStream = server.AuthenticateAsSslServer(ioStream);
+               try
+               {
+                  ioStream = server.AuthenticateAsSslServer(ioStream);
+               }
+               catch (Exception ex)
+               {
+                  server.logger.LogWarning(ex, "Server SSL Authentication failed: {0}", ex.Message);
+                  client.Close();
+                  throw;
+               }
             }
 
             // Signal that the client has connected and is ready for scripted action.
@@ -185,7 +226,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
             if (!server.closed)
             {
                server.logger.LogWarning(sockEx, "Server accept failed: {0}, SocketErrorCode:{1}",
-                                       sockEx.Message, sockEx.SocketErrorCode);
+                                        sockEx.Message, sockEx.SocketErrorCode);
                try
                {
                   server.serverFailedHandler(server, sockEx);
