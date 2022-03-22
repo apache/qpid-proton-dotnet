@@ -28,7 +28,11 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// A Collection of certificates used to select from when performing
       /// the TLS handshake with the remote.
       /// </summary>
-      public X509CertificateCollection ClientCertificates { get; set; }
+      public X509CertificateCollection ClientCertificates
+      {
+         get { return CertificateCollection; }
+         set { CertificateCollection = value; }
+      }
 
       /// <summary>
       /// Configures the certificate used when the server requests client

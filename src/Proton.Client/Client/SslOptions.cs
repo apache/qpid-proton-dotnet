@@ -17,6 +17,7 @@
 
 using System.Net.Security;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -28,6 +29,8 @@ namespace Apache.Qpid.Proton.Client
       public static readonly bool DEFAULT_ENABLED_CERT_REVOCATION_CHECKS = false;
       public static readonly bool DEFAULT_VERIFY_HOST = true;
       public static readonly int DEFAULT_SSL_PORT = 5671;
+
+      private X509CertificateCollection certificateCollection;
 
       /// <summary>
       /// Creates a default SSL options instance.
@@ -65,6 +68,14 @@ namespace Apache.Qpid.Proton.Client
          other.RemoteValidationCallbackOverride = RemoteValidationCallbackOverride;
          other.LocalCertificateSelectionOverride = LocalCertificateSelectionOverride;
          other.TlsVersionOverride = TlsVersionOverride;
+         other.AllowedSslPolicyErrorsOverride = AllowedSslPolicyErrorsOverride;
+         other.ClientCertificatePath = ClientCertificatePath;
+         other.ClientCertificatePassword = ClientCertificatePassword;
+
+         if (certificateCollection != null)
+         {
+            other.certificateCollection = new X509CertificateCollection(certificateCollection);
+         }
 
          return this;
       }
@@ -108,6 +119,13 @@ namespace Apache.Qpid.Proton.Client
       public SslProtocols TlsVersionOverride { get; set; } = SslProtocols.None;
 
       /// <summary>
+      /// Provides a means of overrideing the default allowable SSL policy errors when validating
+      /// the server certificate during the TLS handshake. By default no errors are allowed and
+      /// any that do occur will fail the TLS handshake.
+      /// </summary>
+      public SslPolicyErrors AllowedSslPolicyErrorsOverride { get; set; } = SslPolicyErrors.None;
+
+      /// <summary>
       /// Allows the user to provide an optional remote certificate validation callback which
       /// can be used by advanced users who want to customize the validation step of the TLS
       /// handshake process instead of relying on the built in mechanism.
@@ -120,6 +138,41 @@ namespace Apache.Qpid.Proton.Client
       /// the client certificate to provide to the remote during the TLS handshake.
       /// </summary>
       public LocalCertificateSelectionCallback LocalCertificateSelectionOverride { get; set; } = null;
+
+      /// <summary>
+      /// Provides a collection of client certificates which will be used when the TLS handshake
+      /// is performed wherein a single certificate will be selected.  This collection takes
+      /// precedence over any set certificate path however if no collection is provided a call
+      /// to get this collection will attempt to load a certificate from the configure certificate
+      /// path if set and return a collection containing the loaded value.
+      /// </summary>
+      public X509CertificateCollection ClientCertificateCollection
+      {
+         get
+         {
+            X509CertificateCollection result = certificateCollection;
+
+            if (result == null && !string.IsNullOrEmpty(ClientCertificatePath))
+            {
+               result = new X509CertificateCollection();
+               result.Add(new X509Certificate2(ClientCertificatePath, ClientCertificatePassword));
+            }
+
+            return result;
+         }
+         set { certificateCollection = value; }
+      }
+
+      /// <summary>
+      /// Provides a system path where a client certificate can be read and supplied for
+      /// use when performing the TLS handshake.
+      /// </summary>
+      public string ClientCertificatePath { get; set; }
+
+      /// <summary>
+      /// Configures the password used when attempting to load the certificate file specified.
+      /// </summary>
+      public string ClientCertificatePassword { get; set; }
 
    }
 }

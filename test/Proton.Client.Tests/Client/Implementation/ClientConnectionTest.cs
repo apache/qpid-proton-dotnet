@@ -167,7 +167,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IClient container = IClient.Create();
             ConnectionOptions options = ConnectionOptions("guest", "guest");
-            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
 
             _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
             _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));

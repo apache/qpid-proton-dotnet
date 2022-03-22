@@ -416,7 +416,10 @@ namespace Apache.Qpid.Proton.Client.Transport
          SslClientAuthenticationOptions clientSslOptions = new SslClientAuthenticationOptions();
 
          sslStream.AuthenticateAsClient(
-            sslOptions.SelectServerName(host), null, sslOptions.TlsVersionOverride, sslOptions.EnableCertificateRevocationChecks);
+            sslOptions.SelectServerName(host),
+            sslOptions.ClientCertificateCollection,
+            sslOptions.TlsVersionOverride,
+            sslOptions.EnableCertificateRevocationChecks);
 
          return sslStream;
       }
@@ -427,21 +430,45 @@ namespace Apache.Qpid.Proton.Client.Transport
          {
             return sslOptions.RemoteValidationCallbackOverride(sender, certificate, chain, sslPolicyErrors);
          }
-         else
+
+         if (sslPolicyErrors == SslPolicyErrors.None)
          {
-            if (sslPolicyErrors == SslPolicyErrors.None)
-            {
-               return true;
-            }
-            else if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateNameMismatch && !sslOptions.VerifyHost)
-            {
-               return true;
-            }
-            else
-            {
-               return false;
-            }
+            return true;
          }
+
+         bool validated = true;
+
+         bool remoteCertificateNotAvailable = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable);
+         bool remoteCertificateNameMismatch = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch);
+         bool remoteCertificateChainErrors = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors);
+
+         if (remoteCertificateNotAvailable &&
+             !sslOptions.TlsVersionOverride.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable))
+         {
+            LOG.Trace("Server certificate authentication failed due lack of provided certificate: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (remoteCertificateChainErrors &&
+             !sslOptions.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors))
+         {
+            LOG.Trace("Server certificate authentication failed due certificate chain error: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (remoteCertificateNameMismatch && sslOptions.VerifyHost &&
+             !sslOptions.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateNameMismatch))
+         {
+            LOG.Trace("Server certificate authentication failed due remote certificate name mismatch: {0}", sslPolicyErrors);
+            validated = false;
+         }
+
+         if (!validated)
+         {
+            LOG.Debug("Server authentication had SSL policy error(s): {0}", sslPolicyErrors);
+         }
+
+         return validated;
       }
 
       public X509Certificate HandleLocalCertificateSelection(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
@@ -452,7 +479,28 @@ namespace Apache.Qpid.Proton.Client.Transport
          }
          else
          {
-            return null;
+            X509Certificate result = null;
+
+            if (acceptableIssuers != null && acceptableIssuers.Length > 0 &&
+                localCertificates != null && localCertificates.Count > 0)
+            {
+               foreach (X509Certificate certificate in localCertificates)
+               {
+                  string issuer = certificate.Issuer;
+                  if (Array.IndexOf(acceptableIssuers, issuer) != -1)
+                  {
+                     result = certificate;
+                     break;
+                  }
+               }
+            }
+
+            if (result == null && localCertificates != null && localCertificates.Count > 0)
+            {
+               result = localCertificates[0];
+            }
+
+            return result;
          }
       }
 
