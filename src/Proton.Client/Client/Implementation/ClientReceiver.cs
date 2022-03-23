@@ -172,7 +172,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return session.Request(this, creditAdded).Task.ConfigureAwait(false).GetAwaiter().GetResult();
+         return creditAdded.Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public void Close(IErrorCondition error = null)

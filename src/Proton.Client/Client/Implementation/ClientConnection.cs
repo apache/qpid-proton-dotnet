@@ -164,7 +164,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, defaultSender).Task;
+         return defaultSender.Task;
       }
 
       public ISession DefaultSession()
@@ -190,7 +190,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, defaultSession).Task;
+         return defaultSession.Task;
       }
 
       public ISession OpenSession(SessionOptions options = null)
@@ -216,7 +216,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSession).Task;
+         return createSession.Task;
       }
 
       public IReceiver OpenDurableReceiver(string address, string subscriptionName, ReceiverOptions options = null)
@@ -243,7 +243,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
@@ -269,7 +269,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public IReceiver OpenReceiver(string address, ReceiverOptions options = null)
@@ -296,7 +296,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public ISender OpenAnonymousSender(SenderOptions options = null)
@@ -322,7 +322,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSender).Task;
+         return createSender.Task;
       }
 
       public ISender OpenSender(string address, SenderOptions options = null)
@@ -349,7 +349,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSender).Task;
+         return createSender.Task;
       }
 
       public IStreamReceiver OpenStreamReceiver(string address, StreamReceiverOptions options = null)
@@ -387,7 +387,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public IStreamSender OpenStreamSender(string address, StreamSenderOptions options = null)
@@ -427,7 +427,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, createSender).Task;
+         return createSender.Task;
       }
 
       public ITracker Send<T>(IMessage<T> message)
@@ -471,7 +471,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return Request(this, result).Task;
+         return result.Task;
       }
 
       public override string ToString()
@@ -550,12 +550,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          // TODO: Either add scheduling to event loop or handle timeouts here somehow
          Task.Delay(delay).ContinueWith((t) => Execute(action));
-      }
-
-      internal TaskCompletionSource<T> Request<T>(Object requestor, TaskCompletionSource<T> request)
-      {
-         // TODO : Wait for completion or fail later via tracking map
-         return request;
       }
 
       #endregion

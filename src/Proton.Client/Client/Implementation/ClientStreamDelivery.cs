@@ -265,7 +265,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                         request.TrySetResult((int)buffer.WriteOffset);
                      });
 
-                     return connection.Request(receiver, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
+                     return request.Task.ConfigureAwait(false).GetAwaiter().GetResult();
                   }
                   catch (Exception e)
                   {
@@ -320,7 +320,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      closeRequest.TrySetResult(true);
                   });
 
-                  connection.Request(receiver, closeRequest).Task.ConfigureAwait(false).GetAwaiter().GetResult();
+                  closeRequest.Task.ConfigureAwait(false).GetAwaiter().GetResult();
                }
                catch (Exception error)
                {
@@ -524,7 +524,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                });
 
-               return connection.Request(receiver, request).Task.ConfigureAwait(false).GetAwaiter().GetResult();
+               return request.Task.ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {

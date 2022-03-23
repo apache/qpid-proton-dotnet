@@ -339,7 +339,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return ClientSession.Request(this, operation).Task;
+         return operation.Task;
       }
 
       protected void CheckClosedOrFailed()

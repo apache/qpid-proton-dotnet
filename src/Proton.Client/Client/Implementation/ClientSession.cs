@@ -145,7 +145,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public virtual IReceiver OpenDynamicReceiver(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
@@ -171,7 +171,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public virtual IReceiver OpenReceiver(string address, ReceiverOptions options = null)
@@ -199,7 +199,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createReceiver).Task;
+         return createReceiver.Task;
       }
 
       public virtual ISender OpenAnonymousSender(SenderOptions options = null)
@@ -225,7 +225,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createSender).Task;
+         return createSender.Task;
       }
 
       public virtual ISender OpenSender(string address, SenderOptions options = null)
@@ -253,7 +253,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, createSender).Task;
+         return createSender.Task;
       }
 
       public ISession BeginTransaction()
@@ -283,7 +283,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, beginFuture).Task;
+         return beginFuture.Task;
       }
 
       public ISession CommitTransaction()
@@ -309,7 +309,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, commitFuture).Task;
+         return commitFuture.Task;
       }
 
       public ISession RollbackTransaction()
@@ -335,7 +335,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return connection.Request(this, rollbackFuture).Task;
+         return rollbackFuture.Task;
       }
 
       #region Internal client session API
@@ -397,11 +397,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             // TODO return null;
          }
-      }
-
-      internal TaskCompletionSource<T> Request<T>(Object requestor, TaskCompletionSource<T> request)
-      {
-         return connection.Request(requestor, request);
       }
 
       internal ClientReceiver InternalOpenReceiver(string address, ReceiverOptions receiverOptions)
