@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Only when this receiver settles on its end are the outgoing delivery instances removed from
       /// the unsettled tracking.
       /// </summary>
-      IEnumerable<IIncomingDelivery> Unsettled { get; }
+      IReadOnlyCollection<IIncomingDelivery> Unsettled { get; }
 
       /// <summary>
       /// Returns true if the receiver link is tracking any unsettled sent deliveries.

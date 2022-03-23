@@ -22,7 +22,6 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
-using System.Linq;
 using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Client.Implementation
@@ -482,7 +481,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (currentCredit <= creditWindow * 0.5)
             {
                // TODO - The count on unsettled might be less efficient then an exposed collection Count
-               uint potentialPrefetch = (uint)(currentCredit + protonReceiver.Unsettled.Count());
+               uint potentialPrefetch = (uint)(currentCredit + protonReceiver.Unsettled.Count);
 
                if (potentialPrefetch <= creditWindow * 0.7)
                {
@@ -737,7 +736,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
          {
-            uint previousCredit = (uint)(protonReceiver.Credit + protonReceiver.Unsettled.Count());
+            uint previousCredit = (uint)(protonReceiver.Credit + protonReceiver.Unsettled.Count);
 
             if (drainingFuture != null)
             {

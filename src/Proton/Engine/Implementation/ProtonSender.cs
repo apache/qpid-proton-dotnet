@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public bool HasUnsettled => unsettled.Count > 0;
 
-      public IEnumerable<IOutgoingDelivery> Unsettled => new List<IOutgoingDelivery>(unsettled.Values);
+      public IReadOnlyCollection<IOutgoingDelivery> Unsettled => new List<IOutgoingDelivery>(unsettled.Values);
 
       public IDeliveryTagGenerator DeliveryTagGenerator
       {

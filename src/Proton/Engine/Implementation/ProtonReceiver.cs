@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public bool HasUnsettled => unsettled.Count > 0;
 
-      public IEnumerable<IIncomingDelivery> Unsettled => new List<IIncomingDelivery>(unsettled.Values);
+      public IReadOnlyCollection<IIncomingDelivery> Unsettled => new List<IIncomingDelivery>(unsettled.Values);
 
       public IReceiver AddCredit(uint amount)
       {
