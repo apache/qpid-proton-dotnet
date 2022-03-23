@@ -148,8 +148,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamReceiver AddCredit(uint credit)
       {
+         return (IStreamReceiver)AddCreditAsync(credit).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> AddCreditAsync(uint credit)
+      {
          CheckClosedOrFailed();
-         TaskCompletionSource<IStreamReceiver> creditAdded = new TaskCompletionSource<IStreamReceiver>();
+         TaskCompletionSource<IReceiver> creditAdded = new TaskCompletionSource<IReceiver>();
 
          session.Execute(() =>
          {
@@ -178,7 +183,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return creditAdded.Task.ConfigureAwait(false).GetAwaiter().GetResult();
+         return creditAdded.Task;
       }
 
       public Task<IReceiver> DrainAsync()

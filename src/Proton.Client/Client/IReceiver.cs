@@ -159,6 +159,20 @@ namespace Apache.Qpid.Proton.Client
       IReceiver AddCredit(uint credit);
 
       /// <summary>
+      /// Asynchronously Adds credit to the Receiver link for use when there receiver has not been
+      /// configured with with a credit window.  When credit window is configured credit replenishment
+      /// is automatic and calling this method will result in an exception indicating that the operation
+      /// is invalid.
+      ///
+      /// If the Receiver is draining and this method is called an exception will be thrown to
+      /// indicate that credit cannot be replenished until the remote has drained the existing link
+      /// credit.
+      /// </summary>
+      /// <param name="credit">The amount of new credit to add to the existing credit if any</param>
+      /// <returns>This receiver instance.</returns>
+      Task<IReceiver> AddCreditAsync(uint credit);
+
+      /// <summary>
       /// Blocking receive method that waits forever for the remote to provide a delivery for consumption.
       /// </summary>
       /// <remarks>

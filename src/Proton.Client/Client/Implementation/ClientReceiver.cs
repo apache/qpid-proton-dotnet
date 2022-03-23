@@ -142,6 +142,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IReceiver AddCredit(uint credit)
       {
+         return AddCreditAsync(credit).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> AddCreditAsync(uint credit)
+      {
          CheckClosedOrFailed();
          TaskCompletionSource<IReceiver> creditAdded = new TaskCompletionSource<IReceiver>();
 
@@ -172,7 +177,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return creditAdded.Task.ConfigureAwait(false).GetAwaiter().GetResult();
+         return creditAdded.Task;
       }
 
       public void Close(IErrorCondition error = null)
