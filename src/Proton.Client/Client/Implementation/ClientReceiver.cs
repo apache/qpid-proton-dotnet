@@ -223,6 +223,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      public IReceiver Drain()
+      {
+         return DrainAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
       public Task<IReceiver> DrainAsync()
       {
          CheckClosedOrFailed();

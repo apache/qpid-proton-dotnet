@@ -186,6 +186,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return creditAdded.Task;
       }
 
+      public IStreamReceiver Drain()
+      {
+         return (IStreamReceiver)DrainAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
       public Task<IReceiver> DrainAsync()
       {
          CheckClosedOrFailed();

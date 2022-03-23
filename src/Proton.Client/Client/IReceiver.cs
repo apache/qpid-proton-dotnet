@@ -208,6 +208,16 @@ namespace Apache.Qpid.Proton.Client
       /// Requests the remote to drain previously granted credit for this receiver link.
       /// The remote will either send all available deliveries up to the currently granted
       /// link credit or will report it has none to send an link credit will be set to zero.
+      /// This method will block until the remote answers the drain request or the configured
+      /// drain timeout expires.
+      /// </summary>
+      /// <returns>This receiver instance once the remote reports drain completed</returns>
+      IReceiver Drain();
+
+      /// <summary>
+      /// Requests the remote to drain previously granted credit for this receiver link.
+      /// The remote will either send all available deliveries up to the currently granted
+      /// link credit or will report it has none to send an link credit will be set to zero.
       /// The caller can wait on the returned task which will be signalled either after the
       /// remote reports drained or once the configured drain timeout is reached.
       /// </summary>
