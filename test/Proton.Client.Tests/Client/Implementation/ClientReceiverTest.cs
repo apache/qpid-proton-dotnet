@@ -2994,5 +2994,136 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestReceiverCreditReplenishedAfterSyncReceiveAutoAccept()
+      {
+         DoTestReceiverCreditReplenishedAfterSyncReceive(true);
+      }
+
+      [Test]
+      public void TestReceiverCreditReplenishedAfterSyncReceiveManualAccept()
+      {
+         DoTestReceiverCreditReplenishedAfterSyncReceive(false);
+      }
+
+      public void DoTestReceiverCreditReplenishedAfterSyncReceive(bool autoAccept)
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            for (uint i = 0; i < 10; ++i)
+            {
+               peer.RemoteTransfer().WithDeliveryId(i)
+                                    .WithMore(false)
+                                    .WithMessageFormat(0)
+                                    .WithPayload(payload).Queue();
+            }
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               AutoAccept = autoAccept,
+               CreditWindow = 10
+            };
+
+            IReceiver receiver = connection.OpenReceiver("test-receiver", options);
+
+            peer.WaitForScriptToComplete();
+            if (autoAccept)
+            {
+               peer.ExpectDisposition();
+               peer.ExpectDisposition();
+            }
+
+            // Consume messages 1 and 2 which should not provoke credit replenishment
+            // as there are still 8 outstanding which is above the 70% mark
+            Assert.IsNotNull(receiver.Receive()); // #1
+            Assert.IsNotNull(receiver.Receive()); // #2
+
+            peer.WaitForScriptToComplete();
+            if (autoAccept)
+            {
+               peer.ExpectDisposition();
+            }
+            peer.ExpectFlow().WithLinkCredit(3);
+
+            // Now consume message 3 which will trip the replenish barrier and the
+            // credit should be updated to reflect that we still have 7 queued
+            Assert.IsNotNull(receiver.Receive());  // #3
+
+            peer.WaitForScriptToComplete();
+            if (autoAccept)
+            {
+               peer.ExpectDisposition();
+               peer.ExpectDisposition();
+            }
+
+            // Consume messages 4 and 5 which should not provoke credit replenishment
+            // as there are still 5 outstanding plus the credit we sent last time
+            // which is above the 70% mark
+            Assert.IsNotNull(receiver.Receive()); // #4
+            Assert.IsNotNull(receiver.Receive()); // #5
+
+            peer.WaitForScriptToComplete();
+            if (autoAccept)
+            {
+               peer.ExpectDisposition();
+            }
+            peer.ExpectFlow().WithLinkCredit(6);
+
+            // Consume number 6 which means we only have 4 outstanding plus the three
+            // that we sent last time we flowed which is 70% of possible prefetch so
+            // we should flow to top off credit which would be 6 since we have four
+            // still pending
+            Assert.IsNotNull(receiver.Receive()); // #6
+
+            peer.WaitForScriptToComplete();
+            if (autoAccept)
+            {
+               peer.ExpectDisposition();
+               peer.ExpectDisposition();
+            }
+
+            // Consume deliveries 7 and 8 which should not flow as we should be
+            // above the threshold of 70% since we would now have 2 outstanding
+            // and 6 credits on the link
+            Assert.IsNotNull(receiver.Receive()); // #7
+            Assert.IsNotNull(receiver.Receive()); // #8
+
+            peer.WaitForScriptToComplete();
+            if (autoAccept)
+            {
+               peer.ExpectDisposition();
+               peer.ExpectDisposition();
+            }
+
+            // Now consume 9 and 10 but we still shouldn't flow more credit because
+            // the link credit is above the 50% mark for overall credit windowing.
+            Assert.IsNotNull(receiver.Receive()); // #9
+            Assert.IsNotNull(receiver.Receive()); // #10
+
+            peer.WaitForScriptToComplete();
+
+            peer.ExpectClose().Respond();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }
