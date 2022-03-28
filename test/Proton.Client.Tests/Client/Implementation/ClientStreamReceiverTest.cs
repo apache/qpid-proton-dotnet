@@ -4080,8 +4080,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(0);
+               peer.ExpectDisposition().WithFirst(1);
             }
 
             // Consume messages 1 and 2 which should not provoke credit replenishment
@@ -4095,7 +4095,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectDetach().Respond();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(2);
             }
             peer.ExpectFlow().WithLinkCredit(3);
 
@@ -4108,8 +4108,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(3);
+               peer.ExpectDisposition().WithFirst(4);
             }
 
             // Consume messages 4 and 5 which should not provoke credit replenishment
@@ -4123,7 +4123,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectDetach().Respond();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(5);
             }
             peer.ExpectFlow().WithLinkCredit(6);
 
@@ -4138,8 +4138,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(6);
+               peer.ExpectDisposition().WithFirst(7);
             }
 
             // Consume deliveries 7 and 8 which should not flow as we should be
@@ -4151,8 +4151,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(8);
+               peer.ExpectDisposition().WithFirst(9);
             }
 
             // Now consume 9 and 10 but we still shouldn't flow more credit because
