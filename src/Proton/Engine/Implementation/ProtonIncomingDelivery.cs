@@ -136,6 +136,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return Disposition(localState, true);
       }
 
+      public override string ToString()
+      {
+         return "ProtonIncomingDelivery: { " + deliveryId + ", " + deliveryTag + " }";
+      }
+
       #region Access API for the Delivery payload
 
       public long Available => payload?.ReadableBytes ?? 0;

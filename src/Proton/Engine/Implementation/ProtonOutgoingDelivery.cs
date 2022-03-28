@@ -143,6 +143,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public uint TransferCount => transferCount;
 
+      public override string ToString()
+      {
+         return "ProtonOutgoingDelivery: { " + deliveryId + ", " + deliveryTag + " }";
+      }
+
       #endregion
 
       #region Delivery Write and State Management APIs

@@ -3046,8 +3046,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(0);
+               peer.ExpectDisposition().WithFirst(1);
             }
 
             // Consume messages 1 and 2 which should not provoke credit replenishment
@@ -3056,11 +3056,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNotNull(receiver.Receive()); // #2
 
             peer.WaitForScriptToComplete();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectDetach().Respond();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(2);
             }
             peer.ExpectFlow().WithLinkCredit(3);
+
+            connection.OpenSender("test").OpenTask.Result.Close();
 
             // Now consume message 3 which will trip the replenish barrier and the
             // credit should be updated to reflect that we still have 7 queued
@@ -3069,8 +3073,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(3);
+               peer.ExpectDisposition().WithFirst(4);
             }
 
             // Consume messages 4 and 5 which should not provoke credit replenishment
@@ -3080,11 +3084,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNotNull(receiver.Receive()); // #5
 
             peer.WaitForScriptToComplete();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectDetach().Respond();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(5);
             }
             peer.ExpectFlow().WithLinkCredit(6);
+
+            connection.OpenSender("test").OpenTask.Result.Close();
 
             // Consume number 6 which means we only have 4 outstanding plus the three
             // that we sent last time we flowed which is 70% of possible prefetch so
@@ -3095,8 +3103,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(6);
+               peer.ExpectDisposition().WithFirst(7);
             }
 
             // Consume deliveries 7 and 8 which should not flow as we should be
@@ -3108,8 +3116,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
             if (autoAccept)
             {
-               peer.ExpectDisposition();
-               peer.ExpectDisposition();
+               peer.ExpectDisposition().WithFirst(8);
+               peer.ExpectDisposition().WithFirst(9);
             }
 
             // Now consume 9 and 10 but we still shouldn't flow more credit because

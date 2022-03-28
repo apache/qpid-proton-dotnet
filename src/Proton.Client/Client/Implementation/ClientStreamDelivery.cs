@@ -55,6 +55,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.protonDelivery = protonDelivery;
          this.protonDelivery.LinkedResource = this;
 
+         // Already fully received delivery could be settled now
+         AutoAcceptDeliveryIfNecessary();
+
          // Capture inbound events and route to an active stream or message
          protonDelivery.DeliveryReadHandler(HandleDeliveryRead)
                        .DeliveryAbortedHandler(HandleDeliveryAborted);
@@ -198,12 +201,45 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleDeliveryRead(IIncomingDelivery delivery)
       {
-         rawInputStream?.HandleDeliveryRead(delivery);
+         try
+         {
+            rawInputStream?.HandleDeliveryRead(delivery);
+         }
+         finally
+         {
+            AutoAcceptDeliveryIfNecessary();
+         }
       }
 
       private void HandleDeliveryAborted(IIncomingDelivery delivery)
       {
-         rawInputStream?.HandleDeliveryAborted(delivery);
+         try
+         {
+            rawInputStream?.HandleDeliveryAborted(delivery);
+         }
+         finally
+         {
+            AutoAcceptDeliveryIfNecessary();
+         }
+      }
+
+      #endregion
+
+      #region
+
+         private void AutoAcceptDeliveryIfNecessary()
+         {
+         if (receiver.ReceiverOptions.AutoAccept && !protonDelivery.IsSettled && !protonDelivery.IsPartial)
+         {
+            try
+            {
+               _ = receiver.DispositionAsync(this, Accepted.Instance, receiver.ReceiverOptions.AutoSettle);
+            }
+            catch (Exception error)
+            {
+               LOG.Warn("Caught error while attempting to auto accept the fully read delivery: {0}", error.Message);
+            }
+         }
       }
 
       #endregion
@@ -291,8 +327,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                   connection.Execute(() =>
                   {
-                     AutoAcceptDeliveryIfNecessary();
-
                      // If the deliver wasn't fully read either because there are remaining
                      // bytes locally we need to discard those to aid in retention avoidance.
                      // and to potentially open the session window to allow for fully reading
@@ -463,7 +497,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                   else if (!delivery.IsPartial)
                   {
-                     AutoAcceptDeliveryIfNecessary();
                      readRequest.TrySetResult(-1);
                      readRequest = null;
                   }
@@ -474,8 +507,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          internal void HandleDeliveryAborted(IIncomingDelivery delivery)
          {
             readRequest?.TrySetException(new ClientDeliveryAbortedException("The remote sender has aborted this delivery"));
-
-            delivery.Settle();
          }
 
          internal void HandleReceiverClosed(ClientStreamReceiver receiver)
@@ -515,7 +546,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   }
                   else if (!protonDelivery.IsPartial)
                   {
-                     AutoAcceptDeliveryIfNecessary();
                      request.TrySetResult(-1);
                   }
                   else
@@ -529,26 +559,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             catch (Exception e)
             {
                throw new IOException("Error reading requested data", e);
-            }
-         }
-
-         private void AutoAcceptDeliveryIfNecessary()
-         {
-            if (receiver.ReceiverOptions.AutoAccept && !protonDelivery.IsSettled)
-            {
-               if (!buffer.IsReadable && protonDelivery.Available == 0 &&
-                   (protonDelivery.IsAborted || !protonDelivery.IsPartial))
-               {
-
-                  try
-                  {
-                     receiver.DispositionAsync(delivery, Accepted.Instance, receiver.ReceiverOptions.AutoSettle);
-                  }
-                  catch (Exception error)
-                  {
-                     LOG.Warn("Caught error while attempting to auto accept the fully read delivery: {0}", error.Message);
-                  }
-               }
             }
          }
 

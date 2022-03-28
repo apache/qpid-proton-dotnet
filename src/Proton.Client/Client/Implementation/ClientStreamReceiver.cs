@@ -23,6 +23,7 @@ using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Utilities;
+using System.Linq;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -325,6 +326,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                else
                {
                   receive.TrySetResult(new ClientStreamDelivery(this, delivery));
+                  AsyncReplenishCreditIfNeeded();
                }
             }
          });
@@ -481,7 +483,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (currentCredit <= creditWindow * 0.5)
             {
                // TODO - The count on unsettled might be less efficient then an exposed collection Count
-               uint potentialPrefetch = (uint)(currentCredit + protonReceiver.Unsettled.Count);
+               uint potentialPrefetch = (uint)(currentCredit +
+                  protonReceiver.Unsettled.Count((delivery) => delivery.LinkedResource == null));
 
                if (potentialPrefetch <= creditWindow * 0.7)
                {
@@ -702,6 +705,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (receiveRequests.TryDequeue(out TaskCompletionSource<IStreamDelivery> entry))
             {
                entry.TrySetResult(new ClientStreamDelivery(this, delivery));
+               AsyncReplenishCreditIfNeeded();
             }
          }
       }

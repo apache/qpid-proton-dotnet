@@ -24,6 +24,7 @@ using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
+using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -283,7 +284,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                if (options.AutoAccept)
                {
-                  delivery.Disposition(ClientAccepted.Instance, options.AutoSettle);
+                  AsyncApplyDisposition(delivery.ProtonDelivery, Accepted.Instance, options.AutoSettle);
                }
                else
                {

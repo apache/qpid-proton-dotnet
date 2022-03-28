@@ -54,6 +54,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                        .WithMore(false)
                                        .WithMessageFormat(0)
                                        .WithPayload(payload).Queue();
+            secondPeer.ExpectDisposition().WithSettled(true).WithState().Accepted();
             secondPeer.Start();
 
             string primaryAddress = firstPeer.ServerAddress;
