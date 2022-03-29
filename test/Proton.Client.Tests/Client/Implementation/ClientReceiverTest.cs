@@ -1786,8 +1786,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                  .WithPayload(payload).Queue();
             peer.ExpectDisposition().WithSettled(true).WithState().Accepted();
             peer.ExpectFlow();
-            peer.ExpectDetach().Respond();
-            peer.ExpectClose().Respond();
 
             // // Send aborted transfer to complete first transfer and allow next to commence.
             peer.RemoteTransfer().WithHandle(0)
@@ -1804,6 +1802,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsTrue(received.Body is string);
             string value = (string)received.Body;
             Assert.AreEqual("Hello World", value);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
 
             receiver.CloseAsync();
             connection.CloseAsync().Wait();
