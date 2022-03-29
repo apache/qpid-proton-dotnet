@@ -25,6 +25,8 @@ using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Utilities;
+using System.Linq;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -40,10 +42,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ReceiverOptions options;
       private readonly ClientSession session;
       private readonly string receiverId;
-      private readonly FifoDeliveryQueue<ClientDelivery> messageQueue;
       private readonly AtomicBoolean closed = new AtomicBoolean();
       private readonly TaskCompletionSource<IReceiver> openFuture = new TaskCompletionSource<IReceiver>();
       private readonly TaskCompletionSource<IReceiver> closeFuture = new TaskCompletionSource<IReceiver>();
+
+      private readonly IDeque<TaskCompletionSource<IDelivery>> receiveRequests =
+         new ArrayDeque<TaskCompletionSource<IDelivery>>();
 
       private TaskCompletionSource<IReceiver> drainingFuture;
 
@@ -65,9 +69,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             protonReceiver.AddCredit(options.CreditWindow);
          }
-
-         messageQueue = new FifoDeliveryQueue<ClientDelivery>();
-         messageQueue.Start();
       }
 
       public IClient Client => session.Client;
@@ -139,7 +140,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public int QueuedDeliveries => messageQueue.Count;
+      public int QueuedDeliveries => protonReceiver.Unsettled.Count(delivery => delivery.LinkedResource == null);
 
       public IReceiver AddCredit(uint credit)
       {
@@ -249,7 +250,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   if (protonReceiver.Drain())
                   {
                      drainingFuture = drainComplete;
-                     // TODO: Need a cancellation point: drainingTimeout
                      session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
                          () => new ClientOperationTimedOutException("Timed out waiting for remote to respond to drain request"));
                   }
@@ -268,6 +268,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return drainComplete.Task;
       }
 
+      public IDelivery TryReceive()
+      {
+         return Receive(TimeSpan.Zero);
+      }
+
       public IDelivery Receive()
       {
          return Receive(TimeSpan.MaxValue);
@@ -276,56 +281,62 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public IDelivery Receive(TimeSpan timeout)
       {
          CheckClosedOrFailed();
+         TaskCompletionSource<IDelivery> receive = new TaskCompletionSource<IDelivery>();
 
-         try
+         session.Execute(() =>
          {
-            ClientDelivery delivery = messageQueue.Dequeue(timeout);
-            if (delivery != null)
+            if (NotClosedOrFailed(receive))
             {
-               if (options.AutoAccept)
+               IIncomingDelivery delivery = null;
+
+               // Scan all unsettled deliveries in the link and check if any are still
+               // lacking a linked stream delivery instance which indicates they have
+               // not been made part of a receive yet.
+               foreach (IIncomingDelivery candidate in protonReceiver.Unsettled)
                {
-                  AsyncApplyDisposition(delivery.ProtonDelivery, Accepted.Instance, options.AutoSettle);
+                  if (candidate.LinkedResource == null && !candidate.IsPartial)
+                  {
+                     delivery = candidate;
+                     break;
+                  }
+               }
+
+               if (delivery == null)
+               {
+                  if (timeout == TimeSpan.Zero)
+                  {
+                     receive.TrySetResult(null);
+                  }
+                  else
+                  {
+                     if (timeout != TimeSpan.MaxValue)
+                     {
+                        session.Schedule(() =>
+                        {
+                           receiveRequests.Remove(receive);
+                           receive.TrySetResult(null);
+                        }, timeout);
+                     }
+
+                     receiveRequests.Enqueue(receive);
+                  }
                }
                else
                {
-                  AsyncReplenishCreditIfNeeded();
+                  receive.TrySetResult(new ClientDelivery(this, delivery));
+                  if (options.AutoAccept)
+                  {
+                     AsyncApplyDisposition(delivery, Accepted.Instance, options.AutoSettle);
+                  }
+                  else
+                  {
+                     AsyncReplenishCreditIfNeeded();
+                  }
                }
-
-               return delivery;
             }
+         });
 
-            CheckClosedOrFailed();
-
-            return null;
-         }
-         catch (ThreadInterruptedException e)
-         {
-            throw new ClientException("Receive wait interrupted", e);
-         }
-      }
-
-      public IDelivery TryReceive()
-      {
-         CheckClosedOrFailed();
-
-         IDelivery delivery = messageQueue.DequeueNoWait();
-         if (delivery != null)
-         {
-            if (options.AutoAccept)
-            {
-               delivery.Disposition(ClientAccepted.Instance, options.AutoSettle);
-            }
-            else
-            {
-               AsyncReplenishCreditIfNeeded();
-            }
-         }
-         else
-         {
-            CheckClosedOrFailed();
-         }
-
-         return delivery;
+         return receive.Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       #region Internal Receiver API
@@ -418,7 +429,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             uint currentCredit = protonReceiver.Credit;
             if (currentCredit <= creditWindow * 0.5)
             {
-               uint potentialPrefetch = currentCredit + (uint)messageQueue.Count;
+               uint potentialPrefetch = currentCredit +
+                  (uint)protonReceiver.Unsettled.Count(delivery => delivery.LinkedResource == null);
 
                if (potentialPrefetch <= creditWindow * 0.7)
                {
@@ -459,7 +471,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private bool NotClosedOrFailed(TaskCompletionSource<IReceiver> request)
+      private bool NotClosedOrFailed<T>(TaskCompletionSource<T> request)
       {
          if (IsClosed)
          {
@@ -514,6 +526,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
          }
 
+         if (receiveRequests.TryDequeue(out TaskCompletionSource<IDelivery> entry))
+         {
+            if (failureCause != null)
+            {
+               entry.TrySetException(failureCause);
+            }
+            else
+            {
+               entry.TrySetException(new ClientResourceRemotelyClosedException("The stream receiver was closed"));
+            }
+         }
+
          if (failureCause != null)
          {
             openFuture.TrySetException(failureCause);
@@ -530,13 +554,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                drainingFuture.TrySetException(new ClientResourceRemotelyClosedException("The Receiver has been closed"));
             }
          }
-
-         // TODO
-         // if (drainingTimeout != null)
-         // {
-         //    drainingTimeout.cancel(false);
-         //    drainingTimeout = null;
-         // }
 
          closeFuture.TrySetResult(this);
       }
@@ -562,8 +579,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void HandleLocalCloseOrDetach(Engine.IReceiver receiver)
       {
-         messageQueue.Stop();  // Ensure blocked receivers are all unblocked.
-
          // If not yet remotely closed we only wait for a remote close if the engine isn't
          // already failed and we have successfully opened the sender without a timeout.
          if (!receiver.Engine.IsShutdown && failureCause == null && receiver.IsRemotelyOpen)
@@ -656,18 +671,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
          {
-            uint previousCredit = protonReceiver.Credit + (uint)messageQueue.Count;
-
-            messageQueue.Clear();  // Prefetched messages should be discarded.
+            uint previousCredit = (uint)(protonReceiver.Credit +
+               protonReceiver.Unsettled.Count(delivery => delivery.LinkedResource == null));
 
             if (drainingFuture != null)
             {
                drainingFuture.TrySetResult(this);
-               // if (drainingTimeout != null)
-               // {
-               //    drainingTimeout.cancel(false);
-               //    drainingTimeout = null;
-               // }
             }
 
             protonReceiver.LocalCloseHandler(null);
@@ -718,7 +727,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
          if (!delivery.IsPartial)
          {
             LOG.Trace("{0} has incoming Message(s).", this);
-            messageQueue.Enqueue(new ClientDelivery(this, delivery));
+            if (receiveRequests.TryDequeue(out TaskCompletionSource<IDelivery> entry))
+            {
+               entry.TrySetResult(new ClientDelivery(this, delivery));
+               if (options.AutoAccept)
+               {
+                  AsyncApplyDisposition(delivery, Accepted.Instance, options.AutoSettle);
+               }
+               else
+               {
+                  AsyncReplenishCreditIfNeeded();
+               }
+            }
+            else
+            {
+               // Ensure the credit window is expanded to allow the prefetch
+               // to fill since we are delivering fully read messages from this
+               // receiver
+               delivery.ClaimAvailableBytes();
+            }
          }
          else
          {
@@ -752,12 +779,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (receiver.Credit == 0)
             {
                drainingFuture.TrySetResult(this);
-               // TODO
-               // if (drainingTimeout != null)
-               // {
-               //    drainingTimeout.cancel(false);
-               //    drainingTimeout = null;
-               // }
             }
          }
       }

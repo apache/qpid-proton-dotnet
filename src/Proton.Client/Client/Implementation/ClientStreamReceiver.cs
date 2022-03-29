@@ -137,14 +137,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public int QueuedDeliveries
-      {
-         get
-         {
-            WaitForOpenToComplete();
-            throw new NotImplementedException();
-         }
-      }
+      public int QueuedDeliveries => protonReceiver.Unsettled.Count(delivery => delivery.LinkedResource == null);
 
       public IStreamReceiver AddCredit(uint credit)
       {
@@ -211,7 +204,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   if (protonReceiver.Drain())
                   {
                      drainingFuture = drainComplete;
-                     // TODO: Need a cancellation point: drainingTimeout
                      session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
                          () => new ClientOperationTimedOutException("Timed out waiting for remote to respond to drain request"));
                   }
@@ -312,16 +304,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   {
                      receive.TrySetResult(null);
                   }
-                  else if (timeout != TimeSpan.MaxValue)
+                  else
                   {
-                     session.Schedule(() =>
+                     if (timeout != TimeSpan.MaxValue)
                      {
-                        receiveRequests.Remove(receive);
-                        receive.TrySetResult(null);
-                     }, timeout);
-                  }
+                        session.Schedule(() =>
+                        {
+                           receiveRequests.Remove(receive);
+                           receive.TrySetResult(null);
+                        }, timeout);
+                     }
 
-                  receiveRequests.Enqueue(receive);
+                     receiveRequests.Enqueue(receive);
+                  }
                }
                else
                {
@@ -482,7 +477,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             uint currentCredit = protonReceiver.Credit;
             if (currentCredit <= creditWindow * 0.5)
             {
-               // TODO - The count on unsettled might be less efficient then an exposed collection Count
                uint potentialPrefetch = (uint)(currentCredit +
                   protonReceiver.Unsettled.Count((delivery) => delivery.LinkedResource == null));
 
@@ -566,13 +560,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                drainingFuture.TrySetException(new ClientResourceRemotelyClosedException("The Receiver has been closed"));
             }
          }
-
-         // TODO
-         // if (drainingTimeout != null)
-         // {
-         //    drainingTimeout.cancel(false);
-         //    drainingTimeout = null;
-         // }
 
          closeFuture.TrySetResult(this);
       }
@@ -726,12 +713,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (receiver.Credit == 0)
             {
                drainingFuture.TrySetResult(this);
-               // TODO
-               // if (drainingTimeout != null)
-               // {
-               //    drainingTimeout.cancel(false);
-               //    drainingTimeout = null;
-               // }
             }
          }
       }
@@ -745,11 +726,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             if (drainingFuture != null)
             {
                drainingFuture.TrySetResult(this);
-               // if (drainingTimeout != null)
-               // {
-               //    drainingTimeout.cancel(false);
-               //    drainingTimeout = null;
-               // }
             }
 
             protonReceiver.LocalCloseHandler(null);

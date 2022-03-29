@@ -4168,5 +4168,69 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestTryReceiveWhenNoMessageDoesNotLeakReceiveRequests()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamReceiver receiver = (IStreamReceiver)connection.OpenStreamReceiver("test-queue").OpenTask.Result;
+
+            byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+            byte[] slice1 = Statics.CopyOfRange(payload, 0, 2);
+            byte[] slice2 = Statics.CopyOfRange(payload, 2, 4);
+            byte[] slice3 = Statics.CopyOfRange(payload, 4, payload.Length);
+
+            Assert.IsNull(receiver.TryReceive());
+            Assert.IsNull(receiver.TryReceive());
+
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithDeliveryTag(new byte[] { 1 })
+                                 .WithMore(true)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(slice1).Now();
+
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithMore(true)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(slice2).Now();
+
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(slice3).Now();
+
+            peer.ExpectDisposition().WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IStreamDelivery delivery = receiver.Receive();
+            Assert.IsNotNull(delivery);
+            IStreamReceiverMessage received = delivery.Message();
+            Assert.IsNotNull(received);
+
+            delivery.Accept();
+            receiver.CloseAsync();
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }
