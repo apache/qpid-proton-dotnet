@@ -87,7 +87,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// not transmit the actual aborted status to the remote, the sender must transmit
       /// the contents of the envelope in order to convery the abort.
       /// </summary>
-      public bool Aborted { get; set; } = false;
+      public bool Aborted => delivery?.IsAborted ?? false;
 
       /// <summary>
       /// The client sender instance that this envelope is linked to
@@ -106,6 +106,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// </summary>
       public IOutgoingDelivery Delivery => delivery;
 
+      public void Send(IClientTransactionContext context, Types.Transport.IDeliveryState state, bool settled)
+      {
+         context.Send(Transmit, state, settled, Discard);
+      }
+
+      public void Abort()
+      {
+         delivery.Abort();
+         Transmit(delivery.State, delivery.IsSettled);
+      }
+
+      public void Complete()
+      {
+         Transmit(delivery.State, delivery.IsSettled);
+      }
+
       /// <summary>
       /// Performs a send of some or all of the message payload on this outgoing delivery
       /// or possibly an abort if the delivery has already begun streaming and has since
@@ -113,7 +129,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// </summary>
       /// <param name="state">The delivery state to apply</param>
       /// <param name="settled">The settlement value to apply</param>
-      public ClientOutgoingEnvelope Transmit(Types.Transport.IDeliveryState state, bool settled)
+      private void Transmit(Types.Transport.IDeliveryState state, bool settled)
       {
          if (delivery == null)
          {
@@ -149,19 +165,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
                Succeeded();
             }
          }
-
-         return this;
       }
 
-      public ClientOutgoingEnvelope Discard()
+      private void Discard()
       {
-         // TODO
-         // if (sendTimeout != null)
-         // {
-         //    sendTimeout.cancel(true);
-         //    sendTimeout = null;
-         // }
-
          if (delivery != null)
          {
             ClientTrackable tracker = (ClientTrackable)delivery.LinkedResource;
@@ -175,33 +182,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             request.TrySetResult(sender.CreateNoOpTracker());
          }
-
-         return this;
       }
 
       public ClientOutgoingEnvelope Failed(ClientException exception)
       {
-         // TODO
-         // if (sendTimeout != null)
-         // {
-         //    sendTimeout.cancel(true);
-         // }
-
          request.TrySetException(exception);
-
          return this;
       }
 
       public ClientOutgoingEnvelope Succeeded()
       {
-         // TODO
-         // if (sendTimeout != null)
-         // {
-         //    sendTimeout.cancel(true);
-         // }
-
          request.TrySetResult((ITracker)delivery.LinkedResource);
-
          return this;
       }
 

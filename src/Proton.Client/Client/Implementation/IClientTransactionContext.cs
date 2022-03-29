@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Engine;
 
@@ -68,11 +69,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// in a roll-back only state. If the transaction is failed the context should discard the
       /// envelope which should appear to the caller as if the send was successful.
       /// </summary>
-      /// <param name="envelope">The envelope that tracks the outgoing send</param>
+      /// <param name="transmit">The method to invoke if the send can proceed</param>
       /// <param name="state">The delivery state that was requested by the sender</param>
       /// <param name="settled">The settlement state that was requested by the sender</param>
+      /// <param name="discard">The method to invoke if the send should be dropped</param>
       /// <returns>This transaction context instance</returns>
-      IClientTransactionContext Send(ClientOutgoingEnvelope envelope, Types.Transport.IDeliveryState state, bool settled);
+      IClientTransactionContext Send(Action<Types.Transport.IDeliveryState, bool> transmit,
+                                     Types.Transport.IDeliveryState state, bool settled, Action discard);
 
       /// <summary>
       /// Apply a disposition to the given delivery wrapping it with a TransactionalState outcome

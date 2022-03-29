@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
@@ -46,9 +47,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new ClientIllegalStateException("Cannot roll back from a no-op transaction context");
       }
 
-      public IClientTransactionContext Send(ClientOutgoingEnvelope envelope, Types.Transport.IDeliveryState state, bool settled)
+      public IClientTransactionContext Send(Action<Types.Transport.IDeliveryState, bool> transmit,
+                                            Types.Transport.IDeliveryState state, bool settled, Action discard)
       {
-         envelope.Transmit(state, settled);
+         transmit(state, settled);
          return this;
       }
 

@@ -269,13 +269,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal void AddToTailOfBlockedQueue(ClientOutgoingEnvelope send)
       {
-         // TODO Need a cancellation token to tell the scheduled timeout it was cancelled.
-         // if (options.SendTimeout > 0 && send.SendTimeout == null)
-         // {
-         //    send.SendTimeout(executor.schedule(()-> {
-         //       send.failed(send.createSendTimedOutException());
-         //    }, options.SendTimeout(), TimeUnit.MILLISECONDS));
-         // }
          if (Options.SendTimeout > 0)
          {
             session.Schedule(() =>
@@ -290,14 +283,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal void AddToHeadOfBlockedQueue(ClientOutgoingEnvelope send)
       {
-         // TODO
-         // if (options.SendTimeout > 0 && send.SendTimeout == null)
-         // {
-         //    send.sendTimeout(executor.schedule(()-> {
-         //       send.failed(send.createSendTimedOutException());
-         //    }, options.sendTimeout(), TimeUnit.MILLISECONDS));
-         // }
-
          blocked.EnqueueFront(send);
       }
 
@@ -321,7 +306,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                   if (ProtonSender.IsSendable && ProtonSender.Current == null)
                   {
-                     ClientSession.TransactionContext.Send(envelope, null, ProtonSender.SenderSettleMode == SenderSettleMode.Settled);
+                     envelope.Send(ClientSession.TransactionContext, null, sendsSettled);
                   }
                   else if (waitForCredit)
                   {
@@ -645,7 +630,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      // We don't currently allow a sender to define any outcome so we pass null for
                      // now, however a transaction context will apply its TransactionalState outcome
                      // and would wrap anything we passed in the future.
-                     session.TransactionContext.Send(held, null, IsSendingSettled);
+                     held.Send(session.TransactionContext, null, IsSendingSettled);
                   }
                   catch (Exception error)
                   {

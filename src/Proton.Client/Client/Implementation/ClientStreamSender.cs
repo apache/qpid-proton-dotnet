@@ -94,7 +94,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   if (ProtonSender.IsSendable)
                   {
-                     ClientSession.TransactionContext.Send(envelope, null, IsSendingSettled);
+                     envelope.Send(ClientSession.TransactionContext, null, IsSendingSettled);
                   }
                   else
                   {
@@ -135,13 +135,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
             else
             {
                ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, false, request);
-               envelope.Aborted = true;
 
                try
                {
                   if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
                   {
-                     envelope.Transmit(protonDelivery.State, protonDelivery.IsSettled);
+                     envelope.Abort();
                   }
                   else
                   {
@@ -181,7 +180,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
                {
-                  envelope.Transmit(protonDelivery.State, protonDelivery.IsSettled);
+                  envelope.Complete();
                }
                else
                {
