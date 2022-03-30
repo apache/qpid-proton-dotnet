@@ -227,8 +227,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region
 
-         private void AutoAcceptDeliveryIfNecessary()
-         {
+      private void AutoAcceptDeliveryIfNecessary()
+      {
          if (receiver.ReceiverOptions.AutoAccept && !protonDelivery.IsSettled && !protonDelivery.IsPartial)
          {
             try
