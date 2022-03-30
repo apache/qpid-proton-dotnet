@@ -41,13 +41,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientSession session;
       private readonly string receiverId;
       private readonly AtomicBoolean closed = new AtomicBoolean();
-      private readonly TaskCompletionSource<IReceiver> openFuture = new TaskCompletionSource<IReceiver>();
-      private readonly TaskCompletionSource<IReceiver> closeFuture = new TaskCompletionSource<IReceiver>();
+      private readonly TaskCompletionSource<IStreamReceiver> openFuture = new TaskCompletionSource<IStreamReceiver>();
+      private readonly TaskCompletionSource<IStreamReceiver> closeFuture = new TaskCompletionSource<IStreamReceiver>();
 
       private readonly IDeque<TaskCompletionSource<IStreamDelivery>> receiveRequests =
          new ArrayDeque<TaskCompletionSource<IStreamDelivery>>();
 
-      private TaskCompletionSource<IReceiver> drainingFuture;
+      private TaskCompletionSource<IStreamReceiver> drainingFuture;
 
       private Engine.IReceiver protonReceiver;
       private ClientException failureCause;
@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ISession Session => session;
 
-      public Task<IReceiver> OpenTask => openFuture.Task;
+      public Task<IStreamReceiver> OpenTask => openFuture.Task;
 
       public string Address
       {
@@ -144,10 +144,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return (IStreamReceiver)AddCreditAsync(credit).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
-      public Task<IReceiver> AddCreditAsync(uint credit)
+      public Task<IStreamReceiver> AddCreditAsync(uint credit)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IReceiver> creditAdded = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IStreamReceiver> creditAdded = new TaskCompletionSource<IStreamReceiver>();
 
          session.Execute(() =>
          {
@@ -184,10 +184,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return (IStreamReceiver)DrainAsync().ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
-      public Task<IReceiver> DrainAsync()
+      public Task<IStreamReceiver> DrainAsync()
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IReceiver> drainComplete = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IStreamReceiver> drainComplete = new TaskCompletionSource<IStreamReceiver>();
 
          session.Execute(() =>
          {
@@ -233,7 +233,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public Task<IReceiver> CloseAsync(IErrorCondition error = null)
+      public Task<IStreamReceiver> CloseAsync(IErrorCondition error = null)
       {
          return DoCloseOrDetach(true, error);
       }
@@ -249,7 +249,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public Task<IReceiver> DetachAsync(IErrorCondition error = null)
+      public Task<IStreamReceiver> DetachAsync(IErrorCondition error = null)
       {
          return DoCloseOrDetach(false, error);
       }
@@ -350,11 +350,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
-      internal Task<IDelivery> DispositionAsync(ClientStreamDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
+      internal Task<IStreamDelivery> DispositionAsync(ClientStreamDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
          CheckClosedOrFailed();
          AsyncApplyDisposition(delivery.ProtonDelivery, state, settle);
-         return Task.FromResult((IDelivery)delivery);
+         return Task.FromResult((IStreamDelivery)delivery);
       }
 
       internal String ReceiverId => receiverId;
@@ -371,7 +371,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Private Receiver Implementation
 
-      private Task<IReceiver> DoCloseOrDetach(bool close, IErrorCondition error)
+      private Task<IStreamReceiver> DoCloseOrDetach(bool close, IErrorCondition error)
       {
          if (closed.CompareAndSet(false, true))
          {

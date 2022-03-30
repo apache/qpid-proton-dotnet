@@ -128,60 +128,60 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamDelivery Accept()
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, Accepted.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, Accepted.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Disposition(IDeliveryState state, bool settled)
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, state?.AsProtonType(), true).ConfigureAwait(false).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, state?.AsProtonType(), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere)
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).ConfigureAwait(false).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Reject(string condition, string description)
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).ConfigureAwait(false).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Release()
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, Released.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, Released.Instance, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       public IStreamDelivery Settle()
       {
-         return (IStreamDelivery)receiver.DispositionAsync(this, null, true).ConfigureAwait(false).GetAwaiter().GetResult();
+         return receiver.DispositionAsync(this, null, true).ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
-      public Task<IDelivery> AcceptAsync()
+      public Task<IStreamDelivery> AcceptAsync()
       {
          return receiver.DispositionAsync(this, Accepted.Instance, true);
       }
 
-      public Task<IDelivery> ReleaseAsync()
+      public Task<IStreamDelivery> ReleaseAsync()
       {
          return receiver.DispositionAsync(this, Released.Instance, true);
       }
 
-      public Task<IDelivery> RejectAsync(string condition, string description)
+      public Task<IStreamDelivery> RejectAsync(string condition, string description)
       {
          return receiver.DispositionAsync(this, new Rejected(new ErrorCondition(condition, description)), true);
       }
 
-      public Task<IDelivery> ModifiedAsync(bool deliveryFailed, bool undeliverableHere)
+      public Task<IStreamDelivery> ModifiedAsync(bool deliveryFailed, bool undeliverableHere)
       {
          return receiver.DispositionAsync(this, new Modified(deliveryFailed, undeliverableHere), true);
       }
 
-      public Task<IDelivery> DispositionAsync(IDeliveryState state, bool settled)
+      public Task<IStreamDelivery> DispositionAsync(IDeliveryState state, bool settled)
       {
          return receiver.DispositionAsync(this, state?.AsProtonType(), true);
       }
 
-      public Task<IDelivery> SettleAsync()
+      public Task<IStreamDelivery> SettleAsync()
       {
          return receiver.DispositionAsync(this, null, true);
       }

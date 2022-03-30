@@ -16,13 +16,14 @@
  */
 
 using System;
+using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client
 {
    /// <summary>
    /// A single AMQP stream receiver instance
    /// </summary>
-   public interface IStreamReceiver : IReceiver
+   public interface IStreamReceiver : ILink<IStreamReceiver>
    {
       /// <summary>
       /// Blocking receive method that waits forever for the remote to provide some or all of a delivery
@@ -36,7 +37,7 @@ namespace Apache.Qpid.Proton.Client
       /// regardless. The application needs to arrage for credit to be granted in that case.
       /// </remarks>
       /// <returns>The next available delivery</returns>
-      new IStreamDelivery Receive();
+      IStreamDelivery Receive();
 
       /// <summary>
       /// Blocking receive method that waits for the specified time period for the remote to provide a
@@ -49,7 +50,7 @@ namespace Apache.Qpid.Proton.Client
       /// window then this method won't grant or extend the credit window but will wait for a delivery
       /// regardless. The application needs to arrage for credit to be granted in that case.
       /// </remarks>
-      new IStreamDelivery Receive(TimeSpan timeout);
+      IStreamDelivery Receive(TimeSpan timeout);
 
       /// <summary>
       /// Non-blocking receive method that either returns a delivery is one is immediately available
@@ -57,41 +58,60 @@ namespace Apache.Qpid.Proton.Client
       /// that allows for consumption or the incoming delivery as it arrives.
       /// </summary>
       /// <returns>A delivery if one is immediately available or null if not</returns>
-      new IStreamDelivery TryReceive();
+      IStreamDelivery TryReceive();
 
-      /// <inheritdoc cref="IReceiver.AddCredit(int)"/>
-      new IStreamReceiver AddCredit(uint credit);
+      /// <summary>
+      /// Adds credit to the Receiver link for use when there receiver has not been configured with
+      /// with a credit window.  When credit window is configured credit replenishment is automatic
+      /// and calling this method will result in an exception indicating that the operation is invalid.
+      ///
+      /// If the Receiver is draining and this method is called an exception will be thrown to
+      /// indicate that credit cannot be replenished until the remote has drained the existing link
+      /// credit.
+      /// </summary>
+      /// <param name="credit">The amount of new credit to add to the existing credit if any</param>
+      /// <returns>This receiver instance.</returns>
+      IStreamReceiver AddCredit(uint credit);
 
-      /// <inheritdoc cref="IReceiver.Drain()"/>
-      new IStreamReceiver Drain();
+      /// <summary>
+      /// Asynchronously Adds credit to the Receiver link for use when there receiver has not been
+      /// configured with with a credit window.  When credit window is configured credit replenishment
+      /// is automatic and calling this method will result in an exception indicating that the operation
+      /// is invalid.
+      ///
+      /// If the Receiver is draining and this method is called an exception will be thrown to
+      /// indicate that credit cannot be replenished until the remote has drained the existing link
+      /// credit.
+      /// </summary>
+      /// <param name="credit">The amount of new credit to add to the existing credit if any</param>
+      /// <returns>This receiver instance.</returns>
+      Task<IStreamReceiver> AddCreditAsync(uint credit);
 
-      #region Defaults for hidden IReceiver APIs
+      /// <summary>
+      /// Requests the remote to drain previously granted credit for this receiver link.
+      /// The remote will either send all available deliveries up to the currently granted
+      /// link credit or will report it has none to send an link credit will be set to zero.
+      /// This method will block until the remote answers the drain request or the configured
+      /// drain timeout expires.
+      /// </summary>
+      /// <returns>This receiver instance once the remote reports drain completed</returns>
+      IStreamReceiver Drain();
 
-      IReceiver IReceiver.AddCredit(uint credit)
-      {
-         return this.AddCredit(credit);
-      }
+      /// <summary>
+      /// Requests the remote to drain previously granted credit for this receiver link.
+      /// The remote will either send all available deliveries up to the currently granted
+      /// link credit or will report it has none to send an link credit will be set to zero.
+      /// The caller can wait on the returned task which will be signalled either after the
+      /// remote reports drained or once the configured drain timeout is reached.
+      /// </summary>
+      /// <returns>A Task that will be completed when the remote reports drained.</returns>
+      Task<IStreamReceiver> DrainAsync();
 
-      IReceiver IReceiver.Drain()
-      {
-         return this.Drain();
-      }
+      /// <summary>
+      /// A count of the currently queued deliveries which can be read immediately without
+      /// blocking a call to receive.
+      /// </summary>
+      int QueuedDeliveries { get; }
 
-      IDelivery IReceiver.Receive()
-      {
-         return this.Receive();
-      }
-
-      IDelivery IReceiver.Receive(TimeSpan timeout)
-      {
-         return this.Receive(timeout);
-      }
-
-      IDelivery IReceiver.TryReceive()
-      {
-         return this.TryReceive();
-      }
-
-      #endregion
    }
 }

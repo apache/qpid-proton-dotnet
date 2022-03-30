@@ -3460,7 +3460,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                DrainTimeout = 15
             };
-            IReceiver receiver = connection.OpenStreamReceiver("test-queue", receiverOptions).OpenTask.Result;
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", receiverOptions).OpenTask.Result;
 
             try
             {
@@ -3504,7 +3504,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                DrainTimeout = 20
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, connectionOptions);
-            IReceiver receiver = connection.OpenStreamReceiver("test-queue").OpenTask.Result;
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue").OpenTask.Result;
 
             try
             {
@@ -3541,7 +3541,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
-            IReceiver receiver = connection.OpenStreamReceiver("test-queue", new StreamReceiverOptions()
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", new StreamReceiverOptions()
             {
                CreditWindow = 0
             });
@@ -3581,7 +3581,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
             StreamReceiverOptions receiverOptions = new StreamReceiverOptions();
-            IReceiver receiver = connection.OpenStreamReceiver("test-queue", receiverOptions).OpenTask.Result;
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", receiverOptions).OpenTask.Result;
 
             receiver.DrainAsync();
 

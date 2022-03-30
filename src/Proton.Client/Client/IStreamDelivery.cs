@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -25,31 +26,167 @@ namespace Apache.Qpid.Proton.Client
    /// which can be used to read incoming large messages that are streamed via
    /// multiple incoming AMQP transfer frames.
    /// </summary>
-   public interface IStreamDelivery : IDelivery
+   public interface IStreamDelivery
    {
-      /// <inheritdoc cref="IDelivery.Receiver"/>
-      new IStreamReceiver Receiver { get; }
+      /// <summary>
+      /// Returns the parent streaming receiver instance where this delivery arrived.
+      /// </summary>
+      IStreamReceiver Receiver { get; }
 
-      /// <inheritdoc cref="IDelivery.Message"/>
-      new IStreamReceiverMessage Message();
+      /// <summary>
+      /// The message format value that was transmitted with this delivery (default is zero).
+      /// </summary>
+      uint MessageFormat { get; }
 
-      /// <inheritdoc cref="IDelivery.Accept"/>
-      new IStreamDelivery Accept();
+      /// <summary>
+      /// Returns a stream receiver message type that will perform a decode of message
+      /// payload as portions of the streamed message arrive. The message API is inherently
+      /// a blocking API as the decoder will need to wait in some cases to decode a full
+      /// section the incoming message when it is requested.
+      /// </summary>
+      /// <remarks>
+      /// If the incoming message carried any delivery annotations they can be accessed
+      /// via the Annotations method.  Re-sending the returned message will not also
+      /// send the incoming delivery annotations, the sender must include them in the
+      /// sender's send call if they are to be forwarded onto the next recipient.
+      /// </remarks>
+      /// <typeparam name="T">Body type of the message</typeparam>
+      /// <returns>the decoded message from the delivery payload</returns>
+      IStreamReceiverMessage Message();
 
-      /// <inheritdoc cref="IDelivery.Release"/>
-      new IStreamDelivery Release();
+      /// <summary>
+      /// Decodes the delivery payload and returns a dictionary containing a copy of any
+      /// associated delivery annotations that were transmitted with the message payload.
+      ///
+      /// Calling this message claims the payload of the delivery for the message and annotations
+      /// methods and excludes use of the RawInputStream method of the delivery object. Calling
+      /// the RawInputStream method after calling this method throws ClientIllegalStateException.
+      /// </summary>
+      IReadOnlyDictionary<string, object> Annotations { get; }
 
-      /// <inheritdoc cref="IDelivery.Reject(string, string)"/>
-      new IStreamDelivery Reject(string condition, string description);
+      /// <summary>
+      /// Create and return an read-only Stream that reads the raw payload bytes of the
+      /// given delivery. Calling this method claims the payload of the delivery for the
+      /// returned Stream and excludes use of the message and annotations API methods of
+      /// the delivery object. Closing the returned input stream discards any unread bytes
+      /// from the delivery payload.  Calling the message or annotations methods after
+      /// calling this method will throw a ClientIllegalStateException.
+      /// </summary>
+      Stream RawInputStream { get; }
 
-      /// <inheritdoc cref="IDelivery.Modified(bool, bool)"/>
-      new IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere);
+      /// <summary>
+      /// Accepts and settles this delivery.
+      /// </summary>
+      /// <returns>This delivery instance</returns>
+      IStreamDelivery Accept();
 
-      /// <inheritdoc cref="IDelivery.Disposition(IDeliveryState, bool)"/>
-      new IStreamDelivery Disposition(IDeliveryState state, bool settled);
+      /// <summary>
+      /// Accepts and settles this delivery asynchronously ensuring that the call does not
+      /// block on any IO or other client operations.
+      /// </summary>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IStreamDelivery> AcceptAsync();
 
-      /// <inheritdoc cref="IDelivery.Settle"/>
-      new IStreamDelivery Settle();
+      /// <summary>
+      /// Releases and settles this delivery.
+      /// </summary>
+      /// <returns>This delivery instance</returns>
+      IStreamDelivery Release();
+
+      /// <summary>
+      /// Releases and settles this delivery asynchronously ensuring that the call does not
+      /// block on any IO or other client operations.
+      /// </summary>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IStreamDelivery> ReleaseAsync();
+
+      /// <summary>
+      /// Rejects the delivery with an ErrorCondition that contains the provided condition
+      /// and description information and settles.
+      /// </summary>
+      /// <param name="condition">The condition that defines this rejection error</param>
+      /// <param name="description">A description of the rejection cause.</param>
+      /// <returns>This delivery instance</returns>
+      IStreamDelivery Reject(string condition, string description);
+
+      /// <summary>
+      /// Asynchronously rejects the delivery with an ErrorCondition that contains the provided
+      /// condition and description information and settles.
+      /// </summary>
+      /// <param name="condition">The condition that defines this rejection error</param>
+      /// <param name="description">A description of the rejection cause.</param>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IStreamDelivery> RejectAsync(string condition, string description);
+
+      /// <summary>
+      /// Modifies and settles the delivery applying the failure and routing options.
+      /// </summary>
+      /// <param name="deliveryFailed">If the delivery failed on this receiver for some reason</param>
+      /// <param name="undeliverableHere">If the delivery should not be routed back to this receiver.</param>
+      /// <returns>This delivery instance</returns>
+      IStreamDelivery Modified(bool deliveryFailed, bool undeliverableHere);
+
+      /// <summary>
+      /// Modifies and settles the delivery asynchronously applying the failure and routing
+      /// options without any blocking due to IO or other client internal operations.
+      /// </summary>
+      /// <param name="deliveryFailed">If the delivery failed on this receiver for some reason</param>
+      /// <param name="undeliverableHere">If the delivery should not be routed back to this receiver.</param>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IStreamDelivery> ModifiedAsync(bool deliveryFailed, bool undeliverableHere);
+
+      /// <summary>
+      /// Applies the given delivery state to the delivery if not already settled and
+      /// optionally settles it.
+      /// </summary>
+      /// <param name="state">delivery state to apply to this delivery</param>
+      /// <param name="settled">optionally settles the delivery</param>
+      /// <returns>This delivery instance</returns>
+      IStreamDelivery Disposition(IDeliveryState state, bool settled);
+
+      /// <summary>
+      /// Applies the given delivery state to the delivery if not already settled and
+      /// optionally settles it performing all IO and client work asynchronously
+      /// ensuring that any calls to this method do not block.
+      /// </summary>
+      /// <param name="state">delivery state to apply to this delivery</param>
+      /// <param name="settled">optionally settles the delivery</param>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IStreamDelivery> DispositionAsync(IDeliveryState state, bool settled);
+
+      /// <summary>
+      /// Settles the delivery with the remote which prevents any further delivery
+      /// state updates.
+      /// </summary>
+      /// <returns>This delivery instance</returns>
+      IStreamDelivery Settle();
+
+      /// <summary>
+      /// Settles the delivery with the remote which prevents any further delivery
+      /// state updates asynchronously.
+      /// </summary>
+      /// <returns>A Task that returns this delivery instance</returns>
+      Task<IStreamDelivery> SettleAsync();
+
+      /// <summary>
+      /// Returns true if this delivery has already been settled.
+      /// </summary>
+      bool Settled { get; }
+
+      /// <summary>
+      /// Returns the currently set delivery state for this delivery or null if none set.
+      /// </summary>
+      IDeliveryState State { get; }
+
+      /// <summary>
+      /// Returns true if this delivery has already been settled by the remote.
+      /// </summary>
+      bool RemoteSettled { get; }
+
+      /// <summary>
+      /// Returns the currently set delivery state for this delivery as set by the remote or null if none set.
+      /// </summary>
+      IDeliveryState RemoteState { get; }
 
       /// <summary>
       /// Returns true if the remote has aborted this incoming streaming delivery and
@@ -63,47 +200,6 @@ namespace Apache.Qpid.Proton.Client
       /// delivery.
       /// </summary>
       bool Completed { get; }
-
-      #region Defaults methods for hidden IDelivery methods
-
-      IReceiver IDelivery.Receiver => this.Receiver;
-
-      IDelivery IDelivery.Accept()
-      {
-         return this.Accept();
-      }
-
-      IDelivery IDelivery.Disposition(IDeliveryState state, bool settled)
-      {
-         return this.Disposition(state, settled);
-      }
-
-      IMessage<object> IDelivery.Message()
-      {
-         throw new NotSupportedException("Must use the IStreamDelivery Message implementation directly");
-      }
-
-      IDelivery IDelivery.Modified(bool deliveryFailed, bool undeliverableHere)
-      {
-         return this.Modified(deliveryFailed, undeliverableHere);
-      }
-
-      IDelivery IDelivery.Reject(string condition, string description)
-      {
-         return this.Reject(condition, description);
-      }
-
-      IDelivery IDelivery.Release()
-      {
-         return this.Release();
-      }
-
-      IDelivery IDelivery.Settle()
-      {
-         return this.Settle();
-      }
-
-      #endregion
 
    }
 }
