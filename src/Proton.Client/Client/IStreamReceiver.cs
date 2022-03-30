@@ -61,6 +61,44 @@ namespace Apache.Qpid.Proton.Client
       IStreamDelivery TryReceive();
 
       /// <summary>
+      /// Asynchronous receive method that waits forever for the remote to provide a delivery for consumption
+      /// and when a delivery is available the returned Task will be completed. The returned task completes with
+      /// a streamed delivery instance that allows for consumption or the incoming delivery as it arrives.
+      /// </summary>
+      /// <remarks>
+      /// Receive calls will only grant credit on their own if a credit window is configured in the options
+      /// which by default will have been configured.  If the client application has not configured a credit
+      /// window then this method won't grant or extend the credit window but will wait for a delivery
+      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// </remarks>
+      /// <returns>The next available delivery</returns>
+      Task<IStreamDelivery> ReceiveAsync();
+
+      /// <summary>
+      /// Asynchronous receive method that returns a Task that will be completed afterthe specified time
+      /// period if the remote to provides a delivery for consumption before completing with null if none was
+      /// received. The returned task completes with a streamed delivery instance that allows for consumption
+      /// or the incoming delivery as it arrives.
+      /// </summary>
+      /// <remarks>
+      /// Receive calls will only grant credit on their own if a credit window is configured in the options
+      /// which by default will have been configured.  If the client application has not configured a credit
+      /// window then this method won't grant or extend the credit window but will wait for a delivery
+      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// </remarks>
+      /// <returns>The next available delivery or null if the time span elapses</returns>
+      Task<IStreamDelivery> ReceiveAsync(TimeSpan timeout);
+
+      /// <summary>
+      /// Asynchronous receive method that returns a Task which will be completed either with a
+      /// currently available delivery or with null to indicate there are no queued deliveries.
+      /// The returned task completes with a streamed delivery instance that allows for consumption
+      /// or the incoming delivery as it arrives.
+      /// </summary>
+      /// <returns>A Task that completes with a delivery if one is immediately available or null if not</returns>
+      Task<IStreamDelivery> TryReceiveAsync();
+
+      /// <summary>
       /// Adds credit to the Receiver link for use when there receiver has not been configured with
       /// with a credit window.  When credit window is configured credit replenishment is automatic
       /// and calling this method will result in an exception indicating that the operation is invalid.

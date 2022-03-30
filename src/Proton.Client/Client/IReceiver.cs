@@ -78,11 +78,46 @@ namespace Apache.Qpid.Proton.Client
       IDelivery Receive(TimeSpan timeout);
 
       /// <summary>
-      /// Non-blocking receive method that either returns a delivery if one is immediately available
-      /// or returns null if none is currently at hand.
+      /// A mostly Non-blocking receive method that either returns a delivery if one is immediately available
+      /// or returns null if none is currently at hand. It is possible that this method will block for short
+      /// time intervals while acquiring and releasing internal locks.
       /// </summary>
       /// <returns>A delivery if one is immediately available or null if not</returns>
       IDelivery TryReceive();
+
+      /// <summary>
+      /// Asynchronous receive method that waits forever for the remote to provide a delivery for consumption
+      /// and when a delivery is available the returned Task will be completed.
+      /// </summary>
+      /// <remarks>
+      /// Receive calls will only grant credit on their own if a credit window is configured in the options
+      /// which by default will have been configured.  If the client application has not configured a credit
+      /// window then this method won't grant or extend the credit window but will wait for a delivery
+      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// </remarks>
+      /// <returns>The next available delivery</returns>
+      Task<IDelivery> ReceiveAsync();
+
+      /// <summary>
+      /// Asynchronous receive method that returns a Task that will be completed afterthe specified time
+      /// period if the remote to provides a delivery for consumption before completing with null if none was
+      /// received.
+      /// </summary>
+      /// <remarks>
+      /// Receive calls will only grant credit on their own if a credit window is configured in the options
+      /// which by default will have been configured.  If the client application has not configured a credit
+      /// window then this method won't grant or extend the credit window but will wait for a delivery
+      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// </remarks>
+      /// <returns>The next available delivery or null if the time span elapses</returns>
+      Task<IDelivery> ReceiveAsync(TimeSpan timeout);
+
+      /// <summary>
+      /// Asynchronous receive method that returns a Task which will be completed either with a
+      /// currently available delivery or with null to indicate there are no queued deliveries.
+      /// </summary>
+      /// <returns>A Task that completes with a delivery if one is immediately available or null if not</returns>
+      Task<IDelivery> TryReceiveAsync();
 
       /// <summary>
       /// Requests the remote to drain previously granted credit for this receiver link.

@@ -277,6 +277,21 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamDelivery Receive(TimeSpan timeout)
       {
+         return ReceiveAsync(timeout).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IStreamDelivery> ReceiveAsync()
+      {
+         return ReceiveAsync(TimeSpan.MaxValue);
+      }
+
+      public Task<IStreamDelivery> TryReceiveAsync()
+      {
+         return ReceiveAsync(TimeSpan.Zero);
+      }
+
+      public Task<IStreamDelivery> ReceiveAsync(TimeSpan timeout)
+      {
          CheckClosedOrFailed();
          TaskCompletionSource<IStreamDelivery> receive = new TaskCompletionSource<IStreamDelivery>();
 
@@ -326,7 +341,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return receive.Task.ConfigureAwait(false).GetAwaiter().GetResult();
+         return receive.Task;
       }
 
       #region Internal Receiver API
