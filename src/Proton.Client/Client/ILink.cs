@@ -128,4 +128,37 @@ namespace Apache.Qpid.Proton.Client
       IReadOnlyCollection<string> DesiredCapabilities { get; }
 
    }
+
+   /// <summary>
+   /// Generic link interface that exposes additional APIs for the various link types.
+   /// </summary>
+   /// <typeparam name="Role">The role the link type plays</typeparam>
+   public interface ILink<Role> : ILink where Role : class, ILink
+   {
+      /// <summary>
+      /// When a link is created and returned to the client application it may not
+      /// be remotely opened yet and if the client needs to wait for completion of the
+      /// open before proceeding the open task can be fetched and waited upon.
+      /// </summary>
+      Task<Role> OpenTask { get; }
+
+      /// <summary>
+      /// Initiates a close of the link and a Task that allows the caller to await
+      /// or poll for the response from the remote that indicates completion of the close
+      /// operation. If the response from the remote exceeds the configure close timeout
+      /// the sender will be cleaned up and the Task signalled indicating completion.
+      /// </summary>
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<Role> CloseAsync(IErrorCondition error = null);
+
+      /// <summary>
+      /// Initiates a detach of the link and a Task that allows the caller to await
+      /// or poll for the response from the remote that indicates completion of the detach
+      /// operation. If the response from the remote exceeds the configure close timeout
+      /// the sender will be cleaned up and the Task signalled indicating completion.
+      /// </summary>
+      /// <param name="error">Optional error condition to convery to the remote</param>
+      Task<Role> DetachAsync(IErrorCondition error = null);
+
+   }
 }

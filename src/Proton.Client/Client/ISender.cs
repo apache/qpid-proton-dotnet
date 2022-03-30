@@ -23,33 +23,8 @@ namespace Apache.Qpid.Proton.Client
    /// <summary>
    /// A single AMQP sender instance.
    /// </summary>
-   public interface ISender : ILink
+   public interface ISender : ILink<ISender>
    {
-      /// <summary>
-      /// When a sender is created and returned to the client application it may not
-      /// be remotely opened yet and if the client needs to wait for completion of the
-      /// open before proceeding the open task can be fetched and waited upon.
-      /// </summary>
-      Task<ISender> OpenTask { get; }
-
-      /// <summary>
-      /// Initiates a close of the sender and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the close
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the sender will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
-      Task<ISender> CloseAsync(IErrorCondition error = null);
-
-      /// <summary>
-      /// Initiates a detach of the sender and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the detach
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the sender will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
-      Task<ISender> DetachAsync(IErrorCondition error = null);
-
       /// <summary>
       /// Send the given message immediately if there is credit available or blocks if the link
       /// has not yet been granted credit. If a send timeout has been configured then this method

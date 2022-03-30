@@ -23,33 +23,8 @@ namespace Apache.Qpid.Proton.Client
    /// <summary>
    /// A single AMQP receiver instance.
    /// </summary>
-   public interface IReceiver : ILink
+   public interface IReceiver : ILink<IReceiver>
    {
-      /// <summary>
-      /// When a receiver is created and returned to the client application it may not
-      /// be remotely opened yet and if the client needs to wait for completion of the
-      /// open before proceeding the open task can be fetched and waited upon.
-      /// </summary>
-      Task<IReceiver> OpenTask { get; }
-
-      /// <summary>
-      /// Initiates a close of the receiver and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the close
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the receiver will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
-      Task<IReceiver> CloseAsync(IErrorCondition error = null);
-
-      /// <summary>
-      /// Initiates a detach of the receiver and a Task that allows the caller to await
-      /// or poll for the response from the remote that indicates completion of the detach
-      /// operation. If the response from the remote exceeds the configure close timeout
-      /// the receiver will be cleaned up and the Task signalled indicating completion.
-      /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
-      Task<IReceiver> DetachAsync(IErrorCondition error = null);
-
       /// <summary>
       /// Adds credit to the Receiver link for use when there receiver has not been configured with
       /// with a credit window.  When credit window is configured credit replenishment is automatic
