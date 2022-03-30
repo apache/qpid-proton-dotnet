@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -24,63 +25,112 @@ namespace Apache.Qpid.Proton.Client
    /// sender message and provides the tracker functions for those types of
    /// messages.
    /// </summary>
-   public interface IStreamTracker : ITracker
+   public interface IStreamTracker
    {
-      /// <inheritdoc cref="ITracker.Sender"/>
-      new IStreamSender Sender { get; }
+      /// <summary>
+      /// Returns the parent sender instance that sent the delivery that is now being tacked.
+      /// </summary>
+      IStreamSender Sender { get; }
 
-      /// <inheritdoc cref="ITracker.Settle"/>
-      new IStreamTracker Settle();
+      /// <summary>
+      /// Indicates if the sent delivery has already been locally settled.
+      /// </summary>
+      bool Settled { get; }
 
-      /// <inheritdoc cref="ITracker.Disposition(IDeliveryState, bool)"/>
-      new IStreamTracker Disposition(IDeliveryState state, bool settle);
+      /// <summary>
+      /// Retrieve the currently applied delivery state for the sent delivery.
+      /// </summary>
+      IDeliveryState State { get; }
 
-      /// <inheritdoc cref="ITracker.AwaitSettlement"/>
-      new IStreamTracker AwaitSettlement();
+      /// <summary>
+      /// Indicates if the sent delivery has already been remotely settled.
+      /// </summary>
+      bool RemoteSettled { get; }
 
-      /// <inheritdoc cref="ITracker.AwaitSettlement(TimeSpan)"/>
-      new IStreamTracker AwaitSettlement(TimeSpan timeout);
+      /// <summary>
+      /// Retrieve the currently applied delivery state by the remote for the sent delivery.
+      /// </summary>
+      IDeliveryState RemoteState { get; }
 
-      /// <inheritdoc cref="ITracker.AwaitAccepted"/>
-      new IStreamTracker AwaitAccepted();
+      /// <summary>
+      /// Settles the sent delivery if not performing auto-settlement on the sender.
+      /// </summary>
+      /// <returns>This tracker instance</returns>
+      IStreamTracker Settle();
 
-      /// <inheritdoc cref="ITracker.AwaitAccepted(TimeSpan)"/>
-      new IStreamTracker AwaitAccepted(TimeSpan timeout);
+      /// <summary>
+      /// Settles the sent delivery if not performing auto-settlement on the sender
+      /// and returns a Task that will be completed once any IO operations required
+      /// by the settlement have compelted.
+      /// </summary>
+      /// <returns>This tracker instance</returns>
+      Task<IStreamTracker> SettleAsync();
 
-      #region Defaults methods for hidden ITracer APIs
+      /// <summary>
+      /// Apply the delivery state and optionally settle the sent delivery with the remote
+      /// </summary>
+      /// <param name="state">The delivery state to apply to the sent delivery</param>
+      /// <param name="settle">Optionally settle the delivery that was sent</param>
+      /// <returns>This tracker instance</returns>
+      IStreamTracker Disposition(IDeliveryState state, bool settle);
 
-      ISender ITracker.Sender => this.Sender;
+      /// <summary>
+      /// Apply the delivery state and optionally settle the sent delivery with the remote.
+      /// The method returns a Task that will be completed once any required IO operations
+      /// in order to apply the dispostion have been completed.
+      /// </summary>
+      /// <param name="state">The delivery state to apply to the sent delivery</param>
+      /// <param name="settle">Optionally settle the delivery that was sent</param>
+      /// <returns>This tracker instance</returns>
+      Task<IStreamTracker> DispositionAsync(IDeliveryState state, bool settle);
 
-      ITracker ITracker.Settle()
-      {
-         return this.Settle();
-      }
+      /// <summary>
+      /// Gets a task that will be completed once the remote has settled the sent
+      /// delivery, or will indicate an error if the connection fails before the
+      /// remote can settle. If the sender sent the tracked delivery settled the
+      /// task returned will already be completed.
+      /// </summary>
+      Task<IStreamTracker> SettlementTask { get; }
 
-      ITracker ITracker.Disposition(IDeliveryState state, bool settle)
-      {
-         return this.Disposition(state, settle);
-      }
+      /// <summary>
+      /// Waits for the remote to settle the sent delivery unless the delivery was already
+      /// settled by the remote or the delivery was sent already settled.
+      /// </summary>
+      /// <returns>This tracker instance</returns>
+      IStreamTracker AwaitSettlement();
 
-      ITracker ITracker.AwaitSettlement()
-      {
-         return this.AwaitSettlement();
-      }
+      /// <summary>
+      /// Waits for the remote to settle the sent delivery unless the delivery was already
+      /// settled by the remote or the delivery was sent already settled.
+      /// </summary>
+      /// <param name="timeout">The duration to wait for the remote to settle the delivery</param>
+      /// <returns>This tracker instance</returns>
+      IStreamTracker AwaitSettlement(TimeSpan timeout);
 
-      ITracker ITracker.AwaitSettlement(TimeSpan timeout)
-      {
-         return this.AwaitSettlement(timeout);
-      }
+      /// <summary>
+      /// Waits for the remote to accept and settle the sent delivery unless the delivery
+      /// was already settled by the remote or the delivery was sent already settled.
+      /// </summary>
+      /// <remarks>
+      /// If the remote send back a delivery state other than accepted then this method
+      /// will throw an ClientDeliveryStateException to indicate the expected outcome
+      /// was not achieved.
+      /// </remarks>
+      /// <returns>This tracker instance</returns>
+      IStreamTracker AwaitAccepted();
 
-      ITracker ITracker.AwaitAccepted()
-      {
-         return this.AwaitAccepted();
-      }
+      /// <summary>
+      /// Waits for the remote to accept and settle the sent delivery unless the delivery
+      /// was already settled by the remote or the delivery was sent already settled.
+      /// </summary>
+      /// <remarks>
+      /// If the remote send back a delivery state other than accepted then this method
+      /// will throw an ClientDeliveryStateException to indicate the expected outcome
+      /// was not achieved.
+      /// </remarks>
+      /// <param name="timeout">The duration to wait for the remote to accept the delivery</param>
+      /// <returns>This tracker instance</returns>
+      IStreamTracker AwaitAccepted(TimeSpan timeout);
 
-      ITracker ITracker.AwaitAccepted(TimeSpan timeout)
-      {
-         return this.AwaitAccepted(timeout);
-      }
-
-      #endregion
    }
 }

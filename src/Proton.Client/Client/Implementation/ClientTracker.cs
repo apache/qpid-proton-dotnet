@@ -15,15 +15,225 @@
  * limitations under the License.
  */
 
+using System;
+using System.Threading.Tasks;
+using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
-   public sealed class ClientTracker : ClientTrackable, ITracker
+   public sealed class ClientTracker : ITracker
    {
+      private readonly ClientSender sender;
+      private readonly IOutgoingDelivery delivery;
+      private readonly TaskCompletionSource<ITracker> remoteSettlementFuture =
+         new TaskCompletionSource<ITracker>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+      private volatile bool remotelySettled;
+      private volatile IDeliveryState remoteDeliveryState;
+
       internal ClientTracker(ClientSender sender, IOutgoingDelivery delivery)
-         : base(sender, delivery)
       {
+         this.sender = sender;
+         this.delivery = delivery;
+         this.delivery.DeliveryStateUpdatedHandler(ProcessDeliveryUpdated);
       }
+
+      internal Engine.IOutgoingDelivery ProtonDelivery => delivery;
+
+      public ISender Sender => sender;
+
+      public bool Settled => delivery.IsSettled;
+
+      public IDeliveryState State => delivery.State?.ToClientDeliveryState();
+
+      public bool RemoteSettled => remotelySettled;
+
+      public IDeliveryState RemoteState => remoteDeliveryState;
+
+      public Task<ITracker> SettlementTask
+      {
+         get
+         {
+            if (Settled)
+            {
+               // If we've settled on our side the remote will never send us any
+               // updates on its own settlement state as we've already told it
+               // that we have forgotten about this delivery.
+               remoteSettlementFuture.TrySetResult(this);
+            }
+
+            return remoteSettlementFuture.Task;
+         }
+      }
+
+      #region Internal trackable API
+
+      internal void FailSettlementTask(ClientException cause)
+      {
+         _ = remoteSettlementFuture.TrySetException(cause);
+      }
+
+      internal void CompleteSettlementTask()
+      {
+         _ = remoteSettlementFuture.TrySetResult(this);
+      }
+
+      #endregion
+
+      #region Private tracker APIs
+
+      private void ProcessDeliveryUpdated(IOutgoingDelivery delivery)
+      {
+         remotelySettled = delivery.IsRemotelySettled;
+         remoteDeliveryState = delivery.RemoteState?.ToClientDeliveryState();
+
+         if (sender.Options.AutoSettle && delivery.IsRemotelySettled)
+         {
+            delivery.Settle();
+         }
+
+         if (delivery.IsRemotelySettled)
+         {
+            remoteSettlementFuture.SetResult(this);
+         }
+      }
+
+      #endregion
+
+      #region ITracker API
+
+      public ITracker Disposition(IDeliveryState state, bool settle)
+      {
+         try
+         {
+            sender.DispositionAsync(delivery, state?.AsProtonType(), settle);
+         }
+         finally
+         {
+            if (settle)
+            {
+               remoteSettlementFuture.SetResult(this);
+            }
+         }
+
+         return this;
+      }
+
+      public ITracker Settle()
+      {
+         return Disposition(null, true);
+      }
+
+      public Task<ITracker> SettleAsync()
+      {
+         return Task.FromResult(this.Settle());
+      }
+
+      public Task<ITracker> DispositionAsync(IDeliveryState state, bool settle)
+      {
+         return Task.FromResult(this.Disposition(state, settle));
+      }
+
+      public ITracker AwaitAccepted()
+      {
+         try
+         {
+            if (Settled && !RemoteSettled)
+            {
+               return this;
+            }
+            else
+            {
+               remoteSettlementFuture.Task.Wait();
+
+               if (RemoteState != null && RemoteState.IsAccepted)
+               {
+                  return this;
+               }
+               else
+               {
+                  throw new ClientDeliveryStateException("Remote did not accept the sent message", RemoteState);
+               }
+            }
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
+      }
+
+      public ITracker AwaitAccepted(TimeSpan timeout)
+      {
+         try
+         {
+            if (Settled && !RemoteSettled)
+            {
+               return this;
+            }
+            else
+            {
+               if (remoteSettlementFuture.Task.Wait(timeout))
+               {
+                  if (RemoteState != null && RemoteState.IsAccepted)
+                  {
+                     return this;
+                  }
+                  else
+                  {
+                     throw new ClientDeliveryStateException("Remote did not accept the sent message", RemoteState);
+                  }
+               }
+               else
+               {
+                  throw new ClientOperationTimedOutException("Timed out waiting for remote Accepted outcome");
+               }
+            }
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
+      }
+
+      public ITracker AwaitSettlement()
+      {
+         try
+         {
+            if (Settled)
+            {
+               return this;
+            }
+
+            return remoteSettlementFuture.Task.Result;
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
+      }
+
+      public ITracker AwaitSettlement(TimeSpan timeout)
+      {
+         try
+         {
+            if (Settled)
+            {
+               return this;
+            }
+            else if (!remoteSettlementFuture.Task.Wait(timeout))
+            {
+               throw new ClientOperationTimedOutException("Timed out waiting for remote settlement");
+            }
+
+            return this;
+         }
+         catch (Exception exe)
+         {
+            throw ClientExceptionSupport.CreateNonFatalOrPassthrough(exe);
+         }
+      }
+
+      #endregion
    }
 }

@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IMessage<string> message = IMessage<string>.Create("Hello World");
 
-            ITracker tracker;
+            IStreamTracker tracker;
             if (trySend)
             {
                if (addDeliveryAnnotations)
@@ -2063,7 +2063,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                try
                {
                   logger.LogInformation("Test send 1 is preparing to fire:");
-                  ITracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
+                  IStreamTracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
                   tracker.AwaitSettlement(TimeSpan.FromSeconds(10));
                }
                catch (Exception e)
@@ -2078,7 +2078,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                try
                {
                   logger.LogInformation("Test send 2 is preparing to fire:");
-                  ITracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
+                  IStreamTracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
                   tracker.AwaitSettlement(TimeSpan.FromSeconds(10));
                }
                catch (Exception e)
@@ -2150,7 +2150,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   Assert.IsTrue(send1Started.Wait(TimeSpan.FromSeconds(10)));
                   logger.LogInformation("Test send 2 is preparing to fire:");
-                  ITracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
+                  IStreamTracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
                   tracker.AwaitSettlement(TimeSpan.FromSeconds(10));
                   send2Completed.Signal();
                }
@@ -2235,7 +2235,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   Assert.IsTrue(send1Started.Wait(TimeSpan.FromSeconds(10)));
                   logger.LogInformation("Test send 2 is preparing to fire:");
-                  ITracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
+                  IStreamTracker tracker = sender.Send(IMessage<byte[]>.Create(payload));
                   tracker.AwaitSettlement(TimeSpan.FromSeconds(10));
                   send2Completed.Signal();
                }
@@ -3100,7 +3100,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IMessage<string> message = IMessage<string>.Create("Hello World");
 
-            ITracker tracker = sender.Send(message);
+            IStreamTracker tracker = sender.Send(message);
 
             if (dispositionAsync)
             {
