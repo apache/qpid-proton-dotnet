@@ -211,7 +211,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                else
                {
-                  receive.TrySetResult(new ClientDelivery(this, delivery));
                   if (options.AutoAccept)
                   {
                      AsyncApplyDisposition(delivery, Accepted.Instance, options.AutoSettle);
@@ -220,6 +219,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   {
                      AsyncReplenishCreditIfNeeded();
                   }
+
+                  receive.TrySetResult(new ClientDelivery(this, delivery));
                }
             }
          });
