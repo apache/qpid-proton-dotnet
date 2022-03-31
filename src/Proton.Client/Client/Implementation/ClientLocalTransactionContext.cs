@@ -177,30 +177,26 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
-      public IClientTransactionContext Send(Action<Types.Transport.IDeliveryState, bool> transmit,
-                                            Types.Transport.IDeliveryState state, bool settled,
-                                            Action discard)
+      public IClientTransactionContext Send(ISendable sendable, Types.Transport.IDeliveryState state, bool settled)
       {
          if (IsInTransaction)
          {
             if (IsRollbackOnly)
             {
-               discard();
+               sendable.Discard();
             }
             else if (state == null)
             {
-               Types.Transport.IDeliveryState txnOutcome =
-                   cachedSenderOutcome ?? (cachedSenderOutcome = new TransactionalState(currentTxn.TxnId));
-               transmit(txnOutcome, settled);
+               sendable.Send(cachedSenderOutcome ?? (cachedSenderOutcome = new TransactionalState(currentTxn.TxnId)), settled);
             }
             else
             {
-               transmit(new TransactionalState(currentTxn.TxnId, (IOutcome)state), settled);
+               sendable.Send(new TransactionalState(currentTxn.TxnId, (IOutcome)state), settled);
             }
          }
          else
          {
-            transmit(state, settled);
+            sendable.Send(state, settled);
          }
 
          return this;

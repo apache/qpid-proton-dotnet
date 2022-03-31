@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                   if (ProtonSender.IsSendable && ProtonSender.Current == null)
                   {
-                     envelope.Send(ClientSession.TransactionContext, null, sendsSettled);
+                     session.TransactionContext.Send(envelope, null, sendsSettled);
                   }
                   else if (waitForCredit)
                   {
@@ -394,7 +394,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   // We don't currently allow a sender to define any outcome so we pass null for
                   // now, however a transaction context will apply its TransactionalState outcome
                   // and would wrap anything we passed in the future.
-                  held.Send(session.TransactionContext, null, IsSendingSettled);
+                  session.TransactionContext.Send(held, null, IsSendingSettled);
                }
                catch (Exception error)
                {
@@ -458,7 +458,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #endregion
 
-      private sealed class ClientOutgoingEnvelope
+      private sealed class ClientOutgoingEnvelope : ISendable
       {
          private readonly IProtonBuffer payload;
          private readonly TaskCompletionSource<ITracker> request;
@@ -492,14 +492,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          /// </summary>
          public IOutgoingDelivery Delivery => delivery;
 
-         public void Send(IClientTransactionContext context, Types.Transport.IDeliveryState state, bool settled)
-         {
-            context.Send(Transmit, state, settled, Discard);
-         }
-
          public void Complete()
          {
-            Transmit(delivery.State, delivery.IsSettled);
+            Send(delivery.State, delivery.IsSettled);
          }
 
          /// <summary>
@@ -509,7 +504,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          /// </summary>
          /// <param name="state">The delivery state to apply</param>
          /// <param name="settled">The settlement value to apply</param>
-         private void Transmit(Types.Transport.IDeliveryState state, bool settled)
+         public void Send(Types.Transport.IDeliveryState state, bool settled)
          {
             if (delivery == null)
             {
@@ -539,7 +534,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
 
-         private void Discard()
+         public void Discard()
          {
             if (delivery != null)
             {

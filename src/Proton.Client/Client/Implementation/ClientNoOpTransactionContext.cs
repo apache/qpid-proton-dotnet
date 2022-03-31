@@ -47,10 +47,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          throw new ClientIllegalStateException("Cannot roll back from a no-op transaction context");
       }
 
-      public IClientTransactionContext Send(Action<Types.Transport.IDeliveryState, bool> transmit,
-                                            Types.Transport.IDeliveryState state, bool settled, Action discard)
+      public IClientTransactionContext Send(ISendable sendable, Types.Transport.IDeliveryState state, bool settled)
       {
-         transmit(state, settled);
+         sendable.Send(state, settled);
          return this;
       }
 
