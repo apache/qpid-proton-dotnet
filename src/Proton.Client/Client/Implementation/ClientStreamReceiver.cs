@@ -33,111 +33,32 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// any call that happens after a large message receives begins will be blocked
    /// until the previous large messsage is fully read and the next arrives.
    /// </summary>
-   public sealed class ClientStreamReceiver : IStreamReceiver
+   public sealed class ClientStreamReceiver : ClientLinkType<IStreamReceiver, Engine.IReceiver>, IStreamReceiver
    {
       private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamReceiver>();
 
       private readonly StreamReceiverOptions options;
-      private readonly ClientSession session;
       private readonly string receiverId;
-      private readonly AtomicBoolean closed = new AtomicBoolean();
-      private readonly TaskCompletionSource<IStreamReceiver> openFuture = new TaskCompletionSource<IStreamReceiver>();
-      private readonly TaskCompletionSource<IStreamReceiver> closeFuture = new TaskCompletionSource<IStreamReceiver>();
 
       private readonly IDeque<TaskCompletionSource<IStreamDelivery>> receiveRequests =
          new ArrayDeque<TaskCompletionSource<IStreamDelivery>>();
 
       private TaskCompletionSource<IStreamReceiver> drainingFuture;
 
-      private Engine.IReceiver protonReceiver;
-      private ClientException failureCause;
-      private volatile ISource remoteSource;
-      private volatile ITarget remoteTarget;
-
       internal ClientStreamReceiver(ClientSession session, StreamReceiverOptions options, string receiverId, Engine.IReceiver receiver)
+       : base(session, receiver)
       {
          this.options = options;
-         this.session = session;
          this.receiverId = receiverId;
-         this.protonReceiver = receiver;
-         this.protonReceiver.LinkedResource = this;
+         this.protonLink.LinkedResource = this;
 
          if (options.CreditWindow > 0)
          {
-            protonReceiver.AddCredit(options.CreditWindow);
+            protonLink.AddCredit(options.CreditWindow);
          }
       }
 
-      public IClient Client => session.Client;
-
-      public IConnection Connection => session.Connection;
-
-      public ISession Session => session;
-
-      public Task<IStreamReceiver> OpenTask => openFuture.Task;
-
-      public string Address
-      {
-         get
-         {
-            if (IsDynamic)
-            {
-               WaitForOpenToComplete();
-               return protonReceiver.RemoteSource?.Address;
-            }
-            else
-            {
-               return protonReceiver.Source?.Address;
-            }
-         }
-      }
-
-      public ISource Source
-      {
-         get
-         {
-            WaitForOpenToComplete();
-            return remoteSource;
-         }
-      }
-
-      public ITarget Target
-      {
-         get
-         {
-            WaitForOpenToComplete();
-            return remoteTarget;
-         }
-      }
-
-      public IReadOnlyDictionary<string, object> Properties
-      {
-         get
-         {
-            WaitForOpenToComplete();
-            return ClientConversionSupport.ToStringKeyedMap(protonReceiver.RemoteProperties);
-         }
-      }
-
-      public IReadOnlyCollection<string> OfferedCapabilities
-      {
-         get
-         {
-            WaitForOpenToComplete();
-            return ClientConversionSupport.ToStringArray(protonReceiver.RemoteOfferedCapabilities);
-         }
-      }
-
-      public IReadOnlyCollection<string> DesiredCapabilities
-      {
-         get
-         {
-            WaitForOpenToComplete();
-            return ClientConversionSupport.ToStringArray(protonReceiver.RemoteDesiredCapabilities);
-         }
-      }
-
-      public int QueuedDeliveries => protonReceiver.Unsettled.Count(delivery => delivery.LinkedResource == null);
+      public int QueuedDeliveries => protonLink.Unsettled.Count(delivery => delivery.LinkedResource == null);
 
       public IStreamReceiver AddCredit(uint credit)
       {
@@ -157,7 +78,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit when a credit window has been configured"));
                }
-               else if (protonReceiver.IsDraining)
+               else if (protonLink.IsDraining)
                {
                   creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit while a drain is pending"));
                }
@@ -165,7 +86,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   try
                   {
-                     protonReceiver.AddCredit(credit);
+                     protonLink.AddCredit(credit);
                      creditAdded.TrySetResult(this);
                   }
                   catch (Exception ex)
@@ -193,7 +114,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (NotClosedOrFailed(drainComplete))
             {
-               if (protonReceiver.IsDraining)
+               if (protonLink.IsDraining)
                {
                   drainComplete.TrySetException(new ClientIllegalStateException("Stream Receiver is already draining"));
                   return;
@@ -201,7 +122,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                try
                {
-                  if (protonReceiver.Drain())
+                  if (protonLink.Drain())
                   {
                      drainingFuture = drainComplete;
                      session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
@@ -220,49 +141,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          });
 
          return drainComplete.Task;
-      }
-
-      public void Close(IErrorCondition error = null)
-      {
-         try
-         {
-            CloseAsync(error).Wait();
-         }
-         catch (Exception)
-         {
-         }
-      }
-
-      public Task<IStreamReceiver> CloseAsync(IErrorCondition error = null)
-      {
-         return DoCloseOrDetach(true, error);
-      }
-
-      public void Detach(IErrorCondition error = null)
-      {
-         try
-         {
-            DetachAsync(error).Wait();
-         }
-         catch (Exception)
-         {
-         }
-      }
-
-      public Task<IStreamReceiver> DetachAsync(IErrorCondition error = null)
-      {
-         return DoCloseOrDetach(false, error);
-      }
-
-      public void Dispose()
-      {
-         try
-         {
-            Close();
-         }
-         catch (Exception)
-         {
-         }
       }
 
       public IStreamDelivery Receive()
@@ -304,7 +182,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                // Scan all unsettled deliveries in the link and check if any are still
                // lacking a linked stream delivery instance which indicates they have
                // not been made part of a receive yet.
-               foreach (IIncomingDelivery candidate in protonReceiver.Unsettled)
+               foreach (IIncomingDelivery candidate in protonLink.Unsettled)
                {
                   if (candidate.LinkedResource == null)
                   {
@@ -348,19 +226,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientStreamReceiver Open()
       {
-         protonReceiver.LocalOpenHandler(HandleLocalOpen)
-                       .LocalCloseHandler(HandleLocalCloseOrDetach)
-                       .LocalDetachHandler(HandleLocalCloseOrDetach)
-                       .OpenHandler(HandleRemoteOpen)
-                       .CloseHandler(HandleRemoteCloseOrDetach)
-                       .DetachHandler(HandleRemoteCloseOrDetach)
-                       .ParentEndpointClosedHandler(HandleParentEndpointClosed)
-                       .DeliveryStateUpdatedHandler(HandleDeliveryStateRemotelyUpdated)
-                       .DeliveryReadHandler(HandleDeliveryReceived)
-                       .DeliveryAbortedHandler(HandleDeliveryAborted)
-                       .CreditStateUpdateHandler(HandleReceiverCreditUpdated)
-                       .EngineShutdownHandler(HandleEngineShutdown)
-                       .Open();
+         protonLink.LocalOpenHandler(HandleLocalOpen)
+                   .LocalCloseHandler(HandleLocalCloseOrDetach)
+                   .LocalDetachHandler(HandleLocalCloseOrDetach)
+                   .OpenHandler(HandleRemoteOpen)
+                   .CloseHandler(HandleRemoteCloseOrDetach)
+                   .DetachHandler(HandleRemoteCloseOrDetach)
+                   .ParentEndpointClosedHandler(HandleParentEndpointClosed)
+                   .DeliveryStateUpdatedHandler(HandleDeliveryStateRemotelyUpdated)
+                   .DeliveryReadHandler(HandleDeliveryReceived)
+                   .DeliveryAbortedHandler(HandleDeliveryAborted)
+                   .CreditStateUpdateHandler(HandleReceiverCreditUpdated)
+                   .EngineShutdownHandler(HandleEngineShutdown)
+                   .Open();
 
          return this;
       }
@@ -374,10 +252,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal String ReceiverId => receiverId;
 
-      internal bool IsClosed => closed;
-
-      internal bool IsDynamic => protonReceiver.Source?.Dynamic ?? false;
-
       internal Exception FailureCause => failureCause;
 
       internal StreamReceiverOptions ReceiverOptions => options;
@@ -385,86 +259,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
       #endregion
 
       #region Private Receiver Implementation
-
-      private Task<IStreamReceiver> DoCloseOrDetach(bool close, IErrorCondition error)
-      {
-         if (closed.CompareAndSet(false, true))
-         {
-            // Already closed by failure or shutdown so no need to
-            if (!closeFuture.Task.IsCompleted)
-            {
-               session.Execute(() =>
-               {
-                  if (protonReceiver.IsLocallyOpen)
-                  {
-                     try
-                     {
-                        protonReceiver.ErrorCondition = ClientErrorCondition.AsProtonErrorCondition(error);
-                        if (close)
-                        {
-                           protonReceiver.Close();
-                        }
-                        else
-                        {
-                           protonReceiver.Detach();
-                        }
-                     }
-                     catch (Exception)
-                     {
-                        // The engine event handlers will deal with errors
-                     }
-                  }
-               });
-            }
-         }
-
-         return closeFuture.Task;
-      }
-
-      private void WaitForOpenToComplete()
-      {
-         if (!openFuture.Task.IsCompleted || openFuture.Task.IsFaulted)
-         {
-            try
-            {
-               openFuture.Task.Wait();
-            }
-            catch (Exception e)
-            {
-               throw failureCause ?? ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
-            }
-         }
-      }
-
-      private void CheckClosedOrFailed()
-      {
-         if (IsClosed)
-         {
-            throw new ClientIllegalStateException("The StreamReceiver was explicitly closed", failureCause);
-         }
-         else if (failureCause != null)
-         {
-            throw failureCause;
-         }
-      }
-
-      private bool NotClosedOrFailed<T>(TaskCompletionSource<T> request)
-      {
-         if (IsClosed)
-         {
-            request.TrySetException(new ClientIllegalStateException("The Receiver was explicitly closed", failureCause));
-            return false;
-         }
-         else if (failureCause != null)
-         {
-            request.TrySetException(failureCause);
-            return false;
-         }
-         else
-         {
-            return true;
-         }
-      }
 
       private void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
@@ -489,11 +283,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          uint creditWindow = options.CreditWindow;
          if (creditWindow > 0)
          {
-            uint currentCredit = protonReceiver.Credit;
+            uint currentCredit = protonLink.Credit;
             if (currentCredit <= creditWindow * 0.5)
             {
                uint potentialPrefetch = (uint)(currentCredit +
-                  protonReceiver.Unsettled.Count((delivery) => delivery.LinkedResource == null));
+                  protonLink.Unsettled.Count((delivery) => delivery.LinkedResource == null));
 
                if (potentialPrefetch <= creditWindow * 0.7)
                {
@@ -502,7 +296,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   LOG.Trace("Consumer granting additional credit: {0}", additionalCredit);
                   try
                   {
-                     protonReceiver.AddCredit(additionalCredit);
+                     protonLink.AddCredit(additionalCredit);
                   }
                   catch (Exception ex)
                   {
@@ -522,13 +316,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          try
          {
-            if (protonReceiver.IsRemotelyDetached)
+            if (protonLink.IsRemotelyDetached)
             {
-               protonReceiver.Detach();
+               protonLink.Detach();
             }
             else
             {
-               protonReceiver.Close();
+               protonLink.Close();
             }
          }
          catch (Exception)
@@ -551,7 +345,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          }
 
-         foreach (IIncomingDelivery delivery in protonReceiver.Unsettled)
+         foreach (IIncomingDelivery delivery in protonLink.Unsettled)
          {
             if (delivery.LinkedResource is ClientStreamDelivery streamDelivery)
             {
@@ -736,19 +530,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
          {
-            uint previousCredit = (uint)(protonReceiver.Credit + protonReceiver.Unsettled.Count);
+            uint previousCredit = (uint)(protonLink.Credit + protonLink.Unsettled.Count);
 
             if (drainingFuture != null)
             {
                drainingFuture.TrySetResult(this);
             }
 
-            protonReceiver.LocalCloseHandler(null);
-            protonReceiver.LocalDetachHandler(null);
-            protonReceiver.Close();
-            protonReceiver = ClientReceiverBuilder.RecreateReceiver(session, protonReceiver, options);
-            protonReceiver.LinkedResource = this;
-            protonReceiver.AddCredit(previousCredit);
+            protonLink.LocalCloseHandler(null);
+            protonLink.LocalDetachHandler(null);
+            protonLink.Close();
+            protonLink = ClientReceiverBuilder.RecreateReceiver(session, protonLink, options);
+            protonLink.LinkedResource = this;
+            protonLink.AddCredit(previousCredit);
 
             Open();
          }
