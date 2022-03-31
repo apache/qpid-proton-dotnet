@@ -455,7 +455,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                try
                {
-                  ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, message.MessageFormat, buffer, operation);
+                  ClientOutgoingEnvelope envelope =
+                     new ClientOutgoingEnvelope(this, null, message.MessageFormat, buffer, true, operation);
 
                   if (ProtonSender.IsSendable && ProtonSender.Current == null)
                   {
@@ -859,25 +860,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          private readonly bool complete;
 
          private IOutgoingDelivery delivery;
-
-         /// <summary>
-         /// Create a new In-flight Send instance for a complete message send. No further
-         /// sends can occur after the send completes however if the send cannot be completed
-         /// due to session or link credit issues the send will be requeued at the sender for
-         /// retry when the credit is updated by the remote.
-         /// </summary>
-         /// <param name="sender">The originating sender of the wrapped message payload</param>
-         /// <param name="messageFormat">The AMQP message format to encode the transfer</param>
-         /// <param name="payload">The encoded message bytes</param>
-         /// <param name="request">The request that is linked to this send event</param>
-         public ClientOutgoingEnvelope(ClientStreamSender sender, uint messageFormat, IProtonBuffer payload, TaskCompletionSource<IStreamTracker> request)
-         {
-            this.messageFormat = messageFormat;
-            this.payload = payload;
-            this.request = request;
-            this.sender = sender;
-            this.complete = true;
-         }
 
          /// <summary>
          /// Create a new In-flight Send instance for a complete message send. No further

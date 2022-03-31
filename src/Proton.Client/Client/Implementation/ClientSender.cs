@@ -623,28 +623,21 @@ namespace Apache.Qpid.Proton.Client.Implementation
             while (sender.IsSendable && !blocked.IsEmpty)
             {
                ClientOutgoingEnvelope held = blocked.Peek();
-               if (held.Delivery == protonSender.Current)
+               LOG.Trace("Dispatching previously held send");
+               try
                {
-                  LOG.Trace("Dispatching previously held send");
-                  try
-                  {
-                     // We don't currently allow a sender to define any outcome so we pass null for
-                     // now, however a transaction context will apply its TransactionalState outcome
-                     // and would wrap anything we passed in the future.
-                     held.Send(session.TransactionContext, null, IsSendingSettled);
-                  }
-                  catch (Exception error)
-                  {
-                     held.Failed(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
-                  }
-                  finally
-                  {
-                     blocked.Dequeue();
-                  }
+                  // We don't currently allow a sender to define any outcome so we pass null for
+                  // now, however a transaction context will apply its TransactionalState outcome
+                  // and would wrap anything we passed in the future.
+                  held.Send(session.TransactionContext, null, IsSendingSettled);
                }
-               else
+               catch (Exception error)
                {
-                  break;
+                  held.Failed(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+               }
+               finally
+               {
+                  blocked.Dequeue();
                }
             }
          }
@@ -706,7 +699,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
          private readonly TaskCompletionSource<ITracker> request;
          private readonly ClientSender sender;
          private readonly uint messageFormat;
-         private readonly bool complete;
 
          private IOutgoingDelivery delivery;
 
@@ -726,29 +718,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
             this.payload = payload;
             this.request = request;
             this.sender = sender;
-            this.complete = true;
-         }
-
-         /// <summary>
-         /// Create a new In-flight Send instance for a complete message send. No further
-         /// sends can occur after the send completes however if the send cannot be completed
-         /// due to session or link credit issues the send will be requeued at the sender for
-         /// retry when the credit is updated by the remote.
-         /// </summary>
-         /// <param name="sender">The originating sender of the wrapped message payload</param>
-         /// <param name="delivery">The proton delivery that is linked to this outgoing write</param>
-         /// <param name="messageFormat">The AMQP message format to encode the transfer</param>
-         /// <param name="payload">The encoded message bytes</param>
-         /// <param name="complete">Is the delivery considered complete as of this transmission</param>
-         /// <param name="request">The request that is linked to this send event</param>
-         public ClientOutgoingEnvelope(ClientSender sender, IOutgoingDelivery delivery, uint messageFormat, IProtonBuffer payload, bool complete, TaskCompletionSource<ITracker> request)
-         {
-            this.messageFormat = messageFormat;
-            this.delivery = delivery;
-            this.payload = payload;
-            this.request = request;
-            this.sender = sender;
-            this.complete = complete;
          }
 
          /// <summary>
@@ -794,7 +763,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // the session capacity is refilled and we can fully write the remaining message payload. This
             // area could use some enhancement to allow control of write and flush when dealing with delivery
             // modes that have low assurance versus those that are strict.
-            delivery.StreamBytes(payload, complete);
+            delivery.StreamBytes(payload, true);
             if (payload != null && payload.IsReadable)
             {
                sender.AddToHeadOfBlockedQueue(this);
