@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientSender Sender(string address, SenderOptions senderOptions)
       {
-         SenderOptions options = senderOptions != null ? senderOptions : GetDefaultSenderOptions();
+         SenderOptions options = senderOptions ?? GetDefaultSenderOptions();
          string senderId = NextSenderId();
          Engine.ISender protonSender = CreateSender(session.ProtonSession, address, options, senderId);
 
@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientSender AnonymousSender(SenderOptions senderOptions)
       {
-         SenderOptions options = senderOptions != null ? senderOptions : GetDefaultSenderOptions();
+         SenderOptions options = senderOptions ?? GetDefaultSenderOptions();
          string senderId = NextSenderId();
          Engine.ISender protonSender = CreateSender(session.ProtonSession, null, options, senderId);
 
@@ -63,7 +63,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientStreamSender StreamSender(String address, StreamSenderOptions senderOptions)
       {
-         StreamSenderOptions options = senderOptions != null ? senderOptions : GetDefaultStreamSenderOptions();
+         StreamSenderOptions options = senderOptions ?? GetDefaultStreamSenderOptions();
          string senderId = NextSenderId();
          Engine.ISender protonSender = CreateSender(session.ProtonSession, address, options, senderId);
 

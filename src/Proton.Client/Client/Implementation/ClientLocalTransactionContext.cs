@@ -498,7 +498,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (currentTxn != null)
          {
-            TaskCompletionSource<ISession> future = null;
+            TaskCompletionSource<ISession> future;
 
             switch (currentTxn.State)
             {

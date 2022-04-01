@@ -42,17 +42,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          get
          {
-            switch (remoteTarget.Durable)
+            return remoteTarget.Durable switch
             {
-               case TerminusDurability.None:
-                  return DurabilityMode.None;
-               case TerminusDurability.Configuration:
-                  return DurabilityMode.Configuration;
-               case TerminusDurability.UnsettledState:
-                  return DurabilityMode.UnsettledState;
-               default:
-                  return DurabilityMode.None;
-            }
+               TerminusDurability.None => DurabilityMode.None,
+               TerminusDurability.Configuration => DurabilityMode.Configuration,
+               TerminusDurability.UnsettledState => DurabilityMode.UnsettledState,
+               _ => DurabilityMode.None,
+            };
          }
       }
 
@@ -62,19 +58,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          get
          {
-            switch (remoteTarget.ExpiryPolicy)
+            return remoteTarget.ExpiryPolicy switch
             {
-               case TerminusExpiryPolicy.Never:
-                  return ExpiryPolicy.Never;
-               case TerminusExpiryPolicy.LinkDetach:
-                  return ExpiryPolicy.LinkClose;
-               case TerminusExpiryPolicy.SessionEnd:
-                  return ExpiryPolicy.SessionClose;
-               case TerminusExpiryPolicy.ConnectionClose:
-                  return ExpiryPolicy.ConnectionClose;
-               default:
-                  return ExpiryPolicy.Never;
-            }
+               TerminusExpiryPolicy.Never => ExpiryPolicy.Never,
+               TerminusExpiryPolicy.LinkDetach => ExpiryPolicy.LinkClose,
+               TerminusExpiryPolicy.SessionEnd => ExpiryPolicy.SessionClose,
+               TerminusExpiryPolicy.ConnectionClose => ExpiryPolicy.ConnectionClose,
+               _ => ExpiryPolicy.Never,
+            };
          }
       }
 

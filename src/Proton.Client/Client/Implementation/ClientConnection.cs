@@ -52,12 +52,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly TaskCompletionSource<IConnection> openFuture = new TaskCompletionSource<IConnection>();
       private readonly TaskCompletionSource<IConnection> closeFuture = new TaskCompletionSource<IConnection>();
       private readonly IOContext ioContext;
+      private readonly Timer idleTimer;
+      private readonly AtomicReference<ClientIOException> failureCause = new AtomicReference<ClientIOException>();
 
-      private Timer idleTimer;
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
       private ITransport transport;
-      private AtomicReference<ClientIOException> failureCause = new AtomicReference<ClientIOException>();
       private ClientSession connectionSession;
       private ClientSender connectionSender;
       private long totalConnections;
@@ -137,6 +137,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          catch (Exception)
          {
+         }
+         finally
+         {
+            GC.SuppressFinalize(this);
          }
       }
 
@@ -918,7 +922,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private ClientSession LazyCreateConnectionSession()
       {
-         return connectionSession ?? (connectionSession = sessionBuilder.Session().Open());
+         return connectionSession ??= sessionBuilder.Session().Open();
       }
 
       private ClientSender LazyCreateConnectionSender()
@@ -1203,8 +1207,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private class ClientSaslCredentialsProvider : ISaslCredentialsProvider
       {
-         private ClientConnection connection;
-         private ConnectionOptions options;
+         private readonly ClientConnection connection;
+         private readonly ConnectionOptions options;
 
          public ClientSaslCredentialsProvider(ClientConnection connection)
          {

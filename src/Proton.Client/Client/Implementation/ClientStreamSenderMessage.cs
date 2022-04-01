@@ -548,7 +548,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IEnumerable<ISection> GetBodySections()
       {
-         return new ISection[0]; // Non null empty result to indicate no sections
+         return Array.Empty<ISection>(); // Non null empty result to indicate no sections
       }
 
       public IAdvancedMessage<Stream> SetBodySections(IEnumerable<ISection> sections)
@@ -621,25 +621,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private Header LazyCreateHeader()
       {
          CheckStreamState(StreamState.PREAMBLE, "Cannot write to Message Header after body writing has started.");
-         return header ?? (header = new Header());
+         return header ??= new Header();
       }
 
       private Properties LazyCreateProperties()
       {
          CheckStreamState(StreamState.PREAMBLE, "Cannot write to Message Properties after body writing has started.");
-         return properties ?? (properties = new Properties());
+         return properties ??= new Properties();
       }
 
       private ApplicationProperties LazyCreateApplicationProperties()
       {
          CheckStreamState(StreamState.PREAMBLE, "Cannot write to Message Application Properties after body writing has started.");
-         return applicationProperties ?? (applicationProperties = new ApplicationProperties(new Dictionary<string, object>()));
+         return applicationProperties ??= new ApplicationProperties(new Dictionary<string, object>());
       }
 
       private MessageAnnotations LazyCreateMessageAnnotations()
       {
          CheckStreamState(StreamState.PREAMBLE, "Cannot write to Message Annotations after body writing has started.");
-         return annotations ?? (annotations = new MessageAnnotations(new Dictionary<Symbol, object>()));
+         return annotations ??= new MessageAnnotations(new Dictionary<Symbol, object>());
       }
 
       private Footer LazyCreateFooter()
@@ -650,7 +650,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                 "Cannot write to Message Footer after message has been marked completed or aborted.");
          }
 
-         return footer ?? (footer = new Footer(new Dictionary<Symbol, object>()));
+         return footer ??= new Footer(new Dictionary<Symbol, object>());
       }
 
       private void AppendDataToBuffer(IProtonBuffer incoming)
@@ -664,9 +664,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // When appending buffers we should ensure that the buffer instance is only
             // readable to ensure that the composite will accept a chain of buffers which
             // must not have any unwritten gaps.
-            if (buffer is ProtonCompositeBuffer)
+            if (buffer is ProtonCompositeBuffer composite)
             {
-               ((ProtonCompositeBuffer)buffer).Append(incoming);
+               composite.Append(incoming);
             }
             else
             {

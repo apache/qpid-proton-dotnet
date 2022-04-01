@@ -191,13 +191,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             return ClientReleased.Instance;
          }
-         else if (outcome is Rejected)
+         else if (outcome is Rejected rejected)
          {
-            return new ClientRejected((Rejected)outcome);
+            return new ClientRejected(rejected);
          }
-         else if (outcome is Modified)
+         else if (outcome is Modified modified)
          {
-            return new ClientModified((Modified)outcome);
+            return new ClientModified(modified);
          }
 
          throw new ArgumentException("Cannot map to unknown Proton Outcome to a client delivery state: " + outcome);
@@ -218,17 +218,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             return ClientReleased.Instance;
          }
-         else if (deliveryState is Rejected)
+         else if (deliveryState is Rejected rejected)
          {
-            return new ClientRejected((Rejected)deliveryState);
+            return new ClientRejected(rejected);
          }
-         else if (deliveryState is Modified)
+         else if (deliveryState is Modified modified)
          {
-            return new ClientModified((Modified)deliveryState);
+            return new ClientModified(modified);
          }
-         else if (deliveryState is TransactionalState)
+         else if (deliveryState is TransactionalState state)
          {
-            return new ClientTransactional((TransactionalState)deliveryState);
+            return new ClientTransactional(state);
          }
 
          throw new ArgumentException("Cannot map to unknown Proton delivery state to a client delivery state: " + deliveryState);
@@ -240,27 +240,21 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             return null;
          }
-         else if (state is ClientDeliveryState)
+         else if (state is ClientDeliveryState state1)
          {
-            return ((ClientDeliveryState)state).ProtonDeliveryState;
+            return state1.ProtonDeliveryState;
          }
          else
          {
-            switch (state.Type)
+            return state.Type switch
             {
-               case DeliveryStateType.Accepted:
-                  return Accepted.Instance;
-               case DeliveryStateType.Released:
-                  return Released.Instance;
-               case DeliveryStateType.Rejected:
-                  return new Rejected(); // TODO - How do we aggregate the different values into one DeliveryState Object
-               case DeliveryStateType.Modified:
-                  return new Modified(); // TODO - How do we aggregate the different values into one DeliveryState Object
-               case DeliveryStateType.Transactional:
-                  throw new ArgumentException("Cannot manually enlist delivery in AMQP Transactions");
-               default:
-                  throw new InvalidOperationException("Client does not support the given Delivery State type: " + state.Type);
-            }
+               DeliveryStateType.Accepted => Accepted.Instance,
+               DeliveryStateType.Released => Released.Instance,
+               DeliveryStateType.Rejected => new Rejected(),// TODO - How do we aggregate the different values into one DeliveryState Object
+               DeliveryStateType.Modified => new Modified(),// TODO - How do we aggregate the different values into one DeliveryState Object
+               DeliveryStateType.Transactional => throw new ArgumentException("Cannot manually enlist delivery in AMQP Transactions"),
+               _ => throw new InvalidOperationException("Client does not support the given Delivery State type: " + state.Type),
+            };
          }
       }
 

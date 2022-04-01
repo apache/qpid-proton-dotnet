@@ -45,9 +45,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientReceiver Receiver(string address, ReceiverOptions receiverOptions)
       {
-         ReceiverOptions rcvOptions = receiverOptions != null ? receiverOptions : getDefaultReceiverOptions();
+         ReceiverOptions rcvOptions = receiverOptions ?? GetDefaultReceiverOptions();
          string receiverId = NextReceiverId();
-         Engine.IReceiver protonReceiver = CreateReceiver(address, rcvOptions, receiverId);
+         Engine.IReceiver protonReceiver = CreateReceiver(rcvOptions, receiverId);
 
          protonReceiver.Source = CreateSource(address, rcvOptions);
          protonReceiver.Target = CreateTarget(address, rcvOptions);
@@ -57,12 +57,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientReceiver DurableReceiver(string address, string subscriptionName, ReceiverOptions receiverOptions)
       {
-         ReceiverOptions options = receiverOptions != null ? receiverOptions : getDefaultReceiverOptions();
+         ReceiverOptions options = receiverOptions ?? GetDefaultReceiverOptions();
          string receiverId = NextReceiverId();
 
          options.LinkName = subscriptionName;
 
-         Engine.IReceiver protonReceiver = CreateReceiver(address, options, receiverId);
+         Engine.IReceiver protonReceiver = CreateReceiver(options, receiverId);
 
          protonReceiver.Source = CreateDurableSource(address, options);
          protonReceiver.Target = CreateTarget(address, options);
@@ -72,9 +72,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientReceiver DynamicReceiver(IDictionary<string, object> dynamicNodeProperties, ReceiverOptions receiverOptions)
       {
-         ReceiverOptions options = receiverOptions != null ? receiverOptions : getDefaultReceiverOptions();
+         ReceiverOptions options = receiverOptions ?? GetDefaultReceiverOptions();
          string receiverId = NextReceiverId();
-         Engine.IReceiver protonReceiver = CreateReceiver(null, options, receiverId);
+         Engine.IReceiver protonReceiver = CreateReceiver(options, receiverId);
 
          protonReceiver.Source = CreateSource(null, options);
          protonReceiver.Target = CreateTarget(null, options);
@@ -88,9 +88,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientStreamReceiver StreamReceiver(string address, StreamReceiverOptions receiverOptions)
       {
-         StreamReceiverOptions options = receiverOptions != null ? receiverOptions : GetDefaultStreamReceiverOptions();
+         StreamReceiverOptions options = receiverOptions ?? GetDefaultStreamReceiverOptions();
          string receiverId = NextReceiverId();
-         Engine.IReceiver protonReceiver = CreateReceiver(address, options, receiverId);
+         Engine.IReceiver protonReceiver = CreateReceiver(options, receiverId);
 
          protonReceiver.Source = CreateSource(address, options);
          protonReceiver.Target = CreateTarget(address, options);
@@ -129,7 +129,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return session.SessionId + ":" + receiverCounter.IncrementAndGet();
       }
 
-      private Engine.IReceiver CreateReceiver(String address, ReceiverOptions options, String receiverId)
+      private Engine.IReceiver CreateReceiver(ReceiverOptions options, String receiverId)
       {
          string linkName = options?.LinkName ?? "receiver-" + receiverId;
 
@@ -155,7 +155,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return protonReceiver;
       }
 
-      private Source CreateSource(string address, ReceiverOptions options)
+      private static Source CreateSource(string address, ReceiverOptions options)
       {
          SourceOptions sourceOptions = options.SourceOptions;
 
@@ -210,7 +210,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return source;
       }
 
-      private Source CreateDurableSource(string address, ReceiverOptions options)
+      private static Source CreateDurableSource(string address, ReceiverOptions options)
       {
          SourceOptions sourceOptions = options.SourceOptions;
          Source source = new Source();
@@ -235,7 +235,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return source;
       }
 
-      private Target CreateTarget(String address, ReceiverOptions options)
+      private static Target CreateTarget(String address, ReceiverOptions options)
       {
          TargetOptions targetOptions = options.TargetOptions;
          Target target = new Target();
@@ -259,7 +259,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return target;
       }
 
-      private ReceiverOptions getDefaultReceiverOptions()
+      private ReceiverOptions GetDefaultReceiverOptions()
       {
          ReceiverOptions receiverOptions = defaultReceiverOptions;
          if (receiverOptions == null)

@@ -102,9 +102,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             return null;
          }
-         else if (condition is ClientErrorCondition)
+         else if (condition is ClientErrorCondition condition1)
          {
-            return ((ClientErrorCondition)condition).ProtonErrorCondition;
+            return condition1.ProtonErrorCondition;
          }
          else
          {

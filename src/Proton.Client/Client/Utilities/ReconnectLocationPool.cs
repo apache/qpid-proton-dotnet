@@ -116,9 +116,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
             while (n > 1)
             {
                int k = rand.Next(n--);
-               ReconnectLocation temp = pool[n];
-               pool[n] = pool[k];
-               pool[k] = temp;
+               (pool[k], pool[n]) = (pool[n], pool[k]);
             }
 
             foreach (ReconnectLocation location in pool)
@@ -265,15 +263,12 @@ namespace Apache.Qpid.Proton.Client.Utilities
       public static void ShuffleMe(IList<ReconnectLocation> list)
       {
          Random random = new Random();
-         int n = list.Count;
 
          for (int i = list.Count - 1; i > 1; i--)
          {
             int rnd = random.Next(i + 1);
 
-            ReconnectLocation value = list[rnd];
-            list[rnd] = list[i];
-            list[i] = value;
+            (list[i], list[rnd]) = (list[rnd], list[i]);
          }
       }
    }

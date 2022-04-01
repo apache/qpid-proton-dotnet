@@ -40,14 +40,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <returns>A client exception that is produced using the input exception instance</returns>
       public static ClientIOException CreateOrPassthroughFatal(Exception cause)
       {
-         if (cause is ClientIOException)
+         if (cause is ClientIOException exception)
          {
-            return (ClientIOException)cause;
+            return exception;
          }
 
-         if (cause.InnerException is ClientIOException)
+         if (cause.InnerException is ClientIOException exception1)
          {
-            return (ClientIOException)cause.InnerException;
+            return exception1;
          }
 
          string message = cause.Message;
@@ -69,14 +69,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <returns>A client exception that is produced using the input exception instance</returns>
       public static ClientException CreateNonFatalOrPassthrough(Exception cause)
       {
-         if (cause is ClientException)
+         if (cause is ClientException exception)
          {
-            return (ClientException)cause;
+            return exception;
          }
 
-         if (cause.InnerException is ClientException)
+         if (cause.InnerException is ClientException exception1)
          {
-            return (ClientException)cause.InnerException;
+            return exception1;
          }
 
          string message = cause.Message;
@@ -145,16 +145,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <returns>A connection remotely closed that indicates the reason.</returns>
       public static ClientConnectionRemotelyClosedException ConvertToConnectionClosedException(Exception cause)
       {
-         ClientConnectionRemotelyClosedException remoteError = null;
+         ClientConnectionRemotelyClosedException remoteError;
 
-         if (cause is ClientConnectionRemotelyClosedException)
+         if (cause is ClientConnectionRemotelyClosedException exception)
          {
-            remoteError = (ClientConnectionRemotelyClosedException)cause;
+            remoteError = exception;
          }
-         else if (cause is SaslSystemException)
+         else if (cause is SaslSystemException saslError)
          {
             remoteError = new ClientConnectionSecuritySaslException(
-                cause.Message, cause, !((SaslSystemException)cause).Permanent);
+                cause.Message, cause, !saslError.Permanent);
          }
          else if (cause is SaslException)
          {

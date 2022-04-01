@@ -94,6 +94,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          catch (Exception)
          {
          }
+
+         GC.SuppressFinalize(this);
       }
 
       public IConnection Connect(string host, int port, ConnectionOptions options = null)

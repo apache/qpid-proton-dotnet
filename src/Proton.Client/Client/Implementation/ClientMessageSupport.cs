@@ -41,9 +41,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <returns>A converted client message instance from the source message.</returns>
       public static IAdvancedMessage<T> ConvertMessage<T>(IMessage<T> message)
       {
-         if (message is IAdvancedMessage<T>)
+         if (message is IAdvancedMessage<T> advanced)
          {
-            return (IAdvancedMessage<T>)message;
+            return advanced;
          }
          else
          {
@@ -170,7 +170,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          ClientMessage<object> message = new ClientMessage<object>();
 
-         ISection section = null;
+         ISection section;
 
          while (buffer.IsReadable)
          {

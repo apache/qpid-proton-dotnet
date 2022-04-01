@@ -246,7 +246,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       #region Transport private API
 
-      private IPAddress ResolveIPAddress(string address)
+      private static IPAddress ResolveIPAddress(string address)
       {
          IPHostEntry entry = Dns.GetHostEntry(address);
          IPAddress result = default(IPAddress);
@@ -396,9 +396,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       {
          while (await channelOutputSink.WaitToReadAsync().ConfigureAwait(false))
          {
-            IChannelTask task = null;
-
-            while (channelOutputSink.TryRead(out task))
+            while (channelOutputSink.TryRead(out IChannelTask task))
             {
                task.Execute();
             }
@@ -443,7 +441,7 @@ namespace Apache.Qpid.Proton.Client.Transport
          bool remoteCertificateChainErrors = sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors);
 
          if (remoteCertificateNotAvailable &&
-             !sslOptions.TlsVersionOverride.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable))
+             !sslOptions.AllowedSslPolicyErrorsOverride.HasFlag(SslPolicyErrors.RemoteCertificateNotAvailable))
          {
             LOG.Trace("Server certificate authentication failed due lack of provided certificate: {0}", sslPolicyErrors);
             validated = false;

@@ -168,66 +168,48 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public static Symbol AsProtonType(this DeliveryStateType mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case DeliveryStateType.Accepted:
-               return Accepted.DescriptorSymbol;
-            case DeliveryStateType.Rejected:
-               return Rejected.DescriptorSymbol;
-            case DeliveryStateType.Modified:
-               return Modified.DescriptorSymbol;
-            case DeliveryStateType.Released:
-               return Released.DescriptorSymbol;
-         }
-
-         throw new ArgumentException("Cannot convert unknown delivery state type: " + mode);
+            DeliveryStateType.Accepted => Accepted.DescriptorSymbol,
+            DeliveryStateType.Rejected => Rejected.DescriptorSymbol,
+            DeliveryStateType.Modified => Modified.DescriptorSymbol,
+            DeliveryStateType.Released => Released.DescriptorSymbol,
+            _ => throw new ArgumentException("Cannot convert unknown delivery state type: " + mode),
+         };
       }
 
       public static Symbol AsProtonType(this DistributionMode mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case DistributionMode.Copy:
-               return ClientConstants.COPY;
-            case DistributionMode.Move:
-               return ClientConstants.MOVE;
-            case DistributionMode.None:
-               return null;
-         }
-
-         throw new ArgumentException("Cannot convert unknown distribution mode: " + mode);
+            DistributionMode.Copy => ClientConstants.COPY,
+            DistributionMode.Move => ClientConstants.MOVE,
+            DistributionMode.None => null,
+            _ => throw new ArgumentException("Cannot convert unknown distribution mode: " + mode),
+         };
       }
 
       public static Types.Messaging.TerminusDurability AsProtonType(this DurabilityMode mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case DurabilityMode.Configuration:
-               return Types.Messaging.TerminusDurability.Configuration;
-            case DurabilityMode.None:
-               return Types.Messaging.TerminusDurability.None;
-            case DurabilityMode.UnsettledState:
-               return Types.Messaging.TerminusDurability.UnsettledState;
-         }
-
-         throw new ArgumentException("Cannot convert unknown durability mode: " + mode);
+            DurabilityMode.Configuration => Types.Messaging.TerminusDurability.Configuration,
+            DurabilityMode.None => Types.Messaging.TerminusDurability.None,
+            DurabilityMode.UnsettledState => Types.Messaging.TerminusDurability.UnsettledState,
+            _ => throw new ArgumentException("Cannot convert unknown durability mode: " + mode),
+         };
       }
 
       public static Types.Messaging.TerminusExpiryPolicy AsProtonType(this ExpiryPolicy policy)
       {
-         switch (policy)
+         return policy switch
          {
-            case ExpiryPolicy.ConnectionClose:
-               return Types.Messaging.TerminusExpiryPolicy.ConnectionClose;
-            case ExpiryPolicy.LinkClose:
-               return Types.Messaging.TerminusExpiryPolicy.LinkDetach;
-            case ExpiryPolicy.Never:
-               return Types.Messaging.TerminusExpiryPolicy.Never;
-            case ExpiryPolicy.SessionClose:
-               return Types.Messaging.TerminusExpiryPolicy.SessionEnd;
-         }
-
-         throw new ArgumentException("Cannot convert unknown expiry policy: " + policy);
+            ExpiryPolicy.ConnectionClose => Types.Messaging.TerminusExpiryPolicy.ConnectionClose,
+            ExpiryPolicy.LinkClose => Types.Messaging.TerminusExpiryPolicy.LinkDetach,
+            ExpiryPolicy.Never => Types.Messaging.TerminusExpiryPolicy.Never,
+            ExpiryPolicy.SessionClose => Types.Messaging.TerminusExpiryPolicy.SessionEnd,
+            _ => throw new ArgumentException("Cannot convert unknown expiry policy: " + policy),
+         };
       }
    }
 }

@@ -37,8 +37,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private static readonly string EngineTransportProxyBindingKey = "Transport-Proxy-Key";
 
-      private IEngine engine;
-      private ITransport transport;
+      private readonly IEngine engine;
+      private readonly ITransport transport;
 
       public ClientTransportProxy(IEngine engine, ITransport transport)
       {

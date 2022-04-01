@@ -46,17 +46,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          get
          {
-            switch (remoteSource.Durable)
+            return remoteSource.Durable switch
             {
-               case TerminusDurability.None:
-                  return DurabilityMode.None;
-               case TerminusDurability.Configuration:
-                  return DurabilityMode.Configuration;
-               case TerminusDurability.UnsettledState:
-                  return DurabilityMode.UnsettledState;
-               default:
-                  return DurabilityMode.None;
-            }
+               TerminusDurability.None => DurabilityMode.None,
+               TerminusDurability.Configuration => DurabilityMode.Configuration,
+               TerminusDurability.UnsettledState => DurabilityMode.UnsettledState,
+               _ => DurabilityMode.None,
+            };
          }
       }
 
@@ -66,19 +62,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          get
          {
-            switch (remoteSource.ExpiryPolicy)
+            return remoteSource.ExpiryPolicy switch
             {
-               case TerminusExpiryPolicy.Never:
-                  return ExpiryPolicy.Never;
-               case TerminusExpiryPolicy.LinkDetach:
-                  return ExpiryPolicy.LinkClose;
-               case TerminusExpiryPolicy.SessionEnd:
-                  return ExpiryPolicy.SessionClose;
-               case TerminusExpiryPolicy.ConnectionClose:
-                  return ExpiryPolicy.ConnectionClose;
-               default:
-                  return ExpiryPolicy.Never;
-            }
+               TerminusExpiryPolicy.Never => ExpiryPolicy.Never,
+               TerminusExpiryPolicy.LinkDetach => ExpiryPolicy.LinkClose,
+               TerminusExpiryPolicy.SessionEnd => ExpiryPolicy.SessionClose,
+               TerminusExpiryPolicy.ConnectionClose => ExpiryPolicy.ConnectionClose,
+               _ => ExpiryPolicy.Never,
+            };
          }
       }
 
@@ -90,15 +81,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (!cachedDistributionMode.HasValue && remoteSource.DistributionMode != null)
             {
-               switch (remoteSource.DistributionMode.ToString())
+               return remoteSource.DistributionMode.ToString() switch
                {
-                  case "MOVE":
-                     return (DistributionMode)(cachedDistributionMode = Client.DistributionMode.Move);
-                  case "COPY":
-                     return (DistributionMode)(cachedDistributionMode = Client.DistributionMode.Copy);
-                  default:
-                     return (DistributionMode)(cachedDistributionMode = Client.DistributionMode.None);
-               }
+                  "MOVE" => (DistributionMode)(cachedDistributionMode = Client.DistributionMode.Move),
+                  "COPY" => (DistributionMode)(cachedDistributionMode = Client.DistributionMode.Copy),
+                  _ => (DistributionMode)(cachedDistributionMode = Client.DistributionMode.None),
+               };
             }
 
             return (DistributionMode)cachedDistributionMode;

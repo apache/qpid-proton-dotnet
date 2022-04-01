@@ -3949,86 +3949,85 @@ namespace Apache.Qpid.Proton.Client.Implementation
       [Test]
       public void TestReceiverGetSourceWaitsForRemoteAttach()
       {
-         tryReadReceiverSource(true);
+         TryReadReceiverSource(true);
       }
 
       [Test]
       public void TestReceiverGetSourceFailsAfterOpenTimeout()
       {
-         tryReadReceiverSource(false);
+         TryReadReceiverSource(false);
       }
 
-      private void tryReadReceiverSource(bool attachResponse)
+      private void TryReadReceiverSource(bool attachResponse)
       {
-         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         using ProtonTestServer peer = new ProtonTestServer(loggerFactory);
+
+         peer.ExpectSASLAnonymousConnect();
+         peer.ExpectOpen().Respond();
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfReceiver();
+         peer.ExpectFlow();
+         peer.Start();
+
+         string remoteAddress = peer.ServerAddress;
+         int remotePort = peer.ServerPort;
+
+         logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+         IClient container = IClient.Create();
+         IConnection connection = container.Connect(remoteAddress, remotePort);
+         StreamReceiverOptions options = new StreamReceiverOptions()
          {
-            peer.ExpectSASLAnonymousConnect();
-            peer.ExpectOpen().Respond();
-            peer.ExpectBegin().Respond();
-            peer.ExpectAttach().OfReceiver();
-            peer.ExpectFlow();
-            peer.Start();
+            OpenTimeout = 150
+         };
+         IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
 
-            string remoteAddress = peer.ServerAddress;
-            int remotePort = peer.ServerPort;
+         peer.WaitForScriptToComplete();
 
-            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+         if (attachResponse)
+         {
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.RespondToLastAttach().Later(10);
+         }
+         else
+         {
+            peer.ExpectDetach();
+            peer.ExpectEnd();
+         }
 
-            IClient container = IClient.Create();
-            IConnection connection = container.Connect(remoteAddress, remotePort);
-            StreamReceiverOptions options = new StreamReceiverOptions()
-            {
-               OpenTimeout = 150
-            };
-            IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
-
-            peer.WaitForScriptToComplete();
-
-            if (attachResponse)
-            {
-               peer.ExpectDetach().Respond();
-               peer.ExpectEnd().Respond();
-               peer.RespondToLastAttach().Later(10);
-            }
-            else
-            {
-               peer.ExpectDetach();
-               peer.ExpectEnd();
-            }
-
-            if (attachResponse)
-            {
-               Assert.IsNotNull(receiver.Source, "Remote should have responded with a Source value");
-               Assert.AreEqual("test-receiver", receiver.Source.Address);
-            }
-            else
-            {
-               try
-               {
-                  _ = receiver.Source;
-                  Assert.Fail("Should failed to get remote source due to no attach response");
-               }
-               catch (ClientException ex)
-               {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
-               }
-            }
-
+         if (attachResponse)
+         {
+            Assert.IsNotNull(receiver.Source, "Remote should have responded with a Source value");
+            Assert.AreEqual("test-receiver", receiver.Source.Address);
+         }
+         else
+         {
             try
             {
-               receiver.Close();
+               _ = receiver.Source;
+               Assert.Fail("Should failed to get remote source due to no attach response");
             }
-            catch (Exception ex)
+            catch (ClientException ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
-               Assert.Fail("Should not fail to close when connection not closed and detach sent");
+               logger.LogDebug("Caught expected exception from blocking call", ex);
             }
-
-            peer.ExpectClose().Respond();
-            connection.Close();
-
-            peer.WaitForScriptToComplete();
          }
+
+         try
+         {
+            receiver.Close();
+         }
+         catch (Exception ex)
+         {
+            logger.LogDebug("Caught unexpected exception from close call", ex);
+            Assert.Fail("Should not fail to close when connection not closed and detach sent");
+         }
+
+         peer.ExpectClose().Respond();
+         connection.Close();
+
+         peer.WaitForScriptToComplete();
       }
 
       [Test]

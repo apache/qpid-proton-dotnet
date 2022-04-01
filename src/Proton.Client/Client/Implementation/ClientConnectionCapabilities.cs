@@ -53,12 +53,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
-      private bool CheckAnonymousRelaySupported(ICollection<Symbol> desired, ICollection<Symbol> offered)
+      private static bool CheckAnonymousRelaySupported(ICollection<Symbol> desired, ICollection<Symbol> offered)
       {
          return offered.Contains(ClientConstants.ANONYMOUS_RELAY);
       }
 
-      private bool CheckDeliveryRelaySupported(ICollection<Symbol> desired, ICollection<Symbol> offered)
+      private static bool CheckDeliveryRelaySupported(ICollection<Symbol> desired, ICollection<Symbol> offered)
       {
          return offered.Contains(ClientConstants.DELAYED_DELIVERY);
       }
