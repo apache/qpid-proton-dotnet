@@ -35,7 +35,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private static readonly IdGenerator CONTAINER_ID_GENERATOR = new IdGenerator();
 
       private readonly ClientOptions options;
-      private readonly ConnectionOptions defaultConnectionOptions = new ConnectionOptions();
       private readonly IDictionary<string, ClientConnection> connections = new Dictionary<string, ClientConnection>();
       private readonly string clientUniqueId = CONTAINER_ID_GENERATOR.GenerateId();
       private readonly AtomicInteger CONNECTION_COUNTER = new AtomicInteger();

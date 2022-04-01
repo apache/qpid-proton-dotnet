@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientStreamSender : ClientLinkType<IStreamSender, Engine.ISender>, IStreamSender
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamSender>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamSender>();
 
       private readonly IDeque<ClientOutgoingEnvelope> blocked = new ArrayDeque<ClientOutgoingEnvelope>();
       private readonly string senderId;

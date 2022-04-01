@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientConnection : IConnection
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientConnection>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientConnection>();
 
       private const int UNLIMITED = -1;
       private const int UNDEFINED = -1;
@@ -1122,7 +1122,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private bool IsStoppageCause(ClientException cause)
+      private static bool IsStoppageCause(ClientException cause)
       {
          if (cause is ClientConnectionSecuritySaslException saslFailure)
          {

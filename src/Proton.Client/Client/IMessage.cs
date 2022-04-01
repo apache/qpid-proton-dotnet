@@ -102,9 +102,9 @@ namespace Apache.Qpid.Proton.Client
       /// <exception cref="ClientException">If an error occurs during the conversion</exception>
       IAdvancedMessage<T> ToAdvancedMessage()
       {
-         if (this is IAdvancedMessage<T>)
+         if (this is IAdvancedMessage<T> message)
          {
-            return (IAdvancedMessage<T>) this;
+            return message;
          }
          else
          {

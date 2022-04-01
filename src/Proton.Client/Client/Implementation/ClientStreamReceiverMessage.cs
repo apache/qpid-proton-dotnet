@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 {
    public sealed class ClientStreamReceiverMessage : IStreamReceiverMessage
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamReceiverMessage>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamReceiverMessage>();
 
       private readonly ClientStreamReceiver receiver;
       private readonly ClientStreamDelivery delivery;

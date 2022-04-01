@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientRedirect
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientRedirect>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientRedirect>();
 
       private readonly Dictionary<Symbol, object> redirect;
 
@@ -40,9 +40,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public ClientRedirect Validate()
       {
-         object networkHost = null;
-
-         if (!redirect.TryGetValue(ClientConstants.NETWORK_HOST, out networkHost))
+         if (!redirect.TryGetValue(ClientConstants.NETWORK_HOST, out object networkHost))
          {
             throw new IOException("Redirection information not set, missing network host.");
          }

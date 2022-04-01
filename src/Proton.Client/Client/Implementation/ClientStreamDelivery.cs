@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientStreamDelivery : IStreamDelivery
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamDelivery>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamDelivery>();
 
       private readonly ClientStreamReceiver receiver;
       private readonly IIncomingDelivery protonDelivery;
@@ -248,9 +248,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private class RawDeliveryInputStream : Stream
       {
-         private const int INVALID_MARK = -1;
-         private const int DEFAULT_MARK_LIMIT = 1024;
-
          private readonly AtomicBoolean closed = false;
          private readonly ClientStreamDelivery delivery;
          private readonly ClientStreamReceiver receiver;

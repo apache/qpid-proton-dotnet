@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Client.Exceptions
    /// </summary>
    public class ClientDeliveryStateException : ClientIllegalStateException
    {
-      private IDeliveryState deliveryState;
+      private readonly IDeliveryState deliveryState;
 
       /// <summary>
       /// Create a new instance of the client delivery state error.

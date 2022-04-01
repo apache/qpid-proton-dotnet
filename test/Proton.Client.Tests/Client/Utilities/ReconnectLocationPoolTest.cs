@@ -282,16 +282,16 @@ namespace Apache.Qpid.Proton.Client.Utilities
       [Test]
       public void TestConnectedShufflesWhenRandomizing()
       {
-         assertConnectedEffectOnPool(true, true);
+         AssertConnectedEffectOnPool(true, true);
       }
 
       [Test]
       public void TestConnectedDoesNotShufflesWhenNoRandomizing()
       {
-         assertConnectedEffectOnPool(false, false);
+         AssertConnectedEffectOnPool(false, false);
       }
 
-      private void assertConnectedEffectOnPool(bool randomize, bool shouldShuffle)
+      private void AssertConnectedEffectOnPool(bool randomize, bool shouldShuffle)
       {
          ReconnectLocationPool pool = new ReconnectLocationPool(entries);
 

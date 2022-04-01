@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientReceiver : ClientLinkType<IReceiver, Engine.IReceiver>, IReceiver
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientReceiver>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientReceiver>();
 
       private readonly ReceiverOptions options;
       private readonly string receiverId;

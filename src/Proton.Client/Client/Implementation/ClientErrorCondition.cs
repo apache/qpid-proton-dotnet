@@ -54,12 +54,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <exception cref="ArgumentNullException"></exception>
       internal ClientErrorCondition(Types.Transport.ErrorCondition condition)
       {
-         if (condition == null)
-         {
-            throw new ArgumentNullException("The error condition value cannot be null");
-         }
-
-         error = condition;
+         error = condition ?? throw new ArgumentNullException("The error condition value cannot be null");
       }
 
       /// <summary>

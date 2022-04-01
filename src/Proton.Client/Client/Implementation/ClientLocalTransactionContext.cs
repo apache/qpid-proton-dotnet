@@ -38,7 +38,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                                                            Released.DescriptorSymbol,
                                                                            Modified.DescriptorSymbol };
 
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientLocalTransactionContext>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientLocalTransactionContext>();
 
       private readonly string DECLARE_FUTURE_NAME = "Declare:Future";
       private readonly string DISCHARGE_FUTURE_NAME = "Discharge:Future";
@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public bool IsInTransaction => currentTxn?.State == TransactionState.Declared;
 
-      public bool IsRollbackOnly => IsInTransaction ? txnController.IsLocallyClosed : false;
+      public bool IsRollbackOnly => IsInTransaction && txnController.IsLocallyClosed;
 
       public IClientTransactionContext Begin(TaskCompletionSource<ISession> beginFuture)
       {

@@ -106,7 +106,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public static IProtonBuffer EncodeMessage<T>(IEncoder encoder, IProtonBufferAllocator allocator, IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations)
       {
-         return EncodeMessage(encoder, encoder.NewEncoderState(), ProtonByteBufferAllocator.Instance, message, deliveryAnnotations);
+         return EncodeMessage(encoder, encoder.NewEncoderState(), allocator, message, deliveryAnnotations);
       }
 
       public static IProtonBuffer EncodeMessage<T>(IEncoder encoder, IEncoderState encoderState, IProtonBufferAllocator allocator, IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations)

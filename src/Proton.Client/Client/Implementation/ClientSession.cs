@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientSession : ISession
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSession>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientSession>();
 
       private static readonly IClientTransactionContext NoOpTransactionContext = new ClientNoOpTransactionContext();
 
