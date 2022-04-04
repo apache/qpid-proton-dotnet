@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public class ProtonEncoderState : IEncoderState
    {
-      private ProtonEncoder encoder;
+      private readonly ProtonEncoder encoder;
 
       public ProtonEncoderState(ProtonEncoder encoder)
       {
@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          return buffer;
       }
 
-      private void EncodeUtf8Sequence(IProtonBuffer buffer, string value)
+      private static void EncodeUtf8Sequence(IProtonBuffer buffer, string value)
       {
          UTF8Encoding utf8 = new UTF8Encoding();
 

@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private static readonly byte[] SASL_FRAME_HEADER = new byte[] { 0, 0, 0, 0, (byte)FRAME_DOFF_SIZE, SASL_FRAME_TYPE, 0, 0 };
 
-      private static readonly IProtonBuffer EMPTY_BUFFER = ProtonByteBufferAllocator.Instance.Wrap(new byte[0]);
+      private static readonly IProtonBuffer EMPTY_BUFFER = ProtonByteBufferAllocator.Instance.Wrap(Array.Empty<byte>());
 
       private readonly IEncoder saslEncoder = CodecFactory.SaslEncoder;
       private readonly IEncoderState saslEncoderState = CodecFactory.SaslEncoder.NewEncoderState();

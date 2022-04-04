@@ -93,9 +93,7 @@ namespace Apache.Qpid.Proton.Types.Transport
             {
                foreach (KeyValuePair<Symbol, object> pair in Info)
                {
-                  object value;
-
-                  if (condition.Info.TryGetValue(pair.Key, out value))
+                  if (condition.Info.TryGetValue(pair.Key, out object value))
                   {
                      if (!EqualityComparer<object>.Default.Equals(value, pair.Value))
                      {

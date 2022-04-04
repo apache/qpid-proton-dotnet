@@ -33,19 +33,19 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonConnection : ProtonEndpoint<IConnection>, IConnection, IHeaderHandler<ProtonEngine>, IPerformativeHandler<ProtonEngine>
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonConnection>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonConnection>();
 
       private readonly Open localOpen = new Open();
       private Open remoteOpen;
       private AmqpHeader remoteHeader;
 
-      private IDictionary<ushort, ProtonSession> localSessions = new Dictionary<ushort, ProtonSession>();
-      private IDictionary<ushort, ProtonSession> remoteSessions = new Dictionary<ushort, ProtonSession>();
+      private readonly IDictionary<ushort, ProtonSession> localSessions = new Dictionary<ushort, ProtonSession>();
+      private readonly IDictionary<ushort, ProtonSession> remoteSessions = new Dictionary<ushort, ProtonSession>();
 
       // These would be sessions that were begun and ended before the remote ever
       // responded with a matching being and end.  The remote is required to complete
       // these before answering a new begin sequence on the same local channel.
-      private MemoryCache zombieSessions = new MemoryCache(new MemoryCacheOptions());
+      private readonly MemoryCache zombieSessions = new MemoryCache(new MemoryCacheOptions());
 
       private ConnectionState localState = ConnectionState.Idle;
       private ConnectionState remoteState = ConnectionState.Idle;
@@ -121,7 +121,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (remoteAMQPHeaderHandler == null)
          {
-            throw new ArgumentNullException("Provided AMQP Header received handler cannot be null");
+            throw new ArgumentNullException(nameof(remoteAMQPHeaderHandler),
+               "Provided AMQP Header received handler cannot be null");
          }
 
          CheckConnectionClosed("Cannot start header negotiation on a closed connection");
@@ -404,7 +405,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleBegin(Begin begin, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session = null;
+         ProtonSession session;
 
          if (channel > localOpen.ChannelMax)
          {
@@ -476,9 +477,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleEnd(End end, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session;
-
-         if (remoteSessions.TryGetValue(channel, out session))
+         if (remoteSessions.TryGetValue(channel, out ProtonSession session))
          {
             remoteSessions.Remove(channel);
             session.RemoteEnd(end, channel);
@@ -488,7 +487,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             // Check that we don't have a lingering session that was opened and closed locally for
             // which the remote is finally getting round to ending but we lost the session instance
             // due to it being cleaned up by GC,
-            if (zombieSessions.TryGetValue(channel, out session))
+            if (zombieSessions.TryGetValue(channel, out _))
             {
                zombieSessions.Remove(channel);
             }
@@ -501,9 +500,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleAttach(Attach attach, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session;
-
-         if (remoteSessions.TryGetValue(channel, out session))
+         if (remoteSessions.TryGetValue(channel, out ProtonSession session))
          {
             session.RemoteAttach(attach, channel);
          }
@@ -515,9 +512,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleDetach(Detach detach, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session;
-
-         if (remoteSessions.TryGetValue(channel, out session))
+         if (remoteSessions.TryGetValue(channel, out ProtonSession session))
          {
             session.RemoteDetach(detach, channel);
          }
@@ -529,9 +524,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleFlow(Flow flow, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session;
-
-         if (remoteSessions.TryGetValue(channel, out session))
+         if (remoteSessions.TryGetValue(channel, out ProtonSession session))
          {
             session.RemoteFlow(flow, channel);
          }
@@ -543,9 +536,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleTransfer(Transfer transfer, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session;
-
-         if (remoteSessions.TryGetValue(channel, out session))
+         if (remoteSessions.TryGetValue(channel, out ProtonSession session))
          {
             session.RemoteTransfer(transfer, payload, channel);
          }
@@ -557,9 +548,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public void HandleDisposition(Disposition disposition, IProtonBuffer payload, ushort channel, ProtonEngine context)
       {
-         ProtonSession session;
-
-         if (remoteSessions.TryGetValue(channel, out session))
+         if (remoteSessions.TryGetValue(channel, out ProtonSession session))
          {
             session.RemoteDisposition(disposition, channel);
          }
@@ -626,8 +615,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                   ErrorCondition = ErrorConditionFromFailureCause(cause);
                }
 
-               Close forcedClose = new Close();
-               forcedClose.Error = ErrorCondition;
+               Close forcedClose = new Close
+               {
+                  Error = ErrorCondition
+               };
 
                engine.FireWrite(forcedClose, 0);
             }
@@ -702,8 +693,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
                   if (IsLocallyClosed && !localCloseSent && !engine.IsShutdown)
                   {
-                     Close localClose = new Close();
-                     localClose.Error = ErrorCondition;
+                     Close localClose = new Close
+                     {
+                        Error = ErrorCondition
+                     };
                      engine.FireWrite(localClose, 0);
                      localCloseSent = true;
                      resourceSyncNeeded = false;  // Session resources can't write anything now
@@ -726,7 +719,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      private ErrorCondition ErrorConditionFromFailureCause(Exception cause)
+      private static ErrorCondition ErrorConditionFromFailureCause(Exception cause)
       {
          Symbol condition;
          string description = cause.Message;
@@ -747,9 +740,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          for (ushort i = 0; i <= localOpen.ChannelMax; ++i)
          {
-            object result;
-
-            if (!localSessions.ContainsKey(i) && !zombieSessions.TryGetValue(i, out result))
+            if (!localSessions.ContainsKey(i) && !zombieSessions.TryGetValue(i, out _))
             {
                return i;
             }

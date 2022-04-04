@@ -65,11 +65,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(buffer, state);
       }
 
-      private Attach ReadAttach(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Attach ReadAttach(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Attach result = new Attach();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          if (count < MinAttachListEntries)
@@ -182,11 +182,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(stream, state);
       }
 
-      private Attach ReadAttach(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Attach ReadAttach(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Attach result = new Attach();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          if (count < MinAttachListEntries)
@@ -276,17 +276,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      private string ErrorForMissingRequiredFields(int present)
+      private static string ErrorForMissingRequiredFields(int present)
       {
-         switch (present)
+         return present switch
          {
-            case 2:
-               return "The role field cannot be omitted from the Attach";
-            case 1:
-               return "The handle field cannot be omitted from the Attach";
-            default:
-               return "The name field cannot be omitted from the Attach";
-         }
+            2 => "The role field cannot be omitted from the Attach",
+            1 => "The handle field cannot be omitted from the Attach",
+            _ => "The name field cannot be omitted from the Attach",
+         };
       }
    }
 }

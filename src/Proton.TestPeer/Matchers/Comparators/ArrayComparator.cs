@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
 
       public bool? Equals(object lhs, object rhs, IDescription mismatchDescription)
       {
-         if (!(lhs is Array lhsArray) || !(rhs is Array rhsArray))
+         if (lhs is not Array lhsArray || rhs is not Array rhsArray)
          {
             return null;
          }

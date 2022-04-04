@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonReceiver : ProtonLink<IReceiver>, IReceiver
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonReceiver>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonReceiver>();
 
       private Action<IIncomingDelivery> deliveryReadEventHandler = null;
       private Action<IIncomingDelivery> deliveryAbortedEventHandler = null;
@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (credits < currentCredit)
          {
-            throw new ArgumentOutOfRangeException("Cannot drain partial link credit");
+            throw new ArgumentOutOfRangeException(nameof(credits), "Cannot drain partial link credit");
          }
 
          CreditState.IncrementCredit(credits - currentCredit);
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (filter == null)
          {
-            throw new ArgumentNullException("Supplied filter cannot be null");
+            throw new ArgumentNullException(nameof(filter), "Supplied filter cannot be null");
          }
 
          IList<uint> toRemove = new List<uint>();
@@ -229,7 +229,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             creditState.UpdateCredit(flow.LinkCredit);
             if (creditState.Credit != 0)
             {
-               throw new ArgumentOutOfRangeException("Receiver read flow with drain set but credit was not zero");
+               throw new ArgumentOutOfRangeException(nameof(creditState.Credit), "Receiver read flow with drain set but credit was not zero");
             }
             else
             {

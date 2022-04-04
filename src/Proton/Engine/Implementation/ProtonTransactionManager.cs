@@ -35,8 +35,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonTransactionManager : ProtonEndpoint<ITransactionManager>, ITransactionManager
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonTransactionManager>();
-
       private readonly ProtonReceiver receiver;
       private readonly IDecoder payloadDecoder;
 
@@ -45,7 +43,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private Action<ITransactionManager> parentEndpointClosedEventHandler;
 
-      private IDictionary<IProtonBuffer, ProtonManagerTransaction> transactions =
+      private readonly IDictionary<IProtonBuffer, ProtonManagerTransaction> transactions =
          new Dictionary<IProtonBuffer, ProtonManagerTransaction>();
 
       public ProtonTransactionManager(ProtonReceiver receiver) : base(receiver.ProtonEngine)
@@ -184,8 +182,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // Start tracking this transaction as active.
          transactions.Add(txnId, txn);
 
-         Declared declaration = new Declared();
-         declaration.TxnId = txnId;
+         Declared declaration = new Declared
+         {
+            TxnId = txnId
+         };
 
          txn.Declare.Disposition(declaration, true);
 
@@ -219,8 +219,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             throw new ArgumentException("Cannot fail a declared transaction from another transaction manager.");
          }
 
-         Rejected rejected = new Rejected();
-         rejected.Error = condition;
+         Rejected rejected = new Rejected
+         {
+            Error = condition
+         };
 
          txn.State = TransactionState.DelcareFailed;
          txn.Declare.Disposition(rejected, true);
@@ -242,8 +244,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // TODO: We should be closing the link if the remote did not report that it supports the
          //       rejected outcome although most don't regardless of what they actually do support.
 
-         Rejected rejected = new Rejected();
-         rejected.Error = condition;
+         Rejected rejected = new Rejected
+         {
+            Error = condition
+         };
 
          txn.State = TransactionState.DischargeFailed;
          txn.Discharge.Disposition(rejected, true);
@@ -336,21 +340,19 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
             if (container.Value is Declare)
             {
-               ProtonManagerTransaction transaction = new ProtonManagerTransaction(this);
-
-               transaction.Declare = delivery;
-               transaction.State = TransactionState.Declaring;
+               ProtonManagerTransaction transaction = new ProtonManagerTransaction(this)
+               {
+                  Declare = delivery,
+                  State = TransactionState.Declaring
+               };
 
                FireDeclare(transaction);
             }
-            else if (container.Value is Discharge)
+            else if (container.Value is Discharge discharge)
             {
-               Discharge discharge = (Discharge)container.Value;
                IProtonBuffer txnId = discharge.TxnId;
 
-               ProtonManagerTransaction transaction;
-
-               if (transactions.TryGetValue(txnId, out transaction))
+               if (transactions.TryGetValue(txnId, out ProtonManagerTransaction transaction))
                {
                   transaction.State = TransactionState.Discharging;
                   transaction.DischargeState = discharge.Fail ? DischargeState.Rollback : DischargeState.Commit;

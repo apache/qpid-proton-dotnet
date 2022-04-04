@@ -64,11 +64,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(buffer, state);
       }
 
-      private Disposition ReadDisposition(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Disposition ReadDisposition(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Disposition result = new Disposition();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          if (count < MinDispositionListEntries)
@@ -154,11 +154,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(stream, state);
       }
 
-      private Disposition ReadDisposition(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Disposition ReadDisposition(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Disposition result = new Disposition();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          if (count < MinDispositionListEntries)
@@ -221,15 +221,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      private string ErrorForMissingRequiredFields(int present)
+      private static string ErrorForMissingRequiredFields(int present)
       {
-         switch (present)
+         return present switch
          {
-            case 1:
-               return "The first field cannot be omitted from the Disposition";
-            default:
-               return "The role field cannot be omitted from the Disposition";
-         }
+            1 => "The first field cannot be omitted from the Disposition",
+            _ => "The role field cannot be omitted from the Disposition",
+         };
       }
    }
 }

@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Engine
    {
       public static readonly byte AmqpFrameType = (byte)0;
 
-      private AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope> pool;
+      private readonly AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope> pool;
 
       private Action<IPerformative> payloadToLargeHandler = DefaultPayloadToLargeHandler;
       private Action frameWriteCompleteHandler;
@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Engine
       private static void DefaultPayloadToLargeHandler(IPerformative performative)
       {
          throw new ArgumentException(string.Format(
-             "Cannot transmit performative %s with payload larger than max frame size limit", performative));
+             "Cannot transmit performative {0} with payload larger than max frame size limit", performative));
       }
    }
 }

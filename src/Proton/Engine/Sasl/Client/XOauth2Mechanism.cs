@@ -52,19 +52,6 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
 
       public override IProtonBuffer GetInitialResponse(ISaslCredentialsProvider credentials)
       {
-         string username = credentials.Username;
-         string password = credentials.Password;
-
-         if (username == null)
-         {
-            username = "";
-         }
-
-         if (password == null)
-         {
-            password = "";
-         }
-
          byte[] usernameBytes = Encoding.UTF8.GetBytes(credentials.Username);
          byte[] passwordBytes = Encoding.UTF8.GetBytes(credentials.Password);
          byte[] userPrefix = Encoding.ASCII.GetBytes("user=");

@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (poolSize == 0)
          {
-            throw new ArgumentOutOfRangeException("The tag pool size cannot be zero");
+            throw new ArgumentOutOfRangeException(nameof(poolSize), "The tag pool size cannot be zero");
          }
 
          this.tagPoolSize = poolSize;
@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private IDeliveryTag CreateTag()
       {
-         IDeliveryTag nextTag = null;
+         IDeliveryTag nextTag;
 
          if (nextTagId >= 0 && nextTagId < tagPoolSize)
          {

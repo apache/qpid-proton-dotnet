@@ -38,12 +38,7 @@ namespace Apache.Qpid.Proton.Types.Security
          get => mechanisms;
          set
          {
-            if (value == null)
-            {
-               throw new ArgumentNullException("Server mechanisms are required and cannot be null");
-            }
-
-            mechanisms = value;
+            mechanisms = value ?? throw new ArgumentNullException(nameof(mechanisms), "Server mechanisms are required and cannot be null");
          }
       }
 

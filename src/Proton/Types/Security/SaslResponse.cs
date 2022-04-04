@@ -40,12 +40,7 @@ namespace Apache.Qpid.Proton.Types.Security
          get => response;
          set
          {
-            if (value == null)
-            {
-               throw new ArgumentNullException("The response value if mandatory and cannot be null");
-            }
-
-            this.response = value;
+            this.response = value ?? throw new ArgumentNullException(nameof(response), "The response value if mandatory and cannot be null");
          }
       }
 

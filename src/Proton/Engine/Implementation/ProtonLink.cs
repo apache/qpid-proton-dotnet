@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public abstract class ProtonLink<T> : ProtonEndpoint<T>, ILink<T>, IProtonLink where T : ILink<T>
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonLink<T>>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonLink<T>>();
 
       protected readonly ProtonConnection connection;
       protected readonly ProtonSession session;
@@ -520,15 +520,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       protected bool AreDeliveriesStillActive()
       {
-         switch (operability)
+         return operability switch
          {
-            case LinkOperabilityState.Ok:
-            case LinkOperabilityState.LinkRemotelyDetached:
-            case LinkOperabilityState.LinkLocallyDetached:
-               return true;
-            default:
-               return false;
-         }
+            LinkOperabilityState.Ok or LinkOperabilityState.LinkRemotelyDetached or LinkOperabilityState.LinkLocallyDetached => true,
+            _ => false,
+         };
       }
 
       protected void CheckNotOpened(String errorMessage)

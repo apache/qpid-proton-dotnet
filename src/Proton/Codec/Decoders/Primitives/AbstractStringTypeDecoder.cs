@@ -33,8 +33,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (length > buffer.ReadableBytes)
          {
             throw new DecodeException(string.Format(
-                    "String encoded size %d is specified to be greater than the amount " +
-                    "of data available (%d)", length, buffer.ReadableBytes));
+                    "String encoded size {0} is specified to be greater than the amount " +
+                    "of data available ({1})", length, buffer.ReadableBytes));
          }
 
          if (length != 0)

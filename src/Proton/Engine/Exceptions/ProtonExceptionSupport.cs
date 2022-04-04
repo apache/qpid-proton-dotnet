@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
    {
       /// <summary>
       /// Create an EngineFailedException if the given instance is not already of that
-      /// type and return it.  
+      /// type and return it.
       /// </summary>
       /// <param name="cause">The exception that indicates the failure reason.</param>
       /// <returns>An EngineFailedException</returns>
@@ -37,16 +37,16 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
 
       /// <summary>
       /// Create an EngineFailedException if the given instance is not already of that
-      /// type and return it.  
+      /// type and return it.
       /// </summary>
       /// <param name="message">The error message to assign the new failed exception</param>
       /// <param name="cause">The exception that indicates the failure reason.</param>
       /// <returns>An EngineFailedException</returns>
       public static EngineFailedException CreateFailedException(string message, Exception cause)
       {
-         if (cause is EngineFailedException) 
+         if (cause is EngineFailedException exception)
          {
-            return (EngineFailedException)cause;
+            return exception;
          }
          else if (cause?.InnerException is EngineFailedException)
          {
@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
             }
 
             return new EngineFailedException(message, cause);
-         } 
+         }
       }
    }
 }

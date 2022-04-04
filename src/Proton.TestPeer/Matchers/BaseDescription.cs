@@ -80,10 +80,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
          {
             Append("null");
          }
-         else if (value is Char)
+         else if (value is Char @char)
          {
             Append("'");
-            Append(((Char)value).ToString());
+            Append(@char.ToString());
             Append("'");
          }
          else if (value is string)
@@ -92,29 +92,29 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
             Append(value.ToString());
             Append("\"");
          }
-         else if (value is long)
+         else if (value is long @int)
          {
-            Append(((long)value).ToString(CultureInfo.InvariantCulture) + "L");
+            Append(@int.ToString(CultureInfo.InvariantCulture) + "L");
          }
-         else if (value is ulong)
+         else if (value is ulong int1)
          {
-            Append(((ulong)value).ToString(CultureInfo.InvariantCulture) + "UL");
+            Append(int1.ToString(CultureInfo.InvariantCulture) + "UL");
          }
-         else if (value is uint)
+         else if (value is uint int2)
          {
-            Append(((uint)value).ToString(CultureInfo.InvariantCulture) + "U");
+            Append(int2.ToString(CultureInfo.InvariantCulture) + "U");
          }
-         else if (value is float)
+         else if (value is float single)
          {
-            Append(((float)value).ToString(CultureInfo.InvariantCulture) + "f");
+            Append(single.ToString(CultureInfo.InvariantCulture) + "f");
          }
-         else if (value is double)
+         else if (value is double @double)
          {
-            Append(((double)value).ToString(CultureInfo.InvariantCulture) + "d");
+            Append(@double.ToString(CultureInfo.InvariantCulture) + "d");
          }
-         else if (value is decimal)
+         else if (value is decimal @decimal)
          {
-            Append(((decimal)value).ToString(CultureInfo.InvariantCulture) + "m");
+            Append(@decimal.ToString(CultureInfo.InvariantCulture) + "m");
          }
          else if (value.GetType().IsArray)
          {

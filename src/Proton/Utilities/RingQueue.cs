@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (array == null)
          {
-            throw new ArgumentNullException("Array parameter cannot be null");
+            throw new ArgumentNullException(nameof(array), "Array parameter cannot be null");
          }
 
          if (array.Rank > 1)
@@ -85,8 +85,7 @@ namespace Apache.Qpid.Proton.Utilities
             throw new ArgumentException("Array cannot be multi-dimensional");
          }
 
-         T[] tArray = array as T[];
-         if (tArray == null)
+         if (array is not T[] tArray)
          {
             throw new ArgumentException("Target array cannot be cast to the correct type");
          }
@@ -102,7 +101,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (array == null)
          {
-            throw new ArgumentNullException("Array parameter cannot be null");
+            throw new ArgumentNullException(nameof(array), "Array parameter cannot be null");
          }
 
          if (array.Rank > 1)
@@ -112,7 +111,7 @@ namespace Apache.Qpid.Proton.Utilities
 
          if (index < 0)
          {
-            throw new ArgumentOutOfRangeException("Index parameter cannot be negative");
+            throw new ArgumentOutOfRangeException(nameof(index), "Index parameter cannot be negative");
          }
 
          if (array.Length - index < size)

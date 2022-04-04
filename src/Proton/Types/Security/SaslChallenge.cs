@@ -40,12 +40,7 @@ namespace Apache.Qpid.Proton.Types.Security
          get => challenge;
          set
          {
-            if (value == null)
-            {
-               throw new ArgumentNullException("The challenge field is required and connt be null");
-            }
-
-            this.challenge = value;
+            this.challenge = value ?? throw new ArgumentNullException(nameof(value), "The challenge field is required and cannot be null");
          }
       }
 

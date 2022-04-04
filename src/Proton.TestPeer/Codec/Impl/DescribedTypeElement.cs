@@ -71,9 +71,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          get
          {
-            object descriptor = first == null ? null : first.Value;
-            IElement second = first == null ? null : first.Next;
-            object described = second == null ? null : second.Value;
+            object descriptor = first?.Value;
+            IElement second = first?.Next;
+            object described = second?.Value;
             return DescribedTypeRegistry.LookupDescribedType(descriptor, described);
          }
       }

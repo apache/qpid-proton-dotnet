@@ -65,11 +65,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          decoder.SkipValue(buffer, state);
       }
 
-      private Modified ReadModified(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Modified ReadModified(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Modified result = new Modified();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          // Don't decode anything if things already look wrong.
@@ -142,11 +142,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          decoder.SkipValue(stream, state);
       }
 
-      private Modified ReadModified(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Modified ReadModified(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Modified result = new Modified();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          // Don't decode anything if things already look wrong.

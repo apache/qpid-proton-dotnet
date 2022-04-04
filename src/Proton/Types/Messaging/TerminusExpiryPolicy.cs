@@ -36,19 +36,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public static Symbol ToSymbol(this TerminusExpiryPolicy mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case TerminusExpiryPolicy.LinkDetach:
-               return LinkDetach;
-            case TerminusExpiryPolicy.SessionEnd:
-               return SessionEnd;
-            case TerminusExpiryPolicy.ConnectionClose:
-               return ConnectionClose;
-            case TerminusExpiryPolicy.Never:
-               return Never;
-            default:
-               throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + mode);
-         }
+            TerminusExpiryPolicy.LinkDetach => LinkDetach,
+            TerminusExpiryPolicy.SessionEnd => SessionEnd,
+            TerminusExpiryPolicy.ConnectionClose => ConnectionClose,
+            TerminusExpiryPolicy.Never => Never,
+            _ => throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + mode),
+         };
       }
 
       public static TerminusExpiryPolicy Lookup(Symbol policy)
@@ -68,19 +63,14 @@ namespace Apache.Qpid.Proton.Types.Messaging
             return TerminusExpiryPolicy.SessionEnd;
          }
 
-         switch (policy)
+         return policy switch
          {
-            case "link-detach":
-               return TerminusExpiryPolicy.LinkDetach;
-            case "session-end":
-               return TerminusExpiryPolicy.SessionEnd;
-            case "connection-close":
-               return TerminusExpiryPolicy.ConnectionClose;
-            case "never":
-               return TerminusExpiryPolicy.Never;
-            default:
-               throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + policy);
-         }
+            "link-detach" => TerminusExpiryPolicy.LinkDetach,
+            "session-end" => TerminusExpiryPolicy.SessionEnd,
+            "connection-close" => TerminusExpiryPolicy.ConnectionClose,
+            "never" => TerminusExpiryPolicy.Never,
+            _ => throw new ArgumentOutOfRangeException("Terminus Expiry Policy value was invalid: " + policy),
+         };
       }
    }
 }

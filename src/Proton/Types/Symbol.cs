@@ -73,9 +73,7 @@ namespace Apache.Qpid.Proton.Types
          }
          else
          {
-            Symbol symbol = null;
-
-            if (!stringsToSymbols.TryGetValue(value, out symbol))
+            if (!stringsToSymbols.TryGetValue(value, out Symbol symbol))
             {
                symbol = Lookup(ProtonByteBufferAllocator.Instance.Wrap(Encoding.ASCII.GetBytes(value)));
 
@@ -124,9 +122,7 @@ namespace Apache.Qpid.Proton.Types
          }
          else
          {
-            Symbol symbol = null;
-
-            if (!buffersToSymbols.TryGetValue(value, out symbol))
+            if (!buffersToSymbols.TryGetValue(value, out Symbol symbol))
             {
                if (copyOnCreate)
                {

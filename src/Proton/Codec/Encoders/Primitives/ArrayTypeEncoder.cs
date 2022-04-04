@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
    {
       public Type EncodesType => typeof(Array);
 
-      public bool IsArrayType => true;
+      public static bool IsArrayType => true;
 
       public void WriteArray(IProtonBuffer buffer, IEncoderState state, Array value)
       {
@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       private ITypeEncoder FindTypeEncoder(IProtonBuffer buffer, IEncoderState state, Array array)
       {
-         ITypeEncoder typeEncoder = null;
+         ITypeEncoder typeEncoder;
 
          if (array.Length == 0)
          {

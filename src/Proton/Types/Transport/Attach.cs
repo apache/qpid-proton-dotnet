@@ -98,13 +98,8 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return name; }
          set
          {
-            if (value == null)
-            {
-               throw new ArgumentNullException("the name field is mandatory");
-            }
-
             modified |= NAME;
-            name = value;
+            name = value ?? throw new ArgumentNullException(nameof(name), "the name field is mandatory");
          }
       }
 

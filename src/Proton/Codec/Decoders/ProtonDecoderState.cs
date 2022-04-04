@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public class ProtonDecoderState : IDecoderState
    {
-      private ProtonDecoder decoder;
+      private readonly ProtonDecoder decoder;
 
       public ProtonDecoderState(ProtonDecoder decoder)
       {
@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      private string InternalDecode(IProtonBuffer buffer, int length)
+      private static string InternalDecode(IProtonBuffer buffer, int length)
       {
          byte[] byteArray = new byte[length];
 

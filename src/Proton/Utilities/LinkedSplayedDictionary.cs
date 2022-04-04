@@ -53,12 +53,12 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (array == null)
          {
-            throw new ArgumentNullException("The provided array cannot be null");
+            throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
          }
 
          if (arrayIndex < 0)
          {
-            throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
          }
 
          if (array.Length - arrayIndex > size)
@@ -76,12 +76,12 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (array == null)
          {
-            throw new ArgumentNullException("The provided array cannot be null");
+            throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
          }
 
          if (arrayIndex < 0)
          {
-            throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
          }
 
          if (array.Length - arrayIndex > size)
@@ -353,12 +353,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -378,12 +378,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -446,12 +446,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -471,12 +471,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)

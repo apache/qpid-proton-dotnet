@@ -61,9 +61,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          get
          {
-            if (current is ArrayElement)
+            if (current is ArrayElement element)
             {
-               return ((ArrayElement)current).IsDescribed;
+               return element.IsDescribed;
             }
             throw new InvalidOperationException("Current value not array");
          }
@@ -104,7 +104,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          get
          {
-            IElement prev = current == null ? null : current.Prev;
+            IElement prev = current?.Prev;
 
             current = prev;
             return prev == null ? DataType.None : prev.DataType;
@@ -143,7 +143,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public long Encode(Stream stream)
       {
-         long position = stream.Position;
+         _ = stream.Position;
          IElement elt = first;
          uint size = 0;
 
@@ -195,99 +195,99 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public uint GetArray()
       {
-         if (current is ArrayElement)
+         if (current is ArrayElement element)
          {
-            return ((ArrayElement)current).Count;
+            return element.Count;
          }
          throw new InvalidOperationException("Current value not array");
       }
 
       public DataType GetArrayType()
       {
-         if (current is ArrayElement)
+         if (current is ArrayElement element)
          {
-            return ((ArrayElement)current).ArrayType;
+            return element.ArrayType;
          }
          throw new InvalidOperationException("Current value not array");
       }
 
       public Binary GetBinary()
       {
-         if (current is BinaryElement)
+         if (current is BinaryElement element)
          {
-            return ((BinaryElement)current).BinaryValue;
+            return element.BinaryValue;
          }
          throw new InvalidOperationException("Current value not a Binary");
       }
 
       public bool GetBoolean()
       {
-         if (current is BooleanElement)
+         if (current is BooleanElement element)
          {
-            return ((BooleanElement)current).BooleanValue;
+            return element.BooleanValue;
          }
          throw new InvalidOperationException("Current value not boolean");
       }
 
       public sbyte GetByte()
       {
-         if (current is ByteElement)
+         if (current is ByteElement element)
          {
-            return ((ByteElement)current).SByteValue;
+            return element.SByteValue;
          }
          throw new InvalidOperationException("Current value not signed byte");
       }
 
       public int GetChar()
       {
-         if (current is CharElement)
+         if (current is CharElement element)
          {
-            return ((CharElement)current).CharValue;
+            return element.CharValue;
          }
          throw new InvalidOperationException("Current value not character");
       }
 
       public Decimal128 GetDecimal128()
       {
-         if (current is Decimal128Element)
+         if (current is Decimal128Element element)
          {
-            return ((Decimal128Element)current).DecimalValue;
+            return element.DecimalValue;
          }
          throw new InvalidOperationException("Current value not Decimal128 value");
       }
 
       public Decimal32 GetDecimal32()
       {
-         if (current is Decimal32Element)
+         if (current is Decimal32Element element)
          {
-            return ((Decimal32Element)current).DecimalValue;
+            return element.DecimalValue;
          }
          throw new InvalidOperationException("Current value not Decimal32 value");
       }
 
       public Decimal64 GetDecimal64()
       {
-         if (current is Decimal64Element)
+         if (current is Decimal64Element element)
          {
-            return ((Decimal64Element)current).DecimalValue;
+            return element.DecimalValue;
          }
          throw new InvalidOperationException("Current value not Decimal64 value");
       }
 
       public IDescribedType GetDescribedType()
       {
-         if (current is DescribedTypeElement)
+         if (current is DescribedTypeElement element)
          {
-            return ((DescribedTypeElement)current).DescribedValue;
+            return element.DescribedValue;
          }
          throw new InvalidOperationException("Current value not described type");
       }
 
       public double GetDouble()
       {
-         if (current is DoubleElement)
+         if (current is DoubleElement element)
          {
-            return ((DoubleElement)current).DoubleValue;
+            return element.DoubleValue;
          }
 
          throw new InvalidOperationException("Current value not a double");
@@ -295,9 +295,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public float GetFloat()
       {
-         if (current is FloatElement)
+         if (current is FloatElement element)
          {
-            return ((FloatElement)current).FloatValue;
+            return element.FloatValue;
          }
 
          throw new InvalidOperationException("Current value not a float");
@@ -305,9 +305,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public int GetInt()
       {
-         if (current is IntegerElement)
+         if (current is IntegerElement element)
          {
-            return ((IntegerElement)current).IntegerValue;
+            return element.IntegerValue;
          }
 
          throw new InvalidOperationException("Current value not a int");
@@ -315,9 +315,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public uint GetList()
       {
-         if (current is ListElement)
+         if (current is ListElement element)
          {
-            return ((ListElement)current).Count;
+            return element.Count;
          }
 
          throw new InvalidOperationException("Current value not list");
@@ -325,9 +325,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public long GetLong()
       {
-         if (current is LongElement)
+         if (current is LongElement element)
          {
-            return ((LongElement)current).LongValue;
+            return element.LongValue;
          }
 
          throw new InvalidOperationException("Current value not a long");
@@ -335,9 +335,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public uint GetMap()
       {
-         if (current is MapElement)
+         if (current is MapElement element)
          {
-            return ((MapElement)current).Count;
+            return element.Count;
          }
 
          throw new InvalidOperationException("Current value not map");
@@ -345,14 +345,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public object GetObject()
       {
-         return current == null ? null : current.Value;
+         return current?.Value;
       }
 
       public Array GetPrimitiveArray()
       {
-         if (current is ArrayElement)
+         if (current is ArrayElement element)
          {
-            return ((ArrayElement)current).ArrayValue;
+            return element.ArrayValue;
          }
 
          throw new InvalidOperationException("Current value not array");
@@ -360,9 +360,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public IList GetPrimitiveList()
       {
-         if (current is ListElement)
+         if (current is ListElement element)
          {
-            return ((ListElement)current).ListValue;
+            return element.ListValue;
          }
 
          throw new InvalidOperationException("Current value not list");
@@ -370,9 +370,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public IDictionary GetPrimitiveMap()
       {
-         if (current is MapElement)
+         if (current is MapElement element)
          {
-            return ((MapElement)current).MapValue;
+            return element.MapValue;
          }
 
          throw new InvalidOperationException("Current value not map");
@@ -380,9 +380,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public short GetShort()
       {
-         if (current is ShortElement)
+         if (current is ShortElement element)
          {
-            return ((ShortElement)current).ShortValue;
+            return element.ShortValue;
          }
 
          throw new InvalidOperationException("Current value not short");
@@ -390,9 +390,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public string GetString()
       {
-         if (current is StringElement)
+         if (current is StringElement element)
          {
-            return ((StringElement)current).StringValue;
+            return element.StringValue;
          }
 
          throw new InvalidOperationException("Current value not a string");
@@ -400,9 +400,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public Symbol GetSymbol()
       {
-         if (current is SymbolElement)
+         if (current is SymbolElement element)
          {
-            return ((SymbolElement)current).SymbolValue;
+            return element.SymbolValue;
          }
 
          throw new InvalidOperationException("Current value not a symbol");
@@ -410,9 +410,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public DateTime GetTimestamp()
       {
-         if (current is TimestampElement)
+         if (current is TimestampElement element)
          {
-            return ((TimestampElement)current).TimeValue;
+            return element.TimeValue;
          }
 
          throw new InvalidOperationException("Current value not a time stamp");
@@ -420,45 +420,45 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public byte GetUnsignedByte()
       {
-         if (current is UnsignedByteElement)
+         if (current is UnsignedByteElement element)
          {
-            return ((UnsignedByteElement)current).ByteValue;
+            return element.ByteValue;
          }
          throw new InvalidOperationException("Current value not unsigned byte");
       }
 
       public uint GetUnsignedInteger()
       {
-         if (current is UnsignedIntegerElement)
+         if (current is UnsignedIntegerElement element)
          {
-            return ((UnsignedIntegerElement)current).UIntValue;
+            return element.UIntValue;
          }
          throw new InvalidOperationException("Current value not unsigned integer");
       }
 
       public ulong GetUnsignedLong()
       {
-         if (current is UnsignedLongElement)
+         if (current is UnsignedLongElement element)
          {
-            return ((UnsignedLongElement)current).ULongValue;
+            return element.ULongValue;
          }
          throw new InvalidOperationException("Current value not unsigned long");
       }
 
       public ushort GetUnsignedShort()
       {
-         if (current is UnsignedShortElement)
+         if (current is UnsignedShortElement element)
          {
-            return ((UnsignedShortElement)current).UShortValue;
+            return element.UShortValue;
          }
          throw new InvalidOperationException("Current value not unsigned short");
       }
 
       public Guid GetUUID()
       {
-         if (current is UuidElement)
+         if (current is UuidElement element)
          {
-            return ((UuidElement)current).GuidValue;
+            return element.GuidValue;
          }
          throw new InvalidOperationException("Current value not a UUID");
       }
@@ -638,95 +638,95 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          {
             PutNull();
          }
-         else if (o is bool)
+         else if (o is bool boolean)
          {
-            PutBoolean((bool)o);
+            PutBoolean(boolean);
          }
-         else if (o is byte)
+         else if (o is byte byte1)
          {
-            PutUnsignedByte((byte)o);
+            PutUnsignedByte(byte1);
          }
-         else if (o is sbyte)
+         else if (o is sbyte @byte)
          {
-            PutByte((sbyte)o);
+            PutByte(@byte);
          }
-         else if (o is ushort)
+         else if (o is ushort int5)
          {
-            PutUnsignedShort((ushort)o);
+            PutUnsignedShort(int5);
          }
-         else if (o is short)
+         else if (o is short int4)
          {
-            PutShort((short)o);
+            PutShort(int4);
          }
-         else if (o is uint)
+         else if (o is uint int3)
          {
-            PutUnsignedInteger((uint)o);
+            PutUnsignedInteger(int3);
          }
-         else if (o is int)
+         else if (o is int int2)
          {
-            PutInt((int)o);
+            PutInt(int2);
          }
-         else if (o is char)
+         else if (o is char @char)
          {
-            PutChar((char)o);
+            PutChar(@char);
          }
-         else if (o is ulong)
+         else if (o is ulong int1)
          {
-            PutUnsignedLong((ulong)o);
+            PutUnsignedLong(int1);
          }
-         else if (o is long)
+         else if (o is long @int)
          {
-            PutLong((long)o);
+            PutLong(@int);
          }
-         else if (o is DateTime)
+         else if (o is DateTime time)
          {
-            PutTimestamp((DateTime)o);
+            PutTimestamp(time);
          }
-         else if (o is float)
+         else if (o is float single)
          {
-            PutFloat((float)o);
+            PutFloat(single);
          }
-         else if (o is Double)
+         else if (o is Double @double)
          {
-            PutDouble((Double)o);
+            PutDouble(@double);
          }
-         else if (o is Decimal32)
+         else if (o is Decimal32 decimal2)
          {
-            PutDecimal32((Decimal32)o);
+            PutDecimal32(decimal2);
          }
-         else if (o is Decimal64)
+         else if (o is Decimal64 decimal1)
          {
-            PutDecimal64((Decimal64)o);
+            PutDecimal64(decimal1);
          }
-         else if (o is Decimal128)
+         else if (o is Decimal128 @decimal)
          {
-            PutDecimal128((Decimal128)o);
+            PutDecimal128(@decimal);
          }
-         else if (o is Guid)
+         else if (o is Guid guid)
          {
-            PutUUID((Guid)o);
+            PutUUID(guid);
          }
-         else if (o is Binary)
+         else if (o is Binary binary)
          {
-            PutBinary((Binary)o);
+            PutBinary(binary);
          }
-         else if (o is String)
+         else if (o is String @string)
          {
-            PutString((String)o);
+            PutString(@string);
          }
-         else if (o is Symbol)
+         else if (o is Symbol symbol)
          {
-            PutSymbol((Symbol)o);
+            PutSymbol(symbol);
          }
-         else if (o is IDescribedType)
+         else if (o is IDescribedType type)
          {
-            PutDescribedType((IDescribedType)o);
+            PutDescribedType(type);
          }
-         else if (o is Symbol[])
+         else if (o is Symbol[] v)
          {
             PutArray(false, DataType.Symbol);
             Enter();
-            foreach (Symbol s in (Symbol[])o)
+            foreach (Symbol s in v)
             {
                PutSymbol(s);
             }
@@ -736,13 +736,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          {
             throw new ArgumentException("Unsupported array type");
          }
-         else if (o is IList)
+         else if (o is IList list)
          {
-            PutPrimitiveList((IList)o);
+            PutPrimitiveList(list);
          }
-         else if (o is IDictionary)
+         else if (o is IDictionary dictionary)
          {
-            PutPrimitiveMap((IDictionary)o);
+            PutPrimitiveMap(dictionary);
          }
          else
          {
@@ -754,9 +754,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          StringBuilder sb = new StringBuilder();
          Render(sb, first);
-         return String.Format("Data[current={0:X}, parent={1:X}]{{2}}",
-                  RuntimeHelpers.GetHashCode(current),
-                  RuntimeHelpers.GetHashCode(parent), sb);
+         return String.Format("Data[current={0:X}, parent={1:X}][{2}]",
+            RuntimeHelpers.GetHashCode(current), RuntimeHelpers.GetHashCode(parent), sb);
       }
 
       #region Private Codec implementation
@@ -768,7 +767,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             return;
          }
 
-         sb.Append("    ").Append(el).Append("\n");
+         sb.Append("    ").Append(el).Append('\n');
          if (el.CanEnter)
          {
             Render(sb, el.Child);

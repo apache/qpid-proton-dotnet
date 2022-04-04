@@ -27,10 +27,10 @@ namespace Apache.Qpid.Proton.Types
    /// </summary>
    public sealed class DeliveryTag : IDeliveryTag
    {
-      private static readonly byte[] EmptyTagArray = new byte[0];
+      private static readonly byte[] EmptyTagArray = Array.Empty<byte>();
 
-      private IProtonBuffer tagBuffer;
-      private byte[] tagBytes;
+      private readonly IProtonBuffer tagBuffer;
+      private readonly byte[] tagBytes;
 
       public DeliveryTag()
       {
@@ -39,22 +39,12 @@ namespace Apache.Qpid.Proton.Types
 
       public DeliveryTag(byte[] tagBytes)
       {
-         if (tagBytes == null)
-         {
-            throw new ArgumentNullException("Provided tag bytes cannot be null");
-         }
-
-         this.tagBytes = tagBytes;
+         this.tagBytes = tagBytes ?? throw new ArgumentNullException(nameof(tagBytes), "Provided tag bytes cannot be null");
       }
 
       public DeliveryTag(IProtonBuffer tagBuffer)
       {
-         if (tagBuffer == null)
-         {
-            throw new ArgumentNullException("Provided tag buffer cannot be null");
-         }
-
-         this.tagBuffer = tagBuffer;
+         this.tagBuffer = tagBuffer ?? throw new ArgumentNullException(nameof(tagBuffer), "Provided tag buffer cannot be null");
       }
 
       public object Clone()

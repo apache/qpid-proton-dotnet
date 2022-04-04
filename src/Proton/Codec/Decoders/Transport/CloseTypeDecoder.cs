@@ -64,11 +64,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(buffer, state);
       }
 
-      private Close ReadClose(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Close ReadClose(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Close result = new Close();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          if (count < MinCloseListEntries)
@@ -116,11 +116,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(stream, state);
       }
 
-      private Close ReadClose(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Close ReadClose(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Close result = new Close();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          if (count < MinCloseListEntries)

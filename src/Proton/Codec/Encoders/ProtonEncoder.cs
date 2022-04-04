@@ -204,12 +204,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, long value)
       {
-         timestampEncoder.WriteType(buffer, state, value);
+         TimestampTypeEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteTimestamp(IProtonBuffer buffer, IEncoderState state, ulong value)
       {
-         timestampEncoder.WriteType(buffer, state, value);
+         TimestampTypeEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteGuid(IProtonBuffer buffer, IEncoderState state, Guid value)
@@ -219,7 +219,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, byte[] value)
       {
-         binaryEncoder.WriteType(buffer, state, value);
+         BinaryTypeEncoder.WriteType(buffer, state, value);
       }
 
       public void WriteBinary(IProtonBuffer buffer, IEncoderState state, IProtonBuffer value)
@@ -369,9 +369,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       {
          if (value != null)
          {
-            ITypeEncoder encoder = null;
-
-            if (typeEncoders.TryGetValue(value.GetType(), out encoder))
+            if (typeEncoders.TryGetValue(value.GetType(), out ITypeEncoder encoder))
             {
                encoder.WriteType(buffer, state, value);
             }
@@ -393,17 +391,17 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          {
             WriteArray(buffer, state, value as Array);
          }
-         else if (value is IList)
+         else if (value is IList list)
          {
-            WriteList(buffer, state, (IList)value);
+            WriteList(buffer, state, list);
          }
-         else if (value is IDictionary)
+         else if (value is IDictionary dictionary)
          {
-            WriteMap(buffer, state, (IDictionary)value);
+            WriteMap(buffer, state, dictionary);
          }
-         else if (value is IDescribedType)
+         else if (value is IDescribedType type)
          {
-            WriteDescribedType(buffer, state, (IDescribedType)value);
+            WriteDescribedType(buffer, state, type);
          }
          else
          {
@@ -439,8 +437,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          }
          else
          {
-            ITypeEncoder encoder = null;
-            if (!typeEncoders.TryGetValue(value.GetType(), out encoder))
+            if (!typeEncoders.TryGetValue(value.GetType(), out ITypeEncoder encoder))
             {
                encoder = DeduceTypeEncoder(value.GetType(), value);
             }
@@ -451,9 +448,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public ITypeEncoder LookupTypeEncoder(Type typeClass)
       {
-         ITypeEncoder encoder = null;
-
-         if (!typeEncoders.TryGetValue(typeClass, out encoder))
+         if (!typeEncoders.TryGetValue(typeClass, out ITypeEncoder encoder))
          {
             encoder = DeduceTypeEncoder(typeClass, null);
          }

@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          internal set => condition = value;
       }
 
-      public IAttachments Attachments => attachments != null ? attachments : attachments = new ProtonAttachments();
+      public IAttachments Attachments => attachments ??= new ProtonAttachments();
 
       public object LinkedResource
       {

@@ -488,7 +488,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             else
             {
                throw new AssertionError(string.Format(
-                   "Received Flow for unknown remote link with handle {0]", flow.Handle));
+                   "Received Flow for unknown remote link with handle {0}", flow.Handle));
             }
          }
 

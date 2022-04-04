@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonSender : ProtonLink<ISender>, ISender
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonSender>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonSender>();
 
       private readonly ProtonSessionOutgoingWindow sessionWindow;
       private readonly LinkedSplayedDictionary<uint, ProtonOutgoingDelivery> unsettled =
@@ -85,7 +85,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          CheckLinkOperable("Cannot apply disposition");
          if (filter == null)
          {
-            throw new ArgumentNullException("Supplied filter cannot be null");
+            throw new ArgumentNullException(nameof(filter), "Supplied filter cannot be null");
          };
 
          IList<uint> toRemove = new List<uint>(); ;

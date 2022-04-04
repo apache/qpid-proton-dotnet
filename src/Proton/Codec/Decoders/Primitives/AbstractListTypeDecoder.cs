@@ -39,8 +39,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (size > buffer.ReadableBytes)
          {
             throw new DecodeException(string.Format(
-                    "List element size %d is specified to be greater than the amount " +
-                    "of data available (%d)", size, buffer.ReadableBytes));
+                    "List element size {0} is specified to be greater than the amount " +
+                    "of data available ({1})", size, buffer.ReadableBytes));
          }
 
          int count = ReadCount(buffer, state);
@@ -48,8 +48,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (count > buffer.ReadableBytes)
          {
             throw new DecodeException(string.Format(
-                    "List encoded element count %d is specified to be greater than the amount " +
-                    "of data available (%d)", count, buffer.ReadableBytes));
+                    "List encoded element count {0} is specified to be greater than the amount " +
+                    "of data available ({1})", count, buffer.ReadableBytes));
          }
 
          IList<T> list = new List<T>(count);

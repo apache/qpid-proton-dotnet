@@ -132,7 +132,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Buffer == null ? false : Buffer.Equals(other.Buffer);
+            return Buffer != null && Buffer.Equals(other.Buffer);
          }
       }
 

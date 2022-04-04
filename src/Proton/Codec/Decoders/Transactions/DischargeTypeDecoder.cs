@@ -66,11 +66,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
          decoder.SkipValue(buffer, state);
       }
 
-      private Discharge ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Discharge ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Discharge result = new Discharge();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          if (count < MinRequiredListEntries)
@@ -129,11 +129,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
          decoder.SkipValue(stream, state);
       }
 
-      private Discharge ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Discharge ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Discharge result = new Discharge();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          if (count < MinRequiredListEntries)

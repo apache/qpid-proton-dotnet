@@ -64,11 +64,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(buffer, state);
       }
 
-      private Detach ReadDetach(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Detach ReadDetach(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Detach result = new Detach();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          if (count < MinDetachListEntries)
@@ -145,11 +145,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(stream, state);
       }
 
-      private Detach ReadDetach(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Detach ReadDetach(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Detach result = new Detach();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          if (count < MinDetachListEntries)
@@ -203,13 +203,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      private string ErrorForMissingRequiredFields(int present)
+      private static string ErrorForMissingRequiredFields(int present)
       {
-         switch (present)
+         return present switch
          {
-            default:
-               return "The Handle field cannot be omitted from the Detach";
-         }
+            _ => "The Handle field cannot be omitted from the Detach",
+         };
       }
    }
 }

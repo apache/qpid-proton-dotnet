@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public IProtonBufferAllocator BufferAllocator
       {
          get => allocator;
-         set => allocator = value ?? throw new ArgumentNullException("Cannot assign a null allocator");
+         set => allocator = value ?? throw new ArgumentNullException(nameof(value), "Cannot assign a null allocator");
       }
 
       public bool TraceFrames

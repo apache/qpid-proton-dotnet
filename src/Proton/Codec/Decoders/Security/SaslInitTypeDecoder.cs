@@ -66,11 +66,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
          decoder.SkipValue(buffer, state);
       }
 
-      private SaslInit ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static SaslInit ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          SaslInit result = new SaslInit();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          // Don't decode anything if things already look wrong.
@@ -134,11 +134,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
          decoder.SkipValue(stream, state);
       }
 
-      private SaslInit ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static SaslInit ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          SaslInit result = new SaslInit();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          // Don't decode anything if things already look wrong.

@@ -32,8 +32,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (length > buffer.ReadableBytes)
          {
             throw new DecodeException(
-                string.Format("Binary data size %d is specified to be greater than the amount " +
-                              "of data available (%d)", length, buffer.ReadableBytes));
+                string.Format("Binary data size {0} is specified to be greater than the amount " +
+                              "of data available ({1})", length, buffer.ReadableBytes));
          }
 
          IProtonBuffer payload = buffer.Copy(buffer.ReadOffset, length);
@@ -63,8 +63,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (length > buffer.ReadableBytes)
          {
             throw new DecodeException(
-                string.Format("Binary data size %d is specified to be greater than the amount " +
-                              "of data available (%d)", length, buffer.ReadableBytes));
+                string.Format("Binary data size {0} is specified to be greater than the amount " +
+                              "of data available ({1})", length, buffer.ReadableBytes));
          }
 
          buffer.SkipBytes(length);

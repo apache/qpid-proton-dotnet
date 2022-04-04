@@ -200,13 +200,20 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public DispositionExpectation Modified(bool failed)
       {
-         expectation.WithState(new Modified());
+         expectation.WithState(new Modified()
+         {
+            DeliveryFailed = failed
+         });
          return expectation;
       }
 
       public DispositionExpectation Modified(bool failed, bool undeliverableHere)
       {
-         expectation.WithState(new Modified());
+         expectation.WithState(new Modified()
+         {
+            DeliveryFailed = failed,
+            UndeliverableHere = undeliverableHere
+         });
          return expectation;
       }
 

@@ -38,8 +38,6 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
-         Decimal128[] buffers = (Decimal128[])values;
-
          buffer.EnsureWritable(sizeof(byte) + ((sizeof(ulong) + sizeof(ulong)) * values.Length));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Decimal128));
          foreach (Decimal128 value in values)

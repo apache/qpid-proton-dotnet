@@ -42,16 +42,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (size > buffer.ReadableBytes)
          {
             throw new DecodeException(string.Format(
-                "Array size indicated %d is greater than the amount of data available to decode (%d)",
+                "Array size indicated {0} is greater than the amount of data available to decode ({1})",
                 size, buffer.ReadableBytes));
          }
 
          ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
 
-         if (decoder is IPrimitiveArrayTypeDecoder)
+         if (decoder is IPrimitiveArrayTypeDecoder arrayDecoder)
          {
-            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)decoder;
-
             object[] array = new object[count];
             for (int i = 0; i < count; i++)
             {
@@ -68,15 +66,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         int size = ReadSize(stream, state);
+         _ = ReadSize(stream, state);
          int count = ReadCount(stream, state);
 
          IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
 
-         if (decoder is IPrimitiveArrayTypeDecoder)
+         if (decoder is IPrimitiveArrayTypeDecoder arrayDecoder)
          {
-            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)decoder;
-
             object[] array = new object[count];
             for (int i = 0; i < count; i++)
             {

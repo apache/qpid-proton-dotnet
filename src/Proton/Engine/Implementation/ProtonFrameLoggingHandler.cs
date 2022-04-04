@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonFrameLoggingHandler : IEngineHandler
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonFrameLoggingHandler>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonFrameLoggingHandler>();
 
       private static readonly string AMQP_IN_PREFIX = "<- AMQP";
       private static readonly string AMQP_OUT_PREFIX = "-> AMQP";
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          context.FireWrite(envelope);
       }
 
-      public void handleWrite(IEngineHandlerContext context, SaslEnvelope envelope)
+      public void HandleWrite(IEngineHandlerContext context, SaslEnvelope envelope)
       {
          if (traceFrames)
          {
@@ -159,12 +159,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          if (payload == null)
          {
             Console.WriteLine(String.Format(
-               "{0,%s}:[{1,%d}:{2,%d}] {3,%s}", prefix, connection, channel, performative));
+               "{0}:[{1}:{2}] {3}", prefix, connection, channel, performative));
          }
          else
          {
             Console.WriteLine(String.Format(
-               "{0,%s}:[{1,%d}:{2,%d}] {3,%s} - {4,%s}", prefix, connection, channel, performative, StringUtils.ToQuotedString(payload, PAYLOAD_STRING_LIMIT, true)));
+               "{0}:[{1}:{2}] {3} - {4}", prefix, connection, channel, performative, StringUtils.ToQuotedString(payload, PAYLOAD_STRING_LIMIT, true)));
          }
       }
    }

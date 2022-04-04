@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          logger.LogInformation("--------- End test {0} ---------------------------------", testName);
       }
 
-      protected byte[] CreateEncodedMessage(ISection body)
+      protected static byte[] CreateEncodedMessage(ISection body)
       {
          IEncoder encoder = CodecFactory.Encoder;
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -82,7 +82,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      protected byte[] CreateEncodedMessage(params Data[] body)
+      protected static byte[] CreateEncodedMessage(params Data[] body)
       {
          IEncoder encoder = CodecFactory.Encoder;
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -95,7 +95,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      protected byte[] CreateEncodedMessage(params ISection[] body)
+      protected static byte[] CreateEncodedMessage(params ISection[] body)
       {
          IEncoder encoder = CodecFactory.Encoder;
          IProtonBuffer buffer = new ProtonByteBufferAllocator().Allocate();
@@ -108,7 +108,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      protected byte[] CreateInvalidHeaderEncoding()
+      protected static byte[] CreateInvalidHeaderEncoding()
       {
          byte[] buffer = new byte[12];
 
@@ -120,7 +120,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return buffer;
       }
 
-      protected byte[] CreateInvalidDeliveryAnnotationsEncoding()
+      protected static byte[] CreateInvalidDeliveryAnnotationsEncoding()
       {
          byte[] buffer = new byte[12];
 
@@ -132,7 +132,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return buffer;
       }
 
-      protected byte[] CreateInvalidMessageAnnotationsEncoding()
+      protected static byte[] CreateInvalidMessageAnnotationsEncoding()
       {
          byte[] buffer = new byte[12];
 
@@ -144,7 +144,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return buffer;
       }
 
-      protected byte[] CreateInvalidPropertiesEncoding()
+      protected static byte[] CreateInvalidPropertiesEncoding()
       {
          byte[] buffer = new byte[12];
 
@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return buffer;
       }
 
-      protected byte[] CreateInvalidApplicationPropertiesEncoding()
+      protected static byte[] CreateInvalidApplicationPropertiesEncoding()
       {
          byte[] buffer = new byte[12];
 

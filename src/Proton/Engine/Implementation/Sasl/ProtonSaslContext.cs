@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
          this.saslHandler = handler;
       }
 
-      public IAttachments Attachments => attachments ?? (attachments = new ProtonAttachments());
+      public IAttachments Attachments => attachments ??= new ProtonAttachments();
 
       public bool IsServer => Role == SaslContextRole.Server;
 

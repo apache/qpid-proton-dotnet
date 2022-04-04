@@ -123,7 +123,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (item == null)
          {
-            throw new ArgumentNullException("Values added to an array deque cannot be null");
+            throw new ArgumentNullException(nameof(item), "Values added to an array deque cannot be null");
          }
 
          if (count == Int32.MaxValue)
@@ -155,7 +155,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (item == null)
          {
-            throw new ArgumentNullException("Values added to an array deque cannot be null");
+            throw new ArgumentNullException(nameof(item), "Values added to an array deque cannot be null");
          }
 
          if (count == Int32.MaxValue)
@@ -206,9 +206,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public T DequeueFront()
       {
-         T result;
-
-         if (!TryDequeueFront(out result))
+         if (!TryDequeueFront(out T result))
          {
             throw new InvalidOperationException("Failed to dequeue a value from the front of the queue");
          }
@@ -235,9 +233,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public T DequeueBack()
       {
-         T result;
-
-         if (!TryDequeueBack(out result))
+         if (!TryDequeueBack(out T result))
          {
             throw new InvalidOperationException("Failed to dequeue a value from the back of the queue");
          }
@@ -257,9 +253,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public T PeekFront()
       {
-         T result;
-
-         if (!TryPeekFront(out result))
+         if (!TryPeekFront(out T result))
          {
             throw new InvalidOperationException("Cannot peek at front of empty queue");
          }
@@ -283,9 +277,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public T PeekBack()
       {
-         T result;
-
-         if (!TryPeekBack(out result))
+         if (!TryPeekBack(out T result))
          {
             throw new InvalidOperationException("Cannot peek at back of empty queue");
          }
@@ -368,7 +360,6 @@ namespace Apache.Qpid.Proton.Utilities
 
       public IEnumerator<T> GetEnumerator()
       {
-         LinkedList<T> list = new LinkedList<T>();
          return new ArrayDequeEnumerator(this);
       }
 
@@ -378,11 +369,6 @@ namespace Apache.Qpid.Proton.Utilities
       }
 
       #region array element access and updates
-
-      private int RemainginCapacity()
-      {
-         return elements.Length - count;
-      }
 
       private void EnsureAdditionalCapacity(int atLeast)
       {
@@ -419,13 +405,13 @@ namespace Apache.Qpid.Proton.Utilities
             }
 
             // Update head now that we've moved things.
-            head = head + extraRoom;
+            head += extraRoom;
          }
 
          this.elements = newElements;
       }
 
-      private void ClearDequeArray(T[] elements, int head, int tail)
+      private static void ClearDequeArray(T[] elements, int head, int tail)
       {
          while (head != tail)
          {
@@ -467,9 +453,9 @@ namespace Apache.Qpid.Proton.Utilities
 
       public override bool Equals(object other)
       {
-         if (other is IEnumerable<T>)
+         if (other is IEnumerable<T> enumerable)
          {
-            return Equals((IEnumerable<T>)other);
+            return Equals(enumerable);
          }
 
          return false;

@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonTransactionController : ProtonEndpoint<ITransactionController>, ITransactionController
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonTransactionController>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonTransactionController>();
 
       private static readonly IProtonBuffer ENCODED_DECLARE;
 
@@ -70,7 +70,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private Action<ITransactionController> parentEndpointClosedEventHandler;
 
-      private List<Action<ITransactionController>> capacityObservers = new List<Action<ITransactionController>>();
+      private readonly List<Action<ITransactionController>> capacityObservers = new List<Action<ITransactionController>>();
 
       public ProtonTransactionController(ProtonSender sender) : base(sender.ProtonEngine)
       {

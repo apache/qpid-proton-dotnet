@@ -35,17 +35,13 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public static SenderSettleMode Lookup(byte mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case 0:
-               return SenderSettleMode.Unsettled;
-            case 1:
-               return SenderSettleMode.Settled;
-            case 2:
-               return SenderSettleMode.Mixed;
-            default:
-               throw new ArgumentOutOfRangeException("Sender settlement role value out or range [0...2]");
-         }
+            0 => SenderSettleMode.Unsettled,
+            1 => SenderSettleMode.Settled,
+            2 => SenderSettleMode.Mixed,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), "Sender settlement role value out or range [0...2]"),
+         };
       }
    }
 }

@@ -91,13 +91,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// Registry of decoders for described types which can be updated with user defined
       /// decoders as well as the default decoders.
       /// </summary>
-      private IDictionary<object, IDescribedTypeDecoder> describedTypeDecoders =
+      private readonly IDictionary<object, IDescribedTypeDecoder> describedTypeDecoders =
          new Dictionary<object, IDescribedTypeDecoder>();
 
       /// <summary>
       /// Quick access to decoders that handle AMQP types like Transfer, Properties etc.
       /// </summary>
-      private IDescribedTypeDecoder[] amqpTypeDecoders = new IDescribedTypeDecoder[256];
+      private readonly IDescribedTypeDecoder[] amqpTypeDecoders = new IDescribedTypeDecoder[256];
 
       // Internal Decoders used to prevent user to access Proton specific decoding methods
       private static readonly Symbol8TypeDecoder symbol8Decoder;
@@ -124,488 +124,379 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.BooleanTrue:
-               return true;
-            case EncodingCodes.BooleanFalse:
-               return false;
-            case EncodingCodes.Boolean:
-               return buffer.ReadByte() == 0 ? false : true;
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.BooleanTrue => true,
+            EncodingCodes.BooleanFalse => false,
+            EncodingCodes.Boolean => buffer.ReadByte() != 0,
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode),
+         };
       }
 
       public bool ReadBoolean(IProtonBuffer buffer, IDecoderState state, bool defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.BooleanTrue:
-               return true;
-            case EncodingCodes.BooleanFalse:
-               return false;
-            case EncodingCodes.Boolean:
-               return buffer.ReadByte() == 0 ? false : true;
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.BooleanTrue => true,
+            EncodingCodes.BooleanFalse => false,
+            EncodingCodes.Boolean => buffer.ReadByte() != 0,
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode),
+         };
       }
 
       public sbyte? ReadByte(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Byte:
-               return buffer.ReadByte();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Byte => buffer.ReadByte(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public sbyte ReadByte(IProtonBuffer buffer, IDecoderState state, sbyte defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Byte:
-               return buffer.ReadByte();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Byte => buffer.ReadByte(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public byte? ReadUnsignedByte(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UByte:
-               return buffer.ReadUnsignedByte();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UByte => buffer.ReadUnsignedByte(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public byte ReadUnsignedByte(IProtonBuffer buffer, IDecoderState state, byte defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UByte:
-               return buffer.ReadUnsignedByte();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UByte => buffer.ReadUnsignedByte(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public char? ReadCharacter(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Char:
-               return (char)buffer.ReadInt();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Char type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Char => (char)buffer.ReadInt(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Char type but found encoding: " + encodingCode),
+         };
       }
 
       public char ReadCharacter(IProtonBuffer buffer, IDecoderState state, char defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Char:
-               return (char)buffer.ReadInt();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Char type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Char => (char)buffer.ReadInt(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Char type but found encoding: " + encodingCode),
+         };
       }
 
       public Decimal32 ReadDecimal32(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Decimal32:
-               return new Decimal32(buffer.ReadUnsignedInt());
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Decimal32 type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Decimal32 => new Decimal32(buffer.ReadUnsignedInt()),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Decimal32 type but found encoding: " + encodingCode),
+         };
       }
 
       public Decimal64 ReadDecimal64(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Decimal64:
-               return new Decimal64(buffer.ReadUnsignedLong());
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Decimal64 type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Decimal64 => new Decimal64(buffer.ReadUnsignedLong()),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Decimal64 type but found encoding: " + encodingCode),
+         };
       }
 
       public Decimal128 ReadDecimal128(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Decimal128:
-               return new Decimal128(buffer.ReadUnsignedLong(), buffer.ReadUnsignedLong());
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Decimal128 type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Decimal128 => new Decimal128(buffer.ReadUnsignedLong(), buffer.ReadUnsignedLong()),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Decimal128 type but found encoding: " + encodingCode),
+         };
       }
 
       public short? ReadShort(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Short:
-               return buffer.ReadShort();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Short => buffer.ReadShort(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Short type but found encoding: " + encodingCode),
+         };
       }
 
       public short ReadShort(IProtonBuffer buffer, IDecoderState state, short defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Short:
-               return buffer.ReadShort();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Short => buffer.ReadShort(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Short type but found encoding: " + encodingCode),
+         };
       }
 
       public ushort? ReadUnsignedShort(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UShort:
-               return buffer.ReadUnsignedShort();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UShort => buffer.ReadUnsignedShort(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode),
+         };
       }
 
       public ushort ReadUnsignedShort(IProtonBuffer buffer, IDecoderState state, ushort defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UShort:
-               return buffer.ReadUnsignedShort();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UShort => buffer.ReadUnsignedShort(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode),
+         };
       }
 
       public int? ReadInteger(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallInt:
-               return buffer.ReadByte();
-            case EncodingCodes.Int:
-               return buffer.ReadInt();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Integer type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallInt => buffer.ReadByte(),
+            EncodingCodes.Int => buffer.ReadInt(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Integer type but found encoding: " + encodingCode),
+         };
       }
 
       public int ReadInteger(IProtonBuffer buffer, IDecoderState state, int defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallInt:
-               return buffer.ReadByte();
-            case EncodingCodes.Int:
-               return buffer.ReadInt();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Integer type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallInt => buffer.ReadByte(),
+            EncodingCodes.Int => buffer.ReadInt(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Integer type but found encoding: " + encodingCode),
+         };
       }
 
       public uint? ReadUnsignedInteger(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UInt0:
-               return 0u;
-            case EncodingCodes.SmallUInt:
-               return buffer.ReadUnsignedByte();
-            case EncodingCodes.UInt:
-               return buffer.ReadUnsignedInt();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UInt0 => 0u,
+            EncodingCodes.SmallUInt => buffer.ReadUnsignedByte(),
+            EncodingCodes.UInt => buffer.ReadUnsignedInt(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode),
+         };
       }
 
       public uint ReadUnsignedInteger(IProtonBuffer buffer, IDecoderState state, uint defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UInt0:
-               return 0u;
-            case EncodingCodes.SmallUInt:
-               return buffer.ReadUnsignedByte();
-            case EncodingCodes.UInt:
-               return buffer.ReadUnsignedInt();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UInt0 => 0u,
+            EncodingCodes.SmallUInt => buffer.ReadUnsignedByte(),
+            EncodingCodes.UInt => buffer.ReadUnsignedInt(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode),
+         };
       }
 
       public long? ReadLong(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallLong:
-               return buffer.ReadByte();
-            case EncodingCodes.Long:
-               return buffer.ReadLong();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallLong => buffer.ReadByte(),
+            EncodingCodes.Long => buffer.ReadLong(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Long type but found encoding: " + encodingCode),
+         };
       }
 
       public long ReadLong(IProtonBuffer buffer, IDecoderState state, long defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallLong:
-               return buffer.ReadByte();
-            case EncodingCodes.Long:
-               return buffer.ReadLong();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallLong => buffer.ReadByte(),
+            EncodingCodes.Long => buffer.ReadLong(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Long type but found encoding: " + encodingCode),
+         };
       }
 
       public ulong? ReadUnsignedLong(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.ULong0:
-               return 0ul;
-            case EncodingCodes.SmallULong:
-               return buffer.ReadUnsignedByte();
-            case EncodingCodes.ULong:
-               return buffer.ReadUnsignedLong();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.ULong0 => 0ul,
+            EncodingCodes.SmallULong => buffer.ReadUnsignedByte(),
+            EncodingCodes.ULong => buffer.ReadUnsignedLong(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode),
+         };
       }
 
       public ulong ReadUnsignedLong(IProtonBuffer buffer, IDecoderState state, ulong defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.ULong0:
-               return 0ul;
-            case EncodingCodes.SmallULong:
-               return buffer.ReadUnsignedByte();
-            case EncodingCodes.ULong:
-               return buffer.ReadUnsignedLong();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.ULong0 => 0ul,
+            EncodingCodes.SmallULong => buffer.ReadUnsignedByte(),
+            EncodingCodes.ULong => buffer.ReadUnsignedLong(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode),
+         };
       }
 
       public float? ReadFloat(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Float:
-               return buffer.ReadFloat();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Float type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Float => buffer.ReadFloat(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Float type but found encoding: " + encodingCode),
+         };
       }
 
       public float ReadFloat(IProtonBuffer buffer, IDecoderState state, float defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Float:
-               return buffer.ReadFloat();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Float type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Float => buffer.ReadFloat(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Float type but found encoding: " + encodingCode),
+         };
       }
 
       public double? ReadDouble(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Double:
-               return buffer.ReadDouble();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Double type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Double => buffer.ReadDouble(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Double type but found encoding: " + encodingCode),
+         };
       }
 
       public double ReadDouble(IProtonBuffer buffer, IDecoderState state, double defaultValue)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Double:
-               return buffer.ReadDouble();
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Double type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Double => buffer.ReadDouble(),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Double type but found encoding: " + encodingCode),
+         };
       }
 
       public IProtonBuffer ReadBinary(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.VBin8:
-               return (IProtonBuffer)binary8Decoder.ReadValue(buffer, state);
-            case EncodingCodes.VBin32:
-               return (IProtonBuffer)binary32Decoder.ReadValue(buffer, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.VBin8 => (IProtonBuffer)binary8Decoder.ReadValue(buffer, state),
+            EncodingCodes.VBin32 => (IProtonBuffer)binary32Decoder.ReadValue(buffer, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Binary type but found encoding: " + encodingCode),
+         };
       }
 
       public string ReadString(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Str8:
-               return (string)string8Decoder.ReadValue(buffer, state);
-            case EncodingCodes.Str32:
-               return (string)string32Decoder.ReadValue(buffer, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected String type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Str8 => (string)string8Decoder.ReadValue(buffer, state),
+            EncodingCodes.Str32 => (string)string32Decoder.ReadValue(buffer, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected String type but found encoding: " + encodingCode),
+         };
       }
 
       public Symbol ReadSymbol(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Sym8:
-               return (Symbol)symbol8Decoder.ReadValue(buffer, state);
-            case EncodingCodes.Sym32:
-               return (Symbol)symbol32Decoder.ReadValue(buffer, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Sym8 => (Symbol)symbol8Decoder.ReadValue(buffer, state),
+            EncodingCodes.Sym32 => (Symbol)symbol32Decoder.ReadValue(buffer, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode),
+         };
       }
 
       public string ReadSymbolAsString(IProtonBuffer buffer, IDecoderState state)
@@ -617,66 +508,51 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Timestamp:
-               return buffer.ReadUnsignedLong();
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Timestamp type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Timestamp => buffer.ReadUnsignedLong(),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Timestamp type but found encoding: " + encodingCode),
+         };
       }
 
       public Guid? ReadGuid(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Uuid:
-               return UuidTypeDecoder.ReadUuid(buffer);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Uuid type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Uuid => (Guid?)UuidTypeDecoder.ReadUuid(buffer),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Uuid type but found encoding: " + encodingCode),
+         };
       }
 
       public IDictionary<K, V> ReadMap<K, V>(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Map8:
-               return map8Decoder.ReadMap<K, V>(buffer, state);
-            case EncodingCodes.Map32:
-               return map32Decoder.ReadMap<K, V>(buffer, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Map type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Map8 => map8Decoder.ReadMap<K, V>(buffer, state),
+            EncodingCodes.Map32 => map32Decoder.ReadMap<K, V>(buffer, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Map type but found encoding: " + encodingCode),
+         };
       }
 
       public IList<T> ReadList<T>(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.List0:
-               return (IList<T>)Array.Empty<T>();
-            case EncodingCodes.List8:
-               return (IList<T>)list8Decoder.ReadList<T>(buffer, state);
-            case EncodingCodes.List32:
-               return (IList<T>)list32Decoder.ReadList<T>(buffer, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected List type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.List0 => (IList<T>)Array.Empty<T>(),
+            EncodingCodes.List8 => (IList<T>)list8Decoder.ReadList<T>(buffer, state),
+            EncodingCodes.List32 => (IList<T>)list32Decoder.ReadList<T>(buffer, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected List type but found encoding: " + encodingCode),
+         };
       }
 
       public object ReadObject(IProtonBuffer buffer, IDecoderState state)
@@ -751,17 +627,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          EncodingCodes encodingCode = ReadEncodingCode(buffer);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.VBin8:
-               return new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(buffer, state));
-            case EncodingCodes.VBin32:
-               return new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(buffer, state));
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.VBin8 => new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(buffer, state)),
+            EncodingCodes.VBin32 => new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(buffer, state)),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Binary type but found encoding: " + encodingCode),
+         };
       }
 
       public ITypeDecoder ReadNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
@@ -812,8 +684,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             descriptor = ReadObject(buffer, state);
          }
 
-         IDescribedTypeDecoder typeDecoder = null;
-         if (!describedTypeDecoders.TryGetValue(descriptor, out typeDecoder))
+         if (!describedTypeDecoders.TryGetValue(descriptor, out IDescribedTypeDecoder typeDecoder))
          {
             typeDecoder = HandleUnknownDescribedType(descriptor);
          }
@@ -862,13 +733,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      private InvalidCastException SignalUnexpectedType(in Type type)
+      private static InvalidCastException SignalUnexpectedType(in Type type)
       {
          return new InvalidCastException(
             "Unexpected null decoding, Expected " + type.Name + ".");
       }
 
-      private InvalidCastException SignalUnexpectedType(in object val, in Type type)
+      private static InvalidCastException SignalUnexpectedType(in object val, in Type type)
       {
          return new InvalidCastException(
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");

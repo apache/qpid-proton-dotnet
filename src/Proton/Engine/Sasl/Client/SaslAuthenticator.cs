@@ -55,18 +55,10 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// <exception cref="ArgumentNullException">If any of the params are null</exception>
       public SaslAuthenticator(SaslMechanismSelector selector, ISaslCredentialsProvider credentials)
       {
-         if (selector == null)
-         {
-            throw new ArgumentNullException("A SASL Mechanism selector implementation is required");
-         }
-
-         if (credentials == null)
-         {
-            throw new ArgumentNullException("A SASL Credentials provider implementation is required");
-         }
-
-         this.credentials = credentials;
-         this.selector = selector;
+         this.credentials = credentials ?? throw new ArgumentNullException(nameof(credentials),
+            "A SASL Credentials provider implementation is required");
+         this.selector = selector ?? throw new ArgumentNullException(nameof(selector),
+            "A SASL Mechanism selector implementation is required");
       }
 
       /// <summary>

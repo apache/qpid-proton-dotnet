@@ -102,9 +102,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
             {
                foreach (KeyValuePair<string, object> pair in Value)
                {
-                  object value;
-
-                  if (other.Value.TryGetValue(pair.Key, out value))
+                  if (other.Value.TryGetValue(pair.Key, out object value))
                   {
                      if (!EqualityComparer<object>.Default.Equals(value, pair.Value))
                      {

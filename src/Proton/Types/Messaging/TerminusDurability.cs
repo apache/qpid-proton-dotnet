@@ -35,17 +35,13 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public static TerminusDurability Lookup(uint mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case 0:
-               return TerminusDurability.None;
-            case 1:
-               return TerminusDurability.Configuration;
-            case 2:
-               return TerminusDurability.UnsettledState;
-            default:
-               throw new ArgumentOutOfRangeException("Terminus Durability value out or range [0...2]");
-         }
+            0 => TerminusDurability.None,
+            1 => TerminusDurability.Configuration,
+            2 => TerminusDurability.UnsettledState,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), "Terminus Durability value out or range [0...2]"),
+         };
       }
    }
 }

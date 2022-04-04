@@ -164,7 +164,7 @@ namespace Apache.Qpid.Proton.Utilities
          }
 
          StringBuilder str = new StringBuilder();
-         str.Append("\"");
+         str.Append('"');
 
          long byteToRead = buffer.ReadableBytes;
          long size = 0;
@@ -202,7 +202,7 @@ namespace Apache.Qpid.Proton.Utilities
             }
          }
 
-         str.Append("\"");
+         str.Append('"');
 
          if (truncated && appendIfTruncated)
          {

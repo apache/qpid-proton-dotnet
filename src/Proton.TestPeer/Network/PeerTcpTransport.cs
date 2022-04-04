@@ -49,8 +49,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       private readonly PeerTransportRole role;
 
-      private Stream streamReader;
-      private Stream streamWriter;
+      private readonly Stream streamReader;
+      private readonly Stream streamWriter;
 
       private Task readLoop;
       private Task writeLoop;

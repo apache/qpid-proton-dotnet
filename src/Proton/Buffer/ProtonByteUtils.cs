@@ -299,7 +299,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <returns>The value read from the given array</returns>
       public static bool ReadBoolean(byte[] array, int offset)
       {
-         return array[offset] == 0 ? false : true;
+         return array[offset] != 0;
       }
 
       /// <summary>

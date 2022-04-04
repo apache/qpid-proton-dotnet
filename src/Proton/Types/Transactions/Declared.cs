@@ -43,12 +43,7 @@ namespace Apache.Qpid.Proton.Types.Transactions
          get => txnId;
          set
          {
-            if (value == null)
-            {
-               throw new ArgumentNullException("Transaction ID is mandatory and cannot be set to null");
-            }
-
-            txnId = value;
+            txnId = value ?? throw new ArgumentNullException(nameof(txnId), "Transaction ID is mandatory and cannot be set to null");
          }
       }
 

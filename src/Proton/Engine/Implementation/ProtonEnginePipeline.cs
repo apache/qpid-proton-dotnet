@@ -29,17 +29,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    {
       private readonly ProtonEngine engine;
 
-      private EngineHandlerContextReadBoundary head;
-      private EngineHandlerContextWriteBoundary tail;
+      private readonly EngineHandlerContextReadBoundary head;
+      private readonly EngineHandlerContextWriteBoundary tail;
 
       public ProtonEnginePipeline(ProtonEngine engine)
       {
-         if (engine == null)
-         {
-            throw new ArgumentNullException("Parent transport cannot be null");
-         }
-
-         this.engine = engine;
+         this.engine = engine ?? throw new ArgumentNullException(nameof(engine), "Parent transport cannot be null");
 
          head = new EngineHandlerContextReadBoundary(this);
          tail = new EngineHandlerContextWriteBoundary(this);
@@ -65,7 +60,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (handler == null)
          {
-            throw new ArgumentNullException("Handler provided cannot be null");
+            throw new ArgumentNullException(nameof(handler), "Handler provided cannot be null");
          }
 
          ProtonEngineHandlerContext oldFirst = head.next;
@@ -98,7 +93,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (handler == null)
          {
-            throw new ArgumentNullException("Handler provided cannot be null");
+            throw new ArgumentNullException(nameof(handler), "Handler provided cannot be null");
          }
 
          ProtonEngineHandlerContext oldLast = tail.previous;

@@ -37,8 +37,6 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
-         Decimal64[] buffers = (Decimal64[])values;
-
          buffer.EnsureWritable(sizeof(byte) + (sizeof(ulong) * values.Length));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Decimal64));
          foreach (Decimal64 value in values)

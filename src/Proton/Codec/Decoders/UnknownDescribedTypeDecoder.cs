@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public sealed class UnknownDescribedTypeDecoder : AbstractDescribedTypeDecoder
    {
-      private object descriptor;
+      private readonly object descriptor;
 
       public UnknownDescribedTypeDecoder(object descriptor) : base()
       {

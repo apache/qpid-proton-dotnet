@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          }
       }
 
-      private IDictionary<String, Object> ReadMap(IProtonBuffer buffer, IDecoderState state, IMapTypeDecoder mapDecoder)
+      private static IDictionary<String, Object> ReadMap(IProtonBuffer buffer, IDecoderState state, IMapTypeDecoder mapDecoder)
       {
          int size = mapDecoder.ReadSize(buffer, state);
          int count = mapDecoder.ReadCount(buffer, state);
@@ -86,8 +86,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          if (count > buffer.ReadableBytes)
          {
             throw new DecodeException(string.Format(
-                    "Map encoded size %d is specified to be greater than the amount " +
-                    "of data available (%d)", size, buffer.ReadableBytes));
+               "Map encoded size {0} is specified to be greater than the amount " +
+               "of data available ({1})", size, buffer.ReadableBytes));
          }
 
          IDecoder decoder = state.Decoder;
@@ -150,9 +150,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          }
       }
 
-      private IDictionary<String, Object> ReadMap(Stream stream, IStreamDecoderState state, IMapTypeDecoder mapDecoder)
+      private static IDictionary<String, Object> ReadMap(Stream stream, IStreamDecoderState state, IMapTypeDecoder mapDecoder)
       {
-         int size = mapDecoder.ReadSize(stream, state);
+         _ = mapDecoder.ReadSize(stream, state);
          int count = mapDecoder.ReadCount(stream, state);
 
          IStreamDecoder decoder = state.Decoder;

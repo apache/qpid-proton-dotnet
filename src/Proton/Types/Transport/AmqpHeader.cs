@@ -127,7 +127,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return ProtocolId == SaslProtocolId;
       }
 
-      public new int GetHashCode()
+      public override int GetHashCode()
       {
          const int prime = 31;
          int result = 1;
@@ -135,7 +135,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return result;
       }
 
-      public new bool Equals(Object other)
+      public override bool Equals(Object other)
       {
          if (other != null && other.GetType() == GetType())
          {
@@ -174,7 +174,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return true;
       }
 
-      public override String ToString()
+      public override string ToString()
       {
          StringBuilder builder = new StringBuilder();
          for (int i = 0; i < buffer.ReadableBytes; ++i)
@@ -186,7 +186,7 @@ namespace Apache.Qpid.Proton.Types.Transport
             }
             else
             {
-               builder.Append(",");
+               builder.Append(',');
                builder.Append((int)value);
             }
          }
@@ -194,7 +194,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return builder.ToString();
       }
 
-      private bool StartsWith(IProtonBuffer buffer, byte[] value)
+      private static bool StartsWith(IProtonBuffer buffer, byte[] value)
       {
          if (buffer == null || buffer.ReadableBytes < value.Length)
          {
@@ -276,7 +276,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != PREFIX[0])
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "Invalid header byte(1) specified %d : expected %d", value, PREFIX[0]));
+                "Invalid header byte(1) specified {0} : expected {1}", value, PREFIX[0]));
          }
       }
 
@@ -285,7 +285,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != PREFIX[1])
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "Invalid header byte(2) specified %d : expected %d", value, PREFIX[1]));
+                "Invalid header byte(2) specified {0} : expected {1}", value, PREFIX[1]));
          }
       }
 
@@ -294,7 +294,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != PREFIX[2])
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "Invalid header byte(3) specified %d : expected %d", value, PREFIX[2]));
+                "Invalid header byte(3) specified {0} : expected {1}", value, PREFIX[2]));
          }
       }
 
@@ -303,7 +303,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != PREFIX[3])
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "Invalid header byte(4) specified %d : expected %d", value, PREFIX[3]));
+                "Invalid header byte(4) specified {0} : expected {1}", value, PREFIX[3]));
          }
       }
 
@@ -312,7 +312,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != AmqpProtocolId && value != SaslProtocolId)
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "Invalid protocol Id specified %d : expected one of %d or %d",
+                "Invalid protocol Id specified {0} : expected one of {1} or {2}",
                 value, AmqpProtocolId, SaslProtocolId));
          }
       }
@@ -322,7 +322,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != 1)
          {
             throw new ArgumentOutOfRangeException(String.Format(
-                "Invalid Major version specified %d : expected %d", value, 1));
+                "Invalid Major version specified {0} : expected {1}", value, 1));
          }
       }
 
@@ -331,7 +331,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != 0)
          {
             throw new ArgumentOutOfRangeException(String.Format(
-                "Invalid Minor version specified %d : expected %d", value, 0));
+                "Invalid Minor version specified {0} : expected {1}", value, 0));
          }
       }
 
@@ -340,7 +340,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (value != 0)
          {
             throw new ArgumentOutOfRangeException(String.Format(
-                "Invalid revision specified %d : expected %d", value, 0));
+                "Invalid revision specified {0} : expected {1}", value, 0));
          }
       }
 

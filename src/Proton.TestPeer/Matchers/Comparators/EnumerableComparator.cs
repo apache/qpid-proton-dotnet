@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
       {
          // Must both be enumerable to qualify for testing otherwise the top level
          // comparator needs to handle this difference.
-         if (!(lhs is IEnumerable lhsEnumerable) || !(rhs is IEnumerable rhsEnumerable))
+         if (lhs is not IEnumerable lhsEnumerable || rhs is not IEnumerable rhsEnumerable)
          {
             return null;
          }

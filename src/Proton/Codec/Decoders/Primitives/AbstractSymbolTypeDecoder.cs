@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
             return Symbol.Lookup("");
          }
 
-         byte[] symbolBytes = null;
+         byte[] symbolBytes;
 
          try
          {

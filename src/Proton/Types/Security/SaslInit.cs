@@ -47,12 +47,7 @@ namespace Apache.Qpid.Proton.Types.Security
          get => mechanism;
          set
          {
-            if (value == null)
-            {
-               throw new ArgumentNullException("Mechanism cannot be null");
-            }
-
-            mechanism = value;
+            mechanism = value ?? throw new ArgumentNullException(nameof(mechanism), "Mechanism cannot be null");
          }
       }
 

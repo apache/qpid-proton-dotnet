@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Engine
    {
       public static readonly byte AmqpFrameType = (byte)0;
 
-      private AmqpPerformativeEnvelopePool<IncomingAmqpEnvelope> pool;
+      private readonly AmqpPerformativeEnvelopePool<IncomingAmqpEnvelope> pool;
 
       /// <summary>
       /// Creates a new empty incoming performative envelope.

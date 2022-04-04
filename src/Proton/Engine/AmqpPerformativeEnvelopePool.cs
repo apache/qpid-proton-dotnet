@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       public static readonly int DEFAULT_MAX_POOL_SIZE = 10;
 
-      private int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
+      private readonly int maxPoolSize;
 
       private readonly RingQueue<T> pool;
       private readonly Func<AmqpPerformativeEnvelopePool<T>, T> envelopeBuilder;
@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Engine
       /// <param name="maxPoolSize">The maximum number of entries in the pool</param>
       public AmqpPerformativeEnvelopePool(Func<AmqpPerformativeEnvelopePool<T>, T> envelopeBuilder, int maxPoolSize)
       {
-         this.pool = new RingQueue<T>(MaxPoolSize);
+         this.pool = new RingQueue<T>(maxPoolSize);
          this.maxPoolSize = maxPoolSize;
          this.envelopeBuilder = envelopeBuilder;
       }

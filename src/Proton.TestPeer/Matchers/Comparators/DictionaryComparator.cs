@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
 
       public bool? Equals(object lhs, object rhs, IDescription mismatchDescription)
       {
-         if (!(lhs is IDictionary lhsDictionary) || !(rhs is IDictionary rhsDictionary))
+         if (lhs is not IDictionary lhsDictionary || rhs is not IDictionary rhsDictionary)
          {
             return null;
          }

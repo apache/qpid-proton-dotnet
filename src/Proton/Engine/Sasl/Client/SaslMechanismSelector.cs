@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// <param name="allowed">A set of allowed SASL mechanism names</param>
       public SaslMechanismSelector(ISet<Symbol> allowed)
       {
-         this.allowedMechanisms = allowed != null ? allowed : new HashSet<Symbol>();
+         this.allowedMechanisms = allowed ?? new HashSet<Symbol>();
       }
 
       /// <summary>
@@ -134,7 +134,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       {
          if (candidate == null)
          {
-            throw new ArgumentNullException("Candidate Mechanism to validate must not be null");
+            throw new ArgumentNullException(nameof(candidate), "Candidate Mechanism to validate must not be null");
          }
 
          // If a match is found we still may skip it if the credentials given do not match with

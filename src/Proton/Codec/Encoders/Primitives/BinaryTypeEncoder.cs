@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          buffer.WriteOffset += binary.ReadableBytes;
       }
 
-      public void WriteType(IProtonBuffer buffer, IEncoderState state, byte[] value)
+      public static void WriteType(IProtonBuffer buffer, IEncoderState state, byte[] value)
       {
          if (value.Length > byte.MaxValue)
          {
@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
             buffer.WriteUnsignedInt((uint)value.ReadableBytes);
 
             value.CopyInto(value.ReadOffset, buffer, buffer.WriteOffset, value.ReadableBytes);
-            buffer.WriteOffset = buffer.WriteOffset + value.ReadableBytes;
+            buffer.WriteOffset += value.ReadableBytes;
          }
       }
    }

@@ -83,12 +83,12 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (initialCapacity < 0)
          {
-            throw new ArgumentOutOfRangeException("Initial capacity cannot be negative");
+            throw new ArgumentOutOfRangeException(nameof(initialCapacity), "Initial capacity cannot be negative");
          }
 
          if (maxCapacity < initialCapacity)
          {
-            throw new ArgumentOutOfRangeException("The maximum capacity cannot be less than the initial value");
+            throw new ArgumentOutOfRangeException(nameof(maxCapacity), "The maximum capacity cannot be less than the initial value");
          }
 
          this.array = new byte[initialCapacity];
@@ -143,12 +143,12 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (arrayOffset > backingArray.Length)
          {
-            throw new ArgumentOutOfRangeException("Array offset cannot exceed the array length");
+            throw new ArgumentOutOfRangeException(nameof(arrayOffset), "Array offset cannot exceed the array length");
          }
 
          if (capacity > backingArray.Length - arrayOffset)
          {
-            throw new ArgumentOutOfRangeException(
+            throw new ArgumentOutOfRangeException(nameof(capacity),
                "Array segment capacity cannot exceed the configured array length minus the offset");
          }
 
@@ -242,12 +242,12 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (offset > Int32.MaxValue)
          {
-            throw new ArgumentOutOfRangeException("Proton byte buffer cannot exceed Int32.MaxValue bytes in capacity");
+            throw new ArgumentOutOfRangeException(nameof(offset), "Proton byte buffer cannot exceed Int32.MaxValue bytes in capacity");
          }
 
          if (offset < 0 || offset > Capacity)
          {
-            throw new ArgumentOutOfRangeException("The buffer split offset must be within the current buffer capacity");
+            throw new ArgumentOutOfRangeException(nameof(offset), "The buffer split offset must be within the current buffer capacity");
          }
 
          int iOffset = (int)offset;
@@ -272,7 +272,7 @@ namespace Apache.Qpid.Proton.Buffer
          ProtonByteBuffer front = new ProtonByteBuffer(array, arrayOffset, iOffset, maxCapacity);
 
          // This buffer is adjusted to view only the portion of the array after the split
-         arrayOffset = arrayOffset + iOffset;
+         arrayOffset += iOffset;
 
          // TODO compute the index values
 
@@ -324,8 +324,10 @@ namespace Apache.Qpid.Proton.Buffer
          byte[] copyBytes = new byte[length];
          Array.Copy(array, Offset(index), copyBytes, 0, length);
 
-         IProtonBuffer copy = new ProtonByteBuffer(copyBytes, maxCapacity);
-         copy.WriteOffset = length;
+         IProtonBuffer copy = new ProtonByteBuffer(copyBytes, maxCapacity)
+         {
+            WriteOffset = length
+         };
 
          return copy;
       }
@@ -341,9 +343,8 @@ namespace Apache.Qpid.Proton.Buffer
       {
          CheckCopyIntoArgs(srcPos, length, destPos, dest.Capacity);
 
-         if (dest is ProtonByteBuffer)
+         if (dest is ProtonByteBuffer destByteBuffer)
          {
-            ProtonByteBuffer destByteBuffer = (ProtonByteBuffer)dest;
             Array.Copy(array, Offset(srcPos), destByteBuffer.array, destPos, length);
          }
          else
@@ -738,7 +739,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (source == null)
          {
-            throw new ArgumentNullException("Input source array cannot be null");
+            throw new ArgumentNullException(nameof(source), "Input source array cannot be null");
          }
 
          return WriteBytes(source, 0, source.Length);
@@ -748,7 +749,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (source == null)
          {
-            throw new ArgumentNullException("Input source array cannot be null");
+            throw new ArgumentNullException(nameof(source), "Input source array cannot be null");
          }
 
          if (length > source.LongLength - offset)
@@ -868,12 +869,12 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (requiredWritable < 0)
          {
-            throw new ArgumentOutOfRangeException("Requested writable bytes cannot be negative");
+            throw new ArgumentOutOfRangeException(nameof(requiredWritable), "Requested writable bytes cannot be negative");
          }
 
          if (minimumGrowth < 0)
          {
-            throw new ArgumentOutOfRangeException("Requested minimum growth bytes cannot be negative");
+            throw new ArgumentOutOfRangeException(nameof(minimumGrowth), "Requested minimum growth bytes cannot be negative");
          }
 
          // Called when we know that we don't need to validate if the minimum writable
@@ -886,7 +887,7 @@ namespace Apache.Qpid.Proton.Buffer
          if (requiredWritable > maxCapacity - writeOffset)
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "writeOffset(%d) + requiredWritable(%d) exceeds maximum buffer capcity(%d): %s",
+                "writeOffset({0}) + requiredWritable({1}) exceeds maximum buffer capcity({2}): {3}",
                 writeOffset, requiredWritable, maxCapacity, this));
          }
 
@@ -975,7 +976,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
       }
 
-      private void CheckWriteIntoArgs(long srcCapacity, long srcPos, long length, long destPos, long destLength)
+      private static void CheckWriteIntoArgs(long srcCapacity, long srcPos, long length, long destPos, long destLength)
       {
          if (srcPos < 0)
          {

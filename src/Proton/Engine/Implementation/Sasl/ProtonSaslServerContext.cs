@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
       {
          if (mechanisms == null)
          {
-            throw new ArgumentNullException("Server mechanisms array cannot be null");
+            throw new ArgumentNullException(nameof(mechanisms), "Server mechanisms array cannot be null");
          }
 
          saslHandler.Engine.Pipeline.FireWrite(new SaslEnvelope(new SaslMechanisms(mechanisms)));
@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
       {
          if (challenge == null)
          {
-            throw new ArgumentNullException("Server challenge array cannot be null");
+            throw new ArgumentNullException(nameof(challenge), "Server challenge array cannot be null");
          }
 
          saslHandler.Engine.Pipeline.FireWrite(new SaslEnvelope(new SaslChallenge(challenge)));

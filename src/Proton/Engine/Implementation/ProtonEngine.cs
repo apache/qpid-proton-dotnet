@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonEngine : IEngine
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonEngine>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonEngine>();
 
       private static readonly IProtonBuffer EMPTY_FRAME_BUFFER =
          ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0x00, 0x00, 0x00, 0x08, 0x02, 0x00, 0x00, 0x00 });
@@ -199,12 +199,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       public IEngine TickAuto(TaskFactory taskFactory)
       {
          CheckShutdownOrFailed("Cannot start auto tick on an Engine that has been shutdown or failed");
-
-         if (taskFactory == null)
-         {
-            throw new ArgumentNullException("The provided Task Scheduler cannot be null");
-         }
-
          if (connection.ConnectionState != ConnectionState.Active)
          {
             throw new InvalidOperationException("Cannot tick on a Connection that is not opened.");
@@ -222,7 +216,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // Immediate run of the idle timeout check logic will decide afterwards when / if we should
          // reschedule the idle timeout processing.
          LOG.Trace("Auto Idle Timeout Check being initiated");
-         idleTimeoutExecutor = taskFactory;
+         idleTimeoutExecutor = taskFactory ?? throw new ArgumentNullException(nameof(taskFactory), "The provided Task Scheduler cannot be null");
          // TODO : idleTimeoutExecutor.TryExecuteTask(new IdleTimeoutCheck());
 
          return this;
@@ -471,7 +465,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      private long ComputeDeadline(long now, long timeout)
+      private static long ComputeDeadline(long now, long timeout)
       {
          long deadline = now + timeout;
          // We use 0 to signal not-initialized and/or no-timeout, so in the

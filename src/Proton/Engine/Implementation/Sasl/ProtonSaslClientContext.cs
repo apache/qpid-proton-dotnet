@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
       {
          if (mechanism == null)
          {
-            throw new ArgumentNullException("Client must choose a mechanism");
+            throw new ArgumentNullException(nameof(mechanism), "Client must choose a mechanism");
          }
 
          SaslInit saslInit = new SaslInit(mechanism, initialResponse, host);
@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
       {
          if (response == null)
          {
-            throw new ArgumentNullException("Response buffer cannot be null if send response is called.");
+            throw new ArgumentNullException(nameof(response), "Response buffer cannot be null if send response is called.");
          }
 
          saslHandler.Engine.Pipeline.FireWrite(new SaslEnvelope(new SaslResponse(response)));

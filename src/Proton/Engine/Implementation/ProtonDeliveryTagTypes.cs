@@ -35,19 +35,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    {
       public static IDeliveryTagGenerator NewTagGenerator(this ProtonDeliveryTagTypes type)
       {
-         switch (type)
+         return type switch
          {
-            case ProtonDeliveryTagTypes.Sequential:
-               return new ProtonSequentialTagGenerator();
-            case ProtonDeliveryTagTypes.Uuid:
-               return ProtonUuidTagGenerator.Instance;
-            case ProtonDeliveryTagTypes.Pooled:
-               return new ProtonPooledTagGenerator();
-            case ProtonDeliveryTagTypes.Empty:
-               return ProtonEmptyTagGenerator.Instance;
-            default:
-               throw new ArgumentException("Cannot create generator for unknown type: " + type);
-         }
+            ProtonDeliveryTagTypes.Sequential => new ProtonSequentialTagGenerator(),
+            ProtonDeliveryTagTypes.Uuid => ProtonUuidTagGenerator.Instance,
+            ProtonDeliveryTagTypes.Pooled => new ProtonPooledTagGenerator(),
+            ProtonDeliveryTagTypes.Empty => ProtonEmptyTagGenerator.Instance,
+            _ => throw new ArgumentException("Cannot create generator for unknown type: " + type),
+         };
       }
    }
 }

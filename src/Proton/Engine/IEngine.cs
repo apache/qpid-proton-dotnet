@@ -159,7 +159,7 @@ namespace Apache.Qpid.Proton.Engine
       {
          if (input == null)
          {
-            throw new ArgumentNullException("Input byte array must not be null");
+            throw new ArgumentNullException(nameof(input), "Input byte array must not be null");
          }
 
          return Ingest(ProtonByteBufferAllocator.Instance.Wrap(input));

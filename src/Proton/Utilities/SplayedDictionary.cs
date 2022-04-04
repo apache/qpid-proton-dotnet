@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Utilities
    /// <typeparam name="T">The type contained in the Queue</typeparam>
    public class SplayedDictionary<K, V> : IDictionary, ICollection<KeyValuePair<K, V>>, IDictionary<K, V>, IEnumerable, IEnumerable<KeyValuePair<K, V>>
    {
-      private IComparer<K> keyComparer = Comparer<K>.Default;
+      private readonly IComparer<K> keyComparer = Comparer<K>.Default;
 
       /// <summary>
       /// Pooled entries used to prevent excessive allocations for rapied insert and removal operations.
@@ -77,12 +77,7 @@ namespace Apache.Qpid.Proton.Utilities
       /// <param name="comparer">The IComparer instance to use to compare keys</param>
       public SplayedDictionary(IComparer<K> comparer)
       {
-         if (comparer == null)
-         {
-            throw new ArgumentNullException("Provided key comparer must not be null");
-         }
-
-         this.keyComparer = comparer;
+         this.keyComparer = comparer ?? throw new ArgumentNullException(nameof(comparer), "Provided key comparer must not be null");
       }
 
       /// <summary>
@@ -94,7 +89,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (source == null)
          {
-            throw new ArgumentNullException("Provided source dictionary cannot be null");
+            throw new ArgumentNullException(nameof(source), "Provided source dictionary cannot be null");
          }
 
          foreach (KeyValuePair<K, V> entry in source)
@@ -239,12 +234,12 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (array == null)
          {
-            throw new ArgumentNullException("The provided array cannot be null");
+            throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
          }
 
          if (arrayIndex < 0)
          {
-            throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
          }
 
          if (array.Length - arrayIndex > size)
@@ -262,12 +257,12 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (array == null)
          {
-            throw new ArgumentNullException("The provided array cannot be null");
+            throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
          }
 
          if (arrayIndex < 0)
          {
-            throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
          }
 
          if (array.Length - arrayIndex > size)
@@ -377,9 +372,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          get
          {
-            V result;
-
-            if (TryGetValue(key, out result))
+            if (TryGetValue(key, out V result))
             {
                return result;
             }
@@ -487,11 +480,11 @@ namespace Apache.Qpid.Proton.Utilities
 
             if (current == null)
             {
-               current = parent.FirstEntry(parent.root);
+               current = FirstEntry(parent.root);
             }
             else
             {
-               current = parent.Successor(current);
+               current = Successor(current);
             }
 
             return current != null;
@@ -635,12 +628,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -648,7 +641,7 @@ namespace Apache.Qpid.Proton.Utilities
                throw new ArgumentException("Not enough space in array to store the dictionary values");
             }
 
-            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            for (SplayedEntry entry = FirstEntry(parent.root); entry != null; entry = Successor(entry))
             {
                array[arrayIndex++] = entry.Value;
             }
@@ -658,12 +651,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -671,7 +664,7 @@ namespace Apache.Qpid.Proton.Utilities
                throw new ArgumentException("Not enough space in array to store the dictionary values");
             }
 
-            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            for (SplayedEntry entry = FirstEntry(parent.root); entry != null; entry = Successor(entry))
             {
                array.SetValue(entry.Value, arrayIndex++);
             }
@@ -724,12 +717,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -737,7 +730,7 @@ namespace Apache.Qpid.Proton.Utilities
                throw new ArgumentException("Not enough space in array to store the dictionary keys");
             }
 
-            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            for (SplayedEntry entry = FirstEntry(parent.root); entry != null; entry = Successor(entry))
             {
                array[arrayIndex++] = entry.Key;
             }
@@ -747,12 +740,12 @@ namespace Apache.Qpid.Proton.Utilities
          {
             if (array == null)
             {
-               throw new ArgumentNullException("The provided array cannot be null");
+               throw new ArgumentNullException(nameof(array), "The provided array cannot be null");
             }
 
             if (arrayIndex < 0)
             {
-               throw new ArgumentOutOfRangeException("Array index must be greater than zero");
+               throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Array index must be greater than zero");
             }
 
             if (array.Length - arrayIndex > parent.size)
@@ -760,7 +753,7 @@ namespace Apache.Qpid.Proton.Utilities
                throw new ArgumentException("Not enough space in array to store the dictionary keys");
             }
 
-            for (SplayedEntry entry = parent.FirstEntry(parent.root); entry != null; entry = parent.Successor(entry))
+            for (SplayedEntry entry = FirstEntry(parent.root); entry != null; entry = Successor(entry))
             {
                array.SetValue(entry.Key, arrayIndex++);
             }
@@ -824,7 +817,7 @@ namespace Apache.Qpid.Proton.Utilities
        *
        */
 
-      private SplayedEntry RightRotate(SplayedEntry node)
+      private static SplayedEntry RightRotate(SplayedEntry node)
       {
          SplayedEntry rotated = node.left;
          node.left = rotated.right;
@@ -841,7 +834,7 @@ namespace Apache.Qpid.Proton.Utilities
          return rotated;
       }
 
-      private SplayedEntry LeftRotate(SplayedEntry node)
+      private static SplayedEntry LeftRotate(SplayedEntry node)
       {
          SplayedEntry rotated = node.right;
          node.right = rotated.left;
@@ -1032,7 +1025,7 @@ namespace Apache.Qpid.Proton.Utilities
          size--;
       }
 
-      private SplayedEntry FirstEntry(SplayedEntry node)
+      private static SplayedEntry FirstEntry(SplayedEntry node)
       {
          SplayedEntry firstEntry = node;
          if (firstEntry != null)
@@ -1046,7 +1039,7 @@ namespace Apache.Qpid.Proton.Utilities
          return firstEntry;
       }
 
-      private SplayedEntry LastEntry(SplayedEntry node)
+      private static SplayedEntry LastEntry(SplayedEntry node)
       {
          SplayedEntry lastEntry = node;
          if (lastEntry != null)
@@ -1060,7 +1053,7 @@ namespace Apache.Qpid.Proton.Utilities
          return lastEntry;
       }
 
-      private SplayedEntry Successor(SplayedEntry node)
+      private static SplayedEntry Successor(SplayedEntry node)
       {
          if (node == null)
          {
@@ -1091,7 +1084,7 @@ namespace Apache.Qpid.Proton.Utilities
          }
       }
 
-      private SplayedEntry Predecessor(SplayedEntry node)
+      private static SplayedEntry Predecessor(SplayedEntry node)
       {
          if (node == null)
          {

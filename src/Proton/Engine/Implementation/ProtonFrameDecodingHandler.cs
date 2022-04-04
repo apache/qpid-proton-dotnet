@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonFrameDecodingHandler : IEngineHandler, ISaslPerformativeHandler<IEngineHandlerContext>
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonFrameDecodingHandler>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonFrameDecodingHandler>();
 
       /// <summary>
       /// Frame type indicator for AMQP protocol frames.
@@ -149,7 +149,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private ParsingErrorStage TransitionToErrorStage(ProtonException error)
       {
-         if (!(stage is ParsingErrorStage))
+         if (stage is not ParsingErrorStage)
          {
             LOG.Trace("Frame decoder encountered error: ", error);
             stage = new ParsingErrorStage(this, error);
@@ -376,7 +376,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             long frameBodySize = frameSize - dataOffset;
 
             IProtonBuffer payload = null;
-            Object val = null;
+            Object val;
 
             if (frameBodySize > 0)
             {
@@ -431,7 +431,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             }
          }
 
-         private void ValidateDataOffset(int dataOffset, int frameSize)
+         private static void ValidateDataOffset(int dataOffset, int frameSize)
          {
             if (dataOffset < 8)
             {

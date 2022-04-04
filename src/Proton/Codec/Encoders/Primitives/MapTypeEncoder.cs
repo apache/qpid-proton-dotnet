@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          }
       }
 
-      private void WriteValue(IProtonBuffer buffer, IEncoderState state, IDictionary value)
+      private static void WriteValue(IProtonBuffer buffer, IEncoderState state, IDictionary value)
       {
          long startIndex = buffer.WriteOffset;
 

@@ -42,12 +42,12 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override bool Equals(object other)
       {
-         return other == null ? false : other.GetType() == GetType();
+         return other != null && other.GetType() == GetType();
       }
 
       public bool Equals(IDeliveryState state)
       {
-         return state == null ? false : state.GetType() == GetType();
+         return state != null && state.GetType() == GetType();
       }
 
       public override string ToString()

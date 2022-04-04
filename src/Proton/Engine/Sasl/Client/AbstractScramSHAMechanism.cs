@@ -93,7 +93,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
                break;
             case State.CLIENT_PROOF_SENT:
                EvaluateOutcome(challenge);
-               response = new byte[0];
+               response = Array.Empty<byte>();
                state = State.COMPLETE;
                break;
             default:
@@ -195,7 +195,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             throw new SaslException("Server final message did not contain verifier");
          }
 
-         byte[] localServerSignature = null;
+         byte[] localServerSignature;
          try
          {
             localServerSignature = Convert.FromBase64String(parts[0].Substring(2));
@@ -227,7 +227,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
 
          for (int i = 1; i < iterationCount; i++)
          {
-            previous = mac.ComputeHash(previous != null ? previous : initial);
+            previous = mac.ComputeHash(previous ?? initial);
             for (int x = 0; x < initial.Length; x++)
             {
                initial[x] ^= previous[x];
@@ -267,7 +267,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
          return CreateHmac(key).ComputeHash(Encoding.ASCII.GetBytes(@string));
       }
 
-      private string DoSaslPrep(string name)
+      private static string DoSaslPrep(string name)
       {
          // TODO - a real implementation of SaslPrep [rfc4013]
 
@@ -284,7 +284,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
          }
       }
 
-      private string EscapeUsername(string name)
+      private static string EscapeUsername(string name)
       {
          name = name.Replace("=", "=3D");
          name = name.Replace(",", "=2C");

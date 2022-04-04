@@ -64,11 +64,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(buffer, state);
       }
 
-      private Begin ReadBegin(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      private static Begin ReadBegin(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
          Begin result = new Begin();
 
-         int size = listDecoder.ReadSize(buffer, state);
+         _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
 
          if (count < MinBeginListEntries)
@@ -161,11 +161,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          decoder.SkipValue(stream, state);
       }
 
-      private Begin ReadBegin(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      private static Begin ReadBegin(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
          Begin result = new Begin();
 
-         int size = listDecoder.ReadSize(stream, state);
+         _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
 
          if (count < MinBeginListEntries)
@@ -234,17 +234,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      private string ErrorForMissingRequiredFields(int present)
+      private static string ErrorForMissingRequiredFields(int present)
       {
-         switch (present)
+         return present switch
          {
-            case 3:
-               return "The outgoing-window field cannot be omitted from the Begin";
-            case 2:
-               return "The incoming-window field cannot be omitted from the Begin";
-            default:
-               return "The next-outgoing-id field cannot be omitted from the Begin";
-         }
+            3 => "The outgoing-window field cannot be omitted from the Begin",
+            2 => "The incoming-window field cannot be omitted from the Begin",
+            _ => "The next-outgoing-id field cannot be omitted from the Begin",
+         };
       }
    }
 }

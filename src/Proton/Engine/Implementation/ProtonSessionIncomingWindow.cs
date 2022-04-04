@@ -52,7 +52,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private uint maxFrameSize;
       private uint incomingBytes;
 
-      private SplayedDictionary<uint, ProtonIncomingDelivery> unsettled = new SplayedDictionary<uint, ProtonIncomingDelivery>();
+      private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
+         new SplayedDictionary<uint, ProtonIncomingDelivery>();
 
       public ProtonSessionIncomingWindow(ProtonSession session)
       {
@@ -137,8 +138,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          incomingWindow--;
          nextIncomingId++;
 
-         ProtonIncomingDelivery delivery = null;
-         link.RemoteTransfer(transfer, payload, out delivery);
+         link.RemoteTransfer(transfer, payload, out ProtonIncomingDelivery delivery);
 
          if (!delivery.IsRemotelySettled && delivery.IsFirstTransfer)
          {
@@ -164,9 +164,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            ProtonIncomingDelivery delivery;
-
-            if (unsettled.TryGetValue(first, out delivery))
+            if (unsettled.TryGetValue(first, out ProtonIncomingDelivery delivery))
             {
                if (delivery.IsSettled)
                {
@@ -187,11 +185,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          bool settled = disposition.Settled;
 
          uint index = first;
-         ProtonIncomingDelivery delivery;
 
          do
          {
-            if (unsettled.TryGetValue(index, out delivery))
+            if (unsettled.TryGetValue(index, out ProtonIncomingDelivery delivery))
             {
                if (settled)
                {

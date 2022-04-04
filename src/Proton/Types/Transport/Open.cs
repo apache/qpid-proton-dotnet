@@ -79,13 +79,8 @@ namespace Apache.Qpid.Proton.Types.Transport
          get { return containerId; }
          set
          {
-            if (value == null)
-            {
-               throw new NullReferenceException("the container-id field is mandatory");
-            }
-
             modified |= CONTAINER_ID;
-            containerId = value;
+            containerId = value ?? throw new NullReferenceException("the container-id field is mandatory");
          }
       }
 

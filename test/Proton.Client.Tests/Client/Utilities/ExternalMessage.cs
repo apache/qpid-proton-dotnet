@@ -387,27 +387,27 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
       private Header LazyCreateHeader()
       {
-         return header ?? (header = new Header());
+         return header ??= new Header();
       }
 
       private Properties LazyCreateProperties()
       {
-         return properties ?? (properties = new Properties());
+         return properties ??= new Properties();
       }
 
       private ApplicationProperties LazyCreateApplicationProperties()
       {
-         return applicationProperties ?? (applicationProperties = new ApplicationProperties(new Dictionary<string, object>()));
+         return applicationProperties ??= new ApplicationProperties(new Dictionary<string, object>());
       }
 
       private MessageAnnotations LazyCreateMessageAnnotations()
       {
-         return messageAnnotations ?? (messageAnnotations = new MessageAnnotations(new Dictionary<Symbol, object>()));
+         return messageAnnotations ??= new MessageAnnotations(new Dictionary<Symbol, object>());
       }
 
       private Footer LazyCreateFooter()
       {
-         return footer ?? (footer = new Footer(new Dictionary<Symbol, object>()));
+         return footer ??= new Footer(new Dictionary<Symbol, object>());
       }
 
       private static ISection ValidateBodySections(uint messageFormat, List<ISection> target, ISection section)
@@ -494,7 +494,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
          {
             if (section == null)
             {
-               throw new ArgumentNullException("Additional body section cannot be null.");
+               throw new ArgumentNullException(nameof(section), "Additional body section cannot be null.");
             }
 
             if (body == null && bodySections == null)

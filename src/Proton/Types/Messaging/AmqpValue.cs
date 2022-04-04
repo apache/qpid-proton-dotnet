@@ -89,7 +89,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Value == null ? false : Value.Equals(other.Value);
+            return Value != null && Value.Equals(other.Value);
          }
       }
    }

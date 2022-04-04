@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
    {
       public Type EncodesType => typeof(IDeliveryTag);
 
-      public bool IsArrayType => false;
+      public static bool IsArrayType => false;
 
       public void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {

@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public static class ProtonStreamReadUtils
    {
-      private static readonly byte[] EmptyArray = new byte[0];
+      private static readonly byte[] EmptyArray = Array.Empty<byte>();
 
       /// <summary>
       /// Reads the given number of bytes from the provided Stream into an array and return
@@ -290,7 +290,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          catch (IOException ex)
          {
             throw new DecodeException(
-                string.Format("Error while attempting to skip %d bytes in the given InputStream", amount), ex);
+                string.Format("Error while attempting to skip {0} bytes in the given InputStream", amount), ex);
          }
 
          return stream;

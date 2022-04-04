@@ -55,8 +55,10 @@ namespace Apache.Qpid.Proton.Buffer
       {
          // Wrap assign a max capacity to prevent reallocation of the buffer
          // for writes, the buffer operations can only be on the original.
-         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, buffer.Length);
-         wrapper.WriteOffset = buffer.LongLength;
+         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, buffer.Length)
+         {
+            WriteOffset = buffer.LongLength
+         };
 
          return wrapper;
       }
@@ -65,8 +67,10 @@ namespace Apache.Qpid.Proton.Buffer
       {
          // Wrap assign a max capacity to prevent reallocation of the buffer
          // for writes, the buffer operations can only be on the original.
-         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, offset, length, length);
-         wrapper.WriteOffset = length;
+         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, offset, length, length)
+         {
+            WriteOffset = length
+         };
 
          return wrapper;
       }

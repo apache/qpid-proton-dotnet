@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public class ProtonStreamDecoderState : IStreamDecoderState
    {
-      private ProtonStreamDecoder decoder;
+      private readonly ProtonStreamDecoder decoder;
 
       public IStreamDecoder Decoder => decoder;
 
@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
       }
 
-      private string InternalDecode(Stream stream, int length)
+      private static string InternalDecode(Stream stream, int length)
       {
          byte[] byteArray = new byte[length];
          if (stream.Read(byteArray, 0, length) != length)

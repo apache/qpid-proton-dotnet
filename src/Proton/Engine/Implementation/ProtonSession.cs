@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private readonly Begin localBegin = new Begin();
       private Begin remoteBegin;
 
-      private ushort localChannel;
+      private readonly ushort localChannel;
 
       private readonly ProtonSessionOutgoingWindow outgoingWindow;
       private readonly ProtonSessionIncomingWindow incomingWindow;
@@ -254,9 +254,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          CheckSessionClosed("Cannot create new Sender from closed Session");
 
-         ProtonSender sender = null;
-
-         if (!senderByNameMap.TryGetValue(name, out sender))
+         if (!senderByNameMap.TryGetValue(name, out ProtonSender sender))
          {
             sender = new ProtonSender(this, name, new ProtonLinkCreditState());
             senderByNameMap.Add(name, sender);
@@ -269,9 +267,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          CheckSessionClosed("Cannot create new Receiver from closed Session");
 
-         ProtonReceiver receiver = null;
-
-         if (!receiverByNameMap.TryGetValue(name, out receiver))
+         if (!receiverByNameMap.TryGetValue(name, out ProtonReceiver receiver))
          {
             receiver = new ProtonReceiver(this, name, new ProtonLinkCreditState());
             receiverByNameMap.Add(name, receiver);
@@ -284,9 +280,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          CheckSessionClosed("Cannot create new TransactionController from closed Session");
 
-         ProtonSender sender = null;
-
-         if (!senderByNameMap.TryGetValue(name, out sender))
+         if (!senderByNameMap.TryGetValue(name, out ProtonSender sender))
          {
             sender = new ProtonSender(this, name, new ProtonLinkCreditState());
             senderByNameMap.Add(name, sender);
@@ -375,8 +369,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal void RemoteDetach(Detach detach, ushort channel)
       {
-         IProtonLink link;
-         if (remoteLinks.TryGetValue(detach.Handle, out link))
+         if (remoteLinks.TryGetValue(detach.Handle, out IProtonLink link))
          {
             remoteLinks.Remove(detach.Handle);
          }
@@ -414,9 +407,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (flow.HasHandle())
          {
-            IProtonLink link;
-
-            if (!remoteLinks.TryGetValue(flow.Handle, out link))
+            if (!remoteLinks.TryGetValue(flow.Handle, out IProtonLink link))
             {
                engine.EngineFailed(new ProtocolViolationException(
                    "Received uncorrelated handle on Flow from remote: " + channel));
@@ -433,8 +424,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal void RemoteTransfer(Transfer transfer, IProtonBuffer payload, ushort channel)
       {
-         IProtonLink link;
-         if (!remoteLinks.TryGetValue(transfer.Handle, out link))
+         if (!remoteLinks.TryGetValue(transfer.Handle, out IProtonLink link))
          {
             engine.EngineFailed(new ProtocolViolationException(
                 "Received uncorrelated handle on Transfer from remote: " + channel));

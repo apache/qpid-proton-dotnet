@@ -92,13 +92,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// Registry of decoders for described types which can be updated with user defined
       /// decoders as well as the default decoders.
       /// </summary>
-      private IDictionary<object, IStreamDescribedTypeDecoder> describedTypeDecoders =
+      private readonly IDictionary<object, IStreamDescribedTypeDecoder> describedTypeDecoders =
          new Dictionary<object, IStreamDescribedTypeDecoder>();
 
       /// <summary>
       /// Quick access to decoders that handle AMQP types like Transfer, Properties etc.
       /// </summary>
-      private IStreamDescribedTypeDecoder[] amqpTypeDecoders = new IStreamDescribedTypeDecoder[256];
+      private readonly IStreamDescribedTypeDecoder[] amqpTypeDecoders = new IStreamDescribedTypeDecoder[256];
 
       // Internal Decoders used to prevent user to access Proton specific decoding methods
       private static readonly Symbol8TypeDecoder symbol8Decoder;
@@ -125,488 +125,379 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.BooleanTrue:
-               return true;
-            case EncodingCodes.BooleanFalse:
-               return false;
-            case EncodingCodes.Boolean:
-               return stream.ReadByte() == 0 ? false : true;
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.BooleanTrue => true,
+            EncodingCodes.BooleanFalse => false,
+            EncodingCodes.Boolean => stream.ReadByte() != 0,
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode),
+         };
       }
 
       public bool ReadBoolean(Stream stream, IStreamDecoderState state, bool defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.BooleanTrue:
-               return true;
-            case EncodingCodes.BooleanFalse:
-               return false;
-            case EncodingCodes.Boolean:
-               return stream.ReadByte() == 0 ? false : true;
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.BooleanTrue => true,
+            EncodingCodes.BooleanFalse => false,
+            EncodingCodes.Boolean => stream.ReadByte() != 0,
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Boolean type but found encoding: " + encodingCode),
+         };
       }
 
       public sbyte? ReadByte(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Byte:
-               return ProtonStreamReadUtils.ReadByte(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Byte => ProtonStreamReadUtils.ReadByte(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public sbyte ReadByte(Stream stream, IStreamDecoderState state, sbyte defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Byte:
-               return ProtonStreamReadUtils.ReadByte(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Byte => ProtonStreamReadUtils.ReadByte(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public byte? ReadUnsignedByte(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UByte:
-               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UByte => ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public byte ReadUnsignedByte(Stream stream, IStreamDecoderState state, byte defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UByte:
-               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UByte => ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Byte type but found encoding: " + encodingCode),
+         };
       }
 
       public char? ReadCharacter(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Char:
-               return (char)ProtonStreamReadUtils.ReadInt(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Char type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Char => (char)ProtonStreamReadUtils.ReadInt(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Char type but found encoding: " + encodingCode),
+         };
       }
 
       public char ReadCharacter(Stream stream, IStreamDecoderState state, char defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Char:
-               return (char)ProtonStreamReadUtils.ReadInt(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Char type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Char => (char)ProtonStreamReadUtils.ReadInt(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Char type but found encoding: " + encodingCode),
+         };
       }
 
       public Decimal32 ReadDecimal32(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Decimal32:
-               return new Decimal32(ProtonStreamReadUtils.ReadUnsignedInt(stream));
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Decimal32 type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Decimal32 => new Decimal32(ProtonStreamReadUtils.ReadUnsignedInt(stream)),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Decimal32 type but found encoding: " + encodingCode),
+         };
       }
 
       public Decimal64 ReadDecimal64(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Decimal64:
-               return new Decimal64(ProtonStreamReadUtils.ReadUnsignedLong(stream));
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Decimal64 type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Decimal64 => new Decimal64(ProtonStreamReadUtils.ReadUnsignedLong(stream)),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Decimal64 type but found encoding: " + encodingCode),
+         };
       }
 
       public Decimal128 ReadDecimal128(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Decimal128:
-               return new Decimal128(ProtonStreamReadUtils.ReadUnsignedLong(stream), ProtonStreamReadUtils.ReadUnsignedLong(stream));
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Decimal128 type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Decimal128 => new Decimal128(ProtonStreamReadUtils.ReadUnsignedLong(stream), ProtonStreamReadUtils.ReadUnsignedLong(stream)),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Decimal128 type but found encoding: " + encodingCode),
+         };
       }
 
       public short? ReadShort(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Short:
-               return ProtonStreamReadUtils.ReadShort(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Short => ProtonStreamReadUtils.ReadShort(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Short type but found encoding: " + encodingCode),
+         };
       }
 
       public short ReadShort(Stream stream, IStreamDecoderState state, short defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Short:
-               return ProtonStreamReadUtils.ReadShort(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Short => ProtonStreamReadUtils.ReadShort(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Short type but found encoding: " + encodingCode),
+         };
       }
 
       public ushort? ReadUnsignedShort(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UShort:
-               return ProtonStreamReadUtils.ReadUnsignedShort(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UShort => ProtonStreamReadUtils.ReadUnsignedShort(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode),
+         };
       }
 
       public ushort ReadUnsignedShort(Stream stream, IStreamDecoderState state, ushort defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UShort:
-               return ProtonStreamReadUtils.ReadUnsignedShort(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UShort => ProtonStreamReadUtils.ReadUnsignedShort(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Short type but found encoding: " + encodingCode),
+         };
       }
 
       public int? ReadInt(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallInt:
-               return ProtonStreamReadUtils.ReadByte(stream);
-            case EncodingCodes.Int:
-               return ProtonStreamReadUtils.ReadInt(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Int type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallInt => ProtonStreamReadUtils.ReadByte(stream),
+            EncodingCodes.Int => ProtonStreamReadUtils.ReadInt(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Int type but found encoding: " + encodingCode),
+         };
       }
 
       public int ReadInt(Stream stream, IStreamDecoderState state, int defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallInt:
-               return ProtonStreamReadUtils.ReadByte(stream);
-            case EncodingCodes.Int:
-               return ProtonStreamReadUtils.ReadInt(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Int type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallInt => ProtonStreamReadUtils.ReadByte(stream),
+            EncodingCodes.Int => ProtonStreamReadUtils.ReadInt(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Int type but found encoding: " + encodingCode),
+         };
       }
 
       public uint? ReadUnsignedInteger(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UInt0:
-               return 0u;
-            case EncodingCodes.SmallUInt:
-               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
-            case EncodingCodes.UInt:
-               return ProtonStreamReadUtils.ReadUnsignedInt(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UInt0 => 0u,
+            EncodingCodes.SmallUInt => ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.UInt => ProtonStreamReadUtils.ReadUnsignedInt(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode),
+         };
       }
 
       public uint ReadUnsignedInteger(Stream stream, IStreamDecoderState state, uint defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.UInt0:
-               return 0u;
-            case EncodingCodes.SmallUInt:
-               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
-            case EncodingCodes.UInt:
-               return ProtonStreamReadUtils.ReadUnsignedInt(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.UInt0 => 0u,
+            EncodingCodes.SmallUInt => ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.UInt => ProtonStreamReadUtils.ReadUnsignedInt(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Integer type but found encoding: " + encodingCode),
+         };
       }
 
       public long? ReadLong(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallLong:
-               return ProtonStreamReadUtils.ReadByte(stream);
-            case EncodingCodes.Long:
-               return ProtonStreamReadUtils.ReadLong(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallLong => ProtonStreamReadUtils.ReadByte(stream),
+            EncodingCodes.Long => ProtonStreamReadUtils.ReadLong(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Long type but found encoding: " + encodingCode),
+         };
       }
 
       public long ReadLong(Stream stream, IStreamDecoderState state, long defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.SmallLong:
-               return ProtonStreamReadUtils.ReadByte(stream);
-            case EncodingCodes.Long:
-               return ProtonStreamReadUtils.ReadLong(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.SmallLong => ProtonStreamReadUtils.ReadByte(stream),
+            EncodingCodes.Long => ProtonStreamReadUtils.ReadLong(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Long type but found encoding: " + encodingCode),
+         };
       }
 
       public ulong? ReadUnsignedLong(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.ULong0:
-               return 0ul;
-            case EncodingCodes.SmallULong:
-               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
-            case EncodingCodes.ULong:
-               return ProtonStreamReadUtils.ReadUnsignedLong(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.ULong0 => 0ul,
+            EncodingCodes.SmallULong => ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.ULong => ProtonStreamReadUtils.ReadUnsignedLong(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode),
+         };
       }
 
       public ulong ReadUnsignedLong(Stream stream, IStreamDecoderState state, ulong defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.ULong0:
-               return 0ul;
-            case EncodingCodes.SmallULong:
-               return ProtonStreamReadUtils.ReadUnsignedByte(stream);
-            case EncodingCodes.ULong:
-               return ProtonStreamReadUtils.ReadUnsignedLong(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.ULong0 => 0ul,
+            EncodingCodes.SmallULong => ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.ULong => ProtonStreamReadUtils.ReadUnsignedLong(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Unsigned Long type but found encoding: " + encodingCode),
+         };
       }
 
       public float? ReadFloat(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Float:
-               return ProtonStreamReadUtils.ReadFloat(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Float type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Float => ProtonStreamReadUtils.ReadFloat(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Float type but found encoding: " + encodingCode),
+         };
       }
 
       public float ReadFloat(Stream stream, IStreamDecoderState state, float defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Float:
-               return ProtonStreamReadUtils.ReadFloat(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Float type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Float => ProtonStreamReadUtils.ReadFloat(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Float type but found encoding: " + encodingCode),
+         };
       }
 
       public double? ReadDouble(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Double:
-               return ProtonStreamReadUtils.ReadDouble(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Double type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Double => ProtonStreamReadUtils.ReadDouble(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Double type but found encoding: " + encodingCode),
+         };
       }
 
       public double ReadDouble(Stream stream, IStreamDecoderState state, double defaultValue)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Double:
-               return ProtonStreamReadUtils.ReadDouble(stream);
-            case EncodingCodes.Null:
-               return defaultValue;
-            default:
-               throw new DecodeException("Expected Double type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Double => ProtonStreamReadUtils.ReadDouble(stream),
+            EncodingCodes.Null => defaultValue,
+            _ => throw new DecodeException("Expected Double type but found encoding: " + encodingCode),
+         };
       }
 
       public IProtonBuffer ReadBinary(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.VBin8:
-               return (IProtonBuffer)binary8Decoder.ReadValue(stream, state);
-            case EncodingCodes.VBin32:
-               return (IProtonBuffer)binary32Decoder.ReadValue(stream, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.VBin8 => (IProtonBuffer)binary8Decoder.ReadValue(stream, state),
+            EncodingCodes.VBin32 => (IProtonBuffer)binary32Decoder.ReadValue(stream, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Binary type but found encoding: " + encodingCode),
+         };
       }
 
       public string ReadString(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Str8:
-               return (string)string8Decoder.ReadValue(stream, state);
-            case EncodingCodes.Str32:
-               return (string)string32Decoder.ReadValue(stream, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected String type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Str8 => (string)string8Decoder.ReadValue(stream, state),
+            EncodingCodes.Str32 => (string)string32Decoder.ReadValue(stream, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected String type but found encoding: " + encodingCode),
+         };
       }
 
       public Symbol ReadSymbol(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Sym8:
-               return (Symbol)symbol8Decoder.ReadValue(stream, state);
-            case EncodingCodes.Sym32:
-               return (Symbol)symbol32Decoder.ReadValue(stream, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Sym8 => (Symbol)symbol8Decoder.ReadValue(stream, state),
+            EncodingCodes.Sym32 => (Symbol)symbol32Decoder.ReadValue(stream, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode),
+         };
       }
 
       public string ReadSymbolAsString(Stream stream, IStreamDecoderState state)
@@ -618,66 +509,51 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Timestamp:
-               return ProtonStreamReadUtils.ReadUnsignedLong(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Timestamp type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Timestamp => ProtonStreamReadUtils.ReadUnsignedLong(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Timestamp type but found encoding: " + encodingCode),
+         };
       }
 
       public Guid? ReadGuid(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Uuid:
-               return UuidTypeDecoder.ReadUuid(stream);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Uuid type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Uuid => (Guid?)UuidTypeDecoder.ReadUuid(stream),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Uuid type but found encoding: " + encodingCode),
+         };
       }
 
       public IDictionary<K, V> ReadMap<K, V>(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.Map8:
-               return map8Decoder.ReadMap<K,V>(stream, state);
-            case EncodingCodes.Map32:
-               return map32Decoder.ReadMap<K,V>(stream, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Map type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.Map8 => map8Decoder.ReadMap<K, V>(stream, state),
+            EncodingCodes.Map32 => map32Decoder.ReadMap<K, V>(stream, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Map type but found encoding: " + encodingCode),
+         };
       }
 
       public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.List0:
-               return (IList<T>)Array.Empty<T>();
-            case EncodingCodes.List8:
-               return (IList<T>)list8Decoder.ReadList<T>(stream, state);
-            case EncodingCodes.List32:
-               return (IList<T>)list32Decoder.ReadList<T>(stream, state);
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected List type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.List0 => (IList<T>)Array.Empty<T>(),
+            EncodingCodes.List8 => (IList<T>)list8Decoder.ReadList<T>(stream, state),
+            EncodingCodes.List32 => (IList<T>)list32Decoder.ReadList<T>(stream, state),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected List type but found encoding: " + encodingCode),
+         };
       }
 
       public object ReadObject(Stream stream, IStreamDecoderState state)
@@ -752,17 +628,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
 
-         switch (encodingCode)
+         return encodingCode switch
          {
-            case EncodingCodes.VBin8:
-               return new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(stream, state));
-            case EncodingCodes.VBin32:
-               return new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(stream, state));
-            case EncodingCodes.Null:
-               return null;
-            default:
-               throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
-         }
+            EncodingCodes.VBin8 => new DeliveryTag((IProtonBuffer)binary8Decoder.ReadValue(stream, state)),
+            EncodingCodes.VBin32 => new DeliveryTag((IProtonBuffer)binary32Decoder.ReadValue(stream, state)),
+            EncodingCodes.Null => null,
+            _ => throw new DecodeException("Expected Binary type but found encoding: " + encodingCode),
+         };
       }
 
       public IStreamTypeDecoder ReadNextTypeDecoder(Stream stream, IStreamDecoderState state)
@@ -808,28 +680,15 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       private IStreamTypeDecoder SlowReadNextTypeDecoder(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = ProtonStreamReadUtils.ReadEncodingCode(stream);
-         object descriptor;
-
-         switch (encodingCode)
+         object descriptor = encodingCode switch
          {
-            case EncodingCodes.SmallULong:
-               descriptor = (ulong)ProtonStreamReadUtils.ReadUnsignedByte(stream);
-               break;
-            case EncodingCodes.ULong:
-               descriptor = ProtonStreamReadUtils.ReadUnsignedLong(stream);
-               break;
-            case EncodingCodes.Sym8:
-               descriptor = symbol8Decoder.ReadValue(stream, state);
-               break;
-            case EncodingCodes.Sym32:
-               descriptor = symbol32Decoder.ReadValue(stream, state);
-               break;
-            default:
-               throw new DecodeException("Expected Descriptor type but found encoding: " + encodingCode);
-         }
-
-         IStreamDescribedTypeDecoder streamTypeDecoder = null;
-         if (!describedTypeDecoders.TryGetValue(descriptor, out streamTypeDecoder))
+            EncodingCodes.SmallULong => (ulong)ProtonStreamReadUtils.ReadUnsignedByte(stream),
+            EncodingCodes.ULong => ProtonStreamReadUtils.ReadUnsignedLong(stream),
+            EncodingCodes.Sym8 => symbol8Decoder.ReadValue(stream, state),
+            EncodingCodes.Sym32 => symbol32Decoder.ReadValue(stream, state),
+            _ => throw new DecodeException("Expected Descriptor type but found encoding: " + encodingCode),
+         };
+         if (!describedTypeDecoders.TryGetValue(descriptor, out IStreamDescribedTypeDecoder streamTypeDecoder))
          {
             streamTypeDecoder = HandleUnknownDescribedType(descriptor);
          }
@@ -880,13 +739,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return this;
       }
 
-      private InvalidCastException SignalUnexpectedType(in Type type)
+      private static InvalidCastException SignalUnexpectedType(in Type type)
       {
          return new InvalidCastException(
             "Unexpected null decoding, Expected " + type.Name + ".");
       }
 
-      private InvalidCastException SignalUnexpectedType(in object val, in Type type)
+      private static InvalidCastException SignalUnexpectedType(in object val, in Type type)
       {
          return new InvalidCastException(
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");

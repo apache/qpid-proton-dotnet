@@ -34,15 +34,12 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public static ReceiverSettleMode Lookup(byte mode)
       {
-         switch (mode)
+         return mode switch
          {
-            case 0:
-               return ReceiverSettleMode.First;
-            case 1:
-               return ReceiverSettleMode.Second;
-            default:
-               throw new ArgumentOutOfRangeException("Receiver settlement role value out or range [0...1]");
-         }
+            0 => ReceiverSettleMode.First,
+            1 => ReceiverSettleMode.Second,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), "Receiver settlement role value out or range [0...1]"),
+         };
       }
    }
 }

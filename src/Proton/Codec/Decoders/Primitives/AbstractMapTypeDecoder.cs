@@ -39,8 +39,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (size > buffer.ReadableBytes)
          {
             throw new DecodeException(string.Format(
-                    "Map element size %d is specified to be greater than the amount " +
-                    "of data available (%d)", size, buffer.ReadableBytes));
+                    "Map element size {0} is specified to be greater than the amount " +
+                    "of data available ({1})", size, buffer.ReadableBytes));
          }
 
          int count = ReadCount(buffer, state);
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (count % 2 != 0)
          {
             throw new DecodeException(string.Format(
-                "Map encoded number of elements %d is not an even number.", count));
+                "Map encoded number of elements {0} is not an even number.", count));
          }
 
          // Count include both key and value so we must include that in the loop
@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (count % 2 != 0)
          {
             throw new DecodeException(string.Format(
-                "Map encoded number of elements %d is not an even number.", count));
+                "Map encoded number of elements {0} is not an even number.", count));
          }
 
          // Count include both key and value so we must include that in the loop

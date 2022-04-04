@@ -239,9 +239,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            ProtonOutgoingDelivery delivery;
-
-            if (unsettled.TryGetValue(first, out delivery))
+            if (unsettled.TryGetValue(first, out ProtonOutgoingDelivery delivery))
             {
                if (disposition.Settled)
                {
@@ -258,14 +256,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          uint first = disposition.First;
          uint last = disposition.Last;
-         bool settled = disposition.Settled;
 
          uint index = first;
-         ProtonOutgoingDelivery delivery;
 
          do
          {
-            if (unsettled.TryGetValue(index, out delivery))
+            if (unsettled.TryGetValue(index, out ProtonOutgoingDelivery delivery))
             {
                if (disposition.Settled)
                {

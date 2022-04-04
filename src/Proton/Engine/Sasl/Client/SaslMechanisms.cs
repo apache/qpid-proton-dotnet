@@ -42,27 +42,18 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// <exception cref="ArgumentException">If no match can be found</exception>
       public static Symbol ToSymbol(this SaslMechanism mechanism)
       {
-         switch (mechanism)
+         return mechanism switch
          {
-            case SaslMechanism.External:
-               return ExternalMechanism.EXTERNAL;
-            case SaslMechanism.ScramSHA512:
-               return ScramSHA512Mechanism.SCRAM_SHA_512;
-            case SaslMechanism.ScramSHA256:
-               return ScramSHA256Mechanism.SCRAM_SHA_256;
-            case SaslMechanism.ScramSHA1:
-               return ScramSHA1Mechanism.SCRAM_SHA_1;
-            case SaslMechanism.CramMD5:
-               return CramMD5Mechanism.CRAM_MD5;
-            case SaslMechanism.Plain:
-               return PlainMechanism.PLAIN;
-            case SaslMechanism.XOAuth2:
-               return XOauth2Mechanism.XOAUTH2;
-            case SaslMechanism.Anonymous:
-               return AnonymousMechanism.ANONYMOUS;
-         }
-
-         throw new ArgumentOutOfRangeException("Unknown or unimplemented SASL mechanism provided.");
+            SaslMechanism.External => ExternalMechanism.EXTERNAL,
+            SaslMechanism.ScramSHA512 => ScramSHA512Mechanism.SCRAM_SHA_512,
+            SaslMechanism.ScramSHA256 => ScramSHA256Mechanism.SCRAM_SHA_256,
+            SaslMechanism.ScramSHA1 => ScramSHA1Mechanism.SCRAM_SHA_1,
+            SaslMechanism.CramMD5 => CramMD5Mechanism.CRAM_MD5,
+            SaslMechanism.Plain => PlainMechanism.PLAIN,
+            SaslMechanism.XOAuth2 => XOauth2Mechanism.XOAUTH2,
+            SaslMechanism.Anonymous => AnonymousMechanism.ANONYMOUS,
+            _ => throw new ArgumentOutOfRangeException(nameof(mechanism), "Unknown or unimplemented SASL mechanism provided."),
+         };
       }
 
       /// <summary>
@@ -74,27 +65,18 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// <exception cref="ArgumentException">If no match can be found</exception>
       public static IMechanism CreateMechanism(this SaslMechanism mechanism)
       {
-         switch (mechanism)
+         return mechanism switch
          {
-            case SaslMechanism.External:
-               return new ExternalMechanism();
-            case SaslMechanism.ScramSHA512:
-               return new ScramSHA512Mechanism();
-            case SaslMechanism.ScramSHA256:
-               return new ScramSHA256Mechanism();
-            case SaslMechanism.ScramSHA1:
-               return new ScramSHA1Mechanism();
-            case SaslMechanism.CramMD5:
-               return new CramMD5Mechanism();
-            case SaslMechanism.Plain:
-               return new PlainMechanism();
-            case SaslMechanism.XOAuth2:
-               return new XOauth2Mechanism();
-            case SaslMechanism.Anonymous:
-               return new AnonymousMechanism();
-         }
-
-         throw new ArgumentOutOfRangeException("Unknown or unimplemented SASL mechanism provided.");
+            SaslMechanism.External => new ExternalMechanism(),
+            SaslMechanism.ScramSHA512 => new ScramSHA512Mechanism(),
+            SaslMechanism.ScramSHA256 => new ScramSHA256Mechanism(),
+            SaslMechanism.ScramSHA1 => new ScramSHA1Mechanism(),
+            SaslMechanism.CramMD5 => new CramMD5Mechanism(),
+            SaslMechanism.Plain => new PlainMechanism(),
+            SaslMechanism.XOAuth2 => new XOauth2Mechanism(),
+            SaslMechanism.Anonymous => new AnonymousMechanism(),
+            _ => throw new ArgumentOutOfRangeException(nameof(mechanism), "Unknown or unimplemented SASL mechanism provided."),
+         };
       }
    }
 
