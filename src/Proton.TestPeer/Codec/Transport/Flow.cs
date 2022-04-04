@@ -39,8 +39,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
    public sealed class Flow : PerformativeDescribedType
    {
-      public static Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:flow:list");
-      public static ulong DESCRIPTOR_CODE = 0x0000000000000013ul;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:flow:list");
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000013ul;
 
       public Flow() : base(Enum.GetNames(typeof(FlowField)).Length)
       {

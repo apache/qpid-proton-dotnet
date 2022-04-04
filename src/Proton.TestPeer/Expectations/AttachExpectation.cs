@@ -455,8 +455,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
             {
                if (attach.Target != null)
                {
-                  if (attach.Target is Target) {
-                     Target target = (Target)attach.Target;
+                  if (attach.Target is Target target)
+                  {
                      response.WithTarget(target);
                      if (target != null && (target.Dynamic ?? false))
                      {

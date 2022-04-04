@@ -37,8 +37,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private PeerTcpTransport transport;
 
-      private ILoggerFactory loggerFactory;
-      private ILogger<ProtonTestServer> logger;
+      private readonly ILoggerFactory loggerFactory;
+      private readonly ILogger<ProtonTestServer> logger;
 
       public ProtonTestServer(in ILoggerFactory loggerFactory = null) : this(new ProtonTestServerOptions(), loggerFactory)
       {

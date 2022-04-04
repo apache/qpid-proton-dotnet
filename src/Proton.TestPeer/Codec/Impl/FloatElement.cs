@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class FloatElement : AtomicElement
    {
-      private float value;
+      private readonly float value;
 
       public FloatElement(IElement parent, IElement prev, float value) : base(parent, prev)
       {

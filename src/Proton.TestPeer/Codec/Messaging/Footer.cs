@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       {
          if (key == null)
          {
-            throw new ArgumentNullException("Footer maps must use non-null keys");
+            throw new ArgumentNullException(nameof(key), "Footer maps must use non-null keys");
          }
 
          Map.Add(key, value);

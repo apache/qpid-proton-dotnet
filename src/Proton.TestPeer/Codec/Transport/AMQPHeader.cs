@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
          if (value != PREFIX[1])
          {
             throw new ArgumentException(String.Format(
-                "Invalid header byte(2) specified {0} : expected {1}}", value, PREFIX[1]));
+                "Invalid header byte(2) specified {0} : expected {1}", value, PREFIX[1]));
          }
       }
 
@@ -236,14 +236,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
          if (buffer.Length > HEADER_SIZE_BYTES)
          {
-            throw new ArgumentOutOfRangeException("Buffer is to large to be an AMQP Header value");
+            throw new ArgumentOutOfRangeException(nameof(buffer), "Buffer is to large to be an AMQP Header value");
          }
 
          this.buffer = buffer;
          return this;
       }
 
-      private bool StartsWith(byte[] buffer, byte[] value)
+      private static bool StartsWith(byte[] buffer, byte[] value)
       {
          if (buffer == null || buffer.Length < value.Length)
          {

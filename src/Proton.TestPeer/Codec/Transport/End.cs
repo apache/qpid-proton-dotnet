@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
    public sealed class End : PerformativeDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:end:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:end:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000017ul;
 
       public End() : base(Enum.GetNames(typeof(EndField)).Length)

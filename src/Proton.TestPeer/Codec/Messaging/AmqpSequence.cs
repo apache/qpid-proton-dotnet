@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000076UL;
       public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:amqp-sequence:list");
 
-      private IList described;
+      private readonly IList described;
 
       public AmqpSequence(IList described) : base()
       {

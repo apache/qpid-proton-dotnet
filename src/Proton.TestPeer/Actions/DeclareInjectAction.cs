@@ -25,8 +25,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public sealed class DeclareInjectAction : TransferInjectAction
    {
-      private readonly Declare declare = new Declare();
-
       public DeclareInjectAction(AMQPTestDriver driver) : base(driver)
       {
          WithBody().WithDescribed(new Declare());

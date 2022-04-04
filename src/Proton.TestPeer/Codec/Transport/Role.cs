@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public static bool ToBoolean(this Role role)
       {
-         return role == Role.Sender ? false : true;
+         return role != Role.Sender;
       }
 
       public static bool IsSender(this Role role)

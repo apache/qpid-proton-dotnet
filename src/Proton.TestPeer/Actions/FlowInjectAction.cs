@@ -104,7 +104,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public FlowInjectAction withProperties(IDictionary<Symbol, object> properties)
+      public FlowInjectAction WithProperties(IDictionary<Symbol, object> properties)
       {
          flow.Properties = properties;
          return this;

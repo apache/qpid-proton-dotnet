@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       protected readonly AMQPTestDriver driver;
 
-      private ILogger<AbstractExpectation<T>> logger;
+      private readonly ILogger<AbstractExpectation<T>> logger;
 
       public AbstractExpectation(AMQPTestDriver driver)
       {
@@ -245,7 +245,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          }
       }
 
-      private void ReportTypeExpectationError(object received, Type expected)
+      private static void ReportTypeExpectationError(object received, Type expected)
       {
          throw new UnexpectedPerformativeError("Expected type: " + expected + " but received value: " + received);
       }

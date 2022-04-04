@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class IntegerElement : AtomicElement
    {
-      private int value;
+      private readonly int value;
 
       public IntegerElement(IElement parent, IElement prev, int value) : base(parent, prev)
       {

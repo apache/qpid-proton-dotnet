@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public DispositionInjectAction withBatchable(bool batchable)
+      public DispositionInjectAction WithBatchable(bool batchable)
       {
          disposition.Batchable = batchable;
          return this;
@@ -126,8 +126,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public DispositionInjectAction Rejected(String condition, String description)
          {
-            Rejected rejected = new Rejected();
-            rejected.Error = new ErrorCondition(new Symbol(condition), description);
+            Rejected rejected = new Rejected
+            {
+               Error = new ErrorCondition(new Symbol(condition), description)
+            };
 
             return action.WithState(rejected);
          }
@@ -139,17 +141,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public DispositionInjectAction Modified(bool failed)
          {
-            Modified modified = new Modified();
-            modified.DeliveryFailed = failed;
+            Modified modified = new Modified
+            {
+               DeliveryFailed = failed
+            };
 
             return action.WithState(modified);
          }
 
          public DispositionInjectAction Modified(bool failed, bool undeliverableHere)
          {
-            Modified modified = new Modified();
-            modified.DeliveryFailed = failed;
-            modified.UndeliverableHere = undeliverableHere;
+            Modified modified = new Modified
+            {
+               DeliveryFailed = failed,
+               UndeliverableHere = undeliverableHere
+            };
 
             return action.WithState(modified);
          }
@@ -222,8 +228,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithRejected(String condition, String description)
          {
-            Rejected rejected = new Rejected();
-            rejected.Error = new ErrorCondition(new Symbol(condition), description);
+            Rejected rejected = new Rejected
+            {
+               Error = new ErrorCondition(new Symbol(condition), description)
+            };
 
             return WithOutcome(rejected);
          }
@@ -235,17 +243,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithModified(bool failed)
          {
-            Modified modified = new Modified();
-            modified.DeliveryFailed = failed;
+            Modified modified = new Modified
+            {
+               DeliveryFailed = failed
+            };
 
             return WithOutcome(modified);
          }
 
          public TransactionalStateBuilder WithModified(bool failed, bool undeliverableHere)
          {
-            Modified modified = new Modified();
-            modified.DeliveryFailed = failed;
-            modified.UndeliverableHere = undeliverableHere;
+            Modified modified = new Modified
+            {
+               DeliveryFailed = failed,
+               UndeliverableHere = undeliverableHere
+            };
 
             return WithOutcome(modified);
          }

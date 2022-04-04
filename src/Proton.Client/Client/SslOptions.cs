@@ -154,8 +154,10 @@ namespace Apache.Qpid.Proton.Client
 
             if (result == null && !string.IsNullOrEmpty(ClientCertificatePath))
             {
-               result = new X509CertificateCollection();
-               result.Add(new X509Certificate2(ClientCertificatePath, ClientCertificatePassword));
+               result = new X509CertificateCollection
+               {
+                  new X509Certificate2(ClientCertificatePath, ClientCertificatePassword)
+               };
             }
 
             return result;

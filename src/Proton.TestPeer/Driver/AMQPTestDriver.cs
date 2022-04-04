@@ -164,10 +164,10 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             if (this.failureCause == null)
             {
-               if (ex is AssertionError)
+               if (ex is AssertionError error)
                {
                   logger.LogTrace("{0} sending failure assertion due to: {1}", driverName, ex.Message);
-                  this.failureCause = (AssertionError)ex;
+                  this.failureCause = error;
                }
                else
                {
@@ -250,9 +250,9 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            if (performative is PerformativeDescribedType)
+            if (performative is PerformativeDescribedType type)
             {
-               switch (((PerformativeDescribedType)performative).Type)
+               switch (type.Type)
                {
                   case PerformativeType.Open:
                      localOpen = (Open)performative;
@@ -367,9 +367,8 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            IScriptedElement scriptEntry;
 
-            if (!script.TryDequeue(out scriptEntry))
+            if (!script.TryDequeue(out IScriptedElement scriptEntry))
             {
                SignalFailure(new AssertionError("Received header when not expecting any input."));
             }
@@ -413,9 +412,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             saslPerformativeCount++;
 
-            IScriptedElement scriptEntry;
-
-            if (!script.TryDequeue(out scriptEntry))
+            if (!script.TryDequeue(out IScriptedElement scriptEntry))
             {
                SignalFailure(new AssertionError("Received SASL performative when not expecting any input."));
             }
@@ -485,9 +482,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          try
          {
-            IScriptedElement scriptEntry;
-
-            if (!script.TryDequeue(out scriptEntry))
+            if (!script.TryDequeue(out IScriptedElement scriptEntry))
             {
                SignalFailure(new AssertionError(
                   "Received AMQP performative when not expecting any input: " + amqp?.GetType().Name));
@@ -687,9 +682,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          foreach (IScriptedElement element in script)
          {
-            if (element is ScriptCompleteAction)
+            if (element is ScriptCompleteAction completed)
             {
-               ScriptCompleteAction completed = (ScriptCompleteAction)element;
                completed.Perform(this);
             }
          }
@@ -705,9 +699,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
          }
 
-         IScriptedElement peekNext = null;
-
-         script.TryPeek(out peekNext);
+         script.TryPeek(out IScriptedElement peekNext);
 
          do
          {
@@ -715,7 +707,6 @@ namespace Apache.Qpid.Proton.Test.Driver
             {
                script.Dequeue();
                action.Perform(this);
-               peekNext = null;
             }
             else
             {

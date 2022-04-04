@@ -187,7 +187,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             else if (state == null)
             {
-               sendable.Send(cachedSenderOutcome ?? (cachedSenderOutcome = new TransactionalState(currentTxn.TxnId)), settled);
+               sendable.Send(cachedSenderOutcome ??= new TransactionalState(currentTxn.TxnId), settled);
             }
             else
             {
@@ -210,8 +210,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             if (state is Accepted)
             {
-               txnOutcome = cachedReceiverOutcome ??
-                   (cachedReceiverOutcome = new TransactionalState(currentTxn.TxnId, Accepted.Instance));
+               txnOutcome = (cachedReceiverOutcome ??= new TransactionalState(currentTxn.TxnId, Accepted.Instance));
             }
             else
             {
@@ -276,11 +275,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (txnController == null || txnController.IsLocallyClosed)
          {
-            Types.Transactions.Coordinator coordinator = new Types.Transactions.Coordinator();
-            coordinator.Capabilities = new Symbol[] { Types.Transactions.TxnCapability.LOCAL_TXN };
+            Types.Transactions.Coordinator coordinator = new Types.Transactions.Coordinator
+            {
+               Capabilities = new Symbol[] { Types.Transactions.TxnCapability.LOCAL_TXN }
+            };
 
-            Source source = new Source();
-            source.Outcomes = (Symbol[])SUPPORTED_OUTCOMES.Clone();
+            Source source = new Source
+            {
+               Outcomes = (Symbol[])SUPPORTED_OUTCOMES.Clone()
+            };
 
             ITransactionController controller = session.ProtonSession.Coordinator(NextCoordinatorId());
             controller.Source = source;

@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
             return true;
          }
 
-         if (ReferenceEquals(null, actual) || ReferenceEquals(null, expected))
+         if (actual is null || expected is null)
          {
             return false;
          }

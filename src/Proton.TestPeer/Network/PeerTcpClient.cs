@@ -153,7 +153,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          return validated;
       }
 
-      public X509Certificate LocalCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
+      public static X509Certificate LocalCertificateSelectionCallback(object sender, string targetHost, X509CertificateCollection localCertificates, X509Certificate remoteCertificate, string[] acceptableIssuers)
       {
          X509Certificate result = null;
 

@@ -91,7 +91,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
                return null;
             }
          }
-         set => List[((int)AttachField.Role)] = value == null ? null : value == Transport.Role.Receiver ? true : false;
+         set => List[((int)AttachField.Role)] = value == null ? null : value == Transport.Role.Receiver;
       }
 
       public SenderSettleMode? SenderSettleMode

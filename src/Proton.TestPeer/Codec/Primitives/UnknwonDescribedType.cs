@@ -22,8 +22,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 {
    public class UnknownDescribedType : IDescribedType
    {
-      private object descriptor;
-      private object described;
+      private readonly object descriptor;
+      private readonly object described;
 
       public UnknownDescribedType(object descriptor, object described)
       {

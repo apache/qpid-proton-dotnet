@@ -423,7 +423,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          if (saslCode > (byte)SaslCode.SysTemp)
          {
-            throw new ArgumentOutOfRangeException("SASL Code should indicate a failure");
+            throw new ArgumentOutOfRangeException(nameof(saslCode), "SASL Code should indicate a failure");
          }
 
          RemoteSaslOutcome().WithCode((SaslCode)saslCode).Queue();
@@ -444,7 +444,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       {
          ExpectSASLHeader().RespondWithSASLHeader();
          RemoteSaslMechanisms().WithMechanisms("EXTERNAL").Queue();
-         ExpectSaslInit().WithMechanism("EXTERNAL").WithInitialResponse(new byte[0]);
+         ExpectSaslInit().WithMechanism("EXTERNAL").WithInitialResponse(Array.Empty<byte>());
          RemoteSaslOutcome().WithCode(SaslCode.Ok).Queue();
          ExpectAMQPHeader().RespondWithAMQPHeader();
       }

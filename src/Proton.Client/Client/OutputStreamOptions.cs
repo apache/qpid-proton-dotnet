@@ -91,7 +91,7 @@ namespace Apache.Qpid.Proton.Client
          {
             if (value < 0)
             {
-               throw new ArgumentOutOfRangeException("Cannot set a body length greater than Int32.MaxValue");
+               throw new ArgumentOutOfRangeException(nameof(value), "Cannot set a body length greater than Int32.MaxValue");
             }
 
             this.bodyLength = value;

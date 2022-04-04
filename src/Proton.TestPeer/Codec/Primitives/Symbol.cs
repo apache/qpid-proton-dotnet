@@ -25,8 +25,6 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 {
    public sealed class Symbol : IEquatable<Symbol>, IComparable, IComparable<Symbol>
    {
-      private static readonly Symbol EMPTY_SYMBOL = new Symbol();
-
       // Lazy allocated based on calls to stringify the given Symbol
       private string symbolString;
 
@@ -35,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       private Symbol()
       {
-         underlying = new byte[0];
+         underlying = Array.Empty<byte>();
          symbolString = "";
          hashCode = 32;
       }

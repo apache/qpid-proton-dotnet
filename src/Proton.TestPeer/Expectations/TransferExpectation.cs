@@ -338,7 +338,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
    public sealed class TransferDeliveryStateBuilder
    {
-      private TransferExpectation expectation;
+      private readonly TransferExpectation expectation;
 
       public TransferDeliveryStateBuilder(TransferExpectation expectation)
       {

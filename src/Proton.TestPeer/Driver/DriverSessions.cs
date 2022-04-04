@@ -59,15 +59,13 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public SessionTracker SessionFromLocalChannel(ushort localChannel)
       {
-         SessionTracker tracker = null;
-         localSessions.TryGetValue(localChannel, out tracker);
+         localSessions.TryGetValue(localChannel, out SessionTracker tracker);
          return tracker;
       }
 
       public SessionTracker SessionFromRemoteChannel(ushort remoteChannel)
       {
-         SessionTracker tracker = null;
-         remoteSessions.TryGetValue(remoteChannel, out tracker);
+         remoteSessions.TryGetValue(remoteChannel, out SessionTracker tracker);
          return tracker;
       }
 
@@ -138,9 +136,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public SessionTracker HandleEnd(End remoteEnd, ushort remoteChannel)
       {
-         SessionTracker sessionTracker = null;
-
-         if (!remoteSessions.TryGetValue(remoteChannel, out sessionTracker))
+         if (!remoteSessions.TryGetValue(remoteChannel, out SessionTracker sessionTracker))
          {
             throw new AssertionError(string.Format(
                 "Received End on channel [{0}] that has no matching Session for that remote channel. ", remoteChannel));

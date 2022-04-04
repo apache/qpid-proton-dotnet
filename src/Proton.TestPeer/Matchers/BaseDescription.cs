@@ -136,11 +136,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
 
       public virtual IDescription AppendValueList<T>(string start, string separator, string end, IEnumerable<T> values)
       {
-         AppendList(start, separator, end, EnumerateAsSelfDescribing<T>(values));
+         AppendList(start, separator, end, EnumerateAsSelfDescribing(values));
          return this;
       }
 
-      protected IEnumerable<ISelfDescribing> EnumerateAsSelfDescribing<T>(IEnumerable<T> values)
+      protected static IEnumerable<ISelfDescribing> EnumerateAsSelfDescribing<T>(IEnumerable<T> values)
       {
          foreach (T value in values)
          {
@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
          }
       }
 
-      protected IEnumerable<object> EnumerateArrayOf(Array values)
+      protected static IEnumerable<object> EnumerateArrayOf(Array values)
       {
          for (int i = 0; i < values.Length; ++i)
          {
@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
 
       private sealed class SelfDescribingProxy<T> : ISelfDescribing
       {
-         private T value;
+         private readonly T value;
 
          public SelfDescribingProxy(T value)
          {

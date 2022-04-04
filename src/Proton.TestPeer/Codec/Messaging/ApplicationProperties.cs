@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       {
          if (name == null)
          {
-            throw new ArgumentNullException("ApplicationProperties maps must use non-null String keys");
+            throw new ArgumentNullException(nameof(name), "ApplicationProperties maps must use non-null String keys");
          }
 
          Map.Add(name, value);

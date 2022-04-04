@@ -142,8 +142,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          SourceOptions sourceOptions = options.SourceOptions;
 
-         Source source = new Source();
-         source.Address = address;
+         Source source = new Source
+         {
+            Address = address
+         };
 
          if (sourceOptions.DurabilityMode.HasValue)
          {
@@ -192,10 +194,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private static Target CreateTarget(string address, SenderOptions options)
       {
          TargetOptions targetOptions = options.TargetOptions;
-         Target target = new Target();
-
-         target.Address = address;
-         target.Capabilities = ClientConversionSupport.ToSymbolArray(targetOptions.Capabilities);
+         Target target = new Target
+         {
+            Address = address,
+            Capabilities = ClientConversionSupport.ToSymbolArray(targetOptions.Capabilities)
+         };
 
          if (targetOptions.DurabilityMode.HasValue)
          {
@@ -223,11 +226,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
                senderOptions = defaultSenderOptions;
                if (senderOptions == null)
                {
-                  senderOptions = new SenderOptions();
-                  senderOptions.OpenTimeout = sessionOptions.OpenTimeout;
-                  senderOptions.CloseTimeout = sessionOptions.CloseTimeout;
-                  senderOptions.RequestTimeout = sessionOptions.RequestTimeout;
-                  senderOptions.SendTimeout = sessionOptions.SendTimeout;
+                  senderOptions = new SenderOptions
+                  {
+                     OpenTimeout = sessionOptions.OpenTimeout,
+                     CloseTimeout = sessionOptions.CloseTimeout,
+                     RequestTimeout = sessionOptions.RequestTimeout,
+                     SendTimeout = sessionOptions.SendTimeout
+                  };
                }
 
                defaultSenderOptions = senderOptions;
@@ -247,11 +252,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
                senderOptions = defaultStreamSenderOptions;
                if (senderOptions == null)
                {
-                  senderOptions = new StreamSenderOptions();
-                  senderOptions.OpenTimeout = sessionOptions.OpenTimeout;
-                  senderOptions.CloseTimeout = sessionOptions.CloseTimeout;
-                  senderOptions.RequestTimeout = sessionOptions.RequestTimeout;
-                  senderOptions.SendTimeout = sessionOptions.SendTimeout;
+                  senderOptions = new StreamSenderOptions
+                  {
+                     OpenTimeout = sessionOptions.OpenTimeout,
+                     CloseTimeout = sessionOptions.CloseTimeout,
+                     RequestTimeout = sessionOptions.RequestTimeout,
+                     SendTimeout = sessionOptions.SendTimeout
+                  };
                }
 
                defaultStreamSenderOptions = senderOptions;

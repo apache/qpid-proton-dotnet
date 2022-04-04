@@ -249,21 +249,17 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private class RawDeliveryInputStream : Stream
       {
          private readonly AtomicBoolean closed = false;
-         private readonly ClientStreamDelivery delivery;
          private readonly ClientStreamReceiver receiver;
-         private readonly ClientSession session;
          private readonly ClientConnection connection;
-         private readonly Engine.IIncomingDelivery protonDelivery;
+         private readonly IIncomingDelivery protonDelivery;
          private readonly IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          private TaskCompletionSource<int> readRequest;
 
          public RawDeliveryInputStream(ClientStreamDelivery delivery)
          {
-            this.delivery = delivery;
             this.receiver = delivery.receiver;
             this.protonDelivery = delivery.protonDelivery;
-            this.session = (ClientSession)delivery.receiver.Session;
             this.connection = (ClientConnection)delivery.receiver.Session.Connection;
          }
 
@@ -284,7 +280,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                else
                {
-                  TaskCompletionSource<int> request = new TaskCompletionSource<int>();
+                  TaskCompletionSource<int> request = new();
 
                   try
                   {
@@ -320,7 +316,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                try
                {
-                  TaskCompletionSource<bool> closeRequest = new TaskCompletionSource<bool>();
+                  TaskCompletionSource<bool> closeRequest = new();
 
                   connection.Execute(() =>
                   {
@@ -522,7 +518,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          private int RequestMoreData()
          {
-            TaskCompletionSource<int> request = new TaskCompletionSource<int>();
+            TaskCompletionSource<int> request = new();
 
             try
             {

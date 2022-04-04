@@ -32,8 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
    /// </summary>
    public sealed class PeerTcpServer
    {
-      private Socket serverListener;
-      private AtomicBoolean closed = new AtomicBoolean();
+      private readonly Socket serverListener;
+      private readonly AtomicBoolean closed = new AtomicBoolean();
 
       private Action<PeerTcpTransport> clientConnectedHandler;
       private Action<PeerTcpServer, Exception> serverFailedHandler;

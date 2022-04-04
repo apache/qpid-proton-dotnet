@@ -86,7 +86,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
             return true;
          }
 
-         if (!(obj is IDescribedType)) {
+         if (obj is not IDescribedType)
+         {
             return false;
          }
 

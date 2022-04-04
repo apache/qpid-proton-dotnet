@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class LongElement : AtomicElement
    {
-      private long value;
+      private readonly long value;
 
       public LongElement(IElement parent, IElement prev, long value) : base(parent, prev)
       {

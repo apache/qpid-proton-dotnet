@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
-      public Released Instance => INSTANCE;
+      public static Released Instance => INSTANCE;
 
       public override bool Equals(object obj)
       {
@@ -54,7 +54,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
             return true;
          }
 
-         if (!(obj is IDescribedType)) {
+         if (obj is not IDescribedType)
+         {
             return false;
          }
 

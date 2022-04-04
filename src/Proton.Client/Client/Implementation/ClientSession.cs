@@ -626,7 +626,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             // clean up any resources it can by closing it.
             protonSession.LocalCloseHandler(null);
             protonSession.Close();
-            protonSession = ConfigureSession(ClientSessionBuilder.RecreateSession(connection, protonSession, options));
+            protonSession = ConfigureSession(ClientSessionBuilder.RecreateSession(connection, options));
 
             Open();
          }

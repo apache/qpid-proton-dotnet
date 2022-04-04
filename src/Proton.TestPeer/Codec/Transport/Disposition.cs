@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
    public sealed class Disposition : PerformativeDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:disposition:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:disposition:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000015ul;
 
       public Disposition() : base(Enum.GetNames(typeof(DispositionField)).Length)
@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
                return null;
             }
          }
-         set => List[((int)DispositionField.Role)] = value == null ? null : value == Transport.Role.Receiver ? true : false;
+         set => List[((int)DispositionField.Role)] = value == null ? null : value == Transport.Role.Receiver;
       }
 
       public uint? First

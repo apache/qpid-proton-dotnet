@@ -37,18 +37,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public ExecuteUserCodeAction(AMQPTestDriver driver, Action action)
       {
-         if (driver == null)
-         {
-            throw new AssertionError("Driver instance cannot be null");
-         }
-
-         if (action == null)
-         {
-            throw new AssertionError("User action instance cannot be null");
-         }
-
-         this.driver = driver;
-         this.action = action;
+         this.driver = driver ?? throw new AssertionError("Driver instance cannot be null");
+         this.action = action ?? throw new AssertionError("User action instance cannot be null");
       }
 
       /// <summary>

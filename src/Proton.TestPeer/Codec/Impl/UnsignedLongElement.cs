@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class UnsignedLongElement : AtomicElement
    {
-      private ulong value;
+      private readonly ulong value;
 
       public UnsignedLongElement(IElement parent, IElement prev, ulong value) : base(parent, prev)
       {

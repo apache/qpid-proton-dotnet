@@ -225,29 +225,33 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private static ClientMessage<T> ConvertFromOutsideMessage<T>(IMessage<T> source)
       {
-         Header header = new Header();
-         header.Durable = source.Durable;
-         header.Priority = source.Priority;
-         header.TimeToLive = source.TimeToLive;
-         header.FirstAcquirer = source.FirstAcquirer;
-         header.DeliveryCount = source.DeliveryCount;
+         Header header = new Header
+         {
+            Durable = source.Durable,
+            Priority = source.Priority,
+            TimeToLive = source.TimeToLive,
+            FirstAcquirer = source.FirstAcquirer,
+            DeliveryCount = source.DeliveryCount
+         };
 
          byte[] userId = source.UserId;
 
-         Properties properties = new Properties();
-         properties.MessageId = source.MessageId;
-         properties.UserId = userId != null ? ProtonByteBufferAllocator.Instance.Wrap(userId) : null;
-         properties.To = source.To;
-         properties.Subject = source.Subject;
-         properties.ReplyTo = source.ReplyTo;
-         properties.CorrelationId = source.CorrelationId;
-         properties.ContentType = source.ContentType;
-         properties.ContentEncoding = source.ContentEncoding;
-         properties.AbsoluteExpiryTime = source.AbsoluteExpiryTime;
-         properties.CreationTime = source.CreationTime;
-         properties.GroupId = source.GroupId;
-         properties.GroupSequence = source.GroupSequence;
-         properties.ReplyToGroupId = source.ReplyToGroupId;
+         Properties properties = new Properties
+         {
+            MessageId = source.MessageId,
+            UserId = userId != null ? ProtonByteBufferAllocator.Instance.Wrap(userId) : null,
+            To = source.To,
+            Subject = source.Subject,
+            ReplyTo = source.ReplyTo,
+            CorrelationId = source.CorrelationId,
+            ContentType = source.ContentType,
+            ContentEncoding = source.ContentEncoding,
+            AbsoluteExpiryTime = source.AbsoluteExpiryTime,
+            CreationTime = source.CreationTime,
+            GroupId = source.GroupId,
+            GroupSequence = source.GroupSequence,
+            ReplyToGroupId = source.ReplyToGroupId
+         };
 
          MessageAnnotations messageAnnotations;
          if (source.HasAnnotations)
@@ -294,13 +298,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
             footer = null;
          }
 
-         ClientMessage<T> message = new ClientMessage<T>(CreateSectionFromValue(source.Body));
-
-         message.Header = header;
-         message.Properties = properties;
-         message.Annotations = messageAnnotations;
-         message.ApplicationProperties = applicationProperties;
-         message.Footer = footer;
+         ClientMessage<T> message = new ClientMessage<T>(CreateSectionFromValue(source.Body))
+         {
+            Header = header,
+            Properties = properties,
+            Annotations = messageAnnotations,
+            ApplicationProperties = applicationProperties,
+            Footer = footer
+         };
 
          return message;
       }

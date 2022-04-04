@@ -85,7 +85,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
             // Should be a Binary AMQP type with a length value and possibly some bytes
             EncodingCodes encodingCode = receivedBinary.ReadEncodingCode();
-            int binaryEncodedSize = -1;
+            int binaryEncodedSize;
 
             if (encodingCode == EncodingCodes.VBin8)
             {
@@ -187,7 +187,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          return null;
       }
 
-      private Symbol ReadSymbol32(Stream buffer)
+      private static Symbol ReadSymbol32(Stream buffer)
       {
          int length = buffer.ReadInt();
 
@@ -204,7 +204,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          }
       }
 
-      private Symbol ReadSymbol8(Stream buffer)
+      private static Symbol ReadSymbol8(Stream buffer)
       {
          int length = buffer.ReadUnsignedByte();
 

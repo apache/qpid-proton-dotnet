@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Client.Transport
    /// </summary>
    public class TcpTransport : ITransport
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<TcpTransport>();
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<TcpTransport>();
 
       private readonly ChannelReader<IChannelTask> channelOutputSink;
       private readonly ChannelWriter<IChannelTask> channelOutputSource;
@@ -49,6 +49,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       private readonly IEventLoop eventLoop;
       private readonly TransportOptions options;
       private readonly SslOptions sslOptions;
+      private readonly bool traceBytes;
 
       private Task readLoop;
       private Task writeLoop;
@@ -58,7 +59,6 @@ namespace Apache.Qpid.Proton.Client.Transport
       private volatile bool connected;
       private string host;
       private int port = -1;
-      private bool traceBytes;
 
       private Action<ITransport> connectedHandler;
       private Action<ITransport, Exception> connectFailedHandler;
@@ -152,7 +152,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          if (port < 0 && options.DefaultTcpPort < 0 && (sslOptions.SslEnabled && sslOptions.DefaultSslPort < 0))
          {
-            throw new ArgumentOutOfRangeException("Transport port value must be a non-negative int value or a default port configured");
+            throw new ArgumentOutOfRangeException(nameof(port), "Transport port value must be a non-negative int value or a default port configured");
          }
 
          if (port < 0)

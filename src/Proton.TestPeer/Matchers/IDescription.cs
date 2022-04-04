@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       /// Do nothing description that will behave as if it accepts input
       /// but produces no actual descriptive output.
       /// </summary>
-      static IDescription None = new NullDescription();
+      static readonly IDescription None = new NullDescription();
 
       /// <summary>
       /// Appends the given text to this description

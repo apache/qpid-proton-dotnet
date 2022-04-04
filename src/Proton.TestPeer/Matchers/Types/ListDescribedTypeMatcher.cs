@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types
       {
          if (field > numFields)
          {
-            throw new ArgumentOutOfRangeException("Field index supplied exceeds number of fields in type");
+            throw new ArgumentOutOfRangeException(nameof(field), "Field index supplied exceeds number of fields in type");
          }
 
          fieldMatchers[field] = matcher;

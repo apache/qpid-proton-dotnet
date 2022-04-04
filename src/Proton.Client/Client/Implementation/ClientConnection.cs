@@ -46,14 +46,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ConnectionOptions options;
       private readonly ClientSessionBuilder sessionBuilder;
       private readonly string connectionId;
-      private readonly ReconnectLocationPool reconnectPool = new ReconnectLocationPool();
-      private readonly AtomicBoolean closed = new AtomicBoolean();
-      private readonly ClientConnectionCapabilities capabilities = new ClientConnectionCapabilities();
-      private readonly TaskCompletionSource<IConnection> openFuture = new TaskCompletionSource<IConnection>();
-      private readonly TaskCompletionSource<IConnection> closeFuture = new TaskCompletionSource<IConnection>();
+      private readonly ReconnectLocationPool reconnectPool = new();
+      private readonly AtomicBoolean closed = new();
+      private readonly ClientConnectionCapabilities capabilities = new();
+      private readonly TaskCompletionSource<IConnection> openFuture = new();
+      private readonly TaskCompletionSource<IConnection> closeFuture = new();
       private readonly IOContext ioContext;
       private readonly Timer idleTimer;
-      private readonly AtomicReference<ClientIOException> failureCause = new AtomicReference<ClientIOException>();
+      private readonly AtomicReference<ClientIOException> failureCause = new();
 
       private Engine.IEngine engine;
       private Engine.IConnection protonConnection;
@@ -380,8 +380,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
                sessionCapacity = Math.Max(sessionCapacity, protonConnection.MaxFrameSize);
 
                CheckClosedOrFailed();
-               SessionOptions sessionOptions = new SessionOptions(sessionBuilder.DefaultSessionOptions);
-               sessionOptions.IncomingCapacity = sessionCapacity;
+               SessionOptions sessionOptions = new(sessionBuilder.DefaultSessionOptions)
+               {
+                  IncomingCapacity = sessionCapacity
+               };
                ClientStreamSession session = (ClientStreamSession)sessionBuilder.StreamSession(sessionOptions).Open();
                createReceiver.TrySetResult(session.InternalOpenStreamReceiver(address, options));
             }
@@ -419,8 +421,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
                sessionCapacity = Math.Max(sessionCapacity, protonConnection.MaxFrameSize);
 
                CheckClosedOrFailed();
-               SessionOptions sessionOptions = new SessionOptions(sessionBuilder.DefaultSessionOptions);
-               sessionOptions.OutgoingCapacity = sessionCapacity;
+               SessionOptions sessionOptions = new(sessionBuilder.DefaultSessionOptions)
+               {
+                  OutgoingCapacity = sessionCapacity
+               };
 
                ClientStreamSession session = (ClientStreamSession)sessionBuilder.StreamSession(sessionOptions).Open();
                createSender.TrySetResult(session.InternalOpenStreamSender(address, options));

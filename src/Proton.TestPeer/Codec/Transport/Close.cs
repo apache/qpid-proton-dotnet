@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
    public sealed class Close : PerformativeDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:close:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:close:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000018ul;
 
       public Close() : base(Enum.GetNames(typeof(CloseField)).Length)

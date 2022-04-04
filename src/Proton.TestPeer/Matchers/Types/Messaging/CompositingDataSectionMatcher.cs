@@ -196,7 +196,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          return null;
       }
 
-      private Symbol ReadSymbol32(Stream buffer)
+      private static Symbol ReadSymbol32(Stream buffer)
       {
          int length = buffer.ReadInt();
 
@@ -213,7 +213,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          }
       }
 
-      private Symbol ReadSymbol8(Stream buffer)
+      private static Symbol ReadSymbol8(Stream buffer)
       {
          int length = buffer.ReadUnsignedByte();
 

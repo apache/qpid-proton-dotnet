@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       private bool traceBytes;
 
-      private ILogger<PeerTcpTransport> logger;
+      private readonly ILogger<PeerTcpTransport> logger;
 
       internal PeerTcpTransport(in ILoggerFactory loggerFactory, PeerTransportRole role, Socket socket, Stream networkStream)
       {

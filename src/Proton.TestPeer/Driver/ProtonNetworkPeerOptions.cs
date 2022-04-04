@@ -119,8 +119,10 @@ namespace Apache.Qpid.Proton.Test.Driver
 
             if (result == null && !string.IsNullOrEmpty(CertificatePath))
             {
-               result = new X509CertificateCollection();
-               result.Add(new X509Certificate2(CertificatePath, CertificatePassword));
+               result = new X509CertificateCollection
+               {
+                  new X509Certificate2(CertificatePath, CertificatePassword)
+               };
             }
 
             return result;

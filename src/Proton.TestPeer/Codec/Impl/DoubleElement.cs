@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class DoubleElement : AtomicElement
    {
-      private double value;
+      private readonly double value;
 
       public DoubleElement(IElement parent, IElement prev, double value) : base(parent, prev)
       {

@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class ShortElement : AtomicElement
    {
-      private short value;
+      private readonly short value;
 
       public ShortElement(IElement parent, IElement prev, short value) : base(parent, prev)
       {

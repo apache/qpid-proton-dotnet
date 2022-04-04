@@ -41,24 +41,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientConnectionCapabilities DetermineCapabilities(Engine.IConnection connection)
       {
-         Symbol[] desired = connection.DesiredCapabilities;
          Symbol[] offered = connection.RemoteOfferedCapabilities;
 
          ICollection<Symbol> offeredSymbols = offered != null ? new List<Symbol>(offered) : new List<Symbol>();
-         ICollection<Symbol> desiredSymbols = desired != null ? new List<Symbol>(desired) : new List<Symbol>();
 
-         anonymousRelaySupported = CheckAnonymousRelaySupported(desiredSymbols, offeredSymbols);
-         delayedDeliverySupported = CheckDeliveryRelaySupported(desiredSymbols, offeredSymbols);
+         anonymousRelaySupported = CheckAnonymousRelaySupported(offeredSymbols);
+         delayedDeliverySupported = CheckDeliveryRelaySupported(offeredSymbols);
 
          return this;
       }
 
-      private static bool CheckAnonymousRelaySupported(ICollection<Symbol> desired, ICollection<Symbol> offered)
+      private static bool CheckAnonymousRelaySupported(ICollection<Symbol> offered)
       {
          return offered.Contains(ClientConstants.ANONYMOUS_RELAY);
       }
 
-      private static bool CheckDeliveryRelaySupported(ICollection<Symbol> desired, ICollection<Symbol> offered)
+      private static bool CheckDeliveryRelaySupported(ICollection<Symbol> offered)
       {
          return offered.Contains(ClientConstants.DELAYED_DELIVERY);
       }

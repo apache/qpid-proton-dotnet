@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            sb.Append(DataType).Append(" ").Append(Value);
+            sb.Append(DataType).Append(' ').Append(Value);
          }
       }
 
@@ -108,7 +108,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override String ToString()
       {
-         return String.Format("{0}[{1:X}]{parent={2:X}, prev={3:X}, next={4:X}}", this.GetType().Name,
+         return String.Format("{0}[{1:X}][parent={2:X}, prev={3:X}, next={4:X}]", this.GetType().Name,
                               RuntimeHelpers.GetHashCode(this),
                               RuntimeHelpers.GetHashCode(Parent),
                               RuntimeHelpers.GetHashCode(Prev),
@@ -121,7 +121,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       protected virtual bool IsElementOfArray()
       {
-         return Parent is ArrayElement && !(((ArrayElement)Parent).IsDescribed && this == Parent.Child);
+         return Parent is ArrayElement element && !(element.IsDescribed && this == Parent.Child);
       }
    }
 }

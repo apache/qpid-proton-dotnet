@@ -38,7 +38,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
       {
          if (described.fields.Count > numberOfFields)
          {
-            throw new ArgumentOutOfRangeException("List encoded exceeds expected number of elements for this type");
+            throw new ArgumentOutOfRangeException(nameof(numberOfFields), "List encoded exceeds expected number of elements for this type");
          }
 
          fields = new ArrayList(numberOfFields);
@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
       {
          if (described.Count > numberOfFields)
          {
-            throw new ArgumentOutOfRangeException("List encoded exceeds expected number of elements for this type");
+            throw new ArgumentOutOfRangeException(nameof(numberOfFields), "List encoded exceeds expected number of elements for this type");
          }
 
          fields = new ArrayList(numberOfFields);

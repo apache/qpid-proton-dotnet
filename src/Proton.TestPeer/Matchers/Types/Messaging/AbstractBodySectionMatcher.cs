@@ -90,9 +90,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          }
          else if (expectedValue != null)
          {
-            if (expectedValue is IMatcher)
+            if (expectedValue is IMatcher matcher)
             {
-               IMatcher matcher = (IMatcher)expectedValue;
                if (!matcher.Matches(decodedDescribedType.Described))
                {
                   return false;

@@ -32,9 +32,9 @@ namespace Apache.Qpid.Proton.Client.Concurrent
       private readonly ChannelWriter<Action> eventWriter;
 
       private readonly Task eventLoop;
-      private readonly AtomicBoolean shutdown = new AtomicBoolean();
-      private readonly CountdownEvent hasShutdown = new CountdownEvent(1);
-      private readonly AtomicReference<Thread> eventLoopThread = new AtomicReference<Thread>();
+      private readonly AtomicBoolean shutdown = new();
+      private readonly CountdownEvent hasShutdown = new(1);
+      private readonly AtomicReference<Thread> eventLoopThread = new();
 
       public DefaultEventLoop()
       {
@@ -59,6 +59,8 @@ namespace Apache.Qpid.Proton.Client.Concurrent
       public bool IsShutdown => shutdown;
 
       public bool IsTerminated => hasShutdown.CurrentCount == 0;
+
+      internal Task EventLoopTask => eventLoop;
 
       public void Shutdown()
       {

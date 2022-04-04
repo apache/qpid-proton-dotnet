@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public sealed class UnsignedIntegerElement : AtomicElement
    {
-      private uint value;
+      private readonly uint value;
 
       public UnsignedIntegerElement(IElement parent, IElement prev, uint value) : base(parent, prev)
       {

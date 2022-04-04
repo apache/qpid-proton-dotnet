@@ -151,7 +151,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          internal override void Parse(Stream incoming)
          {
-            int nextByte = 0;
+            int nextByte;
+
             while (headerByte < AMQPHeader.HEADER_SIZE_BYTES && (nextByte = incoming.ReadByte()) != -1)
             {
                headerBytes[headerByte++] = ((byte)nextByte);
@@ -194,7 +195,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          internal override void Parse(Stream input)
          {
-            int nextByte = 0;
+            int nextByte;
+
             while ((nextByte = input.ReadByte()) != -1)
             {
                frameSize |= (uint)((nextByte & 0xFF) << (--multiplier * 8));
@@ -235,7 +237,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             if (frameSize > frameHandler.InboundMaxFrameSize)
             {
                throw new ArgumentOutOfRangeException(String.Format(
-                   "specified frame size {0} larger than maximum frame size", frameSize, frameHandler.InboundMaxFrameSize));
+                   "specified frame size {0} larger than maximum frame size {1}", frameSize, frameHandler.InboundMaxFrameSize));
             }
          }
 
@@ -400,7 +402,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             return this;
          }
 
-         private void ValidateDataOffset(uint dataOffset, uint frameSize)
+         private static void ValidateDataOffset(uint dataOffset, uint frameSize)
          {
             if (dataOffset < 8)
             {

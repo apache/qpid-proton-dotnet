@@ -34,12 +34,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public ProtonBufferInputStream(IProtonBuffer buffer) : base()
       {
-         if (buffer == null)
-         {
-            throw new ArgumentNullException("Wrapped buffer cannot be null");
-         }
-
-         this.buffer = buffer;
+         this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer), "Wrapped buffer cannot be null");
          this.initialReadIndex = buffer.ReadOffset;
       }
 
@@ -82,7 +77,7 @@ namespace Apache.Qpid.Proton.Buffer
 
          if (offset < 0 || count < 0)
          {
-            throw new ArgumentOutOfRangeException("offset and count must be non-negative");
+            throw new ArgumentOutOfRangeException(nameof(offset), "offset and count must be non-negative");
          }
 
          int available = buffer.ReadableBytes > Int32.MaxValue ? Int32.MaxValue : (int)buffer.ReadableBytes;
@@ -98,7 +93,6 @@ namespace Apache.Qpid.Proton.Buffer
       {
          CheckClosed();
 
-         long current = buffer.ReadOffset;
          long newReadOffset = 0;
 
          switch (origin)
@@ -116,11 +110,11 @@ namespace Apache.Qpid.Proton.Buffer
 
          if (newReadOffset > buffer.WriteOffset)
          {
-            throw new ArgumentOutOfRangeException("Cannot seek beyond readable portion of the wrapped buffer");
+            throw new ArgumentOutOfRangeException(nameof(newReadOffset), "Cannot seek beyond readable portion of the wrapped buffer");
          }
          else if ((int) newReadOffset < initialReadIndex)
          {
-            throw new ArgumentOutOfRangeException("Cannot seek beyond readable portion of the wrapped buffer");
+            throw new ArgumentOutOfRangeException(nameof(newReadOffset), "Cannot seek beyond readable portion of the wrapped buffer");
          }
          else
          {

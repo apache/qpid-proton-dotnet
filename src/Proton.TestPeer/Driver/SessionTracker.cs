@@ -366,7 +366,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public LinkTracker HandleRemoteDetach(Detach detach)
       {
-         LinkTracker tracker = null;
+         LinkTracker tracker;
 
          if (remoteLinks.Contains(detach.Handle))
          {

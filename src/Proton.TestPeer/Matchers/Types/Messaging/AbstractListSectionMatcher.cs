@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       protected override void VerifyReceivedDescribedObject(object described)
       {
-         if (!(described is IList))
+         if (described is not IList)
          {
             throw new ArgumentException(
                 "Unexpected section contents. Expected List, but got: " +

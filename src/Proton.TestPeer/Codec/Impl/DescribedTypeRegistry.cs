@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 {
    public static class DescribedTypeRegistry
    {
-      private static IDictionary<object, Type> describedTypes = new Dictionary<object, Type>();
+      private static readonly IDictionary<object, Type> describedTypes = new Dictionary<object, Type>();
 
       static DescribedTypeRegistry()
       {
@@ -115,9 +115,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public static IDescribedType LookupDescribedType(object descriptor, object described)
       {
-         Type typeClass;
-
-         if (describedTypes.TryGetValue(descriptor, out typeClass))
+         if (describedTypes.TryGetValue(descriptor, out Type typeClass))
          {
             try
             {

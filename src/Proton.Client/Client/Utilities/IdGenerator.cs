@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
          sb.Append(Prefix);
          sb.Append(Guid.NewGuid());
-         sb.Append(":");
+         sb.Append(':');
          sb.Append(Interlocked.Increment(ref sequenceId));
 
          return sb.ToString();

@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    internal class ClientSessionBuilder
    {
-      private readonly AtomicInteger sessionCounter = new AtomicInteger();
+      private readonly AtomicInteger sessionCounter = new();
       private readonly ClientConnection connection;
       private readonly ConnectionOptions connectionOptions;
 
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
         return new ClientStreamSession(connection, options, sessionId, protonSession);
     }
 
-      public static Engine.ISession RecreateSession(ClientConnection connection, Engine.ISession previousSession, SessionOptions options)
+      public static Engine.ISession RecreateSession(ClientConnection connection, SessionOptions options)
       {
          Engine.ISession session = connection.ProtonConnection.Session();
 
@@ -93,12 +93,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
                sessionOptions = defaultSessionOptions;
                if (sessionOptions == null)
                {
-                  sessionOptions = new SessionOptions();
-                  sessionOptions.OpenTimeout = connectionOptions.OpenTimeout;
-                  sessionOptions.CloseTimeout = connectionOptions.CloseTimeout;
-                  sessionOptions.RequestTimeout = connectionOptions.RequestTimeout;
-                  sessionOptions.SendTimeout = connectionOptions.SendTimeout;
-                  sessionOptions.DrainTimeout = connectionOptions.DrainTimeout;
+                  sessionOptions = new SessionOptions
+                  {
+                     OpenTimeout = connectionOptions.OpenTimeout,
+                     CloseTimeout = connectionOptions.CloseTimeout,
+                     RequestTimeout = connectionOptions.RequestTimeout,
+                     SendTimeout = connectionOptions.SendTimeout,
+                     DrainTimeout = connectionOptions.DrainTimeout
+                  };
                }
 
                defaultSessionOptions = sessionOptions;

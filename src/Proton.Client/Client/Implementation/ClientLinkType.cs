@@ -27,17 +27,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
    public abstract class ClientLinkType<LinkType, ProtonLinkType> : IDisposable where LinkType : class, ILink
                                                                                 where ProtonLinkType : class, Engine.ILink<ProtonLinkType>
    {
-      private static IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientLinkType<LinkType, ProtonLinkType>>();
-
-      protected readonly AtomicBoolean closed = new AtomicBoolean();
+      protected readonly AtomicBoolean closed = new();
       protected readonly ClientSession session;
 
       protected ClientException failureCause;
 
       protected readonly TaskCompletionSource<LinkType> openFuture =
-         new TaskCompletionSource<LinkType>(TaskCreationOptions.RunContinuationsAsynchronously);
+         new(TaskCreationOptions.RunContinuationsAsynchronously);
       protected readonly TaskCompletionSource<LinkType> closeFuture =
-         new TaskCompletionSource<LinkType>(TaskCreationOptions.RunContinuationsAsynchronously);
+         new(TaskCreationOptions.RunContinuationsAsynchronously);
 
       protected volatile ISource remoteSource;
       protected volatile ITarget remoteTarget;

@@ -141,7 +141,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Utilities
          }
 
          StringBuilder str = new StringBuilder();
-         str.Append("\"");
+         str.Append('"');
 
          int byteToRead = buffer.Length;
          int size = 0;
@@ -179,7 +179,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Utilities
             }
          }
 
-         str.Append("\"");
+         str.Append('"');
 
          if (truncated && appendIfTruncated)
          {

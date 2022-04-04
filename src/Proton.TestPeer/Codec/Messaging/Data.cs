@@ -25,16 +25,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000075UL;
       public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:data:binary");
 
-      private Binary described;
+      private readonly Binary described;
 
       public Data(Binary described)
       {
-         if (described == null)
-         {
-            throw new ArgumentNullException("provided Binary must not be null");
-         }
-
-         this.described = described;
+         this.described = described ?? throw new ArgumentNullException(nameof(described), "provided Binary must not be null");
       }
 
       public object Descriptor => DESCRIPTOR_SYMBOL;

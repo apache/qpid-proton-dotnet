@@ -38,17 +38,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          IsDescribed = described;
          ArrayType = type;
 
-         switch (ArrayType)
+         ConstructorType = ArrayType switch
          {
-            case DataType.UInt:
-            case DataType.ULong:
-            case DataType.List:
-               ConstructorType = ConstructorType.Tiny;
-               break;
-            default:
-               ConstructorType = ConstructorType.Small;
-               break;
-         }
+            DataType.UInt or DataType.ULong or DataType.List => ConstructorType.Tiny,
+            _ => ConstructorType.Small,
+         };
       }
 
       internal ConstructorType ConstructorType
@@ -472,8 +466,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          if (IsDescribed)
          {
             IDescribedType[] rVal = new IDescribedType[Count];
-            object descriptor = first == null ? null : first.Value;
-            IElement element = first == null ? null : first.Next;
+            object descriptor = first?.Value;
+            IElement element = first?.Next;
             int i = 0;
             while (element != null)
             {

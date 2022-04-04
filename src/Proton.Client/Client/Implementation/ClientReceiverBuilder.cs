@@ -159,8 +159,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          SourceOptions sourceOptions = options.SourceOptions;
 
-         Source source = new Source();
-         source.Address = address;
+         Source source = new Source
+         {
+            Address = address
+         };
 
          if (sourceOptions.DurabilityMode.HasValue)
          {
@@ -213,15 +215,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private static Source CreateDurableSource(string address, ReceiverOptions options)
       {
          SourceOptions sourceOptions = options.SourceOptions;
-         Source source = new Source();
-
-         source.Address = address;
-         source.Durable = TerminusDurability.UnsettledState;
-         source.ExpiryPolicy = TerminusExpiryPolicy.Never;
-         source.DistributionMode = ClientConstants.COPY;
-         source.Outcomes = ClientConversionSupport.ToSymbolArray(sourceOptions.Outcomes);
-         source.DefaultOutcome = (IOutcome)(sourceOptions.DefaultOutcome?.AsProtonType());
-         source.Capabilities = ClientConversionSupport.ToSymbolArray(sourceOptions.Capabilities);
+         Source source = new Source
+         {
+            Address = address,
+            Durable = TerminusDurability.UnsettledState,
+            ExpiryPolicy = TerminusExpiryPolicy.Never,
+            DistributionMode = ClientConstants.COPY,
+            Outcomes = ClientConversionSupport.ToSymbolArray(sourceOptions.Outcomes),
+            DefaultOutcome = (IOutcome)(sourceOptions.DefaultOutcome?.AsProtonType()),
+            Capabilities = ClientConversionSupport.ToSymbolArray(sourceOptions.Capabilities)
+         };
 
          if (sourceOptions.Timeout.HasValue)
          {
@@ -238,10 +241,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private static Target CreateTarget(String address, ReceiverOptions options)
       {
          TargetOptions targetOptions = options.TargetOptions;
-         Target target = new Target();
-
-         target.Address = address;
-         target.Capabilities = ClientConversionSupport.ToSymbolArray(targetOptions.Capabilities);
+         Target target = new Target
+         {
+            Address = address,
+            Capabilities = ClientConversionSupport.ToSymbolArray(targetOptions.Capabilities)
+         };
 
          if (targetOptions.DurabilityMode.HasValue)
          {
@@ -269,11 +273,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
                receiverOptions = defaultReceiverOptions;
                if (receiverOptions == null)
                {
-                  receiverOptions = new ReceiverOptions();
-                  receiverOptions.OpenTimeout = sessionOptions.OpenTimeout;
-                  receiverOptions.CloseTimeout = sessionOptions.CloseTimeout;
-                  receiverOptions.RequestTimeout = sessionOptions.RequestTimeout;
-                  receiverOptions.DrainTimeout = sessionOptions.DrainTimeout;
+                  receiverOptions = new ReceiverOptions
+                  {
+                     OpenTimeout = sessionOptions.OpenTimeout,
+                     CloseTimeout = sessionOptions.CloseTimeout,
+                     RequestTimeout = sessionOptions.RequestTimeout,
+                     DrainTimeout = sessionOptions.DrainTimeout
+                  };
                }
 
                defaultReceiverOptions = receiverOptions;
@@ -293,11 +299,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
                receiverOptions = defaultStreamReceiverOptions;
                if (receiverOptions == null)
                {
-                  receiverOptions = new StreamReceiverOptions();
-                  receiverOptions.OpenTimeout = sessionOptions.OpenTimeout;
-                  receiverOptions.CloseTimeout = sessionOptions.CloseTimeout;
-                  receiverOptions.RequestTimeout = sessionOptions.RequestTimeout;
-                  receiverOptions.DrainTimeout = sessionOptions.DrainTimeout;
+                  receiverOptions = new StreamReceiverOptions
+                  {
+                     OpenTimeout = sessionOptions.OpenTimeout,
+                     CloseTimeout = sessionOptions.CloseTimeout,
+                     RequestTimeout = sessionOptions.RequestTimeout,
+                     DrainTimeout = sessionOptions.DrainTimeout
+                  };
                }
 
                defaultStreamReceiverOptions = receiverOptions;

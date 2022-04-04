@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       private long readOffset;
       private long writeOffset;
-      private long maxCapacity;
+      private readonly long maxCapacity;
 
       /// <summary>
       /// Create a new proton byte buffer instance with default initial capacity

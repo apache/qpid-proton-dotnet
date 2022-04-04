@@ -555,7 +555,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          if (sections == null)
          {
-            throw new ArgumentNullException("Cannot set body sections with a null enumeration");
+            throw new ArgumentNullException(nameof(sections), "Cannot set body sections with a null enumeration");
          }
 
          foreach (ISection section in sections)

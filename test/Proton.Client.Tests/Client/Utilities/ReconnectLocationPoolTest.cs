@@ -353,7 +353,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       [Test]
       public void TestRemoveAll()
       {
-         ReconnectLocationPool pool = new ReconnectLocationPool(entries);
+         ReconnectLocationPool pool = new(entries);
          Assert.AreEqual(entries.Count, pool.Count);
 
          pool.RemoveAll();
@@ -366,13 +366,14 @@ namespace Apache.Qpid.Proton.Client.Utilities
       [Test]
       public void TestReplaceAll()
       {
-         ReconnectLocationPool pool = new ReconnectLocationPool(entries);
+         ReconnectLocationPool pool = new(entries);
          Assert.AreEqual(entries.Count, pool.Count);
 
-         List<ReconnectLocation> newEntries = new List<ReconnectLocation>();
-
-         newEntries.Add(new ReconnectLocation("192.168.2.1", 5672));
-         newEntries.Add(new ReconnectLocation("192.168.2.2", 5672));
+         List<ReconnectLocation> newEntries = new()
+         {
+            new ReconnectLocation("192.168.2.1", 5672),
+            new ReconnectLocation("192.168.2.2", 5672)
+         };
 
          pool.ReplaceAll(newEntries);
          Assert.IsFalse(pool.IsEmpty);
