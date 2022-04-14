@@ -16,15 +16,34 @@
 -->
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Proton\Proton.csproj" />
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Proton.Client.Tests</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
+  <Import Project="../../common.props" />
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultLibraryTargetFrameworks)</TargetFramework>
+    <AssemblyName>Qpid.Proton.Client</AssemblyName>
+    <RootNamespace>Apache.Qpid.Proton.Client</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- NuGet Package Settings -->
+    <PackageId>Apache.Qpid.Proton.Client</PackageId>
+    <Description>
+      Qpid Proton Client provides an AMQP client that provides an imperative style
+      API for use in communications with AMQP brokers.
+    </Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Proton\Proton.csproj" />
+    <InternalsVisibleTo Include="Qpid.Proton.Client.Tests,
+      PublicKey=002400000480000094000000060200000024000052534131000400000100010045a422464ae5f5707321ca50c72dc6f2a93e141d39f57da1d94ea85e98e6e3f14a3ed234f25a0a5d53bff345c2b608757ee1e73d9212f299dbd9041054b8b822d0f05b8f55d603f6b55c95f1a36205665b55da525fbbbc343e4ed5c0e813980053f5bd82e46d907d43b78f10aed5d3d497b4b8983f5a041ba90835c0db2a34ce" />
+  </ItemGroup>
 
 </Project>
