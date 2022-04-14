@@ -47,6 +47,21 @@ namespace Apache.Qpid.Proton.Buffer
       /// additional buffers or used directly to write initial data at which point
       /// the provided allocator will be used to create a buffer instance. At any
       /// point should the composite buffer need to allocate a new buffer in order
+      /// to accommodate buffer writes a default buffer allocator will be used.
+      /// </summary>
+      /// <param name="maxCapacity">The maximum capacity this composite can contain</param>
+      /// <returns>a new empty composute buffer instance.</returns>
+      /// <exception cref="NotImplementedException"></exception>
+      public static IProtonCompositeBuffer Compose(long maxCapacity)
+      {
+         return new ProtonCompositeBuffer(maxCapacity);
+      }
+
+      /// <summary>
+      /// Creates a new empty composite buffer instance that can be extended with
+      /// additional buffers or used directly to write initial data at which point
+      /// the provided allocator will be used to create a buffer instance. At any
+      /// point should the composite buffer need to allocate a new buffer in order
       /// to accommodate buffer writes the provided allocator will be used.
       /// </summary>
       /// <param name="allocator">A buffer allocator that the composite should use</param>

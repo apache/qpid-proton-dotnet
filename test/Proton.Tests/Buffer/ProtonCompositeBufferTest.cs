@@ -132,7 +132,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestManipulateReadIndexWithOneArrayAppended()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
          DoTestManipulateReadIndexWithOneArrayAppended(buffer);
       }
@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestPositionEnforcesPreconditions()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          // test with nothing appended.
          try
@@ -200,7 +200,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetByteWithManyArraysWithOneElements()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 }))
@@ -232,7 +232,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetByteWithManyArraysWithVariedElements()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1, 2 }))
@@ -259,14 +259,14 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetShortByteWithNothingAppended()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
          Assert.Throws<IndexOutOfRangeException>(() => buffer.ReadShort());
       }
 
       [Test]
       public void TestGetShortWithTwoArraysContainingOneElement()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 8 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0 }));
@@ -287,7 +287,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetIntWithTwoArraysContainingOneElement()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 0 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 8, 0 }));
@@ -308,7 +308,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetLongWithTwoArraysContainingOneElement()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 0, 0, 0 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 0, 8, 0 }));
@@ -329,7 +329,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetLongWithTwoArraysContainingOneElementWithUnEvenSplit()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 9, 8 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 255, 255, 0, 1, 2, 3 }));
@@ -350,7 +350,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetWritableBufferWithContentsInSeveralArrays()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          IProtonBuffer data1 = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4 });
          IProtonBuffer data2 = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 5, 6, 7, 8, 9 });
@@ -379,7 +379,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestGetintWithContentsInMultipleArrays()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0, 1, 2, 3, 4 }))
                .Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 5, 6, 7, 8, 9 }));
@@ -397,7 +397,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestSetAndGetShortAcrossMultipleArrays()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          const int NUM_ELEMENTS = 4;
 
@@ -428,7 +428,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestSetAndGetIntegersAcrossMultipleArrays()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          const int NUM_ELEMENTS = 4;
 
@@ -459,7 +459,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestSetAndGetLongsAcrossMultipleArrays()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          const int NUM_ELEMENTS = 4;
 
@@ -494,7 +494,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendToBufferAtEndOfContentArray()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          byte[] source1 = new byte[] { 0, 1, 2, 3 };
 
@@ -527,7 +527,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendToBufferAtEndOfContentList()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          byte[] source1 = new byte[] { 0, 1, 2, 3 };
          byte[] source2 = new byte[] { 4, 5, 6, 7 };
@@ -560,7 +560,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendToBufferAtWhenWriteIndexNotAtEnd()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          byte[] source1 = new byte[] { 0, 1, 2, 3 };
          byte[] source2 = new byte[] { 4, 5, 6, 7 };
@@ -589,7 +589,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendNullBuffer()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          try
          {
@@ -602,7 +602,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendEmptyBuffer()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[0]));
 
@@ -617,7 +617,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestHashCodeNotFromIdentity()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          Assert.AreEqual(1, buffer.GetHashCode());
 
@@ -638,9 +638,9 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestHashCodeOnSameBackingBuffer()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer3 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer3 = IProtonCompositeBuffer.Compose();
 
          byte[] data = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 
@@ -656,8 +656,8 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestHashCodeOnDifferentBackingBuffer()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
          byte[] data2 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -671,8 +671,8 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestHashCodeOnSplitBufferContentsNotSame()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
          byte[] data2 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -688,8 +688,8 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestHashCodeOnSplitBufferContentsSame()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
          byte[] data2 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -707,7 +707,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          byte[] data = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
          buffer1.Append(ProtonByteBufferAllocator.Instance.Wrap(data));
          buffer1.ReadOffset = buffer1.WriteOffset;
 
@@ -722,7 +722,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          byte[] data = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
          buffer1.Append(ProtonByteBufferAllocator.Instance.Wrap(data));
 
          IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Wrap(data);
@@ -738,7 +738,7 @@ namespace Apache.Qpid.Proton.Buffer
          byte[] data1 = new byte[] { 9, 8, 7, 6, 5 };
          byte[] data2 = new byte[] { 4, 3, 2, 1, 0 };
 
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
          buffer1.Append(ProtonByteBufferAllocator.Instance.Wrap(data1));
          buffer1.Append(ProtonByteBufferAllocator.Instance.Wrap(data2));
 
@@ -758,21 +758,21 @@ namespace Apache.Qpid.Proton.Buffer
          byte[] data4 = new byte[] { 3 };
          byte[] data5 = new byte[] { 2, 1, 0 };
 
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         buffer1.Append(ProtonByteBufferAllocator.Instance.Wrap(data1))
-                .Append(ProtonByteBufferAllocator.Instance.Wrap(data2))
-                .Append(ProtonByteBufferAllocator.Instance.Wrap(data3))
-                .Append(ProtonByteBufferAllocator.Instance.Wrap(data4))
-                .Append(ProtonByteBufferAllocator.Instance.Wrap(data5));
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
+         buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(data1))
+               .Append(ProtonByteBufferAllocator.Instance.Wrap(data2))
+               .Append(ProtonByteBufferAllocator.Instance.Wrap(data3))
+               .Append(ProtonByteBufferAllocator.Instance.Wrap(data4))
+               .Append(ProtonByteBufferAllocator.Instance.Wrap(data5));
 
          IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Wrap(data);
 
          for (int i = 0; i < data.Length; ++i)
          {
-            buffer1.WriteOffset = i;
+            buffer.WriteOffset = i;
             buffer2.WriteOffset = i;
 
-            Assert.AreEqual(buffer1.GetHashCode(), buffer2.GetHashCode());
+            Assert.AreEqual(buffer.GetHashCode(), buffer2.GetHashCode());
          }
       }
 
@@ -783,9 +783,9 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestEqualsOnSameBackingBuffer()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer3 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer3 = IProtonCompositeBuffer.Compose();
 
          byte[] data = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
 
@@ -805,8 +805,8 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestEqualsOnDifferentBackingBuffer()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
          byte[] data2 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -823,8 +823,8 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestEqualsWhenContentsInMultipleArraysNotSame()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
          byte[] data2 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -854,8 +854,8 @@ namespace Apache.Qpid.Proton.Buffer
 
       private void doEqualsWhenContentRemainingWithDifferentStartPositionsSameTestImpl(bool multipleArrays)
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
@@ -886,8 +886,8 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestEqualsWhenContentRemainingIsSubsetOfSingleChunkInMultiArrayBufferSame()
       {
-         ProtonCompositeBuffer buffer1 = new ProtonCompositeBuffer();
-         ProtonCompositeBuffer buffer2 = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer1 = IProtonCompositeBuffer.Compose();
+         IProtonCompositeBuffer buffer2 = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
@@ -923,7 +923,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestReadStringFromEmptyBuffer()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          Assert.AreEqual("", buffer.ToString(System.Text.Encoding.UTF8));
       }
@@ -935,7 +935,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendTwoByteBackedBuffers()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
 
@@ -958,7 +958,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendRejectsReadGapedBuffer()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          IProtonBuffer buffer1 = ProtonByteBufferAllocator.Instance.Wrap(data1);
@@ -977,7 +977,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendRejectsWriteGapedBuffer()
       {
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer buffer = IProtonCompositeBuffer.Compose();
 
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          IProtonBuffer buffer1 = ProtonByteBufferAllocator.Instance.Wrap(data1);
@@ -994,7 +994,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendOneCompositeBufferToAnotherEmptyComposite()
       {
-         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer appendTo = IProtonCompositeBuffer.Compose();
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
          appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1).Reset());
@@ -1005,7 +1005,7 @@ namespace Apache.Qpid.Proton.Buffer
          IProtonBuffer bufferAll = ProtonByteBufferAllocator.Instance.Wrap(dataAll);
          Assert.AreEqual(bufferAll.ReadableBytes, data1.Length + data2.Length);
 
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         ProtonCompositeBuffer buffer = (ProtonCompositeBuffer)IProtonCompositeBuffer.Compose();
          buffer.Append(appendTo);
 
          Assert.AreEqual(buffer.WritableBytes, data1.Length + data2.Length);
@@ -1020,7 +1020,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestAppendOneCompositeBufferToAnotherNonEmptyComposite()
       {
-         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer appendTo = IProtonCompositeBuffer.Compose();
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 255, 0, 1, 2, 3, 4, 5 };
          appendTo.Append(ProtonByteBufferAllocator.Instance.Wrap(data1).Reset());
@@ -1031,7 +1031,7 @@ namespace Apache.Qpid.Proton.Buffer
          IProtonBuffer bufferAll = ProtonByteBufferAllocator.Instance.Wrap(dataAll);
          Assert.AreEqual(bufferAll.ReadableBytes, data1.Length + data2.Length + 2);
 
-         ProtonCompositeBuffer buffer = new ProtonCompositeBuffer();
+         ProtonCompositeBuffer buffer = (ProtonCompositeBuffer)IProtonCompositeBuffer.Compose();
          buffer.Append(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 9, 8 }).Reset());
          buffer.Append(appendTo);
 
@@ -1047,7 +1047,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestCompactReadBufferAndAppendAnother()
       {
-         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer appendTo = IProtonCompositeBuffer.Compose();
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
 
@@ -1078,7 +1078,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestSplitReadBufferAndAppendAnother()
       {
-         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer appendTo = IProtonCompositeBuffer.Compose();
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
 
@@ -1113,7 +1113,7 @@ namespace Apache.Qpid.Proton.Buffer
       [Test]
       public void TestReclaimReadBuffer()
       {
-         ProtonCompositeBuffer appendTo = new ProtonCompositeBuffer();
+         IProtonCompositeBuffer appendTo = IProtonCompositeBuffer.Compose();
          byte[] data1 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
          byte[] data2 = new byte[] { 255, 255, 0, 1, 2, 3, 4, 5 };
 
@@ -1152,17 +1152,17 @@ namespace Apache.Qpid.Proton.Buffer
 
       protected override IProtonBuffer AllocateBuffer(int initialCapacity)
       {
-         return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
+         return IProtonCompositeBuffer.Compose().Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
       }
 
       protected override IProtonBuffer AllocateBuffer(int initialCapacity, int maxCapacity)
       {
-         return new ProtonCompositeBuffer(maxCapacity).Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
+         return IProtonCompositeBuffer.Compose(maxCapacity).Append(ProtonByteBufferAllocator.Instance.Allocate(initialCapacity));
       }
 
       protected override IProtonBuffer WrapBuffer(byte[] array)
       {
-         return new ProtonCompositeBuffer().Append(ProtonByteBufferAllocator.Instance.Wrap(array));
+         return IProtonCompositeBuffer.Compose().Append(ProtonByteBufferAllocator.Instance.Wrap(array));
       }
 
       #endregion
