@@ -47,6 +47,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{94B898B7-8B8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2ECCDCE2-E337-450A-B8D1-5019AC0991C0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{cc3d8411-de5b-4cee-8cf0-4e74b0d9a941}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		build.sh = build.sh
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

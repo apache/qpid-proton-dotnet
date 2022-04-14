@@ -21,6 +21,9 @@
       {
          "path": "examples"
       },
+      {
+         "path": "."
+      }
    ],
    "settings": {
       "cSpell.words": [
