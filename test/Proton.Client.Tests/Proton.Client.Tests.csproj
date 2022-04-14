@@ -39,6 +39,11 @@
     <PackageReference Include="NLog.Extensions.Logging" Version="$(NLogExtensionsVersion)" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="Certificates\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
