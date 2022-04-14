@@ -31,114 +31,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// receiver link and processes incoming deliveries with options for queueing
    /// with a credit window.
    /// </summary>
-   public class ClientReceiver : ClientLinkType<IReceiver, Engine.IReceiver>, IReceiver
+   public class ClientReceiver : ClientReceiverLinkType<IReceiver>, IReceiver
    {
       private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientReceiver>();
-
-      private readonly ReceiverOptions options;
-      private readonly string receiverId;
 
       private readonly IDeque<TaskCompletionSource<IDelivery>> receiveRequests =
          new ArrayDeque<TaskCompletionSource<IDelivery>>();
 
-      private TaskCompletionSource<IReceiver> drainingFuture;
-
-      internal ClientReceiver(ClientSession session, ReceiverOptions options, String receiverId, Engine.IReceiver receiver)
-       : base(session, receiver)
+      internal ClientReceiver(ClientSession session, ReceiverOptions options, string receiverId, Engine.IReceiver receiver)
+       : base(session, options, receiverId, receiver)
       {
-         this.options = options;
-         this.receiverId = receiverId;
-         this.protonLink.LinkedResource = this;
-
-         if (options.CreditWindow > 0)
-         {
-            protonLink.AddCredit(options.CreditWindow);
-         }
-      }
-
-      public int QueuedDeliveries => protonLink.Unsettled.Count(delivery => delivery.LinkedResource == null);
-
-      public IReceiver AddCredit(uint credit)
-      {
-         return AddCreditAsync(credit).ConfigureAwait(false).GetAwaiter().GetResult();
-      }
-
-      public Task<IReceiver> AddCreditAsync(uint credit)
-      {
-         CheckClosedOrFailed();
-         TaskCompletionSource<IReceiver> creditAdded = new TaskCompletionSource<IReceiver>();
-
-         session.Execute(() =>
-         {
-            if (NotClosedOrFailed(creditAdded))
-            {
-               if (options.CreditWindow != 0)
-               {
-                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit when a credit window has been configured"));
-               }
-               else if (protonLink.IsDraining)
-               {
-                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit while a drain is pending"));
-               }
-               else
-               {
-                  try
-                  {
-                     protonLink.AddCredit(credit);
-                     creditAdded.TrySetResult(this);
-                  }
-                  catch (Exception ex)
-                  {
-                     creditAdded.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
-                  }
-               }
-            }
-         });
-
-         return creditAdded.Task;
-      }
-
-      public IReceiver Drain()
-      {
-         return DrainAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-      }
-
-      public Task<IReceiver> DrainAsync()
-      {
-         CheckClosedOrFailed();
-         TaskCompletionSource<IReceiver> drainComplete = new TaskCompletionSource<IReceiver>();
-
-         session.Execute(() =>
-         {
-            if (NotClosedOrFailed(drainComplete))
-            {
-               if (protonLink.IsDraining)
-               {
-                  drainComplete.TrySetException(new ClientIllegalStateException("Receiver is already draining"));
-                  return;
-               }
-
-               try
-               {
-                  if (protonLink.Drain())
-                  {
-                     drainingFuture = drainComplete;
-                     session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
-                         () => new ClientOperationTimedOutException("Timed out waiting for remote to respond to drain request"));
-                  }
-                  else
-                  {
-                     drainComplete.TrySetResult(this);
-                  }
-               }
-               catch (Exception ex)
-               {
-                  drainComplete.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
-               }
-            }
-         });
-
-         return drainComplete.Task;
       }
 
       public IDelivery TryReceive()
@@ -169,7 +71,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<IDelivery> ReceiveAsync(TimeSpan timeout)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IDelivery> receive = new TaskCompletionSource<IDelivery>();
+         TaskCompletionSource<IDelivery> receive = new();
 
          session.Execute(() =>
          {
@@ -256,58 +158,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return Task.FromResult((IDelivery)delivery);
       }
 
-      internal String ReceiverId => receiverId;
+      internal ReceiverOptions ReceiverOptions => options;
+
+      protected override IReceiver Self => this;
 
       #endregion
 
       #region Private Receiver Implementation
-
-      private void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
-      {
-         session.Execute(() =>
-         {
-            session.TransactionContext.Disposition(delivery, state, settle);
-            ReplenishCreditIfNeeded();
-         });
-      }
-
-      private void ReplenishCreditIfNeeded()
-      {
-         uint creditWindow = options.CreditWindow;
-         if (creditWindow > 0)
-         {
-            uint currentCredit = protonLink.Credit;
-            if (currentCredit <= creditWindow * 0.5)
-            {
-               uint potentialPrefetch = currentCredit +
-                  (uint)protonLink.Unsettled.Count(delivery => delivery.LinkedResource == null);
-
-               if (potentialPrefetch <= creditWindow * 0.7)
-               {
-                  uint additionalCredit = creditWindow - potentialPrefetch;
-
-                  LOG.Trace("Consumer granting additional credit: {0}", additionalCredit);
-                  try
-                  {
-                     protonLink.AddCredit(additionalCredit);
-                  }
-                  catch (Exception ex)
-                  {
-                     LOG.Debug("Error caught during credit top-up", ex);
-                  }
-               }
-            }
-         }
-      }
-
-      private void AsyncReplenishCreditIfNeeded()
-      {
-         uint creditWindow = options.CreditWindow;
-         if (creditWindow > 0)
-         {
-            session.Execute(ReplenishCreditIfNeeded);
-         }
-      }
 
       private void ImmediateLinkShutdown(ClientException failureCause)
       {

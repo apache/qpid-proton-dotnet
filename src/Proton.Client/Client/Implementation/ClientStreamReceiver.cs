@@ -21,7 +21,6 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Utilities;
-using System.Linq;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -31,114 +30,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// any call that happens after a large message receives begins will be blocked
    /// until the previous large messsage is fully read and the next arrives.
    /// </summary>
-   public sealed class ClientStreamReceiver : ClientLinkType<IStreamReceiver, Engine.IReceiver>, IStreamReceiver
+   public sealed class ClientStreamReceiver : ClientReceiverLinkType<IStreamReceiver>, IStreamReceiver
    {
       private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ClientStreamReceiver>();
-
-      private readonly StreamReceiverOptions options;
-      private readonly string receiverId;
 
       private readonly IDeque<TaskCompletionSource<IStreamDelivery>> receiveRequests =
          new ArrayDeque<TaskCompletionSource<IStreamDelivery>>();
 
-      private TaskCompletionSource<IStreamReceiver> drainingFuture;
-
       internal ClientStreamReceiver(ClientSession session, StreamReceiverOptions options, string receiverId, Engine.IReceiver receiver)
-       : base(session, receiver)
+       : base(session, options, receiverId, receiver)
       {
-         this.options = options;
-         this.receiverId = receiverId;
-         this.protonLink.LinkedResource = this;
-
-         if (options.CreditWindow > 0)
-         {
-            protonLink.AddCredit(options.CreditWindow);
-         }
-      }
-
-      public int QueuedDeliveries => protonLink.Unsettled.Count(delivery => delivery.LinkedResource == null);
-
-      public IStreamReceiver AddCredit(uint credit)
-      {
-         return (IStreamReceiver)AddCreditAsync(credit).ConfigureAwait(false).GetAwaiter().GetResult();
-      }
-
-      public Task<IStreamReceiver> AddCreditAsync(uint credit)
-      {
-         CheckClosedOrFailed();
-         TaskCompletionSource<IStreamReceiver> creditAdded = new TaskCompletionSource<IStreamReceiver>();
-
-         session.Execute(() =>
-         {
-            if (NotClosedOrFailed(creditAdded))
-            {
-               if (options.CreditWindow != 0)
-               {
-                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit when a credit window has been configured"));
-               }
-               else if (protonLink.IsDraining)
-               {
-                  creditAdded.TrySetException(new ClientIllegalStateException("Cannot add credit while a drain is pending"));
-               }
-               else
-               {
-                  try
-                  {
-                     protonLink.AddCredit(credit);
-                     creditAdded.TrySetResult(this);
-                  }
-                  catch (Exception ex)
-                  {
-                     creditAdded.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
-                  }
-               }
-            }
-         });
-
-         return creditAdded.Task;
-      }
-
-      public IStreamReceiver Drain()
-      {
-         return (IStreamReceiver)DrainAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-      }
-
-      public Task<IStreamReceiver> DrainAsync()
-      {
-         CheckClosedOrFailed();
-         TaskCompletionSource<IStreamReceiver> drainComplete = new TaskCompletionSource<IStreamReceiver>();
-
-         session.Execute(() =>
-         {
-            if (NotClosedOrFailed(drainComplete))
-            {
-               if (protonLink.IsDraining)
-               {
-                  drainComplete.TrySetException(new ClientIllegalStateException("Stream Receiver is already draining"));
-                  return;
-               }
-
-               try
-               {
-                  if (protonLink.Drain())
-                  {
-                     drainingFuture = drainComplete;
-                     session.ScheduleRequestTimeout(drainingFuture, options.DrainTimeout,
-                         () => new ClientOperationTimedOutException("Timed out waiting for remote to respond to drain request"));
-                  }
-                  else
-                  {
-                     drainComplete.TrySetResult(this);
-                  }
-               }
-               catch (Exception ex)
-               {
-                  drainComplete.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(ex));
-               }
-            }
-         });
-
-         return drainComplete.Task;
       }
 
       public IStreamDelivery Receive()
@@ -169,7 +70,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<IStreamDelivery> ReceiveAsync(TimeSpan timeout)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IStreamDelivery> receive = new TaskCompletionSource<IStreamDelivery>();
+         TaskCompletionSource<IStreamDelivery> receive = new();
 
          session.Execute(() =>
          {
@@ -248,62 +149,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return Task.FromResult((IStreamDelivery)delivery);
       }
 
-      internal String ReceiverId => receiverId;
-
       internal Exception FailureCause => failureCause;
 
-      internal StreamReceiverOptions ReceiverOptions => options;
+      internal StreamReceiverOptions ReceiverOptions => (StreamReceiverOptions)options;
+
+      protected override IStreamReceiver Self => this;
 
       #endregion
 
       #region Private Receiver Implementation
-
-      private void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
-      {
-         session.Execute(() =>
-         {
-            session.TransactionContext.Disposition(delivery, state, settle);
-            ReplenishCreditIfNeeded();
-         });
-      }
-
-      private void AsyncReplenishCreditIfNeeded()
-      {
-         uint creditWindow = options.CreditWindow;
-         if (creditWindow > 0)
-         {
-            session.Execute(ReplenishCreditIfNeeded);
-         }
-      }
-
-      private void ReplenishCreditIfNeeded()
-      {
-         uint creditWindow = options.CreditWindow;
-         if (creditWindow > 0)
-         {
-            uint currentCredit = protonLink.Credit;
-            if (currentCredit <= creditWindow * 0.5)
-            {
-               uint potentialPrefetch = (uint)(currentCredit +
-                  protonLink.Unsettled.Count((delivery) => delivery.LinkedResource == null));
-
-               if (potentialPrefetch <= creditWindow * 0.7)
-               {
-                  uint additionalCredit = creditWindow - potentialPrefetch;
-
-                  LOG.Trace("Consumer granting additional credit: {0}", additionalCredit);
-                  try
-                  {
-                     protonLink.AddCredit(additionalCredit);
-                  }
-                  catch (Exception ex)
-                  {
-                     LOG.Debug("Error caught during credit top-up", ex);
-                  }
-               }
-            }
-         }
-      }
 
       private void ImmediateLinkShutdown(ClientException failureCause)
       {

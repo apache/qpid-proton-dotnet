@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Exceptions;
-using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -165,6 +164,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          catch (Exception)
          {
          }
+
+         GC.SuppressFinalize(this);
       }
 
       #region Abstract and virtual Link APIs which the subclass might implement
