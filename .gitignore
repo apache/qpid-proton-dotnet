@@ -451,3 +451,5 @@ $RECYCLE.BIN/
 ## Build script generated files
 ##
 target
+build
+dist

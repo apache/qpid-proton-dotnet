@@ -25,6 +25,7 @@
     <AssemblyName>Qpid.Proton.TestPeer.Tests</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateProgramFile>true</GenerateProgramFile>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

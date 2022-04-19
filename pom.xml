@@ -70,6 +70,7 @@
                   <exclude>.gitignore</exclude>
                   <exclude>**/.github/</exclude>
                   <exclude>**/build/</exclude>
+                  <exclude>**/dist/</exclude>
                   <exclude>**/target/</exclude>
                   <exclude>**/install/</exclude>
                   <exclude>**/README.md</exclude>

@@ -23,6 +23,8 @@
     <AssemblyName>Qpid.Proton.TestPeer</AssemblyName>
     <RootNamespace>Apache.Qpid.Proton</RootNamespace>
     <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
