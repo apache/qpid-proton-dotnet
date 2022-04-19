@@ -26,6 +26,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateProgramFile>true</GenerateProgramFile>
     <SignAssembly>false</SignAssembly>
+    <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>

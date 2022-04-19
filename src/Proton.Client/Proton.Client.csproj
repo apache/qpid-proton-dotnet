@@ -24,6 +24,7 @@
     <RootNamespace>Apache.Qpid.Proton.Client</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup>

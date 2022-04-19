@@ -25,6 +25,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
     <IsPackable>false</IsPackable>
+    <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>

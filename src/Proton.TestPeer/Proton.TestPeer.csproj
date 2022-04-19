@@ -23,8 +23,10 @@
     <AssemblyName>Qpid.Proton.TestPeer</AssemblyName>
     <RootNamespace>Apache.Qpid.Proton</RootNamespace>
     <IsPackable>false</IsPackable>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <SignAssembly>false</SignAssembly>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

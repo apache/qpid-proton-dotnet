@@ -25,6 +25,7 @@
     <AssemblyName>Qpid.Proton.Test</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateProgramFile>true</GenerateProgramFile>
+    <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
