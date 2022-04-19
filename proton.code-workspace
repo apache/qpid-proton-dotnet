@@ -33,5 +33,6 @@
          "UBYTE",
          "XOAUTH"
       ],
+      "java.configuration.updateBuildConfiguration": "disabled",
    }
 }
