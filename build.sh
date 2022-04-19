@@ -16,14 +16,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-# ===========================================================================
-# Bash functions that can be used in this script or exported by using
-# source build.sh
-
-# Stop here if sourcing for functions
-[[ "$0" == *"bash" ]] && return 0
-
-# ===========================================================================
 
 # This might not have been sourced if the entrypoint is not bash
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
