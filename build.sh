@@ -67,10 +67,12 @@ do
 
       rm -rf "dist/${SRC_DIR}"
       rm -rf "dist/${BIN_DIR}"
+      rm -rf "dist/${VERSION}"
 
       if [ -d .git ]; then
         mkdir -p "dist/${SRC_DIR}"
         mkdir -p "dist/${BIN_DIR}"
+        mkdir -p "dist/${VERSION}"
         git archive HEAD | tar -x -C "dist/${SRC_DIR}"
       else
         echo "Not a GIT repo .. cannot continue"
@@ -80,7 +82,7 @@ do
       # runs RAT on artifacts
       mvn -N apache-rat:check
 
-      (cd dist; tar czf "../dist/${SRC_DIR}.tar.gz" "${SRC_DIR}")
+      (cd dist; tar czf "../dist/${VERSION}/${SRC_DIR}.tar.gz" "${SRC_DIR}")
 
       # pack NuGet packages
       dotnet pack --configuration Release Proton.sln
@@ -94,8 +96,28 @@ do
       # add the binary LICENSE and NOTICE to the tarball
       cp README.md LICENSE NOTICE dist/${BIN_DIR}
 
-      (cd dist; tar czf "../dist/${BIN_DIR}.tar.gz" "${BIN_DIR}")
+      (cd dist; tar czf "../dist/${VERSION}/${BIN_DIR}.tar.gz" "${BIN_DIR}")
 
+      ;;
+
+    sign)
+      set +x
+
+      echo -n "Enter password: "
+      stty -echo
+      read -r password
+      stty echo
+
+      for f in $(find dist//${VERSION} -type f \
+        \! -name '*.sha512' \! -name '*.sha256' \
+        \! -name '*.asc' \! -name '*.txt' \
+        -name '*.tar.gz');
+      do
+        (cd "${f%/*}" && shasum -a 512 "${f##*/}") > "$f.sha512"
+        gpg --passphrase "$password" --armor --output "$f.asc" --detach-sig "$f"
+      done
+
+      set -x
       ;;
 
     clean)
