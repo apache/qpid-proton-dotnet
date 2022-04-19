@@ -25,25 +25,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
    [TestFixture, Timeout(20000)]
    public class ClientSaslConnectionTest : ClientBaseTestFixture
    {
-      private static readonly string ANONYMOUS = "ANONYMOUS";
-      private static readonly string PLAIN = "PLAIN";
-      private static readonly string CRAM_MD5 = "CRAM-MD5";
-      private static readonly string SCRAM_SHA_1 = "SCRAM-SHA-1";
-      private static readonly string SCRAM_SHA_256 = "SCRAM-SHA-256";
-      private static readonly string SCRAM_SHA_512 = "SCRAM-SHA-512";
-      private static readonly string EXTERNAL = "EXTERNAL";
-      private static readonly string XOAUTH2 = "XOAUTH2";
+      // private static readonly string ANONYMOUS = "ANONYMOUS";
+      // private static readonly string PLAIN = "PLAIN";
+      // private static readonly string CRAM_MD5 = "CRAM-MD5";
+      // private static readonly string SCRAM_SHA_1 = "SCRAM-SHA-1";
+      // private static readonly string SCRAM_SHA_256 = "SCRAM-SHA-256";
+      // private static readonly string SCRAM_SHA_512 = "SCRAM-SHA-512";
+      // private static readonly string EXTERNAL = "EXTERNAL";
+      // private static readonly string XOAUTH2 = "XOAUTH2";
 
-      private static readonly byte SASL_FAIL_AUTH = 1;
-      private static readonly byte SASL_SYS = 2;
-      private static readonly byte SASL_SYS_PERM = 3;
-      private static readonly byte SASL_SYS_TEMP = 4;
+      // private static readonly byte SASL_FAIL_AUTH = 1;
+      // private static readonly byte SASL_SYS = 2;
+      // private static readonly byte SASL_SYS_PERM = 3;
+      // private static readonly byte SASL_SYS_TEMP = 4;
 
-      private static readonly string BROKER_JKS_KEYSTORE = "src/test/resources/broker-jks.keystore";
-      private static readonly string BROKER_JKS_TRUSTSTORE = "src/test/resources/broker-jks.truststore";
-      private static readonly string CLIENT_JKS_KEYSTORE = "src/test/resources/client-jks.keystore";
-      private static readonly string CLIENT_JKS_TRUSTSTORE = "src/test/resources/client-jks.truststore";
-      private static readonly string PASSWORD = "password";
+      // private static readonly string BROKER_JKS_KEYSTORE = "src/test/resources/broker-jks.keystore";
+      // private static readonly string BROKER_JKS_TRUSTSTORE = "src/test/resources/broker-jks.truststore";
+      // private static readonly string CLIENT_JKS_KEYSTORE = "src/test/resources/client-jks.keystore";
+      // private static readonly string CLIENT_JKS_TRUSTSTORE = "src/test/resources/client-jks.truststore";
+      // private static readonly string PASSWORD = "password";
 
       protected ProtonTestServerOptions ServerOptions()
       {

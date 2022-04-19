@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          NLog.Targets.Target logconsole = new NLog.Targets.ConsoleTarget("logconsole");
 
          // Rules for mapping loggers to targets
-         config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, logconsole);
+         // config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, logconsole);
          config.AddRule(NLog.LogLevel.Trace, NLog.LogLevel.Fatal, logfile);
 
          loggerFactory = LoggerFactory.Create(builder =>

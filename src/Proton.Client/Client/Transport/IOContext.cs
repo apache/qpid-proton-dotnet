@@ -28,7 +28,8 @@ namespace Apache.Qpid.Proton.Client.Transport
    /// </summary>
    public sealed class IOContext
    {
-      private static readonly int SHUTDOWN_TIMEOUT = 50;
+      // TODO Add shutdown quiesse timeouts
+      // private static readonly int SHUTDOWN_TIMEOUT = 50;
 
       private readonly IEventLoop eventLoop;
       private readonly TransportOptions transportOptions;
