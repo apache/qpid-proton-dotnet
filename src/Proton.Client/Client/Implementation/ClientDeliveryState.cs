@@ -56,13 +56,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientReleased : ClientDeliveryState
    {
-      public static readonly ClientReleased Instance = new ClientReleased();
+      public static readonly ClientReleased Instance = new();
 
       private ClientReleased() { }
 
       public override DeliveryStateType Type => DeliveryStateType.Released;
 
-      public override Types.Transport.IDeliveryState ProtonDeliveryState => Types.Messaging.Released.Instance;
+      public override Types.Transport.IDeliveryState ProtonDeliveryState => Released.Instance;
 
    }
 
@@ -71,7 +71,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientRejected : ClientDeliveryState
    {
-      private readonly Rejected rejected = new Rejected();
+      private readonly Rejected rejected = new();
 
       internal ClientRejected(Rejected rejected)
       {
@@ -114,7 +114,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientModified : ClientDeliveryState
    {
-      private readonly Modified modified = new Modified();
+      private readonly Modified modified = new();
 
       internal ClientModified(Modified modified)
       {
@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientTransactional : ClientDeliveryState
    {
-      private readonly TransactionalState txnState = new TransactionalState();
+      private readonly TransactionalState txnState = new();
 
       internal ClientTransactional(TransactionalState txnState)
       {
@@ -176,7 +176,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
    internal static class DeliveryStateExtensions
    {
-      public static IDeliveryState ToClientDeliveryState(this Types.Messaging.IOutcome outcome)
+      public static IDeliveryState ToClientDeliveryState(this IOutcome outcome)
       {
          if (outcome == null)
          {

@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
    /// <typeparam name="T">The type of delivery object this Queue manages</typeparam>
    public sealed class FifoDeliveryQueue<T> : IDeliveryQueue<T> where T : class
    {
-      private readonly Mutex mutex = new Mutex();
+      private readonly Mutex mutex = new();
 
       private static readonly int CLOSED = 0;
       private static readonly int STOPPED = 1;
@@ -87,7 +87,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
       public T Dequeue(TimeSpan timeout)
       {
-         T value = default(T);
+         T value = default;
 
          lock (mutex)
          {

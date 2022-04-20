@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Engine.Implementation;
 using Apache.Qpid.Proton.Types.Messaging;
@@ -32,7 +31,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    {
       private readonly ClientSession session;
       private readonly SessionOptions sessionOptions;
-      private readonly AtomicInteger senderCounter = new AtomicInteger();
+      private readonly AtomicInteger senderCounter = new();
 
       private volatile SenderOptions defaultSenderOptions;
       private volatile StreamSenderOptions defaultStreamSenderOptions;
@@ -142,7 +141,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          SourceOptions sourceOptions = options.SourceOptions;
 
-         Source source = new Source
+         Source source = new()
          {
             Address = address
          };
@@ -194,7 +193,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private static Target CreateTarget(string address, SenderOptions options)
       {
          TargetOptions targetOptions = options.TargetOptions;
-         Target target = new Target
+         Target target = new()
          {
             Address = address,
             Capabilities = ClientConversionSupport.ToSymbolArray(targetOptions.Capabilities)

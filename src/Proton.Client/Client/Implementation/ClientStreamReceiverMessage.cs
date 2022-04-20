@@ -564,7 +564,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   throw new ClientMessageFormatViolationException("Incoming message carries unknown Section");
                }
             }
-            catch (Exception ex) when (ex is ClientMessageFormatViolationException || ex is DecodeException)
+            catch (Exception ex) when (ex is ClientMessageFormatViolationException or DecodeException)
             {
                currentState = StreamState.DECODE_ERROR;
                if (deliveryStream != null)

@@ -378,7 +378,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleEngineShutdown(Engine.IEngine engine)
+      private void HandleEngineShutdown(IEngine engine)
       {
          if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
          {

@@ -333,7 +333,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          else
          {
-            ClientRedirect redirect = new ClientRedirect(info);
+            ClientRedirect redirect = new(info);
 
             try
             {
@@ -370,7 +370,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          else
          {
-            ClientRedirect redirect = new ClientRedirect(info);
+            ClientRedirect redirect = new(info);
 
             try
             {

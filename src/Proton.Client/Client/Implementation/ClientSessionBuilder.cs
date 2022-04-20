@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Client.Concurrent;
 
 namespace Apache.Qpid.Proton.Client.Implementation

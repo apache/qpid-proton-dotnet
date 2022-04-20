@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
+using Apache.Qpid.Proton.Client.Implementation;
+
 namespace Apache.Qpid.Proton.Client
 {
-   using Apache.Qpid.Proton.Client.Implementation;
-
    public interface IDeliveryState
    {
       /// <summary>

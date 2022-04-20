@@ -271,16 +271,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
          });
       }
 
-      private Engine.ITransactionController GetOrCreateNewTxnController()
+      private ITransactionController GetOrCreateNewTxnController()
       {
          if (txnController == null || txnController.IsLocallyClosed)
          {
-            Types.Transactions.Coordinator coordinator = new Types.Transactions.Coordinator
+            Coordinator coordinator = new()
             {
-               Capabilities = new Symbol[] { Types.Transactions.TxnCapability.LOCAL_TXN }
+               Capabilities = new Symbol[] { TxnCapability.LOCAL_TXN }
             };
 
-            Source source = new Source
+            Source source = new()
             {
                Outcomes = (Symbol[])SUPPORTED_OUTCOMES.Clone()
             };
@@ -416,7 +416,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Transaction controller event handlers
 
-      private void HandleTransactionDeclared(Engine.ITransaction<Engine.ITransactionController> transaction)
+      private void HandleTransactionDeclared(ITransaction<ITransactionController> transaction)
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DECLARE_FUTURE_NAME, null);
@@ -439,7 +439,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleTransactionDeclareFailed(Engine.ITransaction<Engine.ITransactionController> transaction)
+      private void HandleTransactionDeclareFailed(ITransaction<ITransactionController> transaction)
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DECLARE_FUTURE_NAME, null);
@@ -448,7 +448,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          future?.TrySetException(new ClientTransactionDeclarationException(cause.Message, cause));
       }
 
-      private void HandleTransactionDischarged(Engine.ITransaction<Engine.ITransactionController> transaction)
+      private void HandleTransactionDischarged(ITransaction<ITransactionController> transaction)
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DISCHARGE_FUTURE_NAME, null);
@@ -461,7 +461,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleTransactionDischargeFailed(Engine.ITransaction<Engine.ITransactionController> transaction)
+      private void HandleTransactionDischargeFailed(ITransaction<ITransactionController> transaction)
       {
          TaskCompletionSource<ISession> future =
             transaction.Attachments.Get<TaskCompletionSource<ISession>>(DISCHARGE_FUTURE_NAME, null);
@@ -484,7 +484,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          txnController?.Close();
       }
 
-      private void HandleCoordinatorLocalClose(Engine.ITransactionController controller)
+      private void HandleCoordinatorLocalClose(ITransactionController controller)
       {
          /// Ensure that the controller is disconnected from this context's event points
          /// so that if any events happen after this they don't affect any newly created
@@ -529,12 +529,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleParentEndpointClosed(Engine.ITransactionController txnController)
+      private void HandleParentEndpointClosed(ITransactionController txnController)
       {
          txnController?.Close();
       }
 
-      private void HandleEngineShutdown(Engine.IEngine engine)
+      private void HandleEngineShutdown(IEngine engine)
       {
          txnController?.Close();
       }

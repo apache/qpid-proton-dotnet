@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          DeliveryAnnotations annotations = null;
-         TaskCompletionSource<IStreamSenderMessage> request = new TaskCompletionSource<IStreamSenderMessage>();
+         TaskCompletionSource<IStreamSenderMessage> request = new();
 
          if (deliveryAnnotations != null)
          {
@@ -103,7 +103,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                // Grab the next delivery and hold for stream writes, no other sends
                // can occur while we hold the delivery.
                IOutgoingDelivery streamDelivery = ProtonSender.Next();
-               ClientStreamTracker streamTracker = new ClientStreamTracker(this, streamDelivery);
+               ClientStreamTracker streamTracker = new(this, streamDelivery);
 
                streamDelivery.LinkedResource = streamTracker;
 
@@ -166,8 +166,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
 
-         TaskCompletionSource<IStreamTracker> request = new TaskCompletionSource<IStreamTracker>();
-         ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(
+         TaskCompletionSource<IStreamTracker> request = new();
+         ClientOutgoingEnvelope envelope = new(
             this, context.ProtonDelivery, messageFormat, buffer, context.Completed, request);
 
          ClientSession.Execute(() =>
@@ -192,13 +192,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
          });
 
-         return (IStreamTracker)request.Task.ConfigureAwait(false).GetAwaiter().GetResult();
+         return request.Task.ConfigureAwait(false).GetAwaiter().GetResult();
       }
 
       internal void Abort(IOutgoingDelivery protonDelivery, ClientStreamTracker tracker)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IStreamTracker> request = new TaskCompletionSource<IStreamTracker>();
+         TaskCompletionSource<IStreamTracker> request = new();
          request.Task.ContinueWith((tracker) =>
          {
             ClientSession.Execute(() => HandleCreditStateUpdated(ProtonSender));
@@ -213,7 +213,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             else
             {
-               ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, false, request);
+               ClientOutgoingEnvelope envelope = new(this, protonDelivery, protonDelivery.MessageFormat, null, false, request);
 
                try
                {
@@ -246,7 +246,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       internal void Complete(IOutgoingDelivery protonDelivery, ClientStreamTracker tracker)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IStreamTracker> request = new TaskCompletionSource<IStreamTracker>();
+         TaskCompletionSource<IStreamTracker> request = new();
          request.Task.ContinueWith((tracker) =>
          {
             ClientSession.Execute(() => HandleCreditStateUpdated(ProtonSender));
@@ -254,7 +254,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          ClientSession.Execute(() =>
          {
-            ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, protonDelivery, protonDelivery.MessageFormat, null, true, request);
+            ClientOutgoingEnvelope envelope = new(this, protonDelivery, protonDelivery.MessageFormat, null, true, request);
             try
             {
                if (ProtonSender.IsSendable && (ProtonSender.Current == null || ProtonSender.Current == protonDelivery))
@@ -315,7 +315,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private Task<IStreamTracker> DoSendMessageAsync<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
       {
-         TaskCompletionSource<IStreamTracker> operation = new TaskCompletionSource<IStreamTracker>();
+         TaskCompletionSource<IStreamTracker> operation = new();
 
          IProtonBuffer buffer = message.Encode(deliveryAnnotations);
 
@@ -326,7 +326,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                try
                {
                   ClientOutgoingEnvelope envelope =
-                     new ClientOutgoingEnvelope(this, null, message.MessageFormat, buffer, true, operation);
+                     new(this, null, message.MessageFormat, buffer, true, operation);
 
                   if (ProtonSender.IsSendable && ProtonSender.Current == null)
                   {
@@ -466,7 +466,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             if (sender.RemoteTerminus != null)
             {
-               remoteTarget = new ClientRemoteTarget(sender.RemoteTerminus as Types.Messaging.Target);
+               remoteTarget = new ClientRemoteTarget(sender.RemoteTerminus as Target);
             }
 
             _ = openFuture.TrySetResult(this);
@@ -569,7 +569,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleEngineShutdown(Engine.IEngine engine)
+      private void HandleEngineShutdown(IEngine engine)
       {
          if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
          {

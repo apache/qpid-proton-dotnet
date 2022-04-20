@@ -32,15 +32,15 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public class ClientInstance : IClient
    {
-      private static readonly IdGenerator CONTAINER_ID_GENERATOR = new IdGenerator();
+      private static readonly IdGenerator CONTAINER_ID_GENERATOR = new();
 
       private readonly ClientOptions options;
       private readonly IDictionary<string, ClientConnection> connections = new Dictionary<string, ClientConnection>();
       private readonly string clientUniqueId = CONTAINER_ID_GENERATOR.GenerateId();
-      private readonly AtomicInteger CONNECTION_COUNTER = new AtomicInteger();
-      private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly AtomicInteger CONNECTION_COUNTER = new();
+      private readonly AtomicBoolean closed = new();
 
-      private readonly Lazy<TaskCompletionSource<IClient>> closeTask = new Lazy<TaskCompletionSource<IClient>>();
+      private readonly Lazy<TaskCompletionSource<IClient>> closeTask = new();
 
       public string ContainerId => options.Id;
 

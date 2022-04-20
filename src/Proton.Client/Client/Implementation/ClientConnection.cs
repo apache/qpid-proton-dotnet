@@ -916,7 +916,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (options.SaslOptions.SaslEnabled)
          {
-            SaslMechanismSelector mechSelector = new SaslMechanismSelector(
+            SaslMechanismSelector mechSelector = new(
                ClientConversionSupport.ToSymbolSet(options.SaslOptions.AllowedMechanisms));
 
             engine.SaslDriver.Client().Authenticator =

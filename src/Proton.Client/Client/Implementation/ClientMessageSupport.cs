@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                return message.ToAdvancedMessage();
             }
-            catch (Exception ex) when (ex is NotImplementedException || ex is NotSupportedException)
+            catch (Exception ex) when (ex is NotImplementedException or NotSupportedException)
             {
                return ConvertFromOutsideMessage(message);
             }
@@ -168,7 +168,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                                         IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
       {
 
-         ClientMessage<object> message = new ClientMessage<object>();
+         ClientMessage<object> message = new();
 
          ISection section;
 
@@ -225,7 +225,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private static ClientMessage<T> ConvertFromOutsideMessage<T>(IMessage<T> source)
       {
-         Header header = new Header
+         Header header = new()
          {
             Durable = source.Durable,
             Priority = source.Priority,
@@ -236,7 +236,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          byte[] userId = source.UserId;
 
-         Properties properties = new Properties
+         Properties properties = new()
          {
             MessageId = source.MessageId,
             UserId = userId != null ? ProtonByteBufferAllocator.Instance.Wrap(userId) : null,
@@ -298,7 +298,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             footer = null;
          }
 
-         ClientMessage<T> message = new ClientMessage<T>(CreateSectionFromValue(source.Body))
+         ClientMessage<T> message = new(CreateSectionFromValue(source.Body))
          {
             Header = header,
             Properties = properties,

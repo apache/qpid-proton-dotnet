@@ -418,7 +418,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             else
             {
-               return default(T);
+               return default;
             }
          }
          set
@@ -437,7 +437,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (body == null && bodySections == null)
          {
-            body = (ISection)section;
+            body = section;
          }
          else
          {
@@ -461,7 +461,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IEnumerable<ISection> GetBodySections()
       {
-         List<ISection> result = new List<ISection>();
+         List<ISection> result = new();
 
          if (body != null)
          {
@@ -485,7 +485,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (sections != null)
          {
-            List<ISection> result = new List<ISection>();
+            List<ISection> result = new();
             foreach (ISection section in sections)
             {
                result.Add(ValidateBodySections(messageFormat, result, section));

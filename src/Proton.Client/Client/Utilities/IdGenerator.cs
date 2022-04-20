@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       /// <returns></returns>
       public string GenerateId()
       {
-         StringBuilder sb = new StringBuilder(64);
+         StringBuilder sb = new(64);
 
          sb.Append(Prefix);
          sb.Append(Guid.NewGuid());

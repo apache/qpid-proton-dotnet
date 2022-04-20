@@ -108,7 +108,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       {
          lock (entries)
          {
-            Random rand = new Random();
+            Random rand = new();
             int n = entries.Count;
             ReconnectLocation[] pool = entries.ToArray();
             entries.Clear();
@@ -135,7 +135,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       {
          lock (entries)
          {
-            if (!entries.Contains(location) && location != default(ReconnectLocation))
+            if (!entries.Contains(location) && location != default)
             {
                entries.Enqueue(location);
             }
@@ -157,7 +157,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
             {
                foreach (ReconnectLocation location in locations)
                {
-                  if (!entries.Contains(location) && location != default(ReconnectLocation))
+                  if (!entries.Contains(location) && location != default)
                   {
                      entries.Enqueue(location);
                   }
@@ -177,7 +177,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       {
          lock (entries)
          {
-            if (!entries.Contains(location) && location != default(ReconnectLocation))
+            if (!entries.Contains(location) && location != default)
             {
                entries.EnqueueFront(location);
             }
@@ -262,7 +262,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
 
       public static void ShuffleMe(IList<ReconnectLocation> list)
       {
-         Random random = new Random();
+         Random random = new();
 
          for (int i = list.Count - 1; i > 1; i--)
          {

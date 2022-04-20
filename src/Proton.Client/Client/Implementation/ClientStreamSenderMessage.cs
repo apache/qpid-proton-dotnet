@@ -765,7 +765,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private abstract class StreamMessageOutputStream : Stream
       {
-         protected readonly AtomicBoolean closed = new AtomicBoolean();
+         protected readonly AtomicBoolean closed = new();
          protected readonly OutputStreamOptions options;
          protected IProtonBuffer streamBuffer;
          protected readonly ClientStreamSenderMessage message;

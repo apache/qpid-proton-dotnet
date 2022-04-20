@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly ClientStreamSender sender;
       private readonly IOutgoingDelivery delivery;
       private readonly TaskCompletionSource<IStreamTracker> remoteSettlementFuture =
-         new TaskCompletionSource<IStreamTracker>(TaskCreationOptions.RunContinuationsAsynchronously);
+         new(TaskCreationOptions.RunContinuationsAsynchronously);
 
       private volatile bool remotelySettled;
       private volatile IDeliveryState remoteDeliveryState;
@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.delivery.DeliveryStateUpdatedHandler(ProcessDeliveryUpdated);
       }
 
-      internal Engine.IOutgoingDelivery ProtonDelivery => delivery;
+      internal IOutgoingDelivery ProtonDelivery => delivery;
 
       public IStreamSender Sender => sender;
 

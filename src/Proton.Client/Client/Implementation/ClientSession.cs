@@ -130,7 +130,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          Objects.RequireNonNull(address, "Cannot create a durable receiver with a null address");
          Objects.RequireNonNull(address, "Cannot create a durable receiver with a null subscription name");
 
-         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IReceiver> createReceiver = new();
 
          connection.Execute(() =>
          {
@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public virtual Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IReceiver> createReceiver = new();
 
          connection.Execute(() =>
          {
@@ -184,7 +184,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
 
-         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IReceiver> createReceiver = new();
 
          connection.Execute(() =>
          {
@@ -210,7 +210,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public virtual Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+         TaskCompletionSource<ISender> createSender = new();
 
          connection.Execute(() =>
          {
@@ -238,7 +238,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a sender with a null address");
 
-         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+         TaskCompletionSource<ISender> createSender = new();
 
          connection.Execute(() =>
          {
@@ -264,7 +264,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISession> BeginTransactionAsync()
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISession> beginFuture = new TaskCompletionSource<ISession>();
+         TaskCompletionSource<ISession> beginFuture = new();
 
          connection.Execute(() =>
          {
@@ -294,7 +294,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISession> CommitTransactionAsync()
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISession> commitFuture = new TaskCompletionSource<ISession>();
+         TaskCompletionSource<ISession> commitFuture = new();
 
          connection.Execute(() =>
          {
@@ -320,7 +320,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISession> RollbackTransactionAsync()
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISession> rollbackFuture = new TaskCompletionSource<ISession>();
+         TaskCompletionSource<ISession> rollbackFuture = new();
 
          connection.Execute(() =>
          {
@@ -421,7 +421,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientSender InternalOpenSender(string address, SenderOptions senderOptions)
       {
-         return senderBuilder.Sender(address, senderOptions).Open() as ClientSender;
+         return senderBuilder.Sender(address, senderOptions).Open();
       }
 
       internal ClientSender InternalOpenAnonymousSender(SenderOptions senderOptions = null)
@@ -431,7 +431,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          if (connection.HasOpened)
          {
             connection.CheckAnonymousRelaySupported();
-            return senderBuilder.AnonymousSender(senderOptions).Open() as ClientSender;
+            return senderBuilder.AnonymousSender(senderOptions).Open();
          }
          else
          {
@@ -441,7 +441,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal ClientStreamSender InternalOpenStreamSender(string address, StreamSenderOptions senderOptions)
       {
-         return senderBuilder.StreamSender(address, senderOptions).Open() as ClientStreamSender;
+         return senderBuilder.StreamSender(address, senderOptions).Open();
       }
 
       #endregion

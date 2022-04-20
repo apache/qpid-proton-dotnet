@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       private readonly ChannelReader<IChannelTask> channelOutputSink;
       private readonly ChannelWriter<IChannelTask> channelOutputSource;
 
-      private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly AtomicBoolean closed = new();
 
       private readonly IEventLoop eventLoop;
       private readonly TransportOptions options;
@@ -249,7 +249,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       private static IPAddress ResolveIPAddress(string address)
       {
          IPHostEntry entry = Dns.GetHostEntry(address);
-         IPAddress result = default(IPAddress);
+         IPAddress result = default;
 
          foreach (IPAddress ipAddress in entry.AddressList)
          {
@@ -409,9 +409,9 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private Stream PerformTlsHandshake(Socket channel, Stream networkStream)
       {
-         SslStream sslStream = new SslStream(networkStream, false, HandleRemoteCertificateValidation, HandleLocalCertificateSelection);
+         SslStream sslStream = new(networkStream, false, HandleRemoteCertificateValidation, HandleLocalCertificateSelection);
 
-         SslClientAuthenticationOptions clientSslOptions = new SslClientAuthenticationOptions();
+         SslClientAuthenticationOptions clientSslOptions = new();
 
          sslStream.AuthenticateAsClient(
             sslOptions.SelectServerName(host),
@@ -516,7 +516,7 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private sealed class ChannelTermination : IChannelTask
       {
-         private readonly TaskCompletionSource writesCompleted = new TaskCompletionSource();
+         private readonly TaskCompletionSource writesCompleted = new();
 
          public void Execute()
          {
