@@ -80,7 +80,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
          {
             Append("null");
          }
-         else if (value is Char @char)
+         else if (value is char @char)
          {
             Append("'");
             Append(@char.ToString());

@@ -107,7 +107,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// </summary>
       /// <param name="name">The stringified name of the SASL mechanism to check</param>
       /// <returns>true if a matching mechanism is found</returns>
-      public static bool Validate(String name)
+      public static bool Validate(string name)
       {
          foreach (SaslMechanism mechanism in (SaslMechanism[])Enum.GetValues(typeof(SaslMechanism)))
          {

@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
@@ -49,7 +48,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          long endIndex = buffer.WriteOffset;
          long writeSize = endIndex - startIndex - sizeof(int);
 
-         if (writeSize > Int32.MaxValue)
+         if (writeSize > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException("Cannot encode given array, encoded size to large: " + writeSize);
          }

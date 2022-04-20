@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          get => outgoingCapacity;
          set
          {
-            this.outgoingCapacity = value;
+            outgoingCapacity = value;
             UpdateOutgoingWindowState();
          }
       }
@@ -99,9 +99,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             uint allowedWrites = outgoingCapacity == 0 ? 0 : outgoingWindowHighWaterMark - pendingOutgoingWrites;
             uint remaining = allowedWrites * engine.OutboundMaxFrameSize;
 
-            if (outgoingCapacity > Int32.MaxValue || remaining > Int32.MaxValue)
+            if (outgoingCapacity > int.MaxValue || remaining > int.MaxValue)
             {
-               return Int32.MaxValue;
+               return int.MaxValue;
             }
             else
             {
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             outgoingWindowHighWaterMark = outgoingWindowLowWaterMark = 0;
             writeable = false;
          }
-         else if (outgoingCapacity < Int32.MaxValue)
+         else if (outgoingCapacity < int.MaxValue)
          {
             // The local end is writable here if the current pending writes count is below the low water
             // mark and also if there is remote incoming window to allow more write.
@@ -140,8 +140,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             // User disabled outgoing windowing so reset state to reflect that we are not
             // enforcing any limit from now on, at least not any sane limit.
-            outgoingWindowHighWaterMark = Int32.MaxValue;
-            outgoingWindowLowWaterMark = Int32.MaxValue / 2;
+            outgoingWindowHighWaterMark = int.MaxValue;
+            outgoingWindowLowWaterMark = int.MaxValue / 2;
             writeable = remoteIncomingWindow > 0;
          }
 
@@ -402,7 +402,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal uint NextOutgoingId => nextOutgoingId;
 
-      internal uint OutgoingWindow => Int32.MaxValue;
+      internal uint OutgoingWindow => int.MaxValue;
 
       internal uint RemoteNextIncomingId => remoteNextIncomingId;
 

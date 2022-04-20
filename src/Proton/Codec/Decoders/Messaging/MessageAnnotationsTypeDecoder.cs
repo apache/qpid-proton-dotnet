@@ -97,7 +97,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          for (int i = 0; i < count / 2; i++)
          {
             Symbol key = decoder.ReadSymbol(buffer, state);
-            Object value = decoder.ReadObject(buffer, state);
+            object value = decoder.ReadObject(buffer, state);
 
             map.Add(key, value);
          }
@@ -162,7 +162,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          for (int i = 0; i < count / 2; i++)
          {
             Symbol key = decoder.ReadSymbol(stream, state);
-            Object value = decoder.ReadObject(stream, state);
+            object value = decoder.ReadObject(stream, state);
 
             map.Add(key, value);
          }

@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return new ClientSender(session, options, senderId, protonSender);
       }
 
-      public ClientStreamSender StreamSender(String address, StreamSenderOptions senderOptions)
+      public ClientStreamSender StreamSender(string address, StreamSenderOptions senderOptions)
       {
          StreamSenderOptions options = senderOptions ?? GetDefaultStreamSenderOptions();
          string senderId = NextSenderId();

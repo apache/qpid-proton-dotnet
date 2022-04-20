@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                else
                {
-                  return (protonLink.RemoteSource as Types.Messaging.Source)?.Address;
+                  return protonLink.RemoteSource?.Address;
                }
             }
             else

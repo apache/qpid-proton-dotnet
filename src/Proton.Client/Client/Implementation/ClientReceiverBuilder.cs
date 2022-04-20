@@ -129,7 +129,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return session.SessionId + ":" + receiverCounter.IncrementAndGet();
       }
 
-      private Engine.IReceiver CreateReceiver(ReceiverOptions options, String receiverId)
+      private Engine.IReceiver CreateReceiver(ReceiverOptions options, string receiverId)
       {
          string linkName = options?.LinkName ?? "receiver-" + receiverId;
 
@@ -238,7 +238,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return source;
       }
 
-      private static Target CreateTarget(String address, ReceiverOptions options)
+      private static Target CreateTarget(string address, ReceiverOptions options)
       {
          TargetOptions targetOptions = options.TargetOptions;
          Target target = new Target

@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer OutputBuffer(long initialCapacity)
       {
-         return OutputBuffer(initialCapacity, Int32.MaxValue);
+         return OutputBuffer(initialCapacity, int.MaxValue);
       }
 
       public IProtonBuffer OutputBuffer(long initialCapacity, long maxCapacity)
@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Allocate(long initialCapacity)
       {
-         return Allocate(initialCapacity, Int32.MaxValue);
+         return Allocate(initialCapacity, int.MaxValue);
       }
 
       public IProtonBuffer Allocate(long initialCapacity, long maxCapacity)

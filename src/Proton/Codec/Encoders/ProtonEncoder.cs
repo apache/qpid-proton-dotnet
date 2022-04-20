@@ -365,7 +365,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          }
       }
 
-      public void WriteObject(IProtonBuffer buffer, IEncoderState state, Object value)
+      public void WriteObject(IProtonBuffer buffer, IEncoderState state, object value)
       {
          if (value != null)
          {
@@ -429,7 +429,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          return this;
       }
 
-      public ITypeEncoder LookupTypeEncoder(Object value)
+      public ITypeEncoder LookupTypeEncoder(object value)
       {
          if (value == null)
          {
@@ -456,7 +456,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          return encoder;
       }
 
-      private ITypeEncoder DeduceTypeEncoder(Type typeClass, Object instance)
+      private ITypeEncoder DeduceTypeEncoder(Type typeClass, object instance)
       {
          ITypeEncoder encoder = null;
 

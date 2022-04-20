@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
 {
    public sealed class IdGenerator
    {
-      public static readonly String DefaultPrefix = "ID:";
+      public static readonly string DefaultPrefix = "ID:";
 
       private int sequenceId;
 

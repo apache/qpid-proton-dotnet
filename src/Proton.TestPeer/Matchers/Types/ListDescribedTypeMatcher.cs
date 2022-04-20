@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types
       {
          try
          {
-            Object descriptor = item.Descriptor;
+            object descriptor = item.Descriptor;
             if (!descriptorCode.Equals(descriptor) && !descriptorSymbol.Equals(descriptor))
             {
                mismatchTextAddition = "Descriptor mismatch";

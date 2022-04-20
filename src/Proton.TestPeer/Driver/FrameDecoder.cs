@@ -31,8 +31,8 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public sealed class FrameDecoder
    {
-      public static readonly byte AMQP_FRAME_TYPE = (byte)0;
-      public static readonly byte SASL_FRAME_TYPE = (byte)1;
+      public static readonly byte AMQP_FRAME_TYPE = 0;
+      public static readonly byte SASL_FRAME_TYPE = 1;
 
       public static readonly int FRAME_SIZE_BYTES = 4;
 
@@ -230,13 +230,13 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             if (frameSize < 8)
             {
-               throw new ArgumentException(String.Format(
+               throw new ArgumentException(string.Format(
                     "specified frame size {0} smaller than minimum frame header size 8", frameSize));
             }
 
             if (frameSize > frameHandler.InboundMaxFrameSize)
             {
-               throw new ArgumentOutOfRangeException(String.Format(
+               throw new ArgumentOutOfRangeException(string.Format(
                    "specified frame size {0} larger than maximum frame size {1}", frameSize, frameHandler.InboundMaxFrameSize));
             }
          }
@@ -324,7 +324,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             uint frameBodySize = frameSize - dataOffset;
 
             byte[] payload = null;
-            Object val = null;
+            object val = null;
 
             if (frameBodySize > 0)
             {
@@ -339,11 +339,11 @@ namespace Apache.Qpid.Proton.Test.Driver
                   throw new Exception("Decoder failed reading remote input:", e);
                }
 
-               Codec.DataType dataType = decoder.codec.DataType;
-               if (dataType != Codec.DataType.Described)
+               DataType dataType = decoder.codec.DataType;
+               if (dataType != DataType.Described)
                {
                   throw new ArgumentException(
-                      "Frame body type expected to be " + Codec.DataType.Described + " but was: " + dataType);
+                      "Frame body type expected to be " + DataType.Described + " but was: " + dataType);
                }
 
                try
@@ -392,7 +392,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
             else
             {
-               throw new ArgumentException(String.Format("unknown frame type: {0}", type));
+               throw new ArgumentException(string.Format("unknown frame type: {0}", type));
             }
          }
 
@@ -406,13 +406,13 @@ namespace Apache.Qpid.Proton.Test.Driver
          {
             if (dataOffset < 8)
             {
-               throw new ArgumentOutOfRangeException(String.Format(
+               throw new ArgumentOutOfRangeException(string.Format(
                    "specified frame data offset {0} smaller than minimum frame header size {1}", dataOffset, 8));
             }
 
             if (dataOffset > frameSize)
             {
-               throw new ArgumentOutOfRangeException(String.Format(
+               throw new ArgumentOutOfRangeException(string.Format(
                    "specified frame data offset {0} larger than the frame size {1}", dataOffset, frameSize));
             }
          }

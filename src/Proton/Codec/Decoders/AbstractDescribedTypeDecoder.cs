@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       #endregion
 
-      public override String ToString()
+      public override string ToString()
       {
          return "DescribedTypeDecoder<" + GetType().Name + ">";
       }
@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                 "Expected " + typeof(T) + "encoding but got decoder for type: " + actual.GetType().Name);
          }
 
-         return (T) actual;
+         return (T)actual;
       }
 
       protected static T CheckIsExpectedTypeAndCast<T>(IStreamTypeDecoder actual)
@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                 "Expected " + typeof(T) + "encoding but got decoder for type: " + actual.GetType().Name);
          }
 
-         return (T) actual;
+         return (T)actual;
       }
 
       protected static void CheckIsExpectedType<T>(ITypeDecoder actual)

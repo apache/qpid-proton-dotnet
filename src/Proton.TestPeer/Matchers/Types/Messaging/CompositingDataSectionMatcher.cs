@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       private readonly MemoryStream expectedValueStream;
 
       private bool expectTrailingBytes;
-      private String decodingErrorDescription;
+      private string decodingErrorDescription;
 
       // State data used during validation of the composite data values
       private bool unexpectedTrailingBytes;

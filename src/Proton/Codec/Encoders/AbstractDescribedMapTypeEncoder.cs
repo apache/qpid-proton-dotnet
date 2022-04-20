@@ -108,7 +108,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
          // Reserve space for the size and write the count of list elements.
          buffer.EnsureWritable(sizeof(byte) + sizeof(byte));
-         buffer.WriteUnsignedByte((byte)0);
+         buffer.WriteUnsignedByte(0);
          buffer.WriteUnsignedByte((byte)(elementCount * 2));
 
          WriteMapEntries(buffer, state, value);
@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          // Move back and write the size
          long writeSize = buffer.WriteOffset - startIndex - sizeof(int);
 
-         if (writeSize > Int32.MaxValue)
+         if (writeSize > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException("Cannot encode given array, encoded size to large: " + writeSize);
          }

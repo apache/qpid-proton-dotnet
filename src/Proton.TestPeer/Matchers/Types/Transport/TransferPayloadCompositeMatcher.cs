@@ -38,8 +38,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
       private string msgContentMatcherFailureDescription;
       private FooterMatcher footersMatcher;
       private string footerMatcherFailureDescription;
-      private TypeSafeMatcher<Int32> payloadLengthMatcher;
-      private String payloadLengthMatcherFailureDescription;
+      private TypeSafeMatcher<int> payloadLengthMatcher;
+      private string payloadLengthMatcherFailureDescription;
 
       public HeaderMatcher HeaderMatcher
       {
@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          set => footersMatcher = value;
       }
 
-      public TypeSafeMatcher<Int32> PayloadLengthMatcher
+      public TypeSafeMatcher<int> PayloadLengthMatcher
       {
          get => payloadLengthMatcher;
          set => payloadLengthMatcher = value;

@@ -25,17 +25,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.BooleanTrue;
 
-      public override Type DecodesType => typeof(Boolean);
+      public override Type DecodesType => typeof(bool);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-        return true;
-      }
+      public override object ReadValue(IProtonBuffer buffer, IDecoderState state) => true;
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         return true;
-      }
+      public override object ReadValue(Stream stream, IStreamDecoderState state) => true;
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {

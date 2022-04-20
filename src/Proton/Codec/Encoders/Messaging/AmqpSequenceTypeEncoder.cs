@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          long endIndex = buffer.WriteOffset;
          long writeSize = endIndex - startIndex - sizeof(int);
 
-         if (writeSize > Int32.MaxValue)
+         if (writeSize > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException("Cannot encode given array, encoded size to large: " + writeSize);
          }
@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          for (int i = 0; i < values.Length; ++i)
          {
             AmqpSequence sequence = (AmqpSequence)values.GetValue(i);
-            elements[i] = (IList)sequence.Value;
+            elements[i] = sequence.Value;
          }
 
          ITypeEncoder entryEncoder = state.Encoder.LookupTypeEncoder(typeof(IList));

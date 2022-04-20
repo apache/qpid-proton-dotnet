@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// Limit capcity to a value that might still allow for a non-composite
       /// buffer copy of this buffer to be made if requested.
       /// </summary>
-      private const long MAX_CAPACITY = Int64.MaxValue;
+      private const long MAX_CAPACITY = long.MaxValue;
 
       private static readonly IProtonBuffer[] EMPTY_BUFFER_ARRAY = Array.Empty<IProtonBuffer>();
 
@@ -308,7 +308,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Split(long offset)
       {
-         if (offset > Int32.MaxValue)
+         if (offset > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException(nameof(offset), "Proton byte buffer cannot exceed Int32.MaxValue bytes in capacity");
          }

@@ -83,9 +83,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                return remoteSource.DistributionMode.ToString() switch
                {
-                  "MOVE" => (DistributionMode)(cachedDistributionMode = Client.DistributionMode.Move),
-                  "COPY" => (DistributionMode)(cachedDistributionMode = Client.DistributionMode.Copy),
-                  _ => (DistributionMode)(cachedDistributionMode = Client.DistributionMode.None),
+                  "MOVE" => (DistributionMode)(cachedDistributionMode = DistributionMode.Move),
+                  "COPY" => (DistributionMode)(cachedDistributionMode = DistributionMode.Copy),
+                  _ => (DistributionMode)(cachedDistributionMode = DistributionMode.None),
                };
             }
 

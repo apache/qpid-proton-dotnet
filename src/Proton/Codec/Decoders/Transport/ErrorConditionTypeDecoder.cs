@@ -81,7 +81,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          }
 
          Symbol condition = null;
-         String description = null;
+         string description = null;
          IDictionary<Symbol, object> info = null;
 
          for (int index = 0; index < count; ++index)
@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          }
 
          Symbol condition = null;
-         String description = null;
+         string description = null;
          IDictionary<Symbol, object> info = null;
 
          for (int index = 0; index < count; ++index)

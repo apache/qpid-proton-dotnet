@@ -30,12 +30,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
       /// <summary>
       /// Default max frame size value used by this engine SASL driver if not otherwise configured.
       /// </summary>
-      public readonly static uint DEFAULT_MAX_SASL_FRAME_SIZE = 4096;
+      public static readonly uint DEFAULT_MAX_SASL_FRAME_SIZE = 4096;
 
       /// <summary>
       /// The specification define lower bound for SASL frame size.
       /// </summary>
-      private readonly static uint MIN_MAX_SASL_FRAME_SIZE = 512;
+      private static readonly uint MIN_MAX_SASL_FRAME_SIZE = 512;
 
       private readonly ProtonSaslHandler handler;
       private readonly ProtonEngine engine;
@@ -64,13 +64,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
                {
                   throw new ArgumentOutOfRangeException("Cannot set a max frame size lower than: " + MIN_MAX_SASL_FRAME_SIZE);
                }
-               else if (value > Int32.MaxValue)
+               else if (value > int.MaxValue)
                {
-                  throw new ArgumentOutOfRangeException("Cannot set a max frame size larger than: " + Int32.MaxValue);
+                  throw new ArgumentOutOfRangeException("Cannot set a max frame size larger than: " + int.MaxValue);
                }
                else
                {
-                  this.maxFrameSize = value;
+                  maxFrameSize = value;
                }
             }
             else

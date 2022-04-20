@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public sealed class BeginInjectAction : AbstractPerformativeInjectAction<Begin>
    {
-      private static readonly uint DEFAULT_WINDOW_SIZE = Int32.MaxValue;
+      private static readonly uint DEFAULT_WINDOW_SIZE = int.MaxValue;
 
       private readonly Begin begin = new Begin()
       {
@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public BeginInjectAction WithOfferedCapabilities(params String[] offeredCapabilities)
+      public BeginInjectAction WithOfferedCapabilities(params string[] offeredCapabilities)
       {
          begin.OfferedCapabilities = TypeMapper.ToSymbolArray(offeredCapabilities);
          return this;
@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public BeginInjectAction WithDesiredCapabilities(params String[] desiredCapabilities)
+      public BeginInjectAction WithDesiredCapabilities(params string[] desiredCapabilities)
       {
          begin.DesiredCapabilities = TypeMapper.ToSymbolArray(desiredCapabilities);
          return this;

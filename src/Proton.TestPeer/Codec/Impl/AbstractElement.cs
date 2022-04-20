@@ -106,9 +106,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return elt;
       }
 
-      public override String ToString()
+      public override string ToString()
       {
-         return String.Format("{0}[{1:X}][parent={2:X}, prev={3:X}, next={4:X}]", this.GetType().Name,
+         return string.Format("{0}[{1:X}][parent={2:X}, prev={3:X}, next={4:X}]", GetType().Name,
                               RuntimeHelpers.GetHashCode(this),
                               RuntimeHelpers.GetHashCode(Parent),
                               RuntimeHelpers.GetHashCode(Prev),

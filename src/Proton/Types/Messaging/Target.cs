@@ -70,7 +70,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public Symbol[] Capabilities { get; set; }
 
-      public new String ToString()
+      public new string ToString()
       {
          return "Target{" +
                 "address='" + Address + '\'' +

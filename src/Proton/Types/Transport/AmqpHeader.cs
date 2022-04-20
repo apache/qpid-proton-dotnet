@@ -135,7 +135,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          return result;
       }
 
-      public override bool Equals(Object other)
+      public override bool Equals(object other)
       {
          if (other != null && other.GetType() == GetType())
          {
@@ -180,7 +180,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          for (int i = 0; i < buffer.ReadableBytes; ++i)
          {
             char value = (char)buffer.GetByte(i);
-            if (Char.IsLetter(value))
+            if (char.IsLetter(value))
             {
                builder.Append(value);
             }
@@ -321,7 +321,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       {
          if (value != 1)
          {
-            throw new ArgumentOutOfRangeException(String.Format(
+            throw new ArgumentOutOfRangeException(string.Format(
                 "Invalid Major version specified {0} : expected {1}", value, 1));
          }
       }
@@ -330,7 +330,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       {
          if (value != 0)
          {
-            throw new ArgumentOutOfRangeException(String.Format(
+            throw new ArgumentOutOfRangeException(string.Format(
                 "Invalid Minor version specified {0} : expected {1}", value, 0));
          }
       }
@@ -339,7 +339,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       {
          if (value != 0)
          {
-            throw new ArgumentOutOfRangeException(String.Format(
+            throw new ArgumentOutOfRangeException(string.Format(
                 "Invalid revision specified {0} : expected {1}", value, 0));
          }
       }

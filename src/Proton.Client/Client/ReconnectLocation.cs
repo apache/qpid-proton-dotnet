@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client
    {
       public ReconnectLocation(string host, int port)
       {
-         if (String.IsNullOrEmpty(host))
+         if (string.IsNullOrEmpty(host))
          {
             throw new ArgumentException("Remote host value cannot be null or empty");
          }

@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          for (int i = 0; i < count; ++i)
          {
-            Object described = decoder.ReadValue(buffer, state);
+            object described = decoder.ReadValue(buffer, state);
             result[i] = new UnknownDescribedType(descriptor, described);
          }
 
@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          for (int i = 0; i < count; ++i)
          {
-            Object described = decoder.ReadValue(stream, state);
+            object described = decoder.ReadValue(stream, state);
             result[i] = new UnknownDescribedType(descriptor, described);
          }
 

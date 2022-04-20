@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// Creates a selector instance from the given enumeration of SASL mechanism names.
       /// </summary>
       /// <param name="allowed">An enumeration of SASL mechanism names</param>
-      public SaslMechanismSelector(IEnumerable<String> allowed)
+      public SaslMechanismSelector(IEnumerable<string> allowed)
       {
          this.allowedMechanisms = allowed != null ? StringUtils.ToSymbolSet(allowed) : new HashSet<Symbol>();
       }

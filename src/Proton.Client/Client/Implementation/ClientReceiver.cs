@@ -268,7 +268,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             if (receiver.RemoteTerminus != null)
             {
-               remoteTarget = new ClientRemoteTarget((Types.Messaging.Target)receiver.RemoteTerminus);
+               remoteTarget = new ClientRemoteTarget((Target)receiver.RemoteTerminus);
             }
 
             ReplenishCreditIfNeeded();
@@ -329,7 +329,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      private void HandleEngineShutdown(Engine.IEngine engine)
+      private void HandleEngineShutdown(IEngine engine)
       {
          if (!IsDynamic && !session.ProtonSession.Engine.IsShutdown)
          {
@@ -383,7 +383,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (delivery.DefaultDeliveryState == null)
          {
-            delivery.DefaultDeliveryState = Types.Messaging.Released.Instance;
+            delivery.DefaultDeliveryState = Released.Instance;
          }
 
          if (!delivery.IsPartial)

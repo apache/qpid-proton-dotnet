@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Client.Transport
       /// <returns>The server name to use when performing the handshake</returns>
       public static string SelectServerName(this SslOptions options, string remoteHost)
       {
-         if (String.IsNullOrEmpty(options.ServerNameOverride))
+         if (string.IsNullOrEmpty(options.ServerNameOverride))
          {
             return remoteHost;
          }

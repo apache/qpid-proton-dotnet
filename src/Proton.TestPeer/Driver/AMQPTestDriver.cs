@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Security;
@@ -36,7 +35,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    public class AMQPTestDriver : IFrameHandler
    {
       private readonly Mutex mutex = new Mutex();
-      private readonly String driverName;
+      private readonly string driverName;
       private readonly FrameDecoder frameParser;
       private readonly FrameEncoder frameEncoder;
       private readonly DriverTaskScheduler scheduler;
@@ -59,8 +58,8 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       private volatile uint saslPerformativeCount;
 
-      private uint inboundMaxFrameSize = UInt32.MaxValue;
-      private uint outboundMaxFrameSize = UInt32.MaxValue;
+      private uint inboundMaxFrameSize = uint.MaxValue;
+      private uint outboundMaxFrameSize = uint.MaxValue;
 
       private readonly ILoggerFactory loggerFactory;
       private readonly ILogger<AMQPTestDriver> logger;
@@ -193,7 +192,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// Throw an exception from processing incoming data which should be handled by the peer under test.
       /// </summary>
       /// <param name="message">The message used to create the assertion error</param>
-      public void SignalFailure(String message)
+      public void SignalFailure(string message)
       {
          SignalFailure(new AssertionError(message));
       }

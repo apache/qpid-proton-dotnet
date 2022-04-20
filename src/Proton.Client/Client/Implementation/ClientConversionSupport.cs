@@ -96,9 +96,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
-      public static Dictionary<string, Object> ToStringKeyedMap<V>(IEnumerable<KeyValuePair<Symbol, V>> symbolMap)
+      public static Dictionary<string, object> ToStringKeyedMap<V>(IEnumerable<KeyValuePair<Symbol, V>> symbolMap)
       {
-         Dictionary<string, Object> result;
+         Dictionary<string, object> result;
 
          if (symbolMap != null)
          {

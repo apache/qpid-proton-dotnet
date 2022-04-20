@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private bool remotelySettled;
 
       private ProtonAttachments attachments;
-      private Object linkedResource;
+      private object linkedResource;
 
       private Action<IOutgoingDelivery> deliveryUpdatedEventHandler = null;
 
@@ -81,13 +81,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                throw new InvalidOperationException("Cannot change delivery tag once Delivery has sent Transfer frames");
             }
 
-            if (this.deliveryTag != null)
+            if (deliveryTag != null)
             {
-               this.deliveryTag.Release();
-               this.deliveryTag = null;
+               deliveryTag.Release();
+               deliveryTag = null;
             }
 
-            this.deliveryTag = value;
+            deliveryTag = value;
          }
       }
 
@@ -115,13 +115,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                throw new InvalidOperationException("Cannot change delivery tag once Delivery has sent Transfer frames");
             }
 
-            if (this.deliveryTag != null)
+            if (deliveryTag != null)
             {
-               this.deliveryTag.Release();
-               this.deliveryTag = null;
+               deliveryTag.Release();
+               deliveryTag = null;
             }
 
-            this.deliveryTag = new DeliveryTag(value);
+            deliveryTag = new DeliveryTag(value);
          }
       }
 
@@ -173,8 +173,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          IDeliveryState oldState = localState;
 
-         this.locallySettled = settled;
-         this.localState = state;
+         locallySettled = settled;
+         localState = state;
 
          // If no transfers initiated yet we just store the state and transmit in the first transfer
          // and if no work actually requested we don't emit a useless frame.  After complete send we
@@ -256,7 +256,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public IOutgoingDelivery DeliveryStateUpdatedHandler(Action<IOutgoingDelivery> handler)
       {
-         this.deliveryUpdatedEventHandler = handler;
+         deliveryUpdatedEventHandler = handler;
          return this;
       }
 
@@ -287,13 +287,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal ProtonOutgoingDelivery LocallySettled()
       {
-         this.locallySettled = true;
+         locallySettled = true;
          return this;
       }
 
       internal ProtonOutgoingDelivery RemotelySettled()
       {
-         this.remotelySettled = true;
+         remotelySettled = true;
          return this;
       }
 
@@ -305,7 +305,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal ProtonOutgoingDelivery MarkComplete()
       {
-         this.complete = true;
+         complete = true;
          return this;
       }
 

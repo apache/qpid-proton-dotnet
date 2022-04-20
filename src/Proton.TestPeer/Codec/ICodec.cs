@@ -100,7 +100,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       void PutSymbol(Symbol symbol);
 
-      void PutObject(Object o);
+      void PutObject(object o);
 
       void PutPrimitiveMap(IDictionary map);
 
@@ -158,11 +158,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec
 
       Binary GetBinary();
 
-      String GetString();
+      string GetString();
 
       Symbol GetSymbol();
 
-      Object GetObject();
+      object GetObject();
 
       IDictionary GetPrimitiveMap();
 

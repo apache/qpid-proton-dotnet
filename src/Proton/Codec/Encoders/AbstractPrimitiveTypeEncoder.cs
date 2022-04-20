@@ -80,7 +80,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          long endIndex = buffer.WriteOffset;
          long writeSize = endIndex - startIndex - sizeof(int);
 
-         if (writeSize > Int32.MaxValue)
+         if (writeSize > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException("Cannot encode given array, encoded size to large: " + writeSize);
          }

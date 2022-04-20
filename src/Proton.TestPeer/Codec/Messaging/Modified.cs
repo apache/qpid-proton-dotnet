@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
          UndeliverableHere = undeliverableHere;
       }
 
-      public Modified(Object described) : base(Enum.GetNames(typeof(ModifiedField)).Length, (IList)described)
+      public Modified(object described) : base(Enum.GetNames(typeof(ModifiedField)).Length, (IList)described)
       {
       }
 
@@ -76,10 +76,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
       public IDictionary MessageAnnotations
       {
          get => (IDictionary)List[((int)ModifiedField.MESSAGE_ANNOTATIONS)];
-         set => List[((int)ModifiedField.MESSAGE_ANNOTATIONS)] = (IDictionary)value;
+         set => List[((int)ModifiedField.MESSAGE_ANNOTATIONS)] = value;
       }
 
-      public override bool Equals(Object obj)
+      public override bool Equals(object obj)
       {
          if (obj == this)
          {

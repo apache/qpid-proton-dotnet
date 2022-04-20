@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.Boolean;
 
-      public override Type DecodesType => typeof(Boolean);
+      public override Type DecodesType => typeof(bool);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {

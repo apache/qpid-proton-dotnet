@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
                throw new SaslException("Server challenge '" + serverFirstMessage + "' cannot be parsed, cannot find iteration count");
             }
 
-            String iterCountString = parts[2].Substring(2);
+            string iterCountString = parts[2].Substring(2);
             iterationCount = Convert.ToInt32(iterCountString);
             if (iterationCount <= 0)
             {
@@ -150,10 +150,10 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             byte[] passwordBytes = Encoding.UTF8.GetBytes(DoSaslPrep(new string(credentials.Password)));
             byte[] saltedPassword = GenerateSaltedPassword(passwordBytes);
 
-            String clientFinalMessageWithoutProof =
+            string clientFinalMessageWithoutProof =
                     "c=" + Convert.ToBase64String(Encoding.ASCII.GetBytes(GS2_HEADER)) + ",r=" + serverNonce;
 
-            String authMessage = clientFirstMessageBare
+            string authMessage = clientFirstMessageBare
                     + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
 
             byte[] clientKey = ComputeHmac(saltedPassword, "Client Key");
@@ -170,7 +170,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             byte[] serverKey = ComputeHmac(saltedPassword, "Server Key");
             serverSignature = ComputeHmac(serverKey, authMessage);
 
-            String finalMessageWithProof = clientFinalMessageWithoutProof
+            string finalMessageWithProof = clientFinalMessageWithoutProof
                     + ",p=" + Convert.ToBase64String(clientProof);
 
             return Encoding.ASCII.GetBytes(finalMessageWithProof);
@@ -207,7 +207,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             throw new SaslException(ex.Message, ex);
          }
 
-         if (!Enumerable.SequenceEqual(this.serverSignature, localServerSignature))
+         if (!Enumerable.SequenceEqual(serverSignature, localServerSignature))
          {
             throw new SaslException("Server signature did not match");
          }

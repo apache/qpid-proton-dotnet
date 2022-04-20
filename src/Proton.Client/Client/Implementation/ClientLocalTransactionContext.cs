@@ -44,14 +44,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly string DISCHARGE_FUTURE_NAME = "Discharge:Future";
       private readonly string START_TRANSACTION_MARKER = "Transaction:Start";
 
-      private readonly AtomicInteger coordinatorCounter = new AtomicInteger();
+      private readonly AtomicInteger coordinatorCounter = new();
       private readonly ClientSession session;
 
-      private Engine.ITransaction<Engine.ITransactionController> currentTxn;
-      private Engine.ITransactionController txnController;
+      private ITransaction<ITransactionController> currentTxn;
+      private ITransactionController txnController;
 
-      private Types.Transactions.TransactionalState cachedSenderOutcome;
-      private Types.Transactions.TransactionalState cachedReceiverOutcome;
+      private TransactionalState cachedSenderOutcome;
+      private TransactionalState cachedReceiverOutcome;
 
       public ClientLocalTransactionContext(ClientSession session)
       {

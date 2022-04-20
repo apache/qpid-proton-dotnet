@@ -166,9 +166,9 @@ namespace Apache.Qpid.Proton.Client.Transport
 
          channel = new Socket(remote.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-         if (!String.IsNullOrEmpty(options.LocalAddress) || options.LocalPort > 0)
+         if (!string.IsNullOrEmpty(options.LocalAddress) || options.LocalPort > 0)
          {
-            IPAddress localAddress = String.IsNullOrEmpty(options.LocalAddress) ?
+            IPAddress localAddress = string.IsNullOrEmpty(options.LocalAddress) ?
                IPAddress.Any : ResolveIPAddress(options.LocalAddress);
             int localPort = options.LocalPort > 0 ? options.LocalPort : 0;
 

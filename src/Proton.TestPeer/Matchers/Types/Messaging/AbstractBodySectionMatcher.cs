@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections;
 using System.IO;
 using Apache.Qpid.Proton.Test.Driver.Codec;
 using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
@@ -33,7 +32,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
    {
       private readonly Symbol descriptorSymbol;
       private readonly ulong descriptorCode;
-      private readonly Object expectedValue;
+      private readonly object expectedValue;
       private readonly bool permitTrailingBytes;
 
       private IDescribedType decodedDescribedType;

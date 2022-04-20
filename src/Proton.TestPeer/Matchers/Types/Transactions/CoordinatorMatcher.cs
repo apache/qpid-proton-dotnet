@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transactions
          return WithCapabilities(Is.EqualTo(capabilities));
       }
 
-      public virtual CoordinatorMatcher WithCapabilities(params String[] capabilities)
+      public virtual CoordinatorMatcher WithCapabilities(params string[] capabilities)
       {
          return WithCapabilities(Is.EqualTo(TypeMapper.ToSymbolArray(capabilities)));
       }

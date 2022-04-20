@@ -29,11 +29,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Exceptions
       {
       }
 
-      public ScriptConfigurationError(String message) : base(message)
+      public ScriptConfigurationError(string message) : base(message)
       {
       }
 
-      public ScriptConfigurationError(String message, Exception cause) : base(message, cause)
+      public ScriptConfigurationError(string message, Exception cause) : base(message, cause)
       {
       }
    }

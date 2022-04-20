@@ -180,7 +180,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (errorCondition?.Condition != null)
          {
-            String message = ExtractErrorMessage(errorCondition);
+            string message = ExtractErrorMessage(errorCondition);
             if (message == null)
             {
                message = "Session remotely closed without explanation";

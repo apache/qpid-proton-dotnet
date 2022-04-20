@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             try
             {
                engine.CheckFailed("Detached called on already failed connection");
-               this.TrySyncLocalStateWithRemote();
+               TrySyncLocalStateWithRemote();
             }
             finally
             {
@@ -527,7 +527,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          };
       }
 
-      protected void CheckNotOpened(String errorMessage)
+      protected void CheckNotOpened(string errorMessage)
       {
          if (localState > LinkState.Idle)
          {
@@ -535,7 +535,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      protected void CheckNotClosed(String errorMessage)
+      protected void CheckNotClosed(string errorMessage)
       {
          if (localState > LinkState.Active)
          {
@@ -543,7 +543,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      void TrySyncLocalStateWithRemote()
+      protected void TrySyncLocalStateWithRemote()
       {
          switch (localState)
          {

@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
          ICodec data = CodecFactory.Create();
          long decoded = data.Decode(receivedBytes);
 
-         if (decoded > UInt32.MaxValue)
+         if (decoded > uint.MaxValue)
          {
             throw new InvalidOperationException("Decoded more bytes than Binary supports holding");
          }
@@ -80,7 +80,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       private void VerifyReceivedDescribedType(IDescribedType decodedDescribedType)
       {
-         Object descriptor = decodedDescribedType.Descriptor;
+         object descriptor = decodedDescribedType.Descriptor;
          if (!(symbolicDescriptor.Equals(descriptor) || numericDescriptor.Equals(descriptor)))
          {
             throw new ArgumentException(
@@ -96,7 +96,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       /// particular section type.
       /// </summary>
       /// <param name="describedObject">The object conveyed in the described section type</param>
-      protected abstract void VerifyReceivedDescribedObject(Object describedObject);
+      protected abstract void VerifyReceivedDescribedObject(object describedObject);
 
       /// <summary>
       /// Utility method for use by sub-classes that expect field-based sections, i.e lists or maps.

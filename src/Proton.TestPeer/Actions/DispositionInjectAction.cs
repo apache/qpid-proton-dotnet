@@ -124,7 +124,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return action.WithState(new Rejected());
          }
 
-         public DispositionInjectAction Rejected(String condition, String description)
+         public DispositionInjectAction Rejected(string condition, string description)
          {
             Rejected rejected = new Rejected
             {
@@ -226,7 +226,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return WithOutcome(new Rejected());
          }
 
-         public TransactionalStateBuilder WithRejected(String condition, String description)
+         public TransactionalStateBuilder WithRejected(string condition, string description)
          {
             Rejected rejected = new Rejected
             {

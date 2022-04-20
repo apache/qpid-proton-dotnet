@@ -353,7 +353,7 @@ namespace Apache.Qpid.Proton.Codec
       /// </summary>
       /// <param name="value">an instance of the type whose encoder is being looked up</param>
       /// <returns></returns>
-      ITypeEncoder LookupTypeEncoder(Object value);
+      ITypeEncoder LookupTypeEncoder(object value);
 
       /// <summary>
       /// Lookup a Type encoder using Type value of the type to be encoded.

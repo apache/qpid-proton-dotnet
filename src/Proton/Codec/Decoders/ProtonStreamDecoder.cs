@@ -595,7 +595,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public T[] ReadMultiple<T>(Stream stream, IStreamDecoderState state)
       {
-         Object val = ReadObject(stream, state);
+         object val = ReadObject(stream, state);
 
          if (val == null)
          {
@@ -650,7 +650,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                {
                   ulong result = ReadUnsignedLong(stream, state) ?? 255;
 
-                  if (result > 0 && result < Byte.MaxValue && amqpTypeDecoders[(int)result] != null)
+                  if (result > 0 && result < byte.MaxValue && amqpTypeDecoders[(int)result] != null)
                   {
                      return amqpTypeDecoders[(int)result];
                   }
@@ -751,7 +751,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");
       }
 
-      private IStreamDescribedTypeDecoder HandleUnknownDescribedType(in Object descriptor)
+      private IStreamDescribedTypeDecoder HandleUnknownDescribedType(in object descriptor)
       {
          IStreamDescribedTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
          describedTypeDecoders.Add(descriptor, (UnknownDescribedTypeDecoder)typeDecoder);

@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// <summary>
       /// Creates a default version of this exception type.
       /// </summary>
-      public MechanismMismatchException(String[] offered) : base()
+      public MechanismMismatchException(string[] offered) : base()
       {
          OfferedMechanisms = offered;
       }
@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
       /// <param name="message">Description of the error</param>
-      public MechanismMismatchException(string message, String[] offered) : base(message)
+      public MechanismMismatchException(string message, string[] offered) : base(message)
       {
          OfferedMechanisms = offered;
       }
@@ -46,7 +46,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl
       /// </summary>
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
-      public MechanismMismatchException(string message, String[] offered, Exception cause) : base(message, cause)
+      public MechanismMismatchException(string message, string[] offered, Exception cause) : base(message, cause)
       {
          OfferedMechanisms = offered;
       }

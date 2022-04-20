@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Security
 
       protected override Type DescribedTypeClassType => typeof(SaslMechanisms);
 
-      public SaslMechanismsMatcher WithSaslServerMechanisms(params String[] mechanisms)
+      public SaslMechanismsMatcher WithSaslServerMechanisms(params string[] mechanisms)
       {
          return WithSaslServerMechanisms(Is.EqualTo(TypeMapper.ToSymbolArray(mechanisms)));
       }

@@ -48,19 +48,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
       }
 
-      public ErrorCondition(Symbol condition, String description) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
+      public ErrorCondition(Symbol condition, string description) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
       {
          Condition = condition;
          Description = description;
       }
 
-      public ErrorCondition(String condition, String description) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
+      public ErrorCondition(string condition, string description) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
       {
          Condition = new Symbol(condition);
          Description = description;
       }
 
-      public ErrorCondition(Symbol condition, String description, IDictionary<Symbol, object> info) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
+      public ErrorCondition(Symbol condition, string description, IDictionary<Symbol, object> info) : base(Enum.GetNames(typeof(ErrorConditionField)).Length)
       {
          Condition = condition;
          Description = description;

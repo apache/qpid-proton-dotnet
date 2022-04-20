@@ -56,25 +56,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public DetachInjectAction WithErrorCondition(String condition, String description)
+      public DetachInjectAction WithErrorCondition(string condition, string description)
       {
          detach.Error = new ErrorCondition(new Symbol(condition), description);
          return this;
       }
 
-      public DetachInjectAction WithErrorCondition(Symbol condition, String description)
+      public DetachInjectAction WithErrorCondition(Symbol condition, string description)
       {
          detach.Error = new ErrorCondition(condition, description);
          return this;
       }
 
-      public DetachInjectAction WithErrorCondition(String condition, String description, IDictionary<string, object> info)
+      public DetachInjectAction WithErrorCondition(string condition, string description, IDictionary<string, object> info)
       {
          detach.Error = new ErrorCondition(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(info));
          return this;
       }
 
-      public DetachInjectAction WithErrorCondition(Symbol condition, String description, IDictionary<Symbol, object> info)
+      public DetachInjectAction WithErrorCondition(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
          detach.Error = new ErrorCondition(condition, description, info);
          return this;

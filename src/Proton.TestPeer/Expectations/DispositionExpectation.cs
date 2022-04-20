@@ -18,7 +18,6 @@
 using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
-using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
 using Apache.Qpid.Proton.Test.Driver.Exceptions;
 using Apache.Qpid.Proton.Test.Driver.Matchers;
@@ -316,7 +315,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return this;
       }
 
-      public DispositionTransactionalStateMatcher WithRejected(String condition, String description)
+      public DispositionTransactionalStateMatcher WithRejected(string condition, string description)
       {
          base.WithOutcome(new Rejected(new ErrorCondition(new Symbol(condition), description)));
          return this;

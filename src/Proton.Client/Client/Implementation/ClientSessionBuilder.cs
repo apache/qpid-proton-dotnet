@@ -49,14 +49,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return new ClientSession(connection, options, sessionId, protonSession);
       }
 
-    public ClientStreamSession StreamSession(SessionOptions sessionOptions = null)
-     {
+      public ClientStreamSession StreamSession(SessionOptions sessionOptions = null)
+      {
          SessionOptions options = sessionOptions ?? GetOrCreateDefaultSessionOptions();
          string sessionId = NextSessionId();
          Engine.ISession protonSession = CreateSession(connection.ProtonConnection, options);
 
-        return new ClientStreamSession(connection, options, sessionId, protonSession);
-    }
+         return new ClientStreamSession(connection, options, sessionId, protonSession);
+      }
 
       public static Engine.ISession RecreateSession(ClientConnection connection, SessionOptions options)
       {
@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return session;
       }
 
-      private String NextSessionId()
+      private string NextSessionId()
       {
          return connection.ConnectionId + ":" + sessionCounter.IncrementAndGet();
       }

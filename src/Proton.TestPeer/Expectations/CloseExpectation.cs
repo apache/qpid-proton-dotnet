@@ -70,22 +70,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return WithError(Is.EqualTo(error));
       }
 
-      public CloseExpectation WithError(String condition, String description)
+      public CloseExpectation WithError(string condition, string description)
       {
          return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description)));
       }
 
-      public CloseExpectation WithError(String condition, String description, IDictionary<string, object> info)
+      public CloseExpectation WithError(string condition, string description, IDictionary<string, object> info)
       {
          return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(info))));
       }
 
-      public CloseExpectation WithError(Symbol condition, String description)
+      public CloseExpectation WithError(Symbol condition, string description)
       {
          return WithError(Is.EqualTo(new ErrorCondition(condition, description)));
       }
 
-      public CloseExpectation WithError(Symbol condition, String description, IDictionary<Symbol, object> info)
+      public CloseExpectation WithError(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
          return WithError(Is.EqualTo(new ErrorCondition(condition, description, info)));
       }

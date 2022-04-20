@@ -25,16 +25,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override EncodingCodes EncodingCode => EncodingCodes.Char;
 
-      public override Type DecodesType => typeof(Char);
+      public override Type DecodesType => typeof(char);
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-         return (char) buffer.ReadInt();
+         return (char)buffer.ReadInt();
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         return (char) ProtonStreamReadUtils.ReadInt(stream);
+         return (char)ProtonStreamReadUtils.ReadInt(stream);
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

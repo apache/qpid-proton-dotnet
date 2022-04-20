@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// Default max cpacity based on maximum array size limit as this
       /// buffer is backed by a byte array.
       /// </summary>
-      public static readonly int DefaultMaximumCapacity = Int32.MaxValue;
+      public static readonly int DefaultMaximumCapacity = int.MaxValue;
 
       private byte[] array;
 
@@ -102,7 +102,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// size determines that largest the buffer can ever be.
       /// </summary>
       /// <param name="backingArray">The actual byte array that backs this buffer</param>
-      public ProtonByteBuffer(byte[] backingArray) : this(backingArray, 0, Int32.MaxValue)
+      public ProtonByteBuffer(byte[] backingArray) : this(backingArray, 0, int.MaxValue)
       {
       }
 
@@ -240,7 +240,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       public IProtonBuffer Split(long offset)
       {
-         if (offset > Int32.MaxValue)
+         if (offset > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException(nameof(offset), "Proton byte buffer cannot exceed Int32.MaxValue bytes in capacity");
          }

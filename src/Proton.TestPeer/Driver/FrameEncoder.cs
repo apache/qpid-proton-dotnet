@@ -28,8 +28,8 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public sealed class FrameEncoder
    {
-      public static readonly byte AMQP_FRAME_TYPE = (byte)0;
-      public static readonly byte SASL_FRAME_TYPE = (byte)1;
+      public static readonly byte AMQP_FRAME_TYPE = 0;
+      public static readonly byte SASL_FRAME_TYPE = 1;
 
       private static readonly uint AMQP_PERFORMATIVE_PAD = 512;
 
@@ -62,7 +62,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          uint outputBufferSize = AMQP_PERFORMATIVE_PAD + (payload != null ? (uint)payload.Length : 0u);
          uint performativeSize = WritePerformative(stream, performative, payload, maxFrameSize, onPayloadTooLarge);
-         uint capacity = maxFrameSize > 0 ? maxFrameSize - performativeSize : Int32.MaxValue;
+         uint capacity = maxFrameSize > 0 ? maxFrameSize - performativeSize : int.MaxValue;
          uint payloadSize = (uint)Math.Min(payload == null ? 0 : payload.Length, capacity);
 
          if (payloadSize > 0)
@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          // Write the frame header and then reset to start for output.
          stream.WriteUnsignedInt((uint)(stream.Length - startIndex));
          stream.WriteByte((byte)FRAME_DOFF_SIZE);
-         stream.WriteByte((byte)frameType);
+         stream.WriteByte(frameType);
          stream.WriteUnsignedShort(channel);
 
          stream.Seek(startIndex, SeekOrigin.Begin);
@@ -103,7 +103,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
          if (performativeSize != encodedSize)
          {
-            throw new InvalidOperationException(String.Format(
+            throw new InvalidOperationException(string.Format(
                 "Unable to encode performative {0} of {1} bytes into provided proton buffer, only wrote {2} bytes",
                 performative, performativeSize, encodedSize));
          }

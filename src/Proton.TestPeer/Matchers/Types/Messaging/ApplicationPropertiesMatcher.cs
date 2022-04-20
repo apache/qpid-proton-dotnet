@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       public override ApplicationPropertiesMatcher WithEntry(object key, IMatcher m)
       {
-         if (key is not String)
+         if (key is not string)
          {
             throw new ArgumentException("ApplicationProperties maps must use non-null String keys");
          }

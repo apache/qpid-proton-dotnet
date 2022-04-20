@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 {
    public sealed class AMQPHeader
    {
-      static readonly byte[] PREFIX = new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P' };
+      internal static readonly byte[] PREFIX = new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P' };
 
       public static readonly int PROTOCOL_ID_INDEX = 4;
       public static readonly int MAJOR_VERSION_INDEX = 5;
@@ -146,7 +146,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != PREFIX[0])
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid header byte(1) specified {0} : expected {1}", value, PREFIX[0]));
          }
       }
@@ -155,7 +155,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != PREFIX[1])
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid header byte(2) specified {0} : expected {1}", value, PREFIX[1]));
          }
       }
@@ -164,7 +164,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != PREFIX[2])
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid header byte(3) specified {0} : expected {1}", value, PREFIX[2]));
          }
       }
@@ -173,7 +173,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != PREFIX[3])
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid header byte(4) specified {0} : expected {1}", value, PREFIX[3]));
          }
       }
@@ -182,7 +182,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != AMQP_PROTOCOL_ID && value != SASL_PROTOCOL_ID)
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid protocol Id specified {0} : expected one of {1} or {2}",
                 value, AMQP_PROTOCOL_ID, SASL_PROTOCOL_ID));
          }
@@ -192,7 +192,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != 1)
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid Major version specified {0} : expected {1}", value, 1));
          }
       }
@@ -201,7 +201,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != 0)
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid Minor version specified {0} : expected {1}", value, 0));
          }
       }
@@ -210,7 +210,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       {
          if (value != 0)
          {
-            throw new ArgumentException(String.Format(
+            throw new ArgumentException(string.Format(
                 "Invalid revision specified {0} : expected {1}", value, 0));
          }
       }

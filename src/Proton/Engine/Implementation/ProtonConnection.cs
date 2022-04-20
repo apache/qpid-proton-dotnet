@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          // This configures the default for the client which could later be made configurable
          // by adding an option in EngineConfiguration but for now this is forced set here.
-         this.localOpen.MaxFrameSize = ProtonConstants.DefaultMaxAmqpFrameSize;
+         localOpen.MaxFrameSize = ProtonConstants.DefaultMaxAmqpFrameSize;
       }
 
       public override IConnection Open()
@@ -631,7 +631,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return this;
       }
 
-      private void CheckNotOpened(String errorMessage)
+      private void CheckNotOpened(string errorMessage)
       {
          if (localState > ConnectionState.Idle)
          {
@@ -639,7 +639,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
       }
 
-      private void CheckConnectionClosed(String errorMessage)
+      private void CheckConnectionClosed(string errorMessage)
       {
          if (IsLocallyClosed || IsRemotelyClosed)
          {

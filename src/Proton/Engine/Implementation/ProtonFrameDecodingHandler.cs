@@ -35,12 +35,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       /// <summary>
       /// Frame type indicator for AMQP protocol frames.
       /// </summary>
-      public static readonly byte AMQP_FRAME_TYPE = (byte)0;
+      public static readonly byte AMQP_FRAME_TYPE = 0;
 
       /// <summary>
       /// Frame type indicator for SASL protocol frames.
       /// </summary>
-      public static readonly byte SASL_FRAME_TYPE = (byte)1;
+      public static readonly byte SASL_FRAME_TYPE = 1;
 
       /// <summary>
       /// The specified encoding size for the frame size value of each encoded frame.
@@ -206,7 +206,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                catch (ArgumentException iae)
                {
                   throw new MalformedAMQPHeaderException(
-                      String.Format("Error on validation of header byte {0} with value of {1}", headerByte, nextByte), iae);
+                      string.Format("Error on validation of header byte {0} with value of {1}", headerByte, nextByte), iae);
                }
                headerBytes[headerByte++] = nextByte;
             }
@@ -287,13 +287,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if ((uint)frameSize < MinFrameSizeValue)
             {
-               throw new FrameDecodingException(String.Format(
+               throw new FrameDecodingException(string.Format(
                     "specified frame size {0} smaller than minimum frame header size 8", frameSize));
             }
 
             if ((uint)frameSize > handler.configuration.InboundMaxFrameSize)
             {
-               throw new FrameDecodingException(String.Format(
+               throw new FrameDecodingException(string.Format(
                    "specified frame size {0} larger than maximum frame size {1}",
                    (uint)frameSize, handler.configuration.InboundMaxFrameSize));
             }
@@ -376,7 +376,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             long frameBodySize = frameSize - dataOffset;
 
             IProtonBuffer payload = null;
-            Object val;
+            object val;
 
             if (frameBodySize > 0)
             {
@@ -427,7 +427,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             }
             else
             {
-               throw new FrameDecodingException(String.Format("unknown frame type: {0}", type));
+               throw new FrameDecodingException(string.Format("unknown frame type: {0}", type));
             }
          }
 
@@ -435,13 +435,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             if (dataOffset < 8)
             {
-               throw new FrameDecodingException(String.Format(
+               throw new FrameDecodingException(string.Format(
                    "specified frame data offset {0} smaller than minimum frame header size {1}", dataOffset, 8));
             }
 
             if (dataOffset > frameSize)
             {
-               throw new FrameDecodingException(String.Format(
+               throw new FrameDecodingException(string.Format(
                    "specified frame data offset {0} larger than the frame size {1}", dataOffset, frameSize));
             }
          }

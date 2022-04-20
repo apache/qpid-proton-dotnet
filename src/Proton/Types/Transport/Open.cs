@@ -42,8 +42,8 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       private string containerId = "";
       private string hostname;
-      private uint maxFrameSize = UInt32.MaxValue;
-      private ushort channelMax = UInt16.MaxValue;
+      private uint maxFrameSize = uint.MaxValue;
+      private ushort channelMax = ushort.MaxValue;
       private uint idleTimeout;
       private Symbol[] outgoingLocales;
       private Symbol[] incomingLocales;

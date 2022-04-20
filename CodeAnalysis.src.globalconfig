@@ -1310,7 +1310,7 @@ dotnet_diagnostic.IDE0001.severity = suggestion
 dotnet_diagnostic.IDE0002.severity = suggestion
 
 # IDE0003: Remove this or Me qualification
-dotnet_diagnostic.IDE0003.severity = suggestion
+dotnet_diagnostic.IDE0003.severity = none
 
 # IDE0004: Remove Unnecessary Cast
 dotnet_diagnostic.IDE0004.severity = suggestion
@@ -1421,10 +1421,10 @@ dotnet_diagnostic.IDE0043.severity = warning
 dotnet_diagnostic.IDE0044.severity = suggestion
 
 # IDE0045: Use conditional expression for assignment
-dotnet_diagnostic.IDE0045.severity = suggestion
+dotnet_diagnostic.IDE0045.severity = silent
 
 # IDE0046: Use conditional expression for return
-dotnet_diagnostic.IDE0046.severity = suggestion
+dotnet_diagnostic.IDE0046.severity = silent
 
 # IDE0047: Remove unnecessary parentheses
 dotnet_diagnostic.IDE0047.severity = silent
@@ -1502,7 +1502,7 @@ dotnet_diagnostic.IDE0073.severity = warning
 dotnet_diagnostic.IDE0074.severity = suggestion
 
 # IDE0075: Simplify conditional expression
-dotnet_diagnostic.IDE0075.severity = silent
+dotnet_diagnostic.IDE0075.severity = none
 
 # IDE0076: Invalid global 'SuppressMessageAttribute'
 dotnet_diagnostic.IDE0076.severity = warning
@@ -1532,7 +1532,7 @@ dotnet_diagnostic.IDE0083.severity = silent
 dotnet_diagnostic.IDE0084.severity = none
 
 # IDE0090: Use 'new(...)'
-dotnet_diagnostic.IDE0090.severity = silent
+dotnet_diagnostic.IDE0090.severity = suggestion
 
 # IDE0100: Remove redundant equality
 dotnet_diagnostic.IDE0100.severity = suggestion

@@ -153,7 +153,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISender> DefaultSenderAsync()
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISender> defaultSender = new TaskCompletionSource<ISender>();
+         TaskCompletionSource<ISender> defaultSender = new();
 
          Execute(() =>
          {
@@ -179,7 +179,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISession> DefaultSessionAsync()
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISession> defaultSession = new TaskCompletionSource<ISession>();
+         TaskCompletionSource<ISession> defaultSession = new();
 
          Execute(() =>
          {
@@ -205,7 +205,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISession> OpenSessionAsync(SessionOptions options = null)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISession> createSession = new TaskCompletionSource<ISession>();
+         TaskCompletionSource<ISession> createSession = new();
 
          Execute(() =>
          {
@@ -232,7 +232,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
-         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IReceiver> createReceiver = new();
 
          Execute(() =>
          {
@@ -258,7 +258,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<IReceiver> OpenDynamicReceiverAsync(ReceiverOptions options = null, IDictionary<string, object> dynamicNodeProperties = null)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IReceiver> createReceiver = new();
 
          Execute(() =>
          {
@@ -285,7 +285,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a receiver with a null address");
-         TaskCompletionSource<IReceiver> createReceiver = new TaskCompletionSource<IReceiver>();
+         TaskCompletionSource<IReceiver> createReceiver = new();
 
          Execute(() =>
          {
@@ -311,7 +311,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<ISender> OpenAnonymousSenderAsync(SenderOptions options = null)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+         TaskCompletionSource<ISender> createSender = new();
 
          Execute(() =>
          {
@@ -338,7 +338,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a sender with a null address");
-         TaskCompletionSource<ISender> createSender = new TaskCompletionSource<ISender>();
+         TaskCompletionSource<ISender> createSender = new();
 
          Execute(() =>
          {
@@ -364,7 +364,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public Task<IStreamReceiver> OpenStreamReceiverAsync(string address, StreamReceiverOptions options = null)
       {
          CheckClosedOrFailed();
-         TaskCompletionSource<IStreamReceiver> createReceiver = new TaskCompletionSource<IStreamReceiver>();
+         TaskCompletionSource<IStreamReceiver> createReceiver = new();
 
          Execute(() =>
          {
@@ -405,7 +405,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(address, "Cannot create a sender with a null address");
-         TaskCompletionSource<IStreamSender> createSender = new TaskCompletionSource<IStreamSender>();
+         TaskCompletionSource<IStreamSender> createSender = new();
 
          Execute(() =>
          {
@@ -447,7 +447,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          Objects.RequireNonNull(message, "Cannot send a null message");
-         TaskCompletionSource<ITracker> result = new TaskCompletionSource<ITracker>();
+         TaskCompletionSource<ITracker> result = new();
 
          DefaultSenderAsync().ContinueWith(sender =>
          {

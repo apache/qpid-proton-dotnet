@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
-using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 {
@@ -46,27 +45,27 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          return WithError(Is.EqualTo(error));
       }
 
-      public DetachMatcher WithError(String condition)
+      public DetachMatcher WithError(string condition)
       {
          return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(Is.NullValue()));
       }
 
-      public DetachMatcher WithError(String condition, String description)
+      public DetachMatcher WithError(string condition, string description)
       {
          return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description));
       }
 
-      public DetachMatcher WithError(String condition, String description, IDictionary<string, object> info)
+      public DetachMatcher WithError(string condition, string description, IDictionary<string, object> info)
       {
          return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description).WithInfo(info));
       }
 
-      public DetachMatcher WithError(Symbol condition, String description)
+      public DetachMatcher WithError(Symbol condition, string description)
       {
          return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description));
       }
 
-      public DetachMatcher WithError(Symbol condition, String description, IDictionary<Symbol, object> info)
+      public DetachMatcher WithError(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
          return WithError(new ErrorConditionMatcher().WithCondition(condition).WithDescription(description).WithInfo(info));
       }

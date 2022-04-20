@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
          set => List[((int)RejectedField.Error)] = value;
       }
 
-      public override bool Equals(Object obj)
+      public override bool Equals(object obj)
       {
          if (obj == this)
          {

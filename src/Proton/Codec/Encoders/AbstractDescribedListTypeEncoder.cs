@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
-         this.WriteType(buffer, state, (T)value);
+         WriteType(buffer, state, (T)value);
       }
 
       public virtual void WriteType(IProtonBuffer buffer, IEncoderState state, T value)
@@ -107,7 +107,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
          // Reserve space for the size and write the count of list elements.
          buffer.EnsureWritable(sizeof(short));
-         buffer.WriteUnsignedByte((byte)0);
+         buffer.WriteUnsignedByte(0);
          buffer.WriteUnsignedByte((byte)elementCount);
 
          // Write the list elements and then compute total size written.
@@ -163,7 +163,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          // Move back and write the size
          long writeSize = buffer.WriteOffset - startIndex - sizeof(int);
 
-         if (writeSize > Int32.MaxValue)
+         if (writeSize > int.MaxValue)
          {
             throw new ArgumentOutOfRangeException("Cannot encode given array, encoded size to large: " + writeSize);
          }

@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #endregion
 
-      private static void Log(string prefix, int connection, int channel, Object performative, IProtonBuffer payload)
+      private static void Log(string prefix, int connection, int channel, object performative, IProtonBuffer payload)
       {
          if (payload == null)
          {
@@ -158,12 +158,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (payload == null)
          {
-            Console.WriteLine(String.Format(
+            Console.WriteLine(string.Format(
                "{0}:[{1}:{2}] {3}", prefix, connection, channel, performative));
          }
          else
          {
-            Console.WriteLine(String.Format(
+            Console.WriteLine(string.Format(
                "{0}:[{1}:{2}] {3} - {4}", prefix, connection, channel, performative, StringUtils.ToQuotedString(payload, PAYLOAD_STRING_LIMIT, true)));
          }
       }

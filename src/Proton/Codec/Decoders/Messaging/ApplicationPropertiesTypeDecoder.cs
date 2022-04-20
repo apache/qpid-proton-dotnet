@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          }
       }
 
-      private static IDictionary<String, Object> ReadMap(IProtonBuffer buffer, IDecoderState state, IMapTypeDecoder mapDecoder)
+      private static IDictionary<string, object> ReadMap(IProtonBuffer buffer, IDecoderState state, IMapTypeDecoder mapDecoder)
       {
          int size = mapDecoder.ReadSize(buffer, state);
          int count = mapDecoder.ReadCount(buffer, state);
@@ -96,8 +96,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          IDictionary<string, object> map = new Dictionary<string, object>(count);
          for (int i = 0; i < count / 2; i++)
          {
-            String key = decoder.ReadString(buffer, state);
-            Object value = decoder.ReadObject(buffer, state);
+            string key = decoder.ReadString(buffer, state);
+            object value = decoder.ReadObject(buffer, state);
 
             map.Add(key, value);
          }
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          }
       }
 
-      private static IDictionary<String, Object> ReadMap(Stream stream, IStreamDecoderState state, IMapTypeDecoder mapDecoder)
+      private static IDictionary<string, object> ReadMap(Stream stream, IStreamDecoderState state, IMapTypeDecoder mapDecoder)
       {
          _ = mapDecoder.ReadSize(stream, state);
          int count = mapDecoder.ReadCount(stream, state);
@@ -161,8 +161,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          IDictionary<string, object> map = new Dictionary<string, object>(count);
          for (int i = 0; i < count / 2; i++)
          {
-            String key = decoder.ReadString(stream, state);
-            Object value = decoder.ReadObject(stream, state);
+            string key = decoder.ReadString(stream, state);
+            object value = decoder.ReadObject(stream, state);
 
             map.Add(key, value);
          }

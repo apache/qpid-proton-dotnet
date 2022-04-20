@@ -594,7 +594,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public T[] ReadMultiple<T>(IProtonBuffer buffer, IDecoderState state)
       {
-         Object val = ReadObject(buffer, state);
+         object val = ReadObject(buffer, state);
 
          if (val == null)
          {
@@ -645,9 +645,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             long readPos = buffer.ReadOffset;
             try
             {
-               ulong result = ReadUnsignedLong(buffer, state) ?? Byte.MaxValue;
+               ulong result = ReadUnsignedLong(buffer, state) ?? byte.MaxValue;
 
-               if (result > 0 && result < Byte.MaxValue && amqpTypeDecoders[(int)result] != null)
+               if (result > 0 && result < byte.MaxValue && amqpTypeDecoders[(int)result] != null)
                {
                   return amqpTypeDecoders[(int)result];
                }
@@ -671,7 +671,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       private ITypeDecoder SlowReadNextTypeDecoder(IProtonBuffer buffer, IDecoderState state)
       {
-         Object descriptor;
+         object descriptor;
          long readPos = buffer.ReadOffset;
 
          try
@@ -745,7 +745,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");
       }
 
-      private IDescribedTypeDecoder HandleUnknownDescribedType(in Object descriptor)
+      private IDescribedTypeDecoder HandleUnknownDescribedType(in object descriptor)
       {
          UnknownDescribedTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
          describedTypeDecoders.Add(descriptor, typeDecoder);

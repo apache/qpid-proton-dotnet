@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       protected readonly ProtonEngine engine;
 
       private ProtonAttachments attachments;
-      private Object linkedResource;
+      private object linkedResource;
 
       private ErrorCondition localError;
       private ErrorCondition remoteError;

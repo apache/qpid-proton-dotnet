@@ -75,22 +75,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return WithError(Is.EqualTo(error));
       }
 
-      public EndExpectation WithError(String condition, String description)
+      public EndExpectation WithError(string condition, string description)
       {
          return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description)));
       }
 
-      public EndExpectation WithError(String condition, String description, IDictionary<string, object> info)
+      public EndExpectation WithError(string condition, string description, IDictionary<string, object> info)
       {
          return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(info))));
       }
 
-      public EndExpectation WithError(Symbol condition, String description)
+      public EndExpectation WithError(Symbol condition, string description)
       {
          return WithError(Is.EqualTo(new ErrorCondition(condition, description)));
       }
 
-      public EndExpectation WithError(Symbol condition, String description, IDictionary<Symbol, object> info)
+      public EndExpectation WithError(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
          return WithError(Is.EqualTo(new ErrorCondition(condition, description, info)));
       }

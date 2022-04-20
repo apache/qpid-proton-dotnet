@@ -131,7 +131,7 @@ namespace Apache.Qpid.Proton.Types
          }
       }
 
-      public override String ToString()
+      public override string ToString()
       {
          return "DeliveryTag: {" + TagBuffer + "}";
       }

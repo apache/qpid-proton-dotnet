@@ -410,7 +410,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// send a SASL init with the plain mechanism selected and the outcome is
       /// predefined failing the exchange.
       /// </remarks>
-      public void ExpectFailingSASLPlainConnect(byte saslCode, params String[] offeredMechanisms)
+      public void ExpectFailingSASLPlainConnect(byte saslCode, params string[] offeredMechanisms)
       {
          if (!(new List<string>(offeredMechanisms).Contains("PLAIN")))
          {

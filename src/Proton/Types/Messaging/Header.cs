@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public static readonly bool DEFAULT_DURABILITY = false;
       public static readonly byte DEFAULT_PRIORITY = 4;
-      public static readonly uint DEFAULT_TIME_TO_LIVE = UInt32.MaxValue;
+      public static readonly uint DEFAULT_TIME_TO_LIVE = uint.MaxValue;
       public static readonly bool DEFAULT_FIRST_ACQUIRER = false;
       public static readonly uint DEFAULT_DELIVERY_COUNT = 0;
 

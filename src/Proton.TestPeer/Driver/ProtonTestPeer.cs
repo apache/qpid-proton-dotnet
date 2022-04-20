@@ -94,7 +94,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          return this;
       }
 
-      protected abstract String PeerName { get; }
+      protected abstract string PeerName { get; }
 
       protected abstract void ProcessCloseRequest();
 

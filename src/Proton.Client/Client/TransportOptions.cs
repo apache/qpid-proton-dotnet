@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client
       public static readonly int DEFAULT_RECEIVE_BUFFER_SIZE = DEFAULT_SEND_BUFFER_SIZE;
       public static readonly bool DEFAULT_TCP_NO_DELAY = true;
       public static readonly bool DEFAULT_TCP_KEEP_ALIVE = false;
-      public static readonly uint DEFAULT_SO_LINGER = UInt32.MinValue;
+      public static readonly uint DEFAULT_SO_LINGER = uint.MinValue;
       public static readonly uint DEFAULT_SO_TIMEOUT = 0;
       public static readonly int DEFAULT_TCP_PORT = 5672;
       public static readonly int DEFAULT_LOCAL_PORT = 0;

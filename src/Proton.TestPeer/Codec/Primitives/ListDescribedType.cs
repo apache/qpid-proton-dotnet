@@ -133,7 +133,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       protected IList List => fields;
 
-      protected Object[] Fields => fields.ToArray();
+      protected object[] Fields => fields.ToArray();
 
       public override string ToString()
       {

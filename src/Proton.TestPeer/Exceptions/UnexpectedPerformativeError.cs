@@ -29,11 +29,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Exceptions
       {
       }
 
-      public UnexpectedPerformativeError(String message) : base(message)
+      public UnexpectedPerformativeError(string message) : base(message)
       {
       }
 
-      public UnexpectedPerformativeError(String message, Exception cause) : base(message, cause)
+      public UnexpectedPerformativeError(string message, Exception cause) : base(message, cause)
       {
       }
    }

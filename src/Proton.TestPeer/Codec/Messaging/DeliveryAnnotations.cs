@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
          Map.Add(name, value);
       }
 
-      public void AddUnsignedLongKeyedAnnotation(ulong name, Object value)
+      public void AddUnsignedLongKeyedAnnotation(ulong name, object value)
       {
          throw new NotSupportedException("UnsignedLong keys are currently reserved");
       }

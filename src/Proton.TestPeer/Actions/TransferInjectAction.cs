@@ -396,13 +396,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          {
          }
 
-         public MessageAnnotationsBuilder WithAnnotation(String key, Object value)
+         public MessageAnnotationsBuilder WithAnnotation(string key, object value)
          {
             action.GetOrCreateMessageAnnotations().AddSymbolKeyedAnnotation(key, value);
             return this;
          }
 
-         public MessageAnnotationsBuilder WithAnnotation(Symbol key, Object value)
+         public MessageAnnotationsBuilder WithAnnotation(Symbol key, object value)
          {
             action.GetOrCreateMessageAnnotations().AddSymbolKeyedAnnotation(key, value);
             return this;
@@ -538,13 +538,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          {
          }
 
-         public BodySectionBuilder WithString(String body)
+         public BodySectionBuilder WithString(string body)
          {
             action.body = new AmqpValue(body);
             return this;
          }
 
-         public BodySectionBuilder WithValue(String body)
+         public BodySectionBuilder WithValue(string body)
          {
             action.body = new AmqpValue(body);
             return this;
@@ -615,7 +615,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return action.WithState(new Rejected());
          }
 
-         public TransferInjectAction Rejected(String condition, String description)
+         public TransferInjectAction Rejected(string condition, string description)
          {
             Rejected rejected = new Rejected
             {
@@ -717,7 +717,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
             return WithOutcome(new Rejected());
          }
 
-         public TransactionalStateBuilder WithRejected(String condition, String description)
+         public TransactionalStateBuilder WithRejected(string condition, string description)
          {
             Rejected rejected = new Rejected
             {

@@ -127,7 +127,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          if (parent != null)
          {
-            IElement oldParent = this.parent;
+            IElement oldParent = parent;
             current = oldParent;
             parent = current.Parent;
             return true;
@@ -136,10 +136,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          return false;
       }
 
-      public long Decode(Stream stream)
-      {
-        return TypeDecoder.Decode(stream, this);
-      }
+      public long Decode(Stream stream) => TypeDecoder.Decode(stream, this);
 
       public long Encode(Stream stream)
       {
@@ -686,7 +683,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          {
             PutFloat(single);
          }
-         else if (o is Double @double)
+         else if (o is double @double)
          {
             PutDouble(@double);
          }
@@ -710,7 +707,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          {
             PutBinary(binary);
          }
-         else if (o is String @string)
+         else if (o is string @string)
          {
             PutString(@string);
          }
@@ -732,7 +729,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             }
             Exit();
          }
-         else if (o is Object[])
+         else if (o is object[])
          {
             throw new ArgumentException("Unsupported array type");
          }
@@ -754,7 +751,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
       {
          StringBuilder sb = new StringBuilder();
          Render(sb, first);
-         return String.Format("Data[current={0:X}, parent={1:X}][{2}]",
+         return string.Format("Data[current={0:X}, parent={1:X}][{2}]",
             RuntimeHelpers.GetHashCode(current), RuntimeHelpers.GetHashCode(parent), sb);
       }
 

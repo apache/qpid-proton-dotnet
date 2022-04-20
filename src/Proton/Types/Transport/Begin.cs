@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       private uint nextOutgoingId;
       private uint incomingWindow;
       private uint outgoingWindow;
-      private uint handleMax = UInt32.MaxValue;
+      private uint handleMax = uint.MaxValue;
       private Symbol[] offeredCapabilities;
       private Symbol[] desiredCapabilities;
       private IDictionary<Symbol, object> properties;

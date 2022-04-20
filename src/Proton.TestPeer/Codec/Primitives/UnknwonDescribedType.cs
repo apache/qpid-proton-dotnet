@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
          return HashCode.Combine(Descriptor, Described);
       }
 
-      public override String ToString()
+      public override string ToString()
       {
          return "UnknownDescribedType{" + "descriptor=" + descriptor + ", described=" + described + '}';
       }

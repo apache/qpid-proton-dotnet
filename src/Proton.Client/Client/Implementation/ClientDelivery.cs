@@ -95,10 +95,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new ClientIllegalStateException("Cannot access Delivery Annotations API after requesting an InputStream");
          }
 
-         IMessage<object> message = (IMessage<object>)cachedMessage;
+         IMessage<object> message = cachedMessage;
          if (message == null && payload.IsReadable)
          {
-            message = (IMessage<object>)(cachedMessage = ClientMessageSupport.DecodeMessage(payload, SetDeliveryAnnotations));
+            message = cachedMessage = ClientMessageSupport.DecodeMessage(payload, SetDeliveryAnnotations);
          }
 
          return message;

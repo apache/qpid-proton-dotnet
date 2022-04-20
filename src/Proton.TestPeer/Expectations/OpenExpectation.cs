@@ -58,22 +58,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          return closeAction;
       }
 
-      public CloseInjectAction Reject(String condition, String description)
+      public CloseInjectAction Reject(string condition, string description)
       {
          return Reject(new Symbol(condition), description);
       }
 
-      public CloseInjectAction Reject(String condition, String description, IDictionary<string, object> infoMap)
+      public CloseInjectAction Reject(string condition, string description, IDictionary<string, object> infoMap)
       {
          return Reject(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(infoMap));
       }
 
-      public CloseInjectAction Reject(Symbol condition, String description)
+      public CloseInjectAction Reject(Symbol condition, string description)
       {
          return Reject(condition, description, null);
       }
 
-      public CloseInjectAction Reject(Symbol condition, String description, IDictionary<Symbol, object> infoMap)
+      public CloseInjectAction Reject(Symbol condition, string description, IDictionary<Symbol, object> infoMap)
       {
          response = new OpenInjectAction(driver);
          driver.AddScriptedElement(response);

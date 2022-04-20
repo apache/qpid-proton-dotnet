@@ -26,11 +26,11 @@ namespace Apache.Qpid.Proton.Types.Transport
       public static readonly ulong DescriptorCode = 0x000000000000001dUL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:error:list");
 
-      public ErrorCondition(String condition) : this(Symbol.Lookup(condition), null, null) { }
+      public ErrorCondition(string condition) : this(Symbol.Lookup(condition), null, null) { }
 
       public ErrorCondition(Symbol condition) : this(condition, null, null) { }
 
-      public ErrorCondition(String condition, string description) : this(Symbol.Lookup(condition), description, null) { }
+      public ErrorCondition(string condition, string description) : this(Symbol.Lookup(condition), description, null) { }
 
       public ErrorCondition(Symbol condition, string description) : this(condition, description, null) { }
 

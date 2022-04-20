@@ -43,25 +43,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          return this;
       }
 
-      public CloseInjectAction WithErrorCondition(String condition, String description)
+      public CloseInjectAction WithErrorCondition(string condition, string description)
       {
          close.Error = new ErrorCondition(new Symbol(condition), description);
          return this;
       }
 
-      public CloseInjectAction WithErrorCondition(Symbol condition, String description)
+      public CloseInjectAction WithErrorCondition(Symbol condition, string description)
       {
          close.Error = new ErrorCondition(condition, description);
          return this;
       }
 
-      public CloseInjectAction WithErrorCondition(String condition, String description, IDictionary<string, object> info)
+      public CloseInjectAction WithErrorCondition(string condition, string description, IDictionary<string, object> info)
       {
          close.Error = new ErrorCondition(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(info));
          return this;
       }
 
-      public CloseInjectAction WithErrorCondition(Symbol condition, String description, IDictionary<Symbol, object> info)
+      public CloseInjectAction WithErrorCondition(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
          close.Error = new ErrorCondition(condition, description, info);
          return this;

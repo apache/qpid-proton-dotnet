@@ -43,9 +43,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types
       {
          if (null != value)
          {
-            if (value is System.Double) return true;
-            if (value is System.Single) return true;
-            if (value is System.Decimal) return true;
+            if (value is double) return true;
+            if (value is float) return true;
+            if (value is decimal) return true;
          }
 
          return false;
@@ -60,15 +60,15 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types
       {
          if (null != value)
          {
-            if (value is System.Byte) return true;
-            if (value is System.SByte) return true;
-            if (value is System.Int32) return true;
-            if (value is System.UInt32) return true;
-            if (value is System.Int64) return true;
-            if (value is System.UInt64) return true;
-            if (value is System.Int16) return true;
-            if (value is System.UInt16) return true;
-            if (value is System.Char) return true;
+            if (value is byte) return true;
+            if (value is sbyte) return true;
+            if (value is int) return true;
+            if (value is uint) return true;
+            if (value is long) return true;
+            if (value is ulong) return true;
+            if (value is short) return true;
+            if (value is ushort) return true;
+            if (value is char) return true;
          }
          return false;
       }

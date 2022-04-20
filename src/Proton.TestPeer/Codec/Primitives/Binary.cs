@@ -73,7 +73,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
          return buffer.GetHashCode();
       }
 
-      public override String ToString()
+      public override string ToString()
       {
          if (buffer == null)
          {
@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
          {
             byte c = buffer[i];
 
-            if (c > 31 && c < 127 && c != '\\')
+            if (c is > 31 and < 127 and not (byte)'\\')
             {
                str.Append((char)c);
             }

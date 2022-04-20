@@ -29,11 +29,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Exceptions
       {
       }
 
-      public AssertionError(String message) : base(message)
+      public AssertionError(string message) : base(message)
       {
       }
 
-      public AssertionError(String message, Exception cause) : base(message, cause)
+      public AssertionError(string message, Exception cause) : base(message, cause)
       {
       }
    }

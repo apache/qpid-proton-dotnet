@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Utilities
 
       public ArrayDeque(uint size = DefaultInitialSize)
       {
-         elements = new T[size == DefaultInitialSize ? size : ((size == Int32.MaxValue ? Int32.MaxValue : size + 1))];
+         elements = new T[size == DefaultInitialSize ? size : (size == int.MaxValue ? int.MaxValue : size + 1)];
       }
 
       public ArrayDeque(IEnumerable<T> elements) : this((uint)elements.Count())
@@ -126,7 +126,7 @@ namespace Apache.Qpid.Proton.Utilities
             throw new ArgumentNullException(nameof(item), "Values added to an array deque cannot be null");
          }
 
-         if (count == Int32.MaxValue)
+         if (count == int.MaxValue)
          {
             return false;
          }
@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Utilities
             throw new ArgumentNullException(nameof(item), "Values added to an array deque cannot be null");
          }
 
-         if (count == Int32.MaxValue)
+         if (count == int.MaxValue)
          {
             return false;
          }

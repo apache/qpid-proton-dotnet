@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
             if (response.Performative.IncomingWindow == null)
             {
-               response.WithIncomingWindow(Int32.MaxValue); //TODO: shouldn't be hard coded
+               response.WithIncomingWindow(int.MaxValue); //TODO: shouldn't be hard coded
             }
 
             if (response.Performative.NextOutgoingId == null)

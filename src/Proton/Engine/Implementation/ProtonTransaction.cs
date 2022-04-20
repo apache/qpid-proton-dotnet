@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types.Transport;
 
@@ -34,7 +33,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private IProtonBuffer txnId;
 
       private ProtonAttachments attachments;
-      private Object linkedResource;
+      private object linkedResource;
 
       public TransactionState State
       {

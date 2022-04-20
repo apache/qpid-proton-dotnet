@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          try
          {
 
-            networkPort = Int32.Parse(redirect[ClientConstants.PORT].ToString());
+            networkPort = int.Parse(redirect[ClientConstants.PORT].ToString());
          }
          catch (Exception)
          {
@@ -85,7 +85,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <summary>
       /// Access the supplied remote port in the redirection information.
       /// </summary>
-      public int Port => Int32.Parse(redirect[ClientConstants.PORT].ToString());
+      public int Port => int.Parse(redirect[ClientConstants.PORT].ToString());
 
       /// <summary>
       /// Access the supplied scheme that the remote indicated the redirect connection should use.

@@ -370,7 +370,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       internal override string StartSymbol()
       {
-         return String.Format("{0}{1}[", IsDescribed ? "D" : "", ArrayType);
+         return string.Format("{0}{1}[", IsDescribed ? "D" : "", ArrayType);
       }
 
       internal override string StopSymbol()

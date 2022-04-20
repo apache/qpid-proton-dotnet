@@ -59,8 +59,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             IElement elt = first;
             while (elt != null)
             {
-               Object key = elt.Value;
-               Object value;
+               object key = elt.Value;
+               object value;
                elt = elt.Next;
                if (elt != null)
                {

@@ -36,22 +36,22 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          return WithError(Is.EqualTo(error));
       }
 
-      public CloseMatcher WithError(String condition, String description)
+      public CloseMatcher WithError(string condition, string description)
       {
          return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description)));
       }
 
-      public CloseMatcher WithError(String condition, String description, IDictionary<string, object> info)
+      public CloseMatcher WithError(string condition, string description, IDictionary<string, object> info)
       {
          return WithError(Is.EqualTo(new ErrorCondition(new Symbol(condition), description, TypeMapper.ToSymbolKeyedMap(info))));
       }
 
-      public CloseMatcher WithError(Symbol condition, String description)
+      public CloseMatcher WithError(Symbol condition, string description)
       {
          return WithError(Is.EqualTo(new ErrorCondition(condition, description)));
       }
 
-      public CloseMatcher WithError(Symbol condition, String description, IDictionary<Symbol, object> info)
+      public CloseMatcher WithError(Symbol condition, string description, IDictionary<Symbol, object> info)
       {
          return WithError(Is.EqualTo(new ErrorCondition(condition, description, info)));
       }

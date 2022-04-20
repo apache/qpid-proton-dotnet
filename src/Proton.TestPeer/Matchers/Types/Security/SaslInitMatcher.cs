@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Security
 
       protected override Type DescribedTypeClassType => typeof(SaslInit);
 
-      public SaslInitMatcher WithMechanism(String mechanism)
+      public SaslInitMatcher WithMechanism(string mechanism)
       {
          return WithMechanism(Is.EqualTo(new Symbol(mechanism)));
       }
@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Security
          return WithInitialResponse(Is.EqualTo(initialResponse));
       }
 
-      public SaslInitMatcher WithHostname(String hostname)
+      public SaslInitMatcher WithHostname(string hostname)
       {
          return WithHostname(Is.EqualTo(hostname));
       }

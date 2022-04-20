@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
    /// Tests for a value being an instance of a given type which can
    /// pass as long as the given object is assignable to the provided type.
    /// </summary>
-   public sealed class IsInstanceOfMatcher : DiagnosingMatcher<Object>
+   public sealed class IsInstanceOfMatcher : DiagnosingMatcher<object>
    {
       private readonly Type expectedType;
 

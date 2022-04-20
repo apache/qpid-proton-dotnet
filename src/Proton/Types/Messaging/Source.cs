@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public Symbol DistributionMode { get; set; }
 
-      public IDictionary<Symbol, Object> Filter { get; set; }
+      public IDictionary<Symbol, object> Filter { get; set; }
 
       public IOutcome DefaultOutcome { get; set; }
 
@@ -85,7 +85,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public Symbol[] Capabilities { get; set; }
 
-      public new String ToString()
+      public new string ToString()
       {
          return "Source{" +
                 "address='" + Address + '\'' +

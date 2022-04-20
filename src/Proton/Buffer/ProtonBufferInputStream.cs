@@ -80,7 +80,7 @@ namespace Apache.Qpid.Proton.Buffer
             throw new ArgumentOutOfRangeException(nameof(offset), "offset and count must be non-negative");
          }
 
-         int available = buffer.ReadableBytes > Int32.MaxValue ? Int32.MaxValue : (int)buffer.ReadableBytes;
+         int available = buffer.ReadableBytes > int.MaxValue ? int.MaxValue : (int)buffer.ReadableBytes;
          int toRead = Math.Min(available, count);
 
          buffer.CopyInto(buffer.ReadOffset, destination, offset, toRead);
