@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(int));
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str32);
 
          foreach (string value in values)
          {
@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       private static void WriteSmallString(IProtonBuffer buffer, IEncoderState state, string value)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + value.Length);
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.Str8));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str8);
          buffer.WriteByte(0);
 
          long startIndex = buffer.WriteOffset;
@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       private static void WriteString(IProtonBuffer buffer, IEncoderState state, string value)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(int) + value.Length);
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str32);
          buffer.WriteInt(0);
 
          long startIndex = buffer.WriteOffset;

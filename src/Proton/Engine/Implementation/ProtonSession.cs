@@ -43,10 +43,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private readonly IDictionary<string, ProtonSender> senderByNameMap = new Dictionary<string, ProtonSender>();
       private readonly IDictionary<string, ProtonReceiver> receiverByNameMap = new Dictionary<string, ProtonReceiver>();
 
-      private readonly SplayedDictionary<uint, IProtonLink> localLinks = new SplayedDictionary<uint, IProtonLink>();
-      private readonly SplayedDictionary<uint, IProtonLink> remoteLinks = new SplayedDictionary<uint, IProtonLink>();
+      private readonly SplayedDictionary<uint, IProtonLink> localLinks = new();
+      private readonly SplayedDictionary<uint, IProtonLink> remoteLinks = new();
 
-      private readonly Flow cachedFlow = new Flow();
+      private readonly Flow cachedFlow = new();
 
       private readonly ProtonConnection connection;
 
@@ -672,7 +672,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             // NOT attempt to attach a link using a handle value outside the range that its partner can handle.
             // A peer that receives a handle outside the supported range MUST close the connection with the
             // framing-error error-code.
-            ErrorCondition condition = new ErrorCondition(ConnectionError.FRAMING_ERROR, "Session handle-max exceeded");
+            ErrorCondition condition = new(ConnectionError.FRAMING_ERROR, "Session handle-max exceeded");
             connection.ErrorCondition = condition;
             connection.Close();
 
@@ -694,8 +694,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private void FireSessionEnd()
       {
-         End end = new End();
-         end.Error = ErrorCondition;
+         End end = new()
+         {
+            Error = ErrorCondition
+         };
 
          engine.FireWrite(end, localChannel);
          localEndSent = true;

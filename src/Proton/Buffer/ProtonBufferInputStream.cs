@@ -112,7 +112,7 @@ namespace Apache.Qpid.Proton.Buffer
          {
             throw new ArgumentOutOfRangeException(nameof(newReadOffset), "Cannot seek beyond readable portion of the wrapped buffer");
          }
-         else if ((int) newReadOffset < initialReadIndex)
+         else if ((int)newReadOffset < initialReadIndex)
          {
             throw new ArgumentOutOfRangeException(nameof(newReadOffset), "Cannot seek beyond readable portion of the wrapped buffer");
          }

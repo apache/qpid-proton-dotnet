@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    {
       private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonConnection>();
 
-      private readonly Open localOpen = new Open();
+      private readonly Open localOpen = new();
       private Open remoteOpen;
       private AmqpHeader remoteHeader;
 
@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       // These would be sessions that were begun and ended before the remote ever
       // responded with a matching being and end.  The remote is required to complete
       // these before answering a new begin sequence on the same local channel.
-      private readonly MemoryCache zombieSessions = new MemoryCache(new MemoryCacheOptions());
+      private readonly MemoryCache zombieSessions = new(new MemoryCacheOptions());
 
       private ConnectionState localState = ConnectionState.Idle;
       private ConnectionState remoteState = ConnectionState.Idle;
@@ -159,7 +159,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          CheckConnectionClosed("Cannot create a Session from a Connection that is already closed");
 
          ushort localChannel = FindFreeLocalChannel();
-         ProtonSession newSession = new ProtonSession(this, localChannel);
+         ProtonSession newSession = new(this, localChannel);
          localSessions.Add(localChannel, newSession);
 
          return newSession;
@@ -615,7 +615,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                   ErrorCondition = ErrorConditionFromFailureCause(cause);
                }
 
-               Close forcedClose = new Close
+               Close forcedClose = new()
                {
                   Error = ErrorCondition
                };
@@ -693,7 +693,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
                   if (IsLocallyClosed && !localCloseSent && !engine.IsShutdown)
                   {
-                     Close localClose = new Close
+                     Close localClose = new()
                      {
                         Error = ErrorCondition
                      };

@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
    /// </summary>
    public sealed class ProtonDefaultSaslServerAuthenticator : ISaslServerAuthenticator
    {
-      public static readonly ProtonDefaultSaslServerAuthenticator Instance = new ProtonDefaultSaslServerAuthenticator();
+      public static readonly ProtonDefaultSaslServerAuthenticator Instance = new();
 
       private static readonly Symbol[] PLAIN = { Symbol.Lookup("PLAIN") };
 

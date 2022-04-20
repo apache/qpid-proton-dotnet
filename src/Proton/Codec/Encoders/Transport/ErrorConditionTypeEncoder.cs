@@ -54,14 +54,14 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transport
          switch (index)
          {
             case 0:
-                state.Encoder.WriteSymbol(buffer, state, error.Condition);
-                break;
+               state.Encoder.WriteSymbol(buffer, state, error.Condition);
+               break;
             case 1:
-                state.Encoder.WriteString(buffer, state, error.Description);
-                break;
+               state.Encoder.WriteString(buffer, state, error.Description);
+               break;
             case 2:
-                state.Encoder.WriteMap(buffer, state, error.Info);
-                break;
+               state.Encoder.WriteMap(buffer, state, error.Info);
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown ErrorCondition value index: " + index);
          }

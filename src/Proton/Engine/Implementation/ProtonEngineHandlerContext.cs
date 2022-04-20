@@ -176,22 +176,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region Internal invoke of Write methods
 
-      void InvokeHandlerWrite(OutgoingAmqpEnvelope envelope)
+      internal void InvokeHandlerWrite(OutgoingAmqpEnvelope envelope)
       {
          handler.HandleWrite(this, envelope);
       }
 
-      void InvokeHandlerWrite(SaslEnvelope envelope)
+      internal void InvokeHandlerWrite(SaslEnvelope envelope)
       {
          handler.HandleWrite(this, envelope);
       }
 
-      void InvokeHandlerWrite(HeaderEnvelope envelope)
+      internal void InvokeHandlerWrite(HeaderEnvelope envelope)
       {
          handler.HandleWrite(this, envelope);
       }
 
-      void InvokeHandlerWrite(IProtonBuffer buffer, Action ioComplete)
+      internal void InvokeHandlerWrite(IProtonBuffer buffer, Action ioComplete)
       {
          next.Handler.HandleWrite(next, buffer, ioComplete);
       }

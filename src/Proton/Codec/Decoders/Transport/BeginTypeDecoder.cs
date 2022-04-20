@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Begin ReadBegin(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Begin result = new Begin();
+         Begin result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -102,30 +102,30 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.RemoteChannel = state.Decoder.ReadUnsignedShort(buffer, state) ?? 0;
-                    break;
-                case 1:
-                    result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 2:
-                    result.IncomingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 3:
-                    result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 4:
-                    result.HandleMax = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 5:
-                    result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
-                    break;
-                case 6:
-                    result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
-                    break;
-                case 7:
-                    result.Properties = state.Decoder.ReadMap<Symbol, object>(buffer, state);
-                    break;
+               case 0:
+                  result.RemoteChannel = state.Decoder.ReadUnsignedShort(buffer, state) ?? 0;
+                  break;
+               case 1:
+                  result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 2:
+                  result.IncomingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 3:
+                  result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 4:
+                  result.HandleMax = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 5:
+                  result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
+                  break;
+               case 6:
+                  result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
+                  break;
+               case 7:
+                  result.Properties = state.Decoder.ReadMap<Symbol, object>(buffer, state);
+                  break;
             }
          }
 
@@ -163,7 +163,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Begin ReadBegin(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Begin result = new Begin();
+         Begin result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
@@ -204,30 +204,30 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.RemoteChannel = state.Decoder.ReadUnsignedShort(stream, state) ?? 0;
-                    break;
-                case 1:
-                    result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 2:
-                    result.IncomingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 3:
-                    result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 4:
-                    result.HandleMax = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 5:
-                    result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
-                    break;
-                case 6:
-                    result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
-                    break;
-                case 7:
-                    result.Properties = state.Decoder.ReadMap<Symbol, object>(stream, state);
-                    break;
+               case 0:
+                  result.RemoteChannel = state.Decoder.ReadUnsignedShort(stream, state) ?? 0;
+                  break;
+               case 1:
+                  result.NextOutgoingId = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 2:
+                  result.IncomingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 3:
+                  result.OutgoingWindow = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 4:
+                  result.HandleMax = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 5:
+                  result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
+                  break;
+               case 6:
+                  result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
+                  break;
+               case 7:
+                  result.Properties = state.Decoder.ReadMap<Symbol, object>(stream, state);
+                  break;
             }
          }
 

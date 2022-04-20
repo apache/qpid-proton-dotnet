@@ -57,7 +57,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       private static void EncodeUtf8Sequence(IProtonBuffer buffer, string value)
       {
-         UTF8Encoding utf8 = new UTF8Encoding();
+         UTF8Encoding utf8 = new();
 
          byte[] encoded = utf8.GetBytes(value);
 

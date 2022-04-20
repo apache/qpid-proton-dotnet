@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
 
       internal ProtonSaslHandler Handler => Handler;
 
-      internal ProtonSaslContext Done(Engine.Sasl.SaslAuthOutcome outcome)
+      internal ProtonSaslContext Done(SaslAuthOutcome outcome)
       {
          this.done = true;
          this.outcome = outcome;

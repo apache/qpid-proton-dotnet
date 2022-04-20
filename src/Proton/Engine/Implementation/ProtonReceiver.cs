@@ -39,8 +39,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<IIncomingDelivery> deliveryUpdatedEventHandler = null;
 
       private readonly ProtonSessionIncomingWindow sessionWindow;
-      private readonly LinkedSplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
-         new LinkedSplayedDictionary<uint, ProtonIncomingDelivery>();
+      private readonly LinkedSplayedDictionary<uint, ProtonIncomingDelivery> unsettled = new();
 
       private uint? currentDeliveryId;
 
@@ -277,8 +276,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             VerifyNewDeliveryIdSequence(transfer, currentDeliveryId);
 
-            delivery = new ProtonIncomingDelivery(this, transfer.DeliveryId, transfer.DeliveryTag);
-            delivery.MessageFormat = transfer.MessageFormat;
+            delivery = new(this, transfer.DeliveryId, transfer.DeliveryTag)
+            {
+               MessageFormat = transfer.MessageFormat
+            };
 
             unsettled.Add(transfer.DeliveryId, delivery);
             currentDeliveryId = transfer.DeliveryId;
@@ -413,7 +414,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else
          {
-            if (remoteAttach.Target is Apache.Qpid.Proton.Types.Transactions.Coordinator)
+            if (remoteAttach.Target is Types.Transactions.Coordinator)
             {
                if (session.HasTransactionManagerOpenHandler)
                {

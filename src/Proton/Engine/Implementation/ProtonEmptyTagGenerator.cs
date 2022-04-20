@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private static readonly byte[] EMPTY_BYTE_ARRAY = System.Array.Empty<byte>();
       private static readonly IDeliveryTag EMPTY_DELIVERY_TAG = new DeliveryTag(EMPTY_BYTE_ARRAY);
 
-      public static ProtonEmptyTagGenerator Instance = new ProtonEmptyTagGenerator();
+      public static ProtonEmptyTagGenerator Instance = new();
 
       public IDeliveryTag NextTag()
       {

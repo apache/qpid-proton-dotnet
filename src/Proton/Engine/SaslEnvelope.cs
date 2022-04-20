@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Engine
    /// </summary>
    public sealed class SaslEnvelope : PerformativeEnvelope<ISaslPerformative>
    {
-      public static readonly byte SaslFrameType = (byte)1;
+      public static readonly byte SaslFrameType = 1;
 
       /// <summary>
       /// Creates a new SASL Envelope with the given performative as the body.

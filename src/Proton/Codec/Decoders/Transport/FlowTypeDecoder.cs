@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Flow ReadFlow(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Flow result = new Flow();
+         Flow result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -172,7 +172,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Flow ReadFlow(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Flow result = new Flow();
+         Flow result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);

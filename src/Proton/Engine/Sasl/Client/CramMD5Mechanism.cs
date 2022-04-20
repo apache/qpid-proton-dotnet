@@ -52,11 +52,11 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             byte[] challengeBytes = new byte[challenge.ReadableBytes];
             challenge.CopyInto(challenge.ReadOffset, challengeBytes, 0, challengeBytes.Length);
 
-            HMACMD5 mac = new HMACMD5(Encoding.ASCII.GetBytes(credentials.Password));
+            HMACMD5 mac = new(Encoding.ASCII.GetBytes(credentials.Password));
 
             byte[] result = mac.ComputeHash(challengeBytes);
 
-            StringBuilder hash = new StringBuilder(credentials.Username);
+            StringBuilder hash = new(credentials.Username);
             hash.Append(' ');
             for (int i = 0; i < result.Length; i++)
             {

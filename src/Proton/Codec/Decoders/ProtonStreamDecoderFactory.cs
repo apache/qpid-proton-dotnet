@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
    {
       public static ProtonStreamDecoder Create()
       {
-         ProtonStreamDecoder decoder = new ProtonStreamDecoder();
+         ProtonStreamDecoder decoder = new();
 
          AddMessagingTypeDecoders(decoder);
          AddTransactionTypeDecoders(decoder);
@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public static ProtonStreamDecoder CreateSasl()
       {
-         ProtonStreamDecoder decoder = new ProtonStreamDecoder();
+         ProtonStreamDecoder decoder = new();
 
          AddSaslTypeDecoders(decoder);
 

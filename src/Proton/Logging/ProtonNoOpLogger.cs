@@ -28,6 +28,8 @@ namespace Apache.Qpid.Proton.Logging
    {
       private readonly string name;
 
+      public string Name => name;
+
       internal ProtonNoOpLogger(string name)
       {
          this.name = name;
@@ -49,7 +51,7 @@ namespace Apache.Qpid.Proton.Logging
 
       private class NoOpDisposable : IDisposable
       {
-         public static NoOpDisposable Instance = new NoOpDisposable();
+         public static NoOpDisposable Instance = new();
 
          public void Dispose()
          {

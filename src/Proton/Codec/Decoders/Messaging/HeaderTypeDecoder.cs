@@ -67,7 +67,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       private static Header ReadHeader(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Header result = new Header();
+         Header result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       private static Header ReadHeader(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Header result = new Header();
+         Header result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);

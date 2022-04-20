@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-using System;
-
 namespace Apache.Qpid.Proton.Buffer
 {
    /// <summary>
@@ -24,7 +22,7 @@ namespace Apache.Qpid.Proton.Buffer
    /// </summary>
    public class ProtonByteBufferAllocator : IProtonBufferAllocator
    {
-      public static readonly ProtonByteBufferAllocator Instance = new ProtonByteBufferAllocator();
+      public static readonly ProtonByteBufferAllocator Instance = new();
 
       public IProtonBuffer OutputBuffer(long initialCapacity)
       {
@@ -55,7 +53,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          // Wrap assign a max capacity to prevent reallocation of the buffer
          // for writes, the buffer operations can only be on the original.
-         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, buffer.Length)
+         ProtonByteBuffer wrapper = new(buffer, buffer.Length)
          {
             WriteOffset = buffer.LongLength
          };
@@ -67,7 +65,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          // Wrap assign a max capacity to prevent reallocation of the buffer
          // for writes, the buffer operations can only be on the original.
-         ProtonByteBuffer wrapper = new ProtonByteBuffer(buffer, offset, length, length)
+         ProtonByteBuffer wrapper = new(buffer, offset, length, length)
          {
             WriteOffset = length
          };

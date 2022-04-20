@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Engine
    /// </summary>
    public sealed class OutgoingAmqpEnvelope : PerformativeEnvelope<IPerformative>
    {
-      public static readonly byte AmqpFrameType = (byte)0;
+      public static readonly byte AmqpFrameType = 0;
 
       private readonly AmqpPerformativeEnvelopePool<OutgoingAmqpEnvelope> pool;
 

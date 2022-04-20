@@ -583,14 +583,16 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (!WasLocalDetachSent)
          {
-            if ((session.IsLocallyOpen && session.WasLocalBeginSent) &&
-                (connection.IsLocallyOpen && connection.WasLocalOpenSent) && !engine.IsShutdown)
+            if (session.IsLocallyOpen && session.WasLocalBeginSent &&
+                connection.IsLocallyOpen && connection.WasLocalOpenSent && !engine.IsShutdown)
             {
 
-               Detach detach = new Detach();
-               detach.Handle = localAttach.Handle;
-               detach.Closed = closed;
-               detach.Error = ErrorCondition;
+               Detach detach = new()
+               {
+                  Handle = localAttach.Handle,
+                  Closed = closed,
+                  Error = ErrorCondition
+               };
 
                engine.FireWrite(detach, session.LocalChannel);
                session.FreeLink(this);

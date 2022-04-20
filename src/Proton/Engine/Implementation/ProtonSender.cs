@@ -330,11 +330,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          }
          else if (session.HasSenderOpenEventHandler)
          {
-            session.FireRemoteSenderOpened((ISender)this);
+            session.FireRemoteSenderOpened(this);
          }
          else if (connection.HasSenderOpenEventHandler)
          {
-            connection.FireRemoteSenderOpened((ISender)this);
+            connection.FireRemoteSenderOpened(this);
          }
          else
          {

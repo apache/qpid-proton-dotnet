@@ -34,13 +34,13 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          if (symbolBytes <= 255)
          {
             buffer.EnsureWritable(sizeof(byte) + sizeof(byte) + symbolBytes);
-            buffer.WriteUnsignedByte(((byte)EncodingCodes.Sym8));
-            buffer.WriteUnsignedByte(((byte)symbolBytes));
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym8);
+            buffer.WriteUnsignedByte((byte)symbolBytes);
          }
          else
          {
             buffer.EnsureWritable(sizeof(byte) + sizeof(int) + symbolBytes);
-            buffer.WriteUnsignedByte(((byte)EncodingCodes.Sym32));
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym32);
             buffer.WriteInt(symbolBytes);
          }
 
@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + sizeof(int) + values.Length);
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.Sym32));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Sym32);
          foreach (Symbol symbol in values)
          {
             buffer.EnsureWritable(sizeof(int) + symbol.Length);

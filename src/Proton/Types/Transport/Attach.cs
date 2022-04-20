@@ -171,7 +171,7 @@ namespace Apache.Qpid.Proton.Types.Transport
                modified &= ~TARGET;
                target = value;
             }
-            else if (value is Target || value is Coordinator)
+            else if (value is Messaging.Target or Coordinator)
             {
                modified |= TARGET;
                target = value;

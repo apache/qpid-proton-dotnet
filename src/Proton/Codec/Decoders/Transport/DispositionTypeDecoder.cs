@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Disposition ReadDisposition(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Disposition result = new Disposition();
+         Disposition result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Disposition ReadDisposition(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Disposition result = new Disposition();
+         Disposition result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);

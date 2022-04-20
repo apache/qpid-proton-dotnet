@@ -16,7 +16,6 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Engine.Exceptions
 {
@@ -30,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// Creates a default version of this exception type.
       /// </summary>
       public IdleTimeoutException() : base()
-      {         
+      {
       }
 
       /// <summary>

@@ -18,7 +18,6 @@
 using System;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 

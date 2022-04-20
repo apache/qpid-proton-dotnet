@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Utilities
    /// <typeparam name="T">The type that is stored in this double ended queue implementation</typeparam>
    public sealed class ArrayDeque<T> : IDeque<T>
    {
-      public readonly object sync = new object();
+      public readonly object sync = new();
 
       public const int DefaultInitialSize = 16;
       public const int AtLeastOne = 1;
@@ -190,14 +190,14 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (count == 0)
          {
-            result = default(T);
+            result = default;
             return false;
          }
 
          modCount++;
 
          result = elements[head];
-         elements[head] = default(T);
+         elements[head] = default;
          head = CircularAdvance(head, elements.Length);
          count--;
 
@@ -218,14 +218,14 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (count == 0)
          {
-            result = default(T);
+            result = default;
             return false;
          }
 
          int newTail = tail = CircularReduce(tail, elements.Length);
 
          result = elements[newTail];
-         elements[newTail] = default(T);
+         elements[newTail] = default;
          count--;
 
          return true;
@@ -270,7 +270,7 @@ namespace Apache.Qpid.Proton.Utilities
          }
          else
          {
-            front = default(T);
+            front = default;
             return false;
          }
       }
@@ -294,7 +294,7 @@ namespace Apache.Qpid.Proton.Utilities
          }
          else
          {
-            back = default(T);
+            back = default;
             return false;
          }
       }
@@ -401,7 +401,7 @@ namespace Apache.Qpid.Proton.Utilities
 
             for (int i = head; i < head + extraRoom; ++i)
             {
-               newElements[i] = default(T);
+               newElements[i] = default;
             }
 
             // Update head now that we've moved things.
@@ -415,7 +415,7 @@ namespace Apache.Qpid.Proton.Utilities
       {
          while (head != tail)
          {
-            elements[head] = default(T);
+            elements[head] = default;
             head = CircularAdvance(head, elements.Length);
          }
       }
@@ -446,7 +446,7 @@ namespace Apache.Qpid.Proton.Utilities
          }
          head = CircularAdvance(head, elements.Length);
 
-         elements[cursor] = default(T);
+         elements[cursor] = default;
          count--;
          modCount++;
       }
@@ -475,7 +475,7 @@ namespace Apache.Qpid.Proton.Utilities
 
          foreach (T thisValue in this)
          {
-            foreach(T otherValue in other)
+            foreach (T otherValue in other)
             {
                if ((thisValue == null && otherValue != null) ||
                    (thisValue != null && otherValue == null))
@@ -495,9 +495,9 @@ namespace Apache.Qpid.Proton.Utilities
 
       public override int GetHashCode()
       {
-         HashCode hash = new HashCode();
+         HashCode hash = new();
 
-         foreach(T element in this)
+         foreach (T element in this)
          {
             hash.Add(element);
          }

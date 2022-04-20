@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Utilities
       /// <summary>
       /// Pooled entries used to prevent excessive allocations for rapied insert and removal operations.
       /// </summary>
-      protected readonly RingQueue<SplayedEntry> entryPool = new RingQueue<SplayedEntry>(64);
+      protected readonly RingQueue<SplayedEntry> entryPool = new(64);
 
       /// <summary>
       /// Root of the tree which can change as entries are splayed up and down the tree
@@ -357,12 +357,12 @@ namespace Apache.Qpid.Proton.Utilities
             }
             else
             {
-               value = default(V);
+               value = default;
             }
          }
          else
          {
-            value = default(V);
+            value = default;
          }
 
          return result;

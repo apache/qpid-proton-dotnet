@@ -37,10 +37,10 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, DeleteOnNoMessages value)
       {
          buffer.EnsureWritable(EncodingSize);
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.DescribedTypeIndicator));
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
-         buffer.WriteUnsignedByte(((byte)DescriptorCode));
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.List0));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)DescriptorCode);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.List0);
       }
 
       protected override int GetElementCount(DeleteOnNoMessages value)

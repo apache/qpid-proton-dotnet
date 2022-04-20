@@ -269,7 +269,7 @@ namespace Apache.Qpid.Proton.Buffer
          //    Returned buffer.            This buffer.
 
          // The new buffer can only view the portion of the array before the split.
-         ProtonByteBuffer front = new ProtonByteBuffer(array, arrayOffset, iOffset, maxCapacity);
+         ProtonByteBuffer front = new(array, arrayOffset, iOffset, maxCapacity);
 
          // This buffer is adjusted to view only the portion of the array after the split
          arrayOffset += iOffset;
@@ -304,7 +304,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (Capacity > 0)
          {
-            Array.Fill<byte>(array, value, (int)arrayOffset, (int)Capacity);
+            Array.Fill(array, value, arrayOffset, (int)Capacity);
          }
          return this;
       }
@@ -898,7 +898,7 @@ namespace Apache.Qpid.Proton.Buffer
          }
          else
          {
-            long newCapacity = Capacity + (long)Math.Max(requiredWritable - WritableBytes, minimumGrowth);
+            long newCapacity = Capacity + Math.Max(requiredWritable - WritableBytes, minimumGrowth);
             if (newCapacity < 1)
             {
                throw new ArgumentOutOfRangeException("Buffer size must be positive, but was " + newCapacity + '.');

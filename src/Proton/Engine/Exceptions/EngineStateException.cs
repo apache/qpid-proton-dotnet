@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// Creates a default version of this exception type.
       /// </summary>
       public EngineStateException() : base()
-      {         
+      {
       }
 
       /// <summary>

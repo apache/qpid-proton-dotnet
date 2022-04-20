@@ -62,11 +62,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Security
          switch (index)
          {
             case 0:
-                state.Encoder.WriteUnsignedByte(buffer, state, (byte)outcome.Code);
-                break;
+               state.Encoder.WriteUnsignedByte(buffer, state, (byte)outcome.Code);
+               break;
             case 1:
-                state.Encoder.WriteBinary(buffer, state, outcome.AdditionalData);
-                break;
+               state.Encoder.WriteBinary(buffer, state, outcome.AdditionalData);
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown SaslOutcome value index: " + index);
          }

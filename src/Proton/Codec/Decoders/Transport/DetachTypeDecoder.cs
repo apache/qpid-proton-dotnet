@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Detach ReadDetach(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Detach result = new Detach();
+         Detach result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -101,15 +101,15 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.Handle = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 1:
-                    result.Closed = state.Decoder.ReadBoolean(buffer, state) ?? false;
-                    break;
-                case 2:
-                    result.Error = state.Decoder.ReadObject<ErrorCondition>(buffer, state);
-                    break;
+               case 0:
+                  result.Handle = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 1:
+                  result.Closed = state.Decoder.ReadBoolean(buffer, state) ?? false;
+                  break;
+               case 2:
+                  result.Error = state.Decoder.ReadObject<ErrorCondition>(buffer, state);
+                  break;
             }
          }
 
@@ -188,15 +188,15 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.Handle = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 1:
-                    result.Closed = state.Decoder.ReadBoolean(stream, state) ?? false;
-                    break;
-                case 2:
-                    result.Error = state.Decoder.ReadObject<ErrorCondition>(stream, state);
-                    break;
+               case 0:
+                  result.Handle = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 1:
+                  result.Closed = state.Decoder.ReadBoolean(stream, state) ?? false;
+                  break;
+               case 2:
+                  result.Error = state.Decoder.ReadObject<ErrorCondition>(stream, state);
+                  break;
             }
          }
 

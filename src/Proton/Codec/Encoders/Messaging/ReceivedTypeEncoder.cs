@@ -46,11 +46,11 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
          switch (index)
          {
             case 0:
-                state.Encoder.WriteUnsignedInteger(buffer, state, source.SectionNumber);
-                break;
+               state.Encoder.WriteUnsignedInteger(buffer, state, source.SectionNumber);
+               break;
             case 1:
-                state.Encoder.WriteUnsignedLong(buffer, state, source.SectionOffset);
-                break;
+               state.Encoder.WriteUnsignedLong(buffer, state, source.SectionOffset);
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown Received value index: " + index);
          }

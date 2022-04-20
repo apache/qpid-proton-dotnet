@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Codec
       /// Creates a default DecodeException.
       /// </summary>
       public DecodeException() : base()
-      {         
+      {
       }
 
       /// <summary>

@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
             throw new SaslException("Request for initial response not expected in state " + state);
          }
 
-         StringBuilder buf = new StringBuilder("n=");
+         StringBuilder buf = new("n=");
          buf.Append(EscapeUsername(DoSaslPrep(credentials.Username)));
          buf.Append(",r=");
          buf.Append(clientNonce);

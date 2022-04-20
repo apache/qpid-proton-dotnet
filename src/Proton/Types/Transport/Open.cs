@@ -254,7 +254,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public object Clone() => new Open(this);
 
-      public Open Copy() => new Open(this);
+      public Open Copy() => new(this);
 
       public PerformativeType Type => PerformativeType.Open;
 

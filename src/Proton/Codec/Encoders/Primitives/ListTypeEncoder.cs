@@ -45,10 +45,10 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(int) * values.Length));
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.List32));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.List32);
          foreach (IList value in values)
          {
-            WriteValue(buffer, state, (IList)value);
+            WriteValue(buffer, state, value);
          }
       }
 

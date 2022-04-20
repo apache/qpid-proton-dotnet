@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public void Reset()
       {
-         throw new System.NotImplementedException();
+         throw new NotImplementedException();
       }
 
       public string DecodeUtf8(Stream stream, int length)

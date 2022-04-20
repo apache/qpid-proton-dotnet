@@ -319,7 +319,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public object Clone() => new Transfer(this);
 
-      public Transfer Copy() => new Transfer(this);
+      public Transfer Copy() => new(this);
 
       public PerformativeType Type => PerformativeType.Transfer;
 

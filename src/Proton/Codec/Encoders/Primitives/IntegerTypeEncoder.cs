@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
          int intValue = (int)value;
 
-         if (intValue >= -128 && intValue <= 127)
+         if (intValue is >= (-128) and <= 127)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallInt));
             buffer.WriteByte((sbyte)intValue);

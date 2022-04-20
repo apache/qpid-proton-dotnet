@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static End ReadEnd(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         End result = new End();
+         End result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -85,9 +85,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          {
             switch (index)
             {
-                case 0:
-                    result.Error = state.Decoder.ReadObject<ErrorCondition>(buffer, state);
-                    break;
+               case 0:
+                  result.Error = state.Decoder.ReadObject<ErrorCondition>(buffer, state);
+                  break;
             }
          }
 
@@ -125,7 +125,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static End ReadEnd(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         End result = new End();
+         End result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
@@ -144,9 +144,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          {
             switch (index)
             {
-                case 0:
-                    result.Error = state.Decoder.ReadObject<ErrorCondition>(stream, state);
-                    break;
+               case 0:
+                  result.Error = state.Decoder.ReadObject<ErrorCondition>(stream, state);
+                  break;
             }
          }
 

@@ -207,7 +207,7 @@ namespace Apache.Qpid.Proton.Buffer
                IEnumerable<IProtonBuffer> decomposed = composite.DecomposeBuffer();
                int decomposedLength = decomposed.Count();
 
-               List<IProtonBuffer> newComposed = new List<IProtonBuffer>(buffers.Length + decomposedLength);
+               List<IProtonBuffer> newComposed = new(buffers.Length + decomposedLength);
                newComposed.AddRange(buffers);
                newComposed.AddRange(decomposed);
 
@@ -223,7 +223,7 @@ namespace Apache.Qpid.Proton.Buffer
             {
                foreach (IProtonBuffer candidate in buffers)
                {
-                  if (object.ReferenceEquals(candidate, buffer))
+                  if (ReferenceEquals(candidate, buffer))
                   {
                      throw new ArgumentException("Cannot add a duplicate buffer to a composite buffer");
                   }
@@ -275,7 +275,7 @@ namespace Apache.Qpid.Proton.Buffer
       {
          if (readOffset != 0)
          {
-            int readIsInBuffer = (int) SearchIndexTracker(readOffset);
+            int readIsInBuffer = (int)SearchIndexTracker(readOffset);
             if (readIsInBuffer > 0)
             {
                buffers = Statics.CopyOfRange(buffers, readIsInBuffer, buffers.Length);
@@ -1373,7 +1373,7 @@ namespace Apache.Qpid.Proton.Buffer
                    (ulong)Get(index + 4) << 24 |
                    (ulong)Get(index + 5) << 16 |
                    (ulong)Get(index + 6) << 8 |
-                   (ulong)Get(index + 7);
+                   Get(index + 7);
          }
 
          public char ReadChar()
@@ -1428,12 +1428,12 @@ namespace Apache.Qpid.Proton.Buffer
                    (ulong)Read() << 24 |
                    (ulong)Read() << 16 |
                    (ulong)Read() << 8 |
-                   (ulong)Read();
+                   Read();
          }
 
          public IProtonBuffer SetChar(long index, char value)
          {
-            return SetUnsignedShort(index, (ushort)value);
+            return SetUnsignedShort(index, value);
          }
 
          public IProtonBuffer SetDouble(long index, double value)
@@ -1577,11 +1577,11 @@ namespace Apache.Qpid.Proton.Buffer
 
       private sealed class IdentityComparator : IEqualityComparer<IProtonBuffer>
       {
-         public static readonly IdentityComparator Instance = new IdentityComparator();
+         public static readonly IdentityComparator Instance = new();
 
          public bool Equals(IProtonBuffer x, IProtonBuffer y)
          {
-            return Object.ReferenceEquals(x, y);
+            return ReferenceEquals(x, y);
          }
 
          public int GetHashCode([DisallowNull] IProtonBuffer obj)

@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((Received) other);
+            return Equals((Received)other);
          }
       }
 

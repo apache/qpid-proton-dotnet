@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Types
       private static readonly IDictionary<string, Symbol> stringsToSymbols =
          new ConcurrentDictionary<string, Symbol>();
 
-      private static readonly Symbol EMPTY_SYMBOL = new Symbol();
+      private static readonly Symbol EMPTY_SYMBOL = new();
 
       // Prevents the Symbol cache from growing overly large if abused by creating overly
       // large Symbols which would all be stored in the symbol cache.
@@ -153,7 +153,7 @@ namespace Apache.Qpid.Proton.Types
       /// </summary>
       public int Length
       {
-         get { return (int) underlying.ReadableBytes; }
+         get { return (int)underlying.ReadableBytes; }
       }
 
       /// <summary>

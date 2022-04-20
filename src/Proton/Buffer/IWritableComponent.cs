@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-using System;
-using System.Text;
-
 namespace Apache.Qpid.Proton.Buffer
 {
    public interface IWritableComponent

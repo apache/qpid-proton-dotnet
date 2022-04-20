@@ -34,45 +34,45 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       static ProtonDecoder()
       {
-         primitiveDecoders[((int)EncodingCodes.Boolean)] = new BooleanTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.BooleanTrue)] = new BooleanTrueTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.BooleanFalse)] = new BooleanFalseTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.VBin8)] = new Binary8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.VBin32)] = new Binary32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Byte)] = new ByteTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Char)] = new CharacterTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Decimal32)] = new Decimal32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Decimal64)] = new Decimal64TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Decimal128)] = new Decimal128TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Double)] = new DoubleTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Float)] = new FloatTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Null)] = new NullTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Short)] = new ShortTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.SmallInt)] = new Integer8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Int)] = new Integer32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.SmallLong)] = new Long8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Long)] = new Long32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.UByte)] = new UnsignedByteTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.UShort)] = new UnsignedShortTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.UInt0)] = new UnsignedInteger0TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.SmallUInt)] = new UnsignedInteger8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.UInt)] = new UnsignedInteger32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.ULong0)] = new UnsignedLong0TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.SmallULong)] = new UnsignedLong8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.ULong)] = new UnsignedLong64TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Str8)] = new String8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Str32)] = new String32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Sym8)] = new Symbol8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Sym32)] = new Symbol32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Uuid)] = new UuidTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Timestamp)] = new TimestampTypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.List0)] = new List0TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.List8)] = new List8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.List32)] = new List32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Map8)] = new Map8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Map32)] = new Map32TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Array8)] = new Array8TypeDecoder();
-         primitiveDecoders[((int)EncodingCodes.Array32)] = new Array32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Boolean] = new BooleanTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.BooleanTrue] = new BooleanTrueTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.BooleanFalse] = new BooleanFalseTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.VBin8] = new Binary8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.VBin32] = new Binary32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Byte] = new ByteTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Char] = new CharacterTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Decimal32] = new Decimal32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Decimal64] = new Decimal64TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Decimal128] = new Decimal128TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Double] = new DoubleTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Float] = new FloatTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Null] = new NullTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Short] = new ShortTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.SmallInt] = new Integer8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Int] = new Integer32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.SmallLong] = new Long8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Long] = new Long32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.UByte] = new UnsignedByteTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.UShort] = new UnsignedShortTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.UInt0] = new UnsignedInteger0TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.SmallUInt] = new UnsignedInteger8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.UInt] = new UnsignedInteger32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.ULong0] = new UnsignedLong0TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.SmallULong] = new UnsignedLong8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.ULong] = new UnsignedLong64TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Str8] = new String8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Str32] = new String32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Sym8] = new Symbol8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Sym32] = new Symbol32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Uuid] = new UuidTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Timestamp] = new TimestampTypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.List0] = new List0TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.List8] = new List8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.List32] = new List32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Map8] = new Map8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Map32] = new Map32TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Array8] = new Array8TypeDecoder();
+         primitiveDecoders[(int)EncodingCodes.Array32] = new Array32TypeDecoder();
 
          // Initialize the locally used primitive type decoders for the main API
          symbol8Decoder = (Symbol8TypeDecoder)primitiveDecoders[(int)EncodingCodes.Sym8];
@@ -492,8 +492,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          return encodingCode switch
          {
-            EncodingCodes.Sym8 => (Symbol)symbol8Decoder.ReadValue(buffer, state),
-            EncodingCodes.Sym32 => (Symbol)symbol32Decoder.ReadValue(buffer, state),
+            EncodingCodes.Sym8 => symbol8Decoder.ReadValue(buffer, state),
+            EncodingCodes.Sym32 => symbol32Decoder.ReadValue(buffer, state),
             EncodingCodes.Null => null,
             _ => throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode),
          };
@@ -547,9 +547,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          return encodingCode switch
          {
-            EncodingCodes.List0 => (IList<T>)Array.Empty<T>(),
-            EncodingCodes.List8 => (IList<T>)list8Decoder.ReadList<T>(buffer, state),
-            EncodingCodes.List32 => (IList<T>)list32Decoder.ReadList<T>(buffer, state),
+            EncodingCodes.List0 => Array.Empty<T>(),
+            EncodingCodes.List8 => list8Decoder.ReadList<T>(buffer, state),
+            EncodingCodes.List32 => list32Decoder.ReadList<T>(buffer, state),
             EncodingCodes.Null => null,
             _ => throw new DecodeException("Expected List type but found encoding: " + encodingCode),
          };
@@ -579,7 +579,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             }
             else
             {
-               return default(T);
+               return default;
             }
          }
          else if (result.GetType().IsAssignableTo(typeof(T)))
@@ -747,7 +747,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       private IDescribedTypeDecoder HandleUnknownDescribedType(in object descriptor)
       {
-         UnknownDescribedTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
+         UnknownDescribedTypeDecoder typeDecoder = new(descriptor);
          describedTypeDecoders.Add(descriptor, typeDecoder);
 
          return typeDecoder;

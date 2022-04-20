@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public IEngine CreateEngine()
       {
-         ProtonEngine engine = new ProtonEngine();
+         ProtonEngine engine = new();
          IEnginePipeline pipeline = engine.Pipeline;
 
          pipeline.AddLast(ProtonConstants.AmqpPerformativeHandler, new ProtonPerformativeHandler());
@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public IEngine CreateNonSaslEngine()
       {
-         ProtonEngine engine = new ProtonEngine();
+         ProtonEngine engine = new();
          IEnginePipeline pipeline = engine.Pipeline;
 
          pipeline.AddLast(ProtonConstants.AmqpPerformativeHandler, new ProtonPerformativeHandler());

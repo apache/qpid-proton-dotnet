@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Codec
    public interface IDecoderState
    {
       /// <summary>
-      /// Resets the decoder after a complete decode operation freeing any held 
+      /// Resets the decoder after a complete decode operation freeing any held
       /// resources and preparing for a new decode operation.
       /// </summary>
       void Reset();
@@ -46,6 +46,6 @@ namespace Apache.Qpid.Proton.Codec
       /// <param name="length">The encoded size of the UTF-8 string.</param>
       /// <returns>A string value decoded from the UTF-8 bytes</returns>
       string DecodeUtf8(IProtonBuffer buffer, int length);
-      
+
    }
 }

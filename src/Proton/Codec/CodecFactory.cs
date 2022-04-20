@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Codec
       /// the get method is called.
       /// </summary>
       public static IDecoder Decoder
-      { 
+      {
          get
          {
             return amqpDecoder ?? DefaultDecoder;
@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Codec
          set
          {
             amqpDecoder = value;
-         }         
+         }
       }
 
       /// <summary>
@@ -91,7 +91,7 @@ namespace Apache.Qpid.Proton.Codec
       /// the get method is called.
       /// </summary>
       public static IDecoder SaslDecoder
-      { 
+      {
          get
          {
             return saslDecoder ?? DefaultSaslDecoder;
@@ -100,7 +100,7 @@ namespace Apache.Qpid.Proton.Codec
          set
          {
             saslDecoder = value;
-         }         
+         }
       }
 
       /// <summary>

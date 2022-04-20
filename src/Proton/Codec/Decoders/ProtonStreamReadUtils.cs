@@ -185,10 +185,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       /// <exception cref="DecodeException">If the value cannot be read from the stream</exception>
       public static int ReadInt(Stream stream)
       {
-         return (int)(ReadUnsignedByte(stream) & 0xFF) << 24 |
-                (int)(ReadUnsignedByte(stream) & 0xFF) << 16 |
-                (int)(ReadUnsignedByte(stream) & 0xFF) << 8 |
-                (int)(ReadUnsignedByte(stream) & 0xFF) << 0;
+         return (ReadUnsignedByte(stream) & 0xFF) << 24 |
+                (ReadUnsignedByte(stream) & 0xFF) << 16 |
+                (ReadUnsignedByte(stream) & 0xFF) << 8 |
+                (ReadUnsignedByte(stream) & 0xFF) << 0;
       }
 
       /// <summary>

@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
    {
       public static ProtonEncoder Create()
       {
-         ProtonEncoder encoder = new ProtonEncoder();
+         ProtonEncoder encoder = new();
 
          AddMessagingTypeEncoders(encoder);
          AddTransactionTypeEncoders(encoder);

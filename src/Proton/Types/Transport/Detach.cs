@@ -95,7 +95,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public object Clone() => new Detach(this);
 
-      public Detach Copy() => new Detach(this);
+      public Detach Copy() => new(this);
 
       public PerformativeType Type => PerformativeType.Detach;
 

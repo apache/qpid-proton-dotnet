@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Open ReadOpen(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Open result = new Open();
+         Open result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -100,36 +100,36 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.ContainerId = state.Decoder.ReadString(buffer, state);
-                    break;
-                case 1:
-                    result.Hostname = state.Decoder.ReadString(buffer, state);
-                    break;
-                case 2:
-                    result.MaxFrameSize = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 3:
-                    result.ChannelMax = state.Decoder.ReadUnsignedShort(buffer, state) ?? 0;
-                    break;
-                case 4:
-                    result.IdleTimeout = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 5:
-                    result.OutgoingLocales = state.Decoder.ReadMultiple<Symbol>(buffer, state);
-                    break;
-                case 6:
-                    result.IncomingLocales = state.Decoder.ReadMultiple<Symbol>(buffer, state);
-                    break;
-                case 7:
-                    result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
-                    break;
-                case 8:
-                    result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
-                    break;
-                case 9:
-                    result.Properties = state.Decoder.ReadMap<Symbol, object>(buffer, state);
-                    break;
+               case 0:
+                  result.ContainerId = state.Decoder.ReadString(buffer, state);
+                  break;
+               case 1:
+                  result.Hostname = state.Decoder.ReadString(buffer, state);
+                  break;
+               case 2:
+                  result.MaxFrameSize = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 3:
+                  result.ChannelMax = state.Decoder.ReadUnsignedShort(buffer, state) ?? 0;
+                  break;
+               case 4:
+                  result.IdleTimeout = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 5:
+                  result.OutgoingLocales = state.Decoder.ReadMultiple<Symbol>(buffer, state);
+                  break;
+               case 6:
+                  result.IncomingLocales = state.Decoder.ReadMultiple<Symbol>(buffer, state);
+                  break;
+               case 7:
+                  result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
+                  break;
+               case 8:
+                  result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(buffer, state);
+                  break;
+               case 9:
+                  result.Properties = state.Decoder.ReadMap<Symbol, object>(buffer, state);
+                  break;
             }
          }
 
@@ -167,7 +167,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Open ReadOpen(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Open result = new Open();
+         Open result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
@@ -207,36 +207,36 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
             switch (index)
             {
-                case 0:
-                    result.ContainerId = state.Decoder.ReadString(stream, state);
-                    break;
-                case 1:
-                    result.Hostname = state.Decoder.ReadString(stream, state);
-                    break;
-                case 2:
-                    result.MaxFrameSize = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 3:
-                    result.ChannelMax = state.Decoder.ReadUnsignedShort(stream, state) ?? 0;
-                    break;
-                case 4:
-                    result.IdleTimeout = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 5:
-                    result.OutgoingLocales = state.Decoder.ReadMultiple<Symbol>(stream, state);
-                    break;
-                case 6:
-                    result.IncomingLocales = state.Decoder.ReadMultiple<Symbol>(stream, state);
-                    break;
-                case 7:
-                    result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
-                    break;
-                case 8:
-                    result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
-                    break;
-                case 9:
-                    result.Properties = state.Decoder.ReadMap<Symbol, object>(stream, state);
-                    break;
+               case 0:
+                  result.ContainerId = state.Decoder.ReadString(stream, state);
+                  break;
+               case 1:
+                  result.Hostname = state.Decoder.ReadString(stream, state);
+                  break;
+               case 2:
+                  result.MaxFrameSize = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 3:
+                  result.ChannelMax = state.Decoder.ReadUnsignedShort(stream, state) ?? 0;
+                  break;
+               case 4:
+                  result.IdleTimeout = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 5:
+                  result.OutgoingLocales = state.Decoder.ReadMultiple<Symbol>(stream, state);
+                  break;
+               case 6:
+                  result.IncomingLocales = state.Decoder.ReadMultiple<Symbol>(stream, state);
+                  break;
+               case 7:
+                  result.OfferedCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
+                  break;
+               case 8:
+                  result.DesiredCapabilities = state.Decoder.ReadMultiple<Symbol>(stream, state);
+                  break;
+               case 9:
+                  result.Properties = state.Decoder.ReadMap<Symbol, object>(stream, state);
+                  break;
             }
          }
 

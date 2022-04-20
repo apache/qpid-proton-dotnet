@@ -36,10 +36,10 @@ namespace Apache.Qpid.Proton.Types.Transport
       public static readonly int HeaderSizeBytes = 8;
 
       private static readonly AmqpHeader Amqp =
-        new AmqpHeader(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 0, 1, 0, 0 });
+        new(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 0, 1, 0, 0 });
 
       private static readonly AmqpHeader Sasl =
-        new AmqpHeader(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 3, 1, 0, 0 });
+        new(new byte[] { (byte)'A', (byte)'M', (byte)'Q', (byte)'P', 3, 1, 0, 0 });
 
       private IProtonBuffer buffer;
 
@@ -176,7 +176,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public override string ToString()
       {
-         StringBuilder builder = new StringBuilder();
+         StringBuilder builder = new();
          for (int i = 0; i < buffer.ReadableBytes; ++i)
          {
             char value = (char)buffer.GetByte(i);

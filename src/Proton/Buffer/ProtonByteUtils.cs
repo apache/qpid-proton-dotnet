@@ -153,7 +153,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <returns>The byte array passed where the value was written</returns>
       public static byte[] WriteChar(char value, byte[] destination, int offset)
       {
-         return WriteUnsignedShort((ushort)value, destination, offset);
+         return WriteUnsignedShort(value, destination, offset);
       }
 
       /// <summary>

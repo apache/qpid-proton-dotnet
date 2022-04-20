@@ -380,11 +380,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       private static object ValidateIsMessageIdType(object messageId)
       {
          // Allowed types of message IDs are listed here
-         if (messageId == null ||
-             messageId is string ||
-             messageId is Guid ||
-             messageId is ulong ||
-             messageId is IProtonBuffer)
+         if (messageId is null or string or Guid or ulong or IProtonBuffer)
          {
             return messageId;
          }

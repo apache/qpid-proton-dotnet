@@ -67,7 +67,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       private static Properties ReadProperties(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         Properties result = new Properties();
+         Properties result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -97,45 +97,45 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
             switch (index)
             {
-                case 0:
-                    result.MessageId = state.Decoder.ReadObject(buffer, state);
-                    break;
-                case 1:
-                    result.UserId = state.Decoder.ReadBinary(buffer, state);
-                    break;
-                case 2:
-                    result.To = state.Decoder.ReadString(buffer, state);
-                    break;
-                case 3:
-                    result.Subject = state.Decoder.ReadString(buffer, state);
-                    break;
-                case 4:
-                    result.ReplyTo = state.Decoder.ReadString(buffer, state);
-                    break;
-                case 5:
-                    result.CorrelationId = state.Decoder.ReadObject(buffer, state);
-                    break;
-                case 6:
-                    result.ContentType = state.Decoder.ReadSymbol(buffer, state)?.ToString() ?? null;
-                    break;
-                case 7:
-                    result.ContentEncoding = state.Decoder.ReadSymbol(buffer, state)?.ToString() ?? null;
-                    break;
-                case 8:
-                    result.AbsoluteExpiryTime = state.Decoder.ReadTimestamp(buffer, state) ?? 0;
-                    break;
-                case 9:
-                    result.CreationTime = state.Decoder.ReadTimestamp(buffer, state) ?? 0;
-                    break;
-                case 10:
-                    result.GroupId = state.Decoder.ReadString(buffer, state);
-                    break;
-                case 11:
-                    result.GroupSequence = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
-                    break;
-                case 12:
-                    result.ReplyToGroupId = state.Decoder.ReadString(buffer, state);
-                    break;
+               case 0:
+                  result.MessageId = state.Decoder.ReadObject(buffer, state);
+                  break;
+               case 1:
+                  result.UserId = state.Decoder.ReadBinary(buffer, state);
+                  break;
+               case 2:
+                  result.To = state.Decoder.ReadString(buffer, state);
+                  break;
+               case 3:
+                  result.Subject = state.Decoder.ReadString(buffer, state);
+                  break;
+               case 4:
+                  result.ReplyTo = state.Decoder.ReadString(buffer, state);
+                  break;
+               case 5:
+                  result.CorrelationId = state.Decoder.ReadObject(buffer, state);
+                  break;
+               case 6:
+                  result.ContentType = state.Decoder.ReadSymbol(buffer, state)?.ToString() ?? null;
+                  break;
+               case 7:
+                  result.ContentEncoding = state.Decoder.ReadSymbol(buffer, state)?.ToString() ?? null;
+                  break;
+               case 8:
+                  result.AbsoluteExpiryTime = state.Decoder.ReadTimestamp(buffer, state) ?? 0;
+                  break;
+               case 9:
+                  result.CreationTime = state.Decoder.ReadTimestamp(buffer, state) ?? 0;
+                  break;
+               case 10:
+                  result.GroupId = state.Decoder.ReadString(buffer, state);
+                  break;
+               case 11:
+                  result.GroupSequence = state.Decoder.ReadUnsignedInteger(buffer, state) ?? 0;
+                  break;
+               case 12:
+                  result.ReplyToGroupId = state.Decoder.ReadString(buffer, state);
+                  break;
             }
          }
 
@@ -174,7 +174,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       private static Properties ReadProperties(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Properties result = new Properties();
+         Properties result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
@@ -210,45 +210,45 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
             switch (index)
             {
-                case 0:
-                    result.MessageId = state.Decoder.ReadObject(stream, state);
-                    break;
-                case 1:
-                    result.UserId = state.Decoder.ReadBinary(stream, state);
-                    break;
-                case 2:
-                    result.To = state.Decoder.ReadString(stream, state);
-                    break;
-                case 3:
-                    result.Subject = state.Decoder.ReadString(stream, state);
-                    break;
-                case 4:
-                    result.ReplyTo = state.Decoder.ReadString(stream, state);
-                    break;
-                case 5:
-                    result.CorrelationId = state.Decoder.ReadObject(stream, state);
-                    break;
-                case 6:
-                    result.ContentType = state.Decoder.ReadSymbol(stream, state)?.ToString() ?? null;
-                    break;
-                case 7:
-                    result.ContentEncoding = state.Decoder.ReadSymbol(stream, state)?.ToString() ?? null;
-                    break;
-                case 8:
-                    result.AbsoluteExpiryTime = state.Decoder.ReadTimestamp(stream, state) ?? 0;
-                    break;
-                case 9:
-                    result.CreationTime = state.Decoder.ReadTimestamp(stream, state) ?? 0;
-                    break;
-                case 10:
-                    result.GroupId = state.Decoder.ReadString(stream, state);
-                    break;
-                case 11:
-                    result.GroupSequence = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
-                    break;
-                case 12:
-                    result.ReplyToGroupId = state.Decoder.ReadString(stream, state);
-                    break;
+               case 0:
+                  result.MessageId = state.Decoder.ReadObject(stream, state);
+                  break;
+               case 1:
+                  result.UserId = state.Decoder.ReadBinary(stream, state);
+                  break;
+               case 2:
+                  result.To = state.Decoder.ReadString(stream, state);
+                  break;
+               case 3:
+                  result.Subject = state.Decoder.ReadString(stream, state);
+                  break;
+               case 4:
+                  result.ReplyTo = state.Decoder.ReadString(stream, state);
+                  break;
+               case 5:
+                  result.CorrelationId = state.Decoder.ReadObject(stream, state);
+                  break;
+               case 6:
+                  result.ContentType = state.Decoder.ReadSymbol(stream, state)?.ToString() ?? null;
+                  break;
+               case 7:
+                  result.ContentEncoding = state.Decoder.ReadSymbol(stream, state)?.ToString() ?? null;
+                  break;
+               case 8:
+                  result.AbsoluteExpiryTime = state.Decoder.ReadTimestamp(stream, state) ?? 0;
+                  break;
+               case 9:
+                  result.CreationTime = state.Decoder.ReadTimestamp(stream, state) ?? 0;
+                  break;
+               case 10:
+                  result.GroupId = state.Decoder.ReadString(stream, state);
+                  break;
+               case 11:
+                  result.GroupSequence = state.Decoder.ReadUnsignedInteger(stream, state) ?? 0;
+                  break;
+               case 12:
+                  result.ReplyToGroupId = state.Decoder.ReadString(stream, state);
+                  break;
             }
          }
 

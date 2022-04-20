@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
 
          long longValue = (long)value;
 
-         if (longValue >= -128 && longValue <= 127)
+         if (longValue is >= (-128) and <= 127)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallLong));
             buffer.WriteByte((sbyte)longValue);
@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(long) * values.Length));
          // Write the array elements after writing the array length
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.Long));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Long);
          foreach (long value in values)
          {
             buffer.WriteLong(value);

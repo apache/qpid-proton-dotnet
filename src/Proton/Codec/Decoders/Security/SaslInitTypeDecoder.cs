@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
 
       private static SaslInit ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         SaslInit result = new SaslInit();
+         SaslInit result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -136,7 +136,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
 
       private static SaslInit ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         SaslInit result = new SaslInit();
+         SaslInit result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);

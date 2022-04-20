@@ -182,7 +182,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // Start tracking this transaction as active.
          transactions.Add(txnId, txn);
 
-         Declared declaration = new Declared
+         Declared declaration = new()
          {
             TxnId = txnId
          };
@@ -219,7 +219,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             throw new ArgumentException("Cannot fail a declared transaction from another transaction manager.");
          }
 
-         Rejected rejected = new Rejected
+         Rejected rejected = new()
          {
             Error = condition
          };
@@ -244,7 +244,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // TODO: We should be closing the link if the remote did not report that it supports the
          //       rejected outcome although most don't regardless of what they actually do support.
 
-         Rejected rejected = new Rejected
+         Rejected rejected = new()
          {
             Error = condition
          };
@@ -340,7 +340,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
             if (container.Value is Declare)
             {
-               ProtonManagerTransaction transaction = new ProtonManagerTransaction(this)
+               ProtonManagerTransaction transaction = new(this)
                {
                   Declare = delivery,
                   State = TransactionState.Declaring
@@ -363,7 +363,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                else
                {
                   // TODO: If the remote did not indicate it supports reject we should really close the link.
-                  ErrorCondition rejection = new ErrorCondition(
+                  ErrorCondition rejection = new(
                      TransactionError.UNKNOWN_ID, "Transaction Manager is not tracking the given transaction ID.");
                   delivery.Disposition(new Rejected(rejection), true);
                }

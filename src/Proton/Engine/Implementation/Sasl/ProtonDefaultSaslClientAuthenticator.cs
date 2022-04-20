@@ -29,13 +29,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
    /// </summary>
    public sealed class ProtonDefaultSaslClientAuthenticator : ISaslClientAuthenticator
    {
-      public static readonly ProtonDefaultSaslClientAuthenticator Instance = new ProtonDefaultSaslClientAuthenticator();
+      public static readonly ProtonDefaultSaslClientAuthenticator Instance = new();
 
       private readonly Symbol ANONYMOUS = Symbol.Lookup("ANONYMOUS");
 
       public void HandleSaslChallenge(ISaslClientContext context, IProtonBuffer challenge)
       {
-         throw new System.NotImplementedException();
+         throw new NotImplementedException();
       }
 
       public void HandleSaslMechanisms(ISaslClientContext context, Symbol[] mechanisms)
@@ -56,7 +56,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
 
       public void HandleSaslOutcome(ISaslClientContext context, SaslAuthOutcome outcome, IProtonBuffer additional)
       {
-         throw new System.NotImplementedException();
+         throw new NotImplementedException();
       }
    }
 }

@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Utilities
          write = -1;
          size = 0;
 
-         Array.Fill(backingArray, default(T));
+         Array.Fill(backingArray, default);
       }
 
       /// <summary>
@@ -174,12 +174,12 @@ namespace Apache.Qpid.Proton.Utilities
       {
          if (IsEmpty())
          {
-            return default(T);
+            return default;
          }
          else
          {
             T result = backingArray[read];
-            backingArray[read] = default(T);
+            backingArray[read] = default;
             read = Advance(read, backingArray.Length);
             size--;
             return result;
@@ -211,7 +211,7 @@ namespace Apache.Qpid.Proton.Utilities
       /// <returns>The head of the queue or the default value contained type</returns>
       public T Peek()
       {
-         return IsEmpty() ? default(T) : backingArray[read];
+         return IsEmpty() ? default : backingArray[read];
       }
 
       /// <summary>
@@ -282,14 +282,14 @@ namespace Apache.Qpid.Proton.Utilities
             this.expectedReadIndex = parent.read;
             this.expectedSize = parent.size;
 
-            this.nextElement = default(T);
+            this.nextElement = default;
             this.position = parent.read;
             this.remaining = parent.size;
          }
 
          public void Dispose()
          {
-            nextElement = default(T);
+            nextElement = default;
          }
 
          object IEnumerator.Current => this.nextElement;
@@ -304,14 +304,14 @@ namespace Apache.Qpid.Proton.Utilities
             }
             else if (remaining <= 0)
             {
-               nextElement = default(T);
+               nextElement = default;
                return false;
             }
             else
             {
                nextElement = parent.backingArray[position];
                remaining--;
-               position = RingQueue<T>.Advance(position, parent.backingArray.Length);
+               position = Advance(position, parent.backingArray.Length);
 
                return true;
             }
@@ -319,7 +319,7 @@ namespace Apache.Qpid.Proton.Utilities
 
          public void Reset()
          {
-            this.nextElement = default(T);
+            this.nextElement = default;
             this.position = parent.read;
             this.remaining = parent.size;
          }

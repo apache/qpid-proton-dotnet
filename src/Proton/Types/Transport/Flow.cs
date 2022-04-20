@@ -324,7 +324,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public object Clone() => new Flow(this);
 
-      public Flow Copy() => new Flow(this);
+      public Flow Copy() => new(this);
 
       public PerformativeType Type => PerformativeType.Flow;
 

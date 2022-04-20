@@ -32,18 +32,18 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
          if (target == 0)
          {
             buffer.EnsureWritable(sizeof(byte));
-            buffer.WriteUnsignedByte(((byte)EncodingCodes.UInt0));
+            buffer.WriteUnsignedByte((byte)EncodingCodes.UInt0);
          }
          else if (target <= 255)
          {
             buffer.EnsureWritable(sizeof(byte) + sizeof(byte));
-            buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallUInt));
+            buffer.WriteUnsignedByte((byte)EncodingCodes.SmallUInt);
             buffer.WriteUnsignedByte((byte)target);
          }
          else
          {
             buffer.EnsureWritable(sizeof(byte) + sizeof(uint));
-            buffer.WriteUnsignedByte(((byte)EncodingCodes.UInt));
+            buffer.WriteUnsignedByte((byte)EncodingCodes.UInt);
             buffer.WriteUnsignedInt((uint)value);
          }
       }
@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       public override void WriteRawArray(IProtonBuffer buffer, IEncoderState state, Array values)
       {
          buffer.EnsureWritable(sizeof(byte) + (sizeof(uint) * values.Length));
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.UInt));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.UInt);
          foreach (uint value in values)
          {
             buffer.WriteUnsignedInt(value);

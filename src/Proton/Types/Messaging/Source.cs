@@ -120,7 +120,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override int GetHashCode()
       {
-         HashCode hash = new HashCode();
+         HashCode hash = new();
          hash.Add(Address);
          hash.Add(Durable);
          hash.Add(ExpiryPolicy);

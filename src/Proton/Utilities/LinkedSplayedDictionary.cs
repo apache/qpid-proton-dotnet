@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Utilities
       /// The first real entry is root.next, and the last is header.pervious.
       /// If the map is empty, root.next == root and root.previous == root.
       /// </summary>
-      private readonly SplayedEntry entries = new SplayedEntry();
+      private readonly SplayedEntry entries = new();
 
       public LinkedSplayedDictionary()
       {

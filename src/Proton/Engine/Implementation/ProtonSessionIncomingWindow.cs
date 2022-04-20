@@ -52,8 +52,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private uint maxFrameSize;
       private uint incomingBytes;
 
-      private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled =
-         new SplayedDictionary<uint, ProtonIncomingDelivery>();
+      private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled = new();
 
       public ProtonSessionIncomingWindow(ProtonSession session)
       {
@@ -234,7 +233,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region Handle sender link actions in the session window context
 
-      private readonly Disposition cachedDisposition = new Disposition();
+      private readonly Disposition cachedDisposition = new();
 
       internal void ProcessDisposition(ProtonReceiver receiver, ProtonIncomingDelivery delivery)
       {

@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// <returns></returns>
       public IMechanism Select(Symbol[] serverMechanisms, ISaslCredentialsProvider credentials)
       {
-         HashSet<Symbol> candidates = new HashSet<Symbol>(serverMechanisms);
+         HashSet<Symbol> candidates = new(serverMechanisms);
 
          if (allowedMechanisms.Count > 0)
          {

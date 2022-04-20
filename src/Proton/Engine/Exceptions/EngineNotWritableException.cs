@@ -20,7 +20,7 @@ using System;
 namespace Apache.Qpid.Proton.Engine.Exceptions
 {
    /// <summary>
-   /// Engine state exception thrown when an data ingest operation cannot be performed on an 
+   /// Engine state exception thrown when an data ingest operation cannot be performed on an
    /// engine that is not currently accepting input.
    /// </summary>
    public class EngineNotWritableException : EngineStateException
@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// Creates a default version of this exception type.
       /// </summary>
       public EngineNotWritableException() : base()
-      {         
+      {
       }
 
       /// <summary>

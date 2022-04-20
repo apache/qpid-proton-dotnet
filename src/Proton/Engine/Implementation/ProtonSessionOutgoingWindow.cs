@@ -53,8 +53,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private uint remoteIncomingWindow;
       private uint remoteNextIncomingId = 0;
 
-      private readonly SplayedDictionary<uint, ProtonOutgoingDelivery> unsettled =
-        new SplayedDictionary<uint, ProtonOutgoingDelivery>();
+      private readonly SplayedDictionary<uint, ProtonOutgoingDelivery> unsettled = new();
 
       public ProtonSessionOutgoingWindow(ProtonSession session)
       {
@@ -277,8 +276,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       #region Handlers for Sender link actions that occurs in the window context
 
-      private readonly Disposition cachedDisposition = new Disposition();
-      private readonly Transfer cachedTransfer = new Transfer();
+      private readonly Disposition cachedDisposition = new();
+      private readonly Transfer cachedTransfer = new();
 
       private void HandlePayloadToLargeRequiresSplitFrames(IPerformative performative)
       {
@@ -326,7 +325,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                }
                else
                {
-                  cachedTransfer.DeliveryTag = (IDeliveryTag)null;
+                  cachedTransfer.DeliveryTag = null;
                }
                cachedTransfer.More = !complete;
 

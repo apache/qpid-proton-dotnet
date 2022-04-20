@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
 
       private static SaslOutcome ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         SaslOutcome result = new SaslOutcome();
+         SaslOutcome result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -88,12 +88,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
          {
             switch (index)
             {
-                case 0:
-                    result.Code = (SaslCode) state.Decoder.ReadUnsignedByte(buffer, state);
-                    break;
-                case 1:
-                    result.AdditionalData = state.Decoder.ReadBinary(buffer, state);
-                    break;
+               case 0:
+                  result.Code = (SaslCode)state.Decoder.ReadUnsignedByte(buffer, state);
+                  break;
+               case 1:
+                  result.AdditionalData = state.Decoder.ReadBinary(buffer, state);
+                  break;
             }
          }
 
@@ -133,7 +133,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
 
       private static SaslOutcome ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         SaslOutcome result = new SaslOutcome();
+         SaslOutcome result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);
@@ -153,12 +153,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Security
          {
             switch (index)
             {
-                case 0:
-                    result.Code = (SaslCode) state.Decoder.ReadUnsignedByte(stream, state);
-                    break;
-                case 1:
-                    result.AdditionalData = state.Decoder.ReadBinary(stream, state);
-                    break;
+               case 0:
+                  result.Code = (SaslCode)state.Decoder.ReadUnsignedByte(stream, state);
+                  break;
+               case 1:
+                  result.AdditionalData = state.Decoder.ReadBinary(stream, state);
+                  break;
             }
          }
 

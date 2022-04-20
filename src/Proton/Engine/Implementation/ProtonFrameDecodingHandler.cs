@@ -214,7 +214,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             if (headerByte == AmqpHeader.HeaderSizeBytes)
             {
                // Construct a new Header from the read bytes which will validate the contents
-               AmqpHeader header = new AmqpHeader(headerBytes);
+               AmqpHeader header = new(headerBytes);
 
                // Transition to parsing the frames if any pipelined into this buffer.
                handler.TransitionToFrameSizeParsingStage();
@@ -420,7 +420,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             else if (type == SASL_FRAME_TYPE)
             {
                ISaslPerformative performative = (ISaslPerformative)val;
-               SaslEnvelope saslFrame = new SaslEnvelope(performative);
+               SaslEnvelope saslFrame = new(performative);
                handler.TransitionToFrameSizeParsingStage();
                // Ensure we process transition from SASL to AMQP header state
                handler.HandleRead(context, saslFrame);

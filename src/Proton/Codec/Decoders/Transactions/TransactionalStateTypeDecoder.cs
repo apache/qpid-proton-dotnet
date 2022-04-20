@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
 
       private static TransactionalState ReadType(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
       {
-         TransactionalState result = new TransactionalState();
+         TransactionalState result = new();
 
          _ = listDecoder.ReadSize(buffer, state);
          int count = listDecoder.ReadCount(buffer, state);
@@ -132,7 +132,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transactions
 
       private static TransactionalState ReadType(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         TransactionalState result = new TransactionalState();
+         TransactionalState result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);

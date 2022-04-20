@@ -26,13 +26,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public class ProtonEngineNoOpSaslDriver : IEngineSaslDriver
    {
-      public static readonly ProtonEngineNoOpSaslDriver Instance = new ProtonEngineNoOpSaslDriver();
+      public static readonly ProtonEngineNoOpSaslDriver Instance = new();
 
       public static readonly uint MinMaxSaslFrameSize = 512;
 
       public EngineSaslState SaslState => EngineSaslState.None;
 
-      public SaslAuthOutcome? SaslOutcome => Engine.Sasl.SaslAuthOutcome.SaslOk;
+      public SaslAuthOutcome? SaslOutcome => SaslAuthOutcome.SaslOk;
 
       public uint MaxFrameSize
       {

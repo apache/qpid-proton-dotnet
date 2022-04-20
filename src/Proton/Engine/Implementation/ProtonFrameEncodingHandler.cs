@@ -31,12 +31,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       /**
        * Frame type indicator for AMQP protocol frames.
        */
-      public static readonly byte AMQP_FRAME_TYPE = (byte)0;
+      public static readonly byte AMQP_FRAME_TYPE = 0;
 
       /**
        * Frame type indicator for SASL protocol frames.
        */
-      public static readonly byte SASL_FRAME_TYPE = (byte)1;
+      public static readonly byte SASL_FRAME_TYPE = 1;
 
       private static readonly uint AMQP_PERFORMATIVE_PAD = 256;
       private static readonly uint FRAME_HEADER_SIZE = 8;

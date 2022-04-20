@@ -252,7 +252,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          EngineStateException failure;
 
-         if (state < EngineState.ShuttingDown && state != EngineState.Failed)
+         if (state is < EngineState.ShuttingDown and not EngineState.Failed)
          {
             state = EngineState.Failed;
             failureCause = cause;
@@ -431,8 +431,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             {
                if (connection.ConnectionState != ConnectionState.Closed)
                {
-                  ErrorCondition condition = new ErrorCondition(
-                      Symbol.Lookup("amqp:resource-limit-exceeded"), "local-idle-timeout expired");
+                  ErrorCondition condition = new(Symbol.Lookup("amqp:resource-limit-exceeded"), "local-idle-timeout expired");
                   connection.ErrorCondition = condition;
                   connection.Close();
                   EngineFailed(new IdleTimeoutException("Remote idle timeout detected"));

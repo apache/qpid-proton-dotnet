@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
             throw new ArgumentNullException(nameof(mechanism), "Client must choose a mechanism");
          }
 
-         SaslInit saslInit = new SaslInit(mechanism, initialResponse, host);
+         SaslInit saslInit = new(mechanism, initialResponse, host);
          saslHandler.Engine.Pipeline.FireWrite(new SaslEnvelope(saslInit));
          return this;
       }

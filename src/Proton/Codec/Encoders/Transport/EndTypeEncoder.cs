@@ -30,12 +30,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transport
 
       protected override EncodingCodes GetListEncoding(End value)
       {
-        return value.Error == null ? EncodingCodes.List8 : EncodingCodes.List32;
+         return value.Error == null ? EncodingCodes.List8 : EncodingCodes.List32;
       }
 
       protected override int GetElementCount(End value)
       {
-        return value.Error == null ? 0 : 1;
+         return value.Error == null ? 0 : 1;
       }
 
       protected override void WriteElement(End end, int index, IProtonBuffer buffer, IEncoderState state)
@@ -43,8 +43,8 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Transport
          switch (index)
          {
             case 0:
-                state.Encoder.WriteObject(buffer, state, end.Error);
-                break;
+               state.Encoder.WriteObject(buffer, state, end.Error);
+               break;
             default:
                throw new ArgumentOutOfRangeException("Unknown End value index: " + index);
          }

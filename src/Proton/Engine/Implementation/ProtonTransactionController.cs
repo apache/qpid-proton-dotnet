@@ -70,7 +70,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       private Action<ITransactionController> parentEndpointClosedEventHandler;
 
-      private readonly List<Action<ITransactionController>> capacityObservers = new List<Action<ITransactionController>>();
+      private readonly List<Action<ITransactionController>> capacityObservers = new();
 
       public ProtonTransactionController(ProtonSender sender) : base(sender.ProtonEngine)
       {
@@ -174,7 +174,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public ITransaction<ITransactionController> NewTransaction()
       {
-         ProtonControllerTransaction txn = new ProtonControllerTransaction(this);
+         ProtonControllerTransaction txn = new(this);
          transactions.Add(txn);
 
          return txn;
@@ -253,9 +253,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          protonTxn.State = TransactionState.Discharging;
          protonTxn.DischargeState = failed ? DischargeState.Rollback : DischargeState.Commit;
 
-         Discharge discharge = new Discharge();
-         discharge.Fail = failed;
-         discharge.TxnId = transaction.TxnId;
+         Discharge discharge = new()
+         {
+            Fail = failed,
+            TxnId = transaction.TxnId
+         };
 
          commandEncoder.WriteObject(encoding.Reset(), commandEncoder.CachedEncoderState, new AmqpValue(discharge));
 
@@ -407,7 +409,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          if (sender.IsSendable && capacityObservers.Count > 0)
          {
-            List<Action<ITransactionController>> copyOf = new List<Action<ITransactionController>>(capacityObservers);
+            List<Action<ITransactionController>> copyOf = new(capacityObservers);
             foreach (Action<ITransactionController> handler in copyOf)
             {
                if (HasCapacity)
