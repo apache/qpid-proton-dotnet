@@ -11,7 +11,7 @@
          "preLaunchTask": "build",
          // If you have changed target frameworks, make sure to update the program path.
          "program": "${workspaceFolder}/Example.StreamingFileReceiver/bin/Debug/net5.0/Example.StreamingFileReceiver.dll",
-         "args": ["/home/timothy/Temporary"],
+         "args": ["/tmp"],
          "cwd": "${workspaceFolder}/Example.StreamingFileReceiver",
          // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
          "console": "internalConsole",
