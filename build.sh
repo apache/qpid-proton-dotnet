@@ -56,14 +56,17 @@ do
 
       SRC_DIR=qpid-proton-dotnet-src-$VERSION
       BIN_DIR=qpid-proton-dotnet-bin-$VERSION
+      DOC_DIR=qpid-proton-dotnet-docs-$VERSION
 
       rm -rf "dist/${SRC_DIR}"
       rm -rf "dist/${BIN_DIR}"
+      rm -rf "dist/${DOC_DIR}"
       rm -rf "dist/${VERSION}"
 
       if [ -d .git ]; then
         mkdir -p "dist/${SRC_DIR}"
         mkdir -p "dist/${BIN_DIR}"
+        mkdir -p "dist/${DOC_DIR}"
         mkdir -p "dist/${VERSION}"
         git archive HEAD | tar -x -C "dist/${SRC_DIR}"
       else
@@ -90,6 +93,10 @@ do
 
       (cd dist; tar czf "../dist/${VERSION}/${BIN_DIR}.tar.gz" "${BIN_DIR}")
 
+      # build documentation release archive
+      (env DOXYGEN_OUTPUT_PATH="dist/${DOC_DIR}" doxygen Proton.dox)
+      (cd dist; tar czf "../dist/${VERSION}/${DOC_DIR}.tar.gz" "${DOC_DIR}")
+
       ;;
 
     sign)
@@ -113,6 +120,7 @@ do
       ;;
 
     clean)
+      dotnet clean
       rm -rf src/{Proton,Proton.Client,Proton.TestPeer}/{obj,bin}
       rm -rf test/{Proton.Tests,Proton.Client.Tests,Proton.TestPeer.Tests}/{obj,bin}
       rm -rf dist
