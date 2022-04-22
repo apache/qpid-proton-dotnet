@@ -17,16 +17,13 @@
 #  limitations under the License.
 #
 
-# This might not have been sourced if the entrypoint is not bash
-[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
-
 set -xe
 cd "${0%/*}"
 
 VERSION=$(<VERSION.txt)
 
 usage() {
-  echo "Usage: $0 {test|dist|sign|clean|veryclean|docker|rat|githooks}"
+  echo "Usage: $0 {test|dist|sign|clean|docker-test|rat}"
   exit 1
 }
 
@@ -125,6 +122,12 @@ do
       rm -rf test/{Proton.Tests,Proton.Client.Tests,Proton.TestPeer.Tests}/{obj,bin}
       rm -rf dist
       rm -rf target
+      ;;
+
+    docker-test)
+      tar -cf- docker/Dockerfile |
+        docker build -t proton-test -f docker/Dockerfile -
+      docker run --rm -v "${PWD}:/proton${DOCKER_MOUNT_FLAG}" -w "/proton" --env "JAVA=${JAVA:-11}" proton-test /proton/docker/run-tests.sh
       ;;
 
     *)
