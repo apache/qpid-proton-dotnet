@@ -130,6 +130,12 @@ do
       docker run --rm -v "${PWD}:/proton${DOCKER_MOUNT_FLAG}" -w "/proton" --env "JAVA=${JAVA:-11}" proton-test /proton/docker/run-tests.sh
       ;;
 
+    podman-test)
+      tar -cf- docker/Dockerfile |
+        podman build -t proton-test -f docker/Dockerfile -
+      podman run --rm -v "${PWD}:/proton${DOCKER_MOUNT_FLAG}:Z,U" -w "/proton" --env "JAVA=${JAVA:-11}" proton-test /proton/docker/run-tests.sh
+      ;;
+
     *)
       usage
       ;;
