@@ -991,14 +991,13 @@ namespace Apache.Qpid.Proton.Buffer
 
             foreach (IProtonBuffer buffer in buffers)
             {
-               if (buffer.WritableBytes == 0 && !unwrittenBufferEnforced)
-               {
-                  writeOffset += buffer.Capacity;
-               }
-               else if (!unwrittenBufferEnforced)
+               if (!unwrittenBufferEnforced)
                {
                   writeOffset += buffer.WriteOffset;
-                  unwrittenBufferEnforced = true;
+                  if (buffer.WritableBytes > 0)
+                  {
+                     unwrittenBufferEnforced = true;
+                  }
                }
                else if (buffer.WriteOffset != 0)
                {
@@ -1008,14 +1007,13 @@ namespace Apache.Qpid.Proton.Buffer
             }
             foreach (IProtonBuffer buffer in buffers)
             {
-               if (!unreadBufferEnforced && buffer.ReadableBytes == 0 && buffer.WritableBytes == 0)
-               {
-                  readOffset += buffer.Capacity;
-               }
-               else if (!unreadBufferEnforced)
+               if (!unreadBufferEnforced)
                {
                   readOffset += buffer.ReadOffset;
-                  unreadBufferEnforced = true;
+                  if (buffer.ReadableBytes > 0 || buffer.WritableBytes > 0)
+                  {
+                     unreadBufferEnforced = true;
+                  }
                }
                else if (buffer.ReadOffset != 0)
                {
