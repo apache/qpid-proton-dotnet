@@ -23,7 +23,7 @@ cd "${0%/*}"
 VERSION=$(<VERSION.txt)
 
 usage() {
-  echo "Usage: $0 {test|dist|sign|clean|docker-test|rat}"
+  echo "Usage: $0 {test|docs|dist|sign|clean|docker-test|rat}"
   exit 1
 }
 
@@ -45,6 +45,22 @@ do
 
     rat)
       mvn apache-rat:check -pl :qpid-proton-dotnet
+      ;;
+
+    docs)
+      # builds the docs for publication
+
+      if [[ -z "${DOCS_OUTPUT_DIR}" ]]; then
+         mkdir -p dist
+         DOC_DIR=dist/qpid-proton-dotnet-docs-$VERSION
+         rm -rf ${DOC_DIR}
+      else
+         DOC_DIR=${DOCS_OUTPUT_DIR}
+      fi
+
+      # build documentation
+      (env DOXYGEN_OUTPUT_PATH=${DOC_DIR} doxygen Proton.dox)
+      echo "Wrote documentation to directory: $DOC_DIR"
       ;;
 
     dist)
