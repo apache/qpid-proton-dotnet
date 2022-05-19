@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Client
       public static readonly bool DEFAULT_USE_RECONNECT_BACKOFF = true;
       public static readonly double DEFAULT_RECONNECT_BACKOFF_MULTIPLIER = 2.0d;
 
-      private readonly List<ReconnectLocation> reconnectLocations = new List<ReconnectLocation>();
+      private readonly List<ReconnectLocation> reconnectLocations = new();
 
       /// <summary>
       /// Creates a default reconnect options instance.

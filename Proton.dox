@@ -16,7 +16,7 @@
 ##
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Proton .NET"
+PROJECT_NAME           = "Proton DotNet"
 OUTPUT_DIRECTORY       = $(DOXYGEN_OUTPUT_PATH)
 TAB_SIZE               = 8
 INPUT                  = src/Proton,src/Proton.Client

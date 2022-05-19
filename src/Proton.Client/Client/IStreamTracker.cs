@@ -61,7 +61,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Settles the sent delivery if not performing auto-settlement on the sender
       /// and returns a Task that will be completed once any IO operations required
-      /// by the settlement have compelted.
+      /// by the settlement have completed.
       /// </summary>
       /// <returns>This tracker instance</returns>
       Task<IStreamTracker> SettleAsync();
@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Apply the delivery state and optionally settle the sent delivery with the remote.
       /// The method returns a Task that will be completed once any required IO operations
-      /// in order to apply the dispostion have been completed.
+      /// in order to apply the disposition have been completed.
       /// </summary>
       /// <param name="state">The delivery state to apply to the sent delivery</param>
       /// <param name="settle">Optionally settle the delivery that was sent</param>

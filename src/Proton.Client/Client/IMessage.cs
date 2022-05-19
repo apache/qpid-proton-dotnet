@@ -89,7 +89,7 @@ namespace Apache.Qpid.Proton.Client
       #region Conversion helper to Advanced Message handling
 
       /// <summary>
-      /// Safely converts this message to an advacned message instance which allows lower level
+      /// Safely converts this message to an advanced message instance which allows lower level
       /// access to AMQP message constructs.
       ///
       /// The default implementation first checks if the current instance is already of the correct
@@ -334,7 +334,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Checks if the message carries any message properties.
       /// </summary>
-      /// <returns>true if the message instance carries any propties</returns>
+      /// <returns>true if the message instance carries any properties</returns>
       bool HasProperties { get; }
 
       /// <summary>

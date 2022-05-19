@@ -30,7 +30,6 @@ namespace Apache.Qpid.Proton.Client
       public static readonly uint DEFAULT_SO_TIMEOUT = 0;
       public static readonly int DEFAULT_TCP_PORT = 5672;
       public static readonly int DEFAULT_LOCAL_PORT = 0;
-      public static readonly bool DEFAULT_USE_WEBSOCKETS = false;
       public static readonly int DEFAULT_WEBSOCKET_MAX_FRAME_SIZE = 65535;
       public static readonly bool DEFAULT_TRACE_BYTES = false;
 

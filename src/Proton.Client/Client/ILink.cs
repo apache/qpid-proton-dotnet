@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// link resources.
       /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
+      /// <param name="error">Optional error condition to convey to the remote</param>
       void Close(IErrorCondition error = null);
 
       /// <summary>
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// link resources.
       /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
+      /// <param name="error">Optional error condition to convey to the remote</param>
       void Detach(IErrorCondition error = null);
 
       /// <summary>
@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the sender will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
+      /// <param name="error">Optional error condition to convey to the remote</param>
       Task<Role> CloseAsync(IErrorCondition error = null);
 
       /// <summary>
@@ -157,7 +157,7 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the sender will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
+      /// <param name="error">Optional error condition to convey to the remote</param>
       Task<Role> DetachAsync(IErrorCondition error = null);
 
    }

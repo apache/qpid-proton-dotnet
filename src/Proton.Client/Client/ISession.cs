@@ -49,7 +49,7 @@ namespace Apache.Qpid.Proton.Client
       /// exceeds the configure close timeout the method returns after cleaning up the
       /// session resources.
       /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
+      /// <param name="error">Optional error condition to convey to the remote</param>
       void Close(IErrorCondition error = null);
 
       /// <summary>
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Client
       /// operation. If the response from the remote exceeds the configure close timeout
       /// the session will be cleaned up and the Task signalled indicating completion.
       /// </summary>
-      /// <param name="error">Optional error condition to convery to the remote</param>
+      /// <param name="error">Optional error condition to convey to the remote</param>
       Task<ISession> CloseAsync(IErrorCondition error = null);
 
       /// <summary>
@@ -289,7 +289,7 @@ namespace Apache.Qpid.Proton.Client
 
       /// <summary>
       /// Asynchronously commit the currently active transaction in this Session, the transaction
-      /// cannot be considered retired until the Task has been compeleted.
+      /// cannot be considered retired until the Task has been completed.
       /// <para>
       /// Commit the currently active transaction in this Session but does not start a new
       /// transaction automatically. If there is no current transaction this method fails the returned

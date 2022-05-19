@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Client
       /// </summary>
       public static readonly bool DEFAULT_SASL_ENABLED = true;
 
-      private readonly HashSet<string> allowedMechanisms = new HashSet<string>();
+      private readonly HashSet<string> allowedMechanisms = new();
 
       /// <summary>
       /// Creates a default SASL options instance.

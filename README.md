@@ -1,7 +1,7 @@
-# Apache Qpid Proton.NET
+# Apache Qpid Proton DotNet
 ===========================
 
-Qpid Proton.NET is a high-performance, lightweight AMQP protocol library. It can be
+Qpid Proton DotNet is a high-performance, lightweight AMQP protocol library. It can be
 used in the widest range of messaging applications, including brokers, client
 libraries, routers, bridges, proxies, and more.
 

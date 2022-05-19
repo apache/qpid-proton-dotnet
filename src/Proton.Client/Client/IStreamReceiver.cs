@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Client
       /// Receive calls will only grant credit on their own if a credit window is configured in the options
       /// which by default will have been configured.  If the client application has not configured a credit
       /// window then this method won't grant or extend the credit window but will wait for a delivery
-      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// regardless. The application needs to arrange for credit to be granted in that case.
       /// </remarks>
       /// <returns>The next available delivery</returns>
       IStreamDelivery Receive();
@@ -48,7 +48,7 @@ namespace Apache.Qpid.Proton.Client
       /// Receive calls will only grant credit on their own if a credit window is configured in the options
       /// which by default will have been configured.  If the client application has not configured a credit
       /// window then this method won't grant or extend the credit window but will wait for a delivery
-      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// regardless. The application needs to arrange for credit to be granted in that case.
       /// </remarks>
       IStreamDelivery Receive(TimeSpan timeout);
 
@@ -69,13 +69,13 @@ namespace Apache.Qpid.Proton.Client
       /// Receive calls will only grant credit on their own if a credit window is configured in the options
       /// which by default will have been configured.  If the client application has not configured a credit
       /// window then this method won't grant or extend the credit window but will wait for a delivery
-      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// regardless. The application needs to arrange for credit to be granted in that case.
       /// </remarks>
       /// <returns>The next available delivery</returns>
       Task<IStreamDelivery> ReceiveAsync();
 
       /// <summary>
-      /// Asynchronous receive method that returns a Task that will be completed afterthe specified time
+      /// Asynchronous receive method that returns a Task that will be completed after the specified time
       /// period if the remote to provides a delivery for consumption before completing with null if none was
       /// received. The returned task completes with a streamed delivery instance that allows for consumption
       /// or the incoming delivery as it arrives.
@@ -84,7 +84,7 @@ namespace Apache.Qpid.Proton.Client
       /// Receive calls will only grant credit on their own if a credit window is configured in the options
       /// which by default will have been configured.  If the client application has not configured a credit
       /// window then this method won't grant or extend the credit window but will wait for a delivery
-      /// regardless. The application needs to arrage for credit to be granted in that case.
+      /// regardless. The application needs to arrange for credit to be granted in that case.
       /// </remarks>
       /// <returns>The next available delivery or null if the time span elapses</returns>
       Task<IStreamDelivery> ReceiveAsync(TimeSpan timeout);

@@ -29,11 +29,10 @@
    <groupId>org.apache.qpid</groupId>
    <artifactId>qpid-proton-dotnet</artifactId>
    <version>1.0.0-SNAPSHOT</version>
-   <name>QpidDispatch</name>
-   <inceptionYear>2022</inceptionYear>
+   <name>Qpid Proton Dotnet</name>
    <url>https://qpid.apache.org</url>
-
-   <description>Qpid Proton .NET</description>
+   <description>Qpid Proton Engine and Client for .NET</description>
+   <inceptionYear>2022</inceptionYear>
 
    <properties>
       <maven.compiler.source>11</maven.compiler.source>
