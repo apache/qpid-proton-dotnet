@@ -134,7 +134,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private Task<ITracker> DoSendMessageAsync<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)
       {
-         TaskCompletionSource<ITracker> operation = new TaskCompletionSource<ITracker>();
+         TaskCompletionSource<ITracker> operation = new();
 
          IProtonBuffer buffer = message.Encode(deliveryAnnotations);
 
@@ -144,7 +144,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                try
                {
-                  ClientOutgoingEnvelope envelope = new ClientOutgoingEnvelope(this, message.MessageFormat, buffer, operation);
+                  ClientOutgoingEnvelope envelope = new(this, message.MessageFormat, buffer, operation);
 
                   if (ProtonSender.IsSendable && ProtonSender.Current == null)
                   {
@@ -274,7 +274,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #endregion
 
-      #region Proton Sender lifecycle envent handlers
+      #region Proton Sender lifecycle event handlers
 
       private void HandleLocalOpen(Engine.ISender sender)
       {

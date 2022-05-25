@@ -110,7 +110,7 @@ namespace Apache.Qpid.Proton.Client.Transport
             // since we are shutting down anyway.
             try
             {
-               ChannelTermination termination = new ChannelTermination();
+               ChannelTermination termination = new();
                if ((!channelOutputSource?.TryWrite(termination) ?? true) || !connected)
                {
                   termination.Execute();

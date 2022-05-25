@@ -482,6 +482,79 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result.Task;
       }
 
+      public IReceiver NextReceiver()
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, TimeSpan.MaxValue).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> NextReceiverAsync()
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, TimeSpan.MaxValue);
+      }
+
+      public IReceiver NextReceiver(NextReceiverPolicy policy)
+      {
+         return NextReceiverAsync(policy, TimeSpan.MaxValue).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy)
+      {
+         return NextReceiverAsync(policy, TimeSpan.MaxValue);
+      }
+
+      public IReceiver NextReceiver(TimeSpan timeout)
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, timeout).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> NextReceiverAsync(TimeSpan timeout)
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, timeout);
+      }
+
+      public IReceiver NextReceiver(NextReceiverPolicy policy, TimeSpan timeout)
+      {
+         return NextReceiverAsync(policy, timeout).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy, TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         TaskCompletionSource<IReceiver> result = new();
+
+         DefaultSessionAsync().ContinueWith(session =>
+         {
+            if (session.IsCompletedSuccessfully)
+            {
+               session.Result.NextReceiverAsync(policy, timeout).ContinueWith(tracker =>
+               {
+                  if (tracker.IsCompletedSuccessfully)
+                  {
+                     result.TrySetResult(tracker.Result);
+                  }
+                  else if (tracker.IsCanceled)
+                  {
+                     result.TrySetCanceled();
+                  }
+                  else
+                  {
+                     result.TrySetException(tracker.Exception.InnerException);
+                  }
+               });
+            }
+            else if (session.IsCanceled)
+            {
+               result.TrySetCanceled();
+            }
+            else
+            {
+               result.TrySetException(session.Exception.InnerException);
+            }
+         });
+
+         return result.Task;
+      }
+
       public override string ToString()
       {
          return "ClientConnection:[" + ConnectionId + "]";
@@ -988,7 +1061,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void DoEngineTickAndReschedule()
       {
-         // Prevent a tick that was queued on the event loop from occuring if the
+         // Prevent a tick that was queued on the event loop from occurring if the
          // connection dropped and a new engine was created for a reconnect attempt.
          if (engine.Connection.IsRemotelyOpen && engine.Connection.IsLocallyOpen)
          {

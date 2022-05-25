@@ -19,7 +19,7 @@ using System;
 using System.IO;
 using Apache.Qpid.Proton.Client;
 
-namespace Apache.Qpid.Proton.Examples.HelloWorld
+namespace Apache.Qpid.Proton.Examples.LargeMessageReceiver
 {
    class Program
    {
@@ -31,9 +31,11 @@ namespace Apache.Qpid.Proton.Examples.HelloWorld
 
          IClient client = IClient.Create();
 
-         ConnectionOptions options = new ConnectionOptions();
-         options.User = Environment.GetEnvironmentVariable("USER");
-         options.Password = Environment.GetEnvironmentVariable("PASSWORD");
+         ConnectionOptions options = new()
+         {
+            User = Environment.GetEnvironmentVariable("USER"),
+            Password = Environment.GetEnvironmentVariable("PASSWORD")
+         };
 
          using IConnection connection = client.Connect(serverHost, serverPort, options);
          using IStreamReceiver receiver = connection.OpenStreamReceiver(address);

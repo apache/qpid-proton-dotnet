@@ -33,6 +33,7 @@ namespace Apache.Qpid.Proton.Client
       public static readonly long DEFAULT_DRAIN_TIMEOUT = 60000;
       public static readonly ushort DEFAULT_CHANNEL_MAX = 65535;
       public static readonly uint DEFAULT_MAX_FRAME_SIZE = 65536;
+      public static readonly NextReceiverPolicy DEFAULT_NEXT_RECEIVER_POLICY = NextReceiverPolicy.RoundRobin;
 
       /// <summary>
       /// Creates a default Connection options instance.
@@ -74,6 +75,7 @@ namespace Apache.Qpid.Proton.Client
          other.ChannelMax = ChannelMax;
          other.MaxFrameSize = MaxFrameSize;
          other.TraceFrames = TraceFrames;
+         other.DefaultNextReceiverPolicy = DefaultNextReceiverPolicy;
          if (OfferedCapabilities != null && OfferedCapabilities.Length > 0)
          {
             string[] copyOf = new string[OfferedCapabilities.Length];
@@ -184,6 +186,12 @@ namespace Apache.Qpid.Proton.Client
       /// than what is set here.
       /// </summary>
       public uint MaxFrameSize { get; set; } = DEFAULT_MAX_FRAME_SIZE;
+
+      /// <summary>
+      /// Configures the default next receiver policy for this connection and any session
+      /// that is created without specifying user defined session default options.
+      /// </summary>
+      public NextReceiverPolicy DefaultNextReceiverPolicy { get; set; } = DEFAULT_NEXT_RECEIVER_POLICY;
 
       /// <summary>
       /// Configures the set of capabilities that a new connection will advertise to the remote.

@@ -336,5 +336,87 @@ namespace Apache.Qpid.Proton.Client
       /// <returns>A Task whose result is the Session no longer under a transaction</returns>
       Task<ISession> RollbackTransactionAsync();
 
+      /// <summary>
+      /// Waits indefinitely for a receiver created from this session to have a delivery ready for
+      /// receipt. The selection of the next receiver when more than one exists which has pending
+      /// deliveries is based upon the configured value of the default next receiver policy that
+      /// was configured in the session options used to create this session, or the connection
+      /// level policy if none was assigned to the session options.
+      /// </summary>
+      /// <returns>The next receiver that has a pending delivery available based on policy.</returns>
+      IReceiver NextReceiver();
+
+      /// <summary>
+      /// Returns a task that will complete only after a receiver created from this session has
+      /// a delivery ready for receipt. The selection of the next receiver when more than one
+      /// exists which has pending deliveries is based upon the configured value of the default next
+      /// receiver policy that was configured in the session options used to create this session,
+      /// or the connection level policy if none was assigned to the session options.
+      /// </summary>
+      /// <returns>A Task that results in the next receiver that has a pending delivery available based on policy.</returns>
+      Task<IReceiver> NextReceiverAsync();
+
+      /// <summary>
+      /// Waits indefinitely for a receiver created from this session to have a delivery ready for
+      /// receipt. The selection of the next receiver when more than one exists which has pending
+      /// deliveries is based upon the value of the next receiver policy that is provided by the caller.
+      /// </summary>
+      /// <param name="policy">The next receiver policy to apply when selecting a result</param>
+      /// <returns></returns>
+      IReceiver NextReceiver(NextReceiverPolicy policy);
+
+      /// <summary>
+      /// Returns a task that will complete only after a receiver created from this session has
+      /// a delivery ready for receipt. The selection of the next receiver when more than one
+      /// exists which has pending deliveries is based upon the value of the next receiver policy
+      /// that is provided by the caller.
+      /// </summary>
+      /// <param name="policy">The next receiver policy to apply when selecting a result</param>
+      /// <returns>A Task that results in the next receiver that has a pending delivery available based on policy.</returns>
+      Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy);
+
+      /// <summary>
+      /// Waits up to the given timeout for a receiver created from this session to have a delivery ready
+      /// for receipt. The selection of the next receiver when more than one exists which has pending
+      /// deliveries is based upon the configured value of the default next receiver policy that was
+      /// configured in the session options used to create this session, or the connection level policy
+      /// if none was assigned to the session options.
+      /// </summary>
+      /// <param name="timeout">The time to wait for a receiver to have a pending delivery</param>
+      /// <returns></returns>
+      IReceiver NextReceiver(TimeSpan timeout);
+
+      /// <summary>
+      /// Returns a task that will complete once a receiver created from this session has a delivery
+      /// ready for receipt or the given timeout expires. The selection of the next receiver when more
+      /// than one exists which has pending deliveries is based upon the configured value of the default
+      /// next receiver policy that was configured in the session options used to create this session,
+      /// or the connection level policy if none was assigned to the session options.
+      /// </summary>
+      /// <param name="timeout">The time to wait for a receiver to have a pending delivery</param>
+      /// <returns></returns>
+      Task<IReceiver> NextReceiverAsync(TimeSpan timeout);
+
+      /// <summary>
+      /// Waits up to the given timeout for a receiver created from this session to have a delivery ready
+      /// for receipt. The selection of the next receiver when more than one exists which has pending
+      /// deliveries is based upon the value of the next receiver policy that is provided by the caller.
+      /// </summary>
+      /// <param name="policy">The next receiver policy to apply when selecting a result</param>
+      /// <param name="timeout">The time to wait for a receiver to have a pending delivery</param>
+      /// <returns>A Task that results in the next receiver that has a pending delivery available based on policy.</returns>
+      IReceiver NextReceiver(NextReceiverPolicy policy, TimeSpan timeout);
+
+      /// <summary>
+      /// Returns a task that will complete once a receiver created from this session has a delivery
+      /// ready for receipt or the given timeout expires. The selection of the next receiver when more
+      /// than one exists which has pending deliveries is based upon the value of the next receiver policy
+      /// that is provided by the caller.
+      /// </summary>
+      /// <param name="policy">The next receiver policy to apply when selecting a result</param>
+      /// <param name="timeout">The time to wait for a receiver to have a pending delivery</param>
+      /// <returns>A Task that results in the next receiver that has a pending delivery available based on policy.</returns>
+      Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy, TimeSpan timeout);
+
    }
 }

@@ -98,7 +98,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      CloseTimeout = connectionOptions.CloseTimeout,
                      RequestTimeout = connectionOptions.RequestTimeout,
                      SendTimeout = connectionOptions.SendTimeout,
-                     DrainTimeout = connectionOptions.DrainTimeout
+                     DrainTimeout = connectionOptions.DrainTimeout,
+                     DefaultNextReceiverPolicy = connectionOptions.DefaultNextReceiverPolicy
                   };
                }
 

@@ -2856,5 +2856,43 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.IsNotNull(failure);
          Assert.IsTrue(failure is ProtocolViolationException);
       }
+
+      [Test]
+      public void TestSessionWideDeliveryMonitoringHandler()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         bool deliveryReadByReceiver = false;
+         bool deliveryReadBySession = false;
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfReceiver().Respond();
+         peer.ExpectFlow().WithLinkCredit(1);
+         peer.RemoteTransfer().WithHandle(0)
+                              .WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 1 })
+                              .OnChannel(0)
+                              .Queue();
+
+         IConnection connection = engine.Start().Open();
+         ISession session = connection.Session().Open();
+
+         session.DeliveryReadHandler((delivery) => deliveryReadBySession = true);
+
+         IReceiver receiver = session.Receiver("test");
+         receiver.DeliveryReadHandler((delivery) => deliveryReadByReceiver = true);
+         receiver.Open().AddCredit(1);
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsTrue(deliveryReadByReceiver);
+         Assert.IsTrue(deliveryReadBySession);
+
+         Assert.IsNull(failure);
+      }
    }
 }

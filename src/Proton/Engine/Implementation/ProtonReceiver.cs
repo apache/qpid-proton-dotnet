@@ -392,6 +392,13 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             deliveryReadEventHandler?.Invoke(delivery);
          }
+
+         // Allow session owner to monitor deliveries passing through the session
+         // but only after the receiver handlers have had a chance to handle it.
+         if (session.HasDeliveryReadHandler)
+         {
+            session.FireDeliveryRead(delivery);
+         }
       }
 
       internal void FireDeliveryUpdated(ProtonIncomingDelivery delivery)

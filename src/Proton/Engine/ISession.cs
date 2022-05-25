@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Sets a delegate for when an AMQP Attach frame is received from the remote peer
       /// for a transaction manager link attach.
       /// <para/>
-      /// Used to process remotely initiated transcation mangaers. Locally initiated links have
+      /// Used to process remotely initiated transaction managers. Locally initiated links have
       /// their own handlers invoked instead. This method is Typically used by servers to listen
       /// for remote resource creation. If an event handler for remote sender open is registered on
       /// this Session for a link scoped to it then this handler will be invoked instead of the
@@ -157,6 +157,18 @@ namespace Apache.Qpid.Proton.Engine
       /// <param name="handler">The delegate that will handle this event</param>
       /// <returns>This session instance</returns>
       ISession TransactionManagerOpenedHandler(Action<ITransactionManager> handler);
+
+      /// <summary>
+      /// Allows monitoring of incoming deliveries to receivers attached to this {@link Session}.
+      /// The Receiver that is the target of the incoming delivery will be notified first of the
+      /// incoming delivery and any processing should be done using the Receiver DeliveryReadHandler
+      /// API. This event point will be trigger only after the Receiver level handler and should be
+      /// used to monitor deliveries passing through a session for logging or other state related
+      /// actions performed by the service managing this session.
+      /// </summary>
+      /// <param name="handler">Handler that is signalled that a receiver read a new delivery</param>
+      /// <returns>This session instance</returns>
+      ISession DeliveryReadHandler(Action<IIncomingDelivery> handler);
 
    }
 }

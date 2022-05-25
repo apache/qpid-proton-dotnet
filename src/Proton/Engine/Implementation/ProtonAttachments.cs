@@ -23,6 +23,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    {
       private readonly IDictionary<string, object> entries = new Dictionary<string, object>();
 
+      public object this[string key]
+      {
+         get => entries[key];
+         set => entries[key] = value;
+      }
+
       public IAttachments Clear()
       {
          entries.Clear();

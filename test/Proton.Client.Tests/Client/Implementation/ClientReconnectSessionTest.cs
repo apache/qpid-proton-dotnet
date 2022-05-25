@@ -17,7 +17,9 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Apache.Qpid.Proton.Test.Driver;
+using Apache.Qpid.Proton.Types.Messaging;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
@@ -275,5 +277,121 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesRoundRobin()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.RoundRobin);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesRandom()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.Random);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesLargestBacklog()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.LargestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesSmallestBacklog()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.SmallestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesFirstAvailable()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.FirstAvailable);
+      }
+
+      public void DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy policy)
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer firstPeer = new ProtonTestServer(loggerFactory))
+         using (ProtonTestServer finalPeer = new ProtonTestServer(loggerFactory))
+         {
+            firstPeer.ExpectSASLAnonymousConnect();
+            firstPeer.ExpectOpen().Respond();
+            firstPeer.ExpectBegin().Respond();
+            firstPeer.ExpectAttach().OfReceiver().Respond();
+            firstPeer.ExpectFlow().WithLinkCredit(10);
+            firstPeer.DropAfterLastHandler();
+            firstPeer.Start();
+
+            finalPeer.ExpectSASLAnonymousConnect();
+            finalPeer.ExpectOpen().Respond();
+            finalPeer.ExpectBegin().Respond();
+            finalPeer.ExpectAttach().OfReceiver().Respond();
+            finalPeer.ExpectFlow().WithLinkCredit(10);
+            finalPeer.Start();
+
+            string primaryAddress = firstPeer.ServerAddress;
+            int primaryPort = firstPeer.ServerPort;
+            string finalAddress = finalPeer.ServerAddress;
+            int finalPort = finalPeer.ServerPort;
+
+            logger.LogInformation("Test started, first peer listening on: {0}:{1}", primaryAddress, primaryPort);
+            logger.LogInformation("Test started, final peer listening on: {0}:{1}", finalAddress, finalPort);
+
+            CountdownEvent done = new CountdownEvent(1);
+
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = policy,
+            };
+            options.ReconnectOptions.ReconnectEnabled = true;
+            options.ReconnectOptions.AddReconnectLocation(finalAddress, finalPort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(primaryAddress, primaryPort, options);
+
+            Task.Run(() =>
+            {
+               try
+               {
+                  IReceiver receiver = connection.NextReceiver();
+                  IDelivery delivery = receiver.Receive();
+                  logger.LogInformation("Next receiver returned delivery with body: {0}", delivery.Message().Body);
+                  done.Signal();
+               }
+               catch (Exception e)
+               {
+                  logger.LogDebug("Exception in next receiver task", e);
+               }
+            });
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+
+            _ = connection.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+
+            firstPeer.WaitForScriptToComplete();
+            finalPeer.WaitForScriptToComplete();
+
+            finalPeer.RemoteTransfer().WithHandle(0)
+                                      .WithDeliveryId(0)
+                                      .WithMore(false)
+                                      .WithMessageFormat(0)
+                                      .WithPayload(payload).Later(15);
+
+            finalPeer.WaitForScriptToComplete();
+
+            Assert.IsTrue(done.Wait(TimeSpan.FromSeconds(10)));
+
+            finalPeer.WaitForScriptToComplete();
+            finalPeer.ExpectClose().Respond();
+
+            connection.Close();
+
+            finalPeer.WaitForScriptToComplete();
+         }
+      }
    }
 }

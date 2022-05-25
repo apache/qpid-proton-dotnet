@@ -16,10 +16,11 @@
  */
 
 using System;
-using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client;
 
-namespace Apache.Qpid.Proton.Examples.LargeMessageSender
+namespace Apache.Qpid.Proton.Examples.NextReceiver
 {
    public class Program
    {
@@ -27,7 +28,8 @@ namespace Apache.Qpid.Proton.Examples.LargeMessageSender
       {
          string serverHost = Environment.GetEnvironmentVariable("HOST") ?? "localhost";
          int serverPort = Convert.ToInt32(Environment.GetEnvironmentVariable("PORT") ?? "5672");
-         string address = Environment.GetEnvironmentVariable("ADDRESS") ?? "large-message-example";
+         string address1 = Environment.GetEnvironmentVariable("ADDRESS1") ?? "next-receiver-1-address";
+         string address2 = Environment.GetEnvironmentVariable("ADDRESS2") ?? "next-receiver-1-address";
 
          IClient client = IClient.Create();
 
@@ -38,30 +40,34 @@ namespace Apache.Qpid.Proton.Examples.LargeMessageSender
          };
 
          using IConnection connection = client.Connect(serverHost, serverPort, options);
-         using IStreamSender sender = connection.OpenStreamSender(address);
 
-         IStreamSenderMessage message = sender.BeginMessage();
-         message.Durable = true;
+         _ = connection.OpenReceiver(address1);
+         _ = connection.OpenReceiver(address2);
 
-         byte[] buffer = new byte[100];
-         Array.Fill(buffer, (byte)'A');
-
-         // Creates an OutputStream that writes a single Data Section whose expected
-         // size is configured in the stream options.
-         OutputStreamOptions streamOptions = new OutputStreamOptions();
-         streamOptions.BodyLength = buffer.Length;
-         Stream output = message.GetBodyStream(streamOptions);
-
-         const int chunkSize = 10;
-
-         for (int i = 0; i < buffer.Length; i += chunkSize)
+         Task.Run(() =>
          {
-            output.Write(buffer, i, chunkSize);
-         }
+            try
+            {
+               Thread.Sleep(2000);
+               IMessage<string> message1 = IMessage<string>.Create("Hello World 1");
+               message1.To = address1;
+               connection.Send(message1);
+               Thread.Sleep(2000);
+               IMessage<string> message2 = IMessage<string>.Create("Hello World 2");
+               message2.To = address2;
+               connection.Send(message2);
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine("Exception in message send task: " + e.Message);
+            }
+         });
 
-         output.Close();  // This completes the message send.
+         IDelivery delivery1 = connection.NextReceiver().Receive();
+         IDelivery delivery2 = connection.NextReceiver().Receive();
 
-         message.Tracker.AwaitAccepted();
+         Console.WriteLine("Received first message with body: " + delivery1.Message().Body);
+         Console.WriteLine("Received second message with body: " + delivery2.Message().Body);
       }
    }
 }

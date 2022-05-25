@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Client.Transport
    public interface ITransport
    {
       /// <summary>
-      /// Returns the event loop that this transport is registed against,
+      /// Returns the event loop that this transport is registered against,
       /// the event loop should never have its lifetime linked to a transport
       /// as the client connection will use a single event loop for the
       /// duration of its lifetime.

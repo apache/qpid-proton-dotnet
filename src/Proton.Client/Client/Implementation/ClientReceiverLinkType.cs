@@ -138,6 +138,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal string ReceiverId => receiverId;
 
+      internal Engine.IReceiver ProtonReceiver => protonLink;
+
       protected void AsyncApplyDisposition(IIncomingDelivery delivery, Types.Transport.IDeliveryState state, bool settle)
       {
          session.Execute(() =>

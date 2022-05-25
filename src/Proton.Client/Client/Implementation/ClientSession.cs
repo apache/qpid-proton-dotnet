@@ -40,15 +40,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private readonly SessionOptions options;
       private readonly ClientConnection connection;
       private readonly string sessionId;
-      private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly AtomicBoolean closed = new();
       private readonly ClientSenderBuilder senderBuilder;
       private readonly ClientReceiverBuilder receiverBuilder;
-      private readonly TaskCompletionSource<ISession> openFuture = new TaskCompletionSource<ISession>();
-      private readonly TaskCompletionSource<ISession> closeFuture = new TaskCompletionSource<ISession>();
+      private readonly TaskCompletionSource<ISession> openFuture = new();
+      private readonly TaskCompletionSource<ISession> closeFuture = new();
 
       private IClientTransactionContext txnContext = NoOpTransactionContext;
       private Engine.ISession protonSession;
       private ClientException failureCause;
+      private ClientNextReceiverSelector nextReceiverSelector;
 
       public ClientSession(ClientConnection connection, SessionOptions options, string sessionId, Engine.ISession session)
       {
@@ -65,6 +66,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public IConnection Connection => connection;
 
       public Task<ISession> OpenTask => openFuture.Task;
+
+      internal ClientException FailureCause => failureCause;
 
       public IReadOnlyDictionary<string, object> Properties
       {
@@ -338,6 +341,67 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return rollbackFuture.Task;
       }
 
+      public virtual IReceiver NextReceiver()
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, TimeSpan.MaxValue).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> NextReceiverAsync()
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, TimeSpan.MaxValue);
+      }
+
+      public virtual IReceiver NextReceiver(NextReceiverPolicy policy)
+      {
+         return NextReceiverAsync(policy, TimeSpan.MaxValue).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy)
+      {
+         return NextReceiverAsync(policy, TimeSpan.MaxValue);
+      }
+
+      public virtual IReceiver NextReceiver(TimeSpan timeout)
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, timeout).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> NextReceiverAsync(TimeSpan timeout)
+      {
+         return NextReceiverAsync(options.DefaultNextReceiverPolicy, timeout);
+      }
+
+      public virtual IReceiver NextReceiver(NextReceiverPolicy policy, TimeSpan timeout)
+      {
+         return NextReceiverAsync(policy, timeout).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
+
+      public virtual Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy, TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         TaskCompletionSource<IReceiver> nextReceiver = new();
+
+         connection.Execute(() =>
+         {
+            try
+            {
+               CheckClosedOrFailed();
+               if (nextReceiverSelector == null)
+               {
+                  nextReceiverSelector = new ClientNextReceiverSelector(this);
+               }
+
+               nextReceiverSelector.NextReceiver(nextReceiver, policy, timeout);
+            }
+            catch (Exception error)
+            {
+               nextReceiver.TrySetException(ClientExceptionSupport.CreateNonFatalOrPassthrough(error));
+            }
+         });
+
+         return nextReceiver.Task;
+      }
+
       #region Internal client session API
 
       internal void CheckClosedOrFailed()
@@ -516,6 +580,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
          }
 
+         nextReceiverSelector?.HandleShutdown();
+
          if (failureCause != null)
          {
             _ = openFuture.TrySetException(failureCause);
@@ -627,6 +693,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             protonSession.LocalCloseHandler(null);
             protonSession.Close();
             protonSession = ConfigureSession(ClientSessionBuilder.RecreateSession(connection, options));
+
+            nextReceiverSelector?.HandleReconnect();
 
             Open();
          }

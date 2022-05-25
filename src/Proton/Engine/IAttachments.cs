@@ -26,6 +26,16 @@ namespace Apache.Qpid.Proton.Engine
    public interface IAttachments
    {
       /// <summary>
+      /// Gets or sets the attachment with the given key. If the element being
+      /// retrieved is not in the collection an exception is thrown.
+      /// </summary>
+      /// <param name="key"></param>
+      /// <returns></returns>
+      /// <exception cref="KeyNotFoundException">If the given key is not in the attachments</exception>
+      /// <exception cref="ArgumentNullException">If the given key is null</exception>
+      object this[string key] { get; set; }
+
+      /// <summary>
       /// Gets the user attached value that is associated with the given key, or null
       /// if no data is mapped to the key.
       /// </summary>

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Exceptions;
@@ -86,6 +87,54 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          CheckClosedOrFailed();
          throw new ClientUnsupportedOperationException("Cannot create a sender from a streaming resource session");
+      }
+
+      public override IReceiver NextReceiver()
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override Task<IReceiver> NextReceiverAsync()
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override IReceiver NextReceiver(NextReceiverPolicy policy)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override IReceiver NextReceiver(TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override Task<IReceiver> NextReceiverAsync(TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override IReceiver NextReceiver(NextReceiverPolicy policy, TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
+      }
+
+      public override Task<IReceiver> NextReceiverAsync(NextReceiverPolicy policy, TimeSpan timeout)
+      {
+         CheckClosedOrFailed();
+         throw new ClientUnsupportedOperationException("Cannot request next receiver from a streaming resource session");
       }
    }
 }

@@ -65,6 +65,7 @@ namespace Apache.Qpid.Proton.Client
          other.OpenTimeout = OpenTimeout;
          other.CloseTimeout = CloseTimeout;
          other.DrainTimeout = DrainTimeout;
+         other.DefaultNextReceiverPolicy = DefaultNextReceiverPolicy;
          if (OfferedCapabilities != null && OfferedCapabilities.Length > 0)
          {
             string[] copyOf = new string[OfferedCapabilities.Length];
@@ -136,6 +137,11 @@ namespace Apache.Qpid.Proton.Client
       /// requires and the remote should return those that it supports in its offered capabilities.
       /// </summary>
       public string[] DesiredCapabilities { get; set; }
+
+      /// <summary>
+      /// Configures the default next receiver policy for this session.
+      /// </summary>
+      public NextReceiverPolicy DefaultNextReceiverPolicy { get; set; } = ConnectionOptions.DEFAULT_NEXT_RECEIVER_POLICY;
 
       /// <summary>
       /// Configures a collection of property values that are sent to the remote upon opening

@@ -106,7 +106,7 @@ namespace Apache.Qpid.Proton.Client.Concurrent
       }
 
       /// <summary>
-      /// Implicit conversion of an atomic reference type to the contined value
+      /// Implicit conversion of an atomic reference type to the contained value
       /// using a volatile read operation.
       /// </summary>
       /// <param name="reference">The atomic reference to read from</param>

@@ -24,6 +24,9 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Types.Transport;
 using System.Collections.Generic;
 using System.Linq;
+using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Client.TestSupport;
+using System.Threading.Tasks;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -266,7 +269,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
-      public void TestConnectionCloseGetsResponseWithErrorDoesNotThrowUntimedGet()
+      public void TestConnectionCloseGetsResponseWithErrorDoesNotThrowInfiniteGet()
       {
          DoTestSessionCloseGetsResponseWithErrorThrows(false);
       }
@@ -686,5 +689,1164 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestNextReceiverFromDefaultSessionReturnsSameReceiverForQueuedDeliveries()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            for (uint i = 0; i < 10; ++i)
+            {
+               peer.RemoteTransfer().WithDeliveryId(i)
+                                    .WithMore(false)
+                                    .WithMessageFormat(0)
+                                    .WithPayload(payload).Queue();
+            }
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions connOptions = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.FirstAvailable
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, connOptions);
+
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 0,
+               AutoAccept = false
+            };
+            IReceiver receiver = connection.OpenReceiver("test-receiver", options);
+            receiver.AddCredit(10);
+
+            Wait.WaitFor(() => receiver.QueuedDeliveries == 10);
+
+            peer.WaitForScriptToComplete();
+
+            for (int i = 0; i < 10; ++i)
+            {
+               IReceiver nextReceiver = connection.NextReceiver();
+               Assert.AreSame(receiver, nextReceiver);
+               IDelivery delivery = nextReceiver.Receive();
+               Assert.IsNotNull(delivery);
+            }
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverTimesOut()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            _ = connection.OpenReceiver("test-receiver").OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Assert.IsNull(connection.NextReceiver(TimeSpan.FromMilliseconds(10)));
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverReturnsAllReceiversEventually()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+
+            _ = connection.OpenReceiver("test-receiver1", options).OpenTask.Result;
+            _ = connection.OpenReceiver("test-receiver2", options).OpenTask.Result;
+            _ = connection.OpenReceiver("test-receiver3", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            IReceiver receiver1 = connection.NextReceiver(NextReceiverPolicy.FirstAvailable);
+            Assert.IsNotNull(receiver1.Receive());
+            IReceiver receiver2 = connection.NextReceiver(NextReceiverPolicy.FirstAvailable);
+            Assert.IsNotNull(receiver2.Receive());
+            IReceiver receiver3 = connection.NextReceiver(NextReceiverPolicy.FirstAvailable);
+            Assert.IsNotNull(receiver3.Receive());
+
+            Assert.AreNotSame(receiver1, receiver2);
+            Assert.AreNotSame(receiver1, receiver3);
+            Assert.AreNotSame(receiver2, receiver3);
+
+            peer.WaitForScriptToComplete();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestConnectionOptionsConfiguresLargestBacklogNextReceiverPolicy()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(3)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.LargestBacklog
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = connection.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = connection.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = connection.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 1);
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            IReceiver next = connection.NextReceiver();
+            Assert.AreSame(next, receiver2);
+
+            peer.WaitForScriptToComplete();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestSessionOptionsConfiguresLargestBacklogNextReceiverPolicy()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(3)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.LargestBacklog
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 1);
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            IReceiver next = session.NextReceiver();
+            Assert.AreSame(next, receiver2);
+
+            peer.WaitForScriptToComplete();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestUserSpecifiedNextReceiverPolicyOverridesConfiguration()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(3)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.SmallestBacklog
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 1);
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            IReceiver next = session.NextReceiver(NextReceiverPolicy.LargestBacklog);
+            Assert.AreSame(next, receiver2);
+
+            peer.WaitForScriptToComplete();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestSessionOptionsConfiguresSmallestBacklogNextReceiverPolicy()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(3)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(4)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(5)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.SmallestBacklog
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 3);
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            IReceiver next = session.NextReceiver();
+            Assert.AreSame(next, receiver3);
+
+            peer.WaitForScriptToComplete();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesRoundRobin()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.RoundRobin);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesRandom()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.Random);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesLargestBacklog()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.LargestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesSmallestBacklog()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.SmallestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesAfterDeliveryArrivesFirstAvailable()
+      {
+         DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy.FirstAvailable);
+      }
+
+      public void DoTestNextReceiverCompletesAfterDeliveryArrives(NextReceiverPolicy policy)
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.Start();
+
+            CountdownEvent done = new CountdownEvent(1);
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = policy
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            _ = connection.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Task.Run(() =>
+            {
+               try
+               {
+                  IReceiver receiver = connection.NextReceiver();
+                  IDelivery delivery = receiver.Receive();
+                  logger.LogInformation("Next receiver returned delivery with body: {0}", delivery.Message().Body);
+                  done.Signal();
+               }
+               catch (Exception e)
+               {
+                  logger.LogDebug("Failed in next receiver task: {0}", e);
+               }
+            });
+
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Later(15);
+
+            peer.WaitForScriptToComplete();
+
+            Assert.IsTrue(done.Wait(TimeSpan.FromSeconds(10)));
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverThrowsAfterSessionClosedRoundRobin()
+      {
+         DoTestNextReceiverThrowsAfterSessionClosed(NextReceiverPolicy.RoundRobin);
+      }
+
+      [Test]
+      public void TestNextReceiverThrowsAfterSessionClosedRandom()
+      {
+         DoTestNextReceiverThrowsAfterSessionClosed(NextReceiverPolicy.Random);
+      }
+
+      [Test]
+      public void TestNextReceiverThrowsAfterSessionClosedLargestBacklog()
+      {
+         DoTestNextReceiverThrowsAfterSessionClosed(NextReceiverPolicy.LargestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverThrowsAfterSessionClosedSmallestBacklog()
+      {
+         DoTestNextReceiverThrowsAfterSessionClosed(NextReceiverPolicy.SmallestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverThrowsAfterSessionClosedFirstAvailable()
+      {
+         DoTestNextReceiverThrowsAfterSessionClosed(NextReceiverPolicy.FirstAvailable);
+      }
+
+      public void DoTestNextReceiverThrowsAfterSessionClosed(NextReceiverPolicy policy)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.Start();
+
+            CountdownEvent started = new CountdownEvent(1);
+            CountdownEvent done = new CountdownEvent(1);
+            Exception error = null;
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = policy
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            ISession session = connection.OpenSession().OpenTask.Result;
+
+            Task.Run(() =>
+            {
+               try
+               {
+                  started.Signal();
+                  session.NextReceiver();
+               }
+               catch (ClientException e)
+               {
+                  error = e;
+               }
+               finally
+               {
+                  done.Signal();
+               }
+            });
+
+            peer.WaitForScriptToComplete();
+
+            Assert.IsTrue(started.Wait(TimeSpan.FromSeconds(10)));
+
+            peer.ExpectEnd().Respond();
+
+            session.CloseAsync();
+
+            Assert.IsTrue(done.Wait(TimeSpan.FromSeconds(10)));
+            Assert.IsTrue(error is ClientIllegalStateException);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesWhenCalledBeforeReceiverCreateRoundRobin()
+      {
+         DoTestNextReceiverCompletesWhenCalledBeforeReceiverCreate(NextReceiverPolicy.RoundRobin);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesWhenCalledBeforeReceiverCreateRandom()
+      {
+         DoTestNextReceiverCompletesWhenCalledBeforeReceiverCreate(NextReceiverPolicy.Random);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesWhenCalledBeforeReceiverCreateLargestBacklog()
+      {
+         DoTestNextReceiverCompletesWhenCalledBeforeReceiverCreate(NextReceiverPolicy.LargestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesWhenCalledBeforeReceiverCreateSmallestBacklog()
+      {
+         DoTestNextReceiverCompletesWhenCalledBeforeReceiverCreate(NextReceiverPolicy.SmallestBacklog);
+      }
+
+      [Test]
+      public void TestNextReceiverCompletesWhenCalledBeforeReceiverCreateFirstAvailable()
+      {
+         DoTestNextReceiverCompletesWhenCalledBeforeReceiverCreate(NextReceiverPolicy.FirstAvailable);
+      }
+
+      public void DoTestNextReceiverCompletesWhenCalledBeforeReceiverCreate(NextReceiverPolicy policy)
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.Start();
+
+            CountdownEvent started = new CountdownEvent(1);
+            CountdownEvent done = new CountdownEvent(1);
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = policy
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            Task.Run(() =>
+            {
+               try
+               {
+                  started.Signal();
+                  IReceiver receiver = connection.NextReceiver();
+                  IDelivery delivery = receiver.Receive();
+                  logger.LogInformation("Next receiver returned delivery with body: {0}", delivery.Message().Body);
+                  done.Signal();
+               }
+               catch (Exception e)
+               {
+                  logger.LogDebug("Failed in next receiver task: {0}", e);
+               }
+            });
+
+            Assert.IsTrue(started.Wait(TimeSpan.FromSeconds(10)));
+
+            _ = connection.OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue().AfterDelay(10);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            _ = connection.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Assert.IsTrue(done.Wait(TimeSpan.FromSeconds(10)));
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverRoundRobinReturnsNextReceiverAfterLast()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.RoundRobin
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            Assert.AreEqual(0, receiver1.QueuedDeliveries);
+
+            IReceiver next = session.NextReceiver();
+            Assert.AreSame(next, receiver2);
+            next = session.NextReceiver();
+            Assert.AreSame(next, receiver3);
+
+            peer.WaitForScriptToComplete();
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverRoundRobinPolicyWrapsAround()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.RoundRobin
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            Assert.AreEqual(0, receiver1.QueuedDeliveries);
+
+            IReceiver next = session.NextReceiver();
+            Assert.AreSame(next, receiver2);
+            next = session.NextReceiver();
+            Assert.AreSame(next, receiver3);
+
+            peer.WaitForScriptToComplete();
+
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(3)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Now();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 1);
+
+            next = session.NextReceiver();
+            Assert.AreSame(next, receiver1);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestNextReceiverRoundRobinPolicyRestartsWhenLastReceiverClosed()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(1)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(2)
+                                 .WithDeliveryId(2)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.RoundRobin
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectDetach().Respond();
+
+            Wait.WaitFor(() => receiver2.QueuedDeliveries == 2);
+            Wait.WaitFor(() => receiver3.QueuedDeliveries == 1);
+
+            Assert.AreEqual(0, receiver1.QueuedDeliveries);
+
+            IReceiver next = session.NextReceiver();
+            Assert.AreSame(next, receiver2);
+            next.Close();
+
+            peer.WaitForScriptToComplete();
+
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(3)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Now();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 1);
+
+            next = session.NextReceiver();
+            Assert.AreSame(next, receiver1);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+    [Test]
+    public void TestNextReceiverRoundRobinPolicySkipsEmptyReceivers()  {
+        byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.RemoteTransfer().WithHandle(3)
+                                 .WithDeliveryId(1)
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.Random
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            SessionOptions sessionOptions = new SessionOptions()
+            {
+               DefaultNextReceiverPolicy = NextReceiverPolicy.RoundRobin
+            };
+            ISession session = connection.OpenSession(sessionOptions);
+
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               CreditWindow = 10,
+               AutoAccept = false
+            };
+            IReceiver receiver1 = session.OpenReceiver("test-receiver1", receiverOptions).OpenTask.Result;
+            IReceiver receiver2 = session.OpenReceiver("test-receiver2", receiverOptions).OpenTask.Result;
+            IReceiver receiver3 = session.OpenReceiver("test-receiver3", receiverOptions).OpenTask.Result;
+            IReceiver receiver4 = session.OpenReceiver("test-receiver4", receiverOptions).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+
+            Wait.WaitFor(() => receiver1.QueuedDeliveries == 1);
+            Wait.WaitFor(() => receiver4.QueuedDeliveries == 1);
+
+            Assert.AreEqual(0, receiver2.QueuedDeliveries);
+            Assert.AreEqual(0, receiver3.QueuedDeliveries);
+
+            IReceiver next = session.NextReceiver();
+            Assert.AreSame(next, receiver1);
+            next = session.NextReceiver();
+            Assert.AreSame(next, receiver4);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectClose().Respond();
+
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+        }
+    }
+
    }
 }

@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonSession : ProtonEndpoint<ISession>, ISession
    {
-      private readonly Begin localBegin = new Begin();
+      private readonly Begin localBegin = new();
       private Begin remoteBegin;
 
       private readonly ushort localChannel;
@@ -60,6 +60,9 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<ISender> remoteSenderOpenEventHandler;
       private Action<IReceiver> remoteReceiverOpenEventHandler;
       private Action<ITransactionManager> remoteTxnManagerOpenEventHandler;
+
+      // Spy API for session resources
+      private Action<IIncomingDelivery> deliveryReadHandler;
 
       public ProtonSession(ProtonConnection connection, ushort channel) : base(connection.ProtonEngine)
       {
@@ -307,6 +310,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return this;
       }
 
+      public ISession DeliveryReadHandler(Action<IIncomingDelivery> handler)
+      {
+         deliveryReadHandler = handler;
+         return this;
+      }
+
       #endregion
 
       #region Handlers for remote AMQP Performatives
@@ -461,6 +470,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool HasTransactionManagerOpenHandler => remoteTxnManagerOpenEventHandler != null;
 
+      internal bool HasDeliveryReadHandler => deliveryReadHandler != null;
+
       internal void FireRemoteReceiverOpened(IReceiver receiver)
       {
          remoteReceiverOpenEventHandler?.Invoke(receiver);
@@ -469,6 +480,11 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       internal void FireRemoteSenderOpened(ISender sender)
       {
          remoteSenderOpenEventHandler?.Invoke(sender);
+      }
+
+      internal void FireDeliveryRead(IIncomingDelivery delivery)
+      {
+         deliveryReadHandler?.Invoke(delivery);
       }
 
       internal void FireRemoteTransactionManagerOpened(ITransactionManager manager)
