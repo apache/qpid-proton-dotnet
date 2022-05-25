@@ -24,11 +24,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// Compares two IEnumerable types for equality using the equality
    /// comparator to evaluate each pair of values in the enumeration.
    /// </summary>
-   public sealed class EnumerableCompartor : ILinkedCompartor
+   public sealed class EnumerableComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public EnumerableCompartor(PeerEqualityComparator comparators)
+      public EnumerableComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }

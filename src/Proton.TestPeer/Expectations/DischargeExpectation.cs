@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class DischargeExpectation : TransferExpectation
    {
-      private readonly DischargeMatcher discharge = new DischargeMatcher();
+      private readonly DischargeMatcher discharge = new();
 
       public DischargeExpectation(AMQPTestDriver driver) : base(driver)
       {

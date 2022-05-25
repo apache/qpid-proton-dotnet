@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
    public sealed class DeleteOnClose : ListDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:delete-on-close:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:delete-on-close:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x000000000000002bUL;
 
       public DeleteOnClose() : base(0)

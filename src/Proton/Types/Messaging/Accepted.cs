@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:accepted:list");
 
       /// <summary>
-      /// The singelton instance of Accepted outcomes and delivery states
+      /// The singleton instance of Accepted outcomes and delivery states
       /// </summary>
       public static Accepted Instance { get; } = new Accepted();
 

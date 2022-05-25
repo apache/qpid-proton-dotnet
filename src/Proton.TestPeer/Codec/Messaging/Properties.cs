@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
    public sealed class Properties : ListDescribedType
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000073UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:properties:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:properties:list");
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 
@@ -59,7 +59,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public object MessageId
       {
-         get => (object)List[((int)PropertiesField.MessageId)];
+         get => List[((int)PropertiesField.MessageId)];
          set => List[((int)PropertiesField.MessageId)] = value;
       }
 
@@ -89,7 +89,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public object CorrelationId
       {
-         get => (object)List[((int)PropertiesField.CorrelationId)];
+         get => List[((int)PropertiesField.CorrelationId)];
          set => List[((int)PropertiesField.CorrelationId)] = value;
       }
 
@@ -113,7 +113,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public ulong? CreationTime
       {
-         get =>  (ulong?)List[((int)PropertiesField.CreationTime)];
+         get => (ulong?)List[((int)PropertiesField.CreationTime)];
          set => List[((int)PropertiesField.CreationTime)] = value;
       }
 

@@ -38,12 +38,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       public int CompareTo(object value)
       {
-         return CompareTo((Decimal32) value);
+         return CompareTo((Decimal32)value);
       }
 
       public int CompareTo(Decimal32 value)
       {
-        return (this.bits < value.bits) ? -1 : ((this.bits == value.bits) ? 0 : 1);
+         return (this.bits < value.bits) ? -1 : ((this.bits == value.bits) ? 0 : 1);
       }
 
       public bool Equals(Decimal32 obj)

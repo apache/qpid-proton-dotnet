@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
    public sealed class Target : ListDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:target:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:target:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000029UL;
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;

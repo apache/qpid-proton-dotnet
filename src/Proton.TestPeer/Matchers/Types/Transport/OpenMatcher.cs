@@ -146,7 +146,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       public OpenMatcher WithIncomingLocales(IMatcher m)
       {
-         AddFieldMatcher((int)OpenField.IncmoningLocales, m);
+         AddFieldMatcher((int)OpenField.IncomingLocales, m);
          return this;
       }
 

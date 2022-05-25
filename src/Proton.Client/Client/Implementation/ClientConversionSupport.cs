@@ -189,25 +189,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
          };
       }
 
-      public static Types.Messaging.TerminusDurability AsProtonType(this DurabilityMode mode)
+      public static TerminusDurability AsProtonType(this DurabilityMode mode)
       {
          return mode switch
          {
-            DurabilityMode.Configuration => Types.Messaging.TerminusDurability.Configuration,
-            DurabilityMode.None => Types.Messaging.TerminusDurability.None,
-            DurabilityMode.UnsettledState => Types.Messaging.TerminusDurability.UnsettledState,
+            DurabilityMode.Configuration => TerminusDurability.Configuration,
+            DurabilityMode.None => TerminusDurability.None,
+            DurabilityMode.UnsettledState => TerminusDurability.UnsettledState,
             _ => throw new ArgumentException("Cannot convert unknown durability mode: " + mode),
          };
       }
 
-      public static Types.Messaging.TerminusExpiryPolicy AsProtonType(this ExpiryPolicy policy)
+      public static TerminusExpiryPolicy AsProtonType(this ExpiryPolicy policy)
       {
          return policy switch
          {
-            ExpiryPolicy.ConnectionClose => Types.Messaging.TerminusExpiryPolicy.ConnectionClose,
-            ExpiryPolicy.LinkClose => Types.Messaging.TerminusExpiryPolicy.LinkDetach,
-            ExpiryPolicy.Never => Types.Messaging.TerminusExpiryPolicy.Never,
-            ExpiryPolicy.SessionClose => Types.Messaging.TerminusExpiryPolicy.SessionEnd,
+            ExpiryPolicy.ConnectionClose => TerminusExpiryPolicy.ConnectionClose,
+            ExpiryPolicy.LinkClose => TerminusExpiryPolicy.LinkDetach,
+            ExpiryPolicy.Never => TerminusExpiryPolicy.Never,
+            ExpiryPolicy.SessionClose => TerminusExpiryPolicy.SessionEnd,
             _ => throw new ArgumentException("Cannot convert unknown expiry policy: " + policy),
          };
       }

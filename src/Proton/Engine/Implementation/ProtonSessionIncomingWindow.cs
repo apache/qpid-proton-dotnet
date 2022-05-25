@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private uint nextIncomingId = 0;
 
       // Tracks the most recent delivery Id for validation against the next incoming delivery
-      private uint? lastDeliveryid;
+      private uint? lastDeliveryId;
 
       private uint maxFrameSize;
       private uint incomingBytes;
@@ -266,14 +266,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal void ValidateNextDeliveryId(uint deliveryId)
       {
-         uint previousId = lastDeliveryid ?? deliveryId - 1;
+         uint previousId = lastDeliveryId ?? deliveryId - 1;
          if (++previousId != deliveryId)
          {
             session.Connection.Engine.EngineFailed(
                   new ProtocolViolationException("Expected delivery-id " + previousId + ", got " + deliveryId));
          }
 
-         lastDeliveryid = deliveryId;
+         lastDeliveryId = deliveryId;
       }
 
       #endregion

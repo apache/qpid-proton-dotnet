@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
    public sealed class SaslMechanisms : SaslDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:sasl-mechanisms:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:sasl-mechanisms:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000040ul;
 
       public SaslMechanisms() : base(Enum.GetNames(typeof(SaslMechanismsField)).Length)

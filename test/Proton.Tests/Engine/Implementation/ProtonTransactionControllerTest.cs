@@ -600,7 +600,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsTrue(declareFailure);
          Assert.AreSame(txn, failedTxn);
-         Assert.AreEqual(TransactionState.DelcareFailed, txn.State);
+         Assert.AreEqual(TransactionState.DeclareFailed, txn.State);
          Assert.AreEqual(failureError, txn.Error);
          Assert.AreEqual(0, CountElements(txnController.Transactions));
 
@@ -1316,7 +1316,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          ITransaction<ITransactionController> txn = txnController.Declare();
 
          Assert.IsNotNull(txn.Error);
-         Assert.AreEqual(TransactionState.DelcareFailed, txn.State);
+         Assert.AreEqual(TransactionState.DeclareFailed, txn.State);
          Assert.AreEqual(failureError, txn.Error);
          Assert.AreEqual(0, CountElements(txnController.Transactions));
 

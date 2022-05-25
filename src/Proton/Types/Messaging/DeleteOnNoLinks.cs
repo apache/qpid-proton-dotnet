@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:delete-on-no-links:list");
 
       /// <summary>
-      /// The singelton instance of this lifetime policy
+      /// The singleton instance of this lifetime policy
       /// </summary>
       public static DeleteOnNoLinks Instance { get; } = new DeleteOnNoLinks();
 

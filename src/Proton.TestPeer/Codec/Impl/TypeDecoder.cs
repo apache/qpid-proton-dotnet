@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          Stream stream = new MemoryStream(buffer);
 
          byte type = stream.ReadUnsignedByte();
-         bool isDescribed = type == (byte)0x00;
+         bool isDescribed = type == 0x00;
          long descriptorPosition = stream.ReadIndex();
 
          if (isDescribed)
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             ITypeConstructor descriptorTc = ReadConstructor(stream);
             stream.ReadIndex(descriptorPosition + descriptorTc.Size(stream));
             type = stream.ReadUnsignedByte();
-            if (type == (byte)0x00)
+            if (type == 0x00)
             {
                throw new ArgumentException("Malformed array data");
             }
@@ -410,7 +410,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          public override void Parse(Stream stream, Codec codec)
          {
             byte i = stream.ReadUnsignedByte();
-            if (i != 0 && i != 1)
+            if (i is not 0 and not 1)
             {
                throw new ArgumentOutOfRangeException("Illegal value " + i + " for boolean");
             }

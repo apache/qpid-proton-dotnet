@@ -29,14 +29,14 @@ namespace Apache.Qpid.Proton.Types.Transport
       /// Handles AMQP Header events
       /// </summary>
       /// <param name="header">The AMQP Header instance</param>
-      /// <param name="context">The context provied to the event handler</param>
+      /// <param name="context">The context provided to the event handler</param>
       void HandleAMQPHeader(AmqpHeader header, E context) { }
 
       /// <summary>
       /// Handles SASL Header events
       /// </summary>
       /// <param name="header">The SASL Header instance</param>
-      /// <param name="context">The context provied to the event handler</param>
+      /// <param name="context">The context provided to the event handler</param>
       void HandleSASLHeader(AmqpHeader header, E context) { }
 
    }

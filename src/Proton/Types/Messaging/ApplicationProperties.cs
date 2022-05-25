@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((ApplicationProperties) other);
+            return Equals((ApplicationProperties)other);
          }
       }
 

@@ -20,7 +20,7 @@ using Apache.Qpid.Proton.Test.Driver.Matchers.Comparators;
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
    /// <summary>
-   /// A type matcher that examins a list of matcher and tests them against
+   /// A type matcher that examines a list of matcher and tests them against
    /// some input, if any single matcher fails to match the testing stops and
    /// an error description is created to describe that mismatch.
    /// </summary>
@@ -55,7 +55,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
             return false;
          }
 
-         PeerEqualityComparator comparer = new PeerEqualityComparator();
+         PeerEqualityComparator comparer = new();
 
          return comparer.AreEqual(expected, actual);
       }

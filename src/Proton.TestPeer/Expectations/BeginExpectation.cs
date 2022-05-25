@@ -30,14 +30,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class BeginExpectation : AbstractExpectation<Begin>
    {
-      private readonly BeginMatcher matcher = new BeginMatcher();
+      private readonly BeginMatcher matcher = new();
 
       private BeginInjectAction response;
 
       public BeginExpectation(AMQPTestDriver driver) : base(driver)
       {
          // Configure default expectations for a valid Attach
-         WithRemoteChannel(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.NotNullValue()));
+         WithRemoteChannel(Matches.AnyOf(Is.NullValue(), Is.NotNullValue()));
          WithNextOutgoingId(Is.NotNullValue());
          WithIncomingWindow(Is.NotNullValue());
          WithOutgoingWindow(Is.NotNullValue());

@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
    public sealed class TransactionalState : ListDescribedType, IDeliveryState
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:transactional-state:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:transactional-state:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000034ul;
 
       public TransactionalState() : base(Enum.GetNames(typeof(TransactionalStateField)).Length)

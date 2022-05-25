@@ -23,16 +23,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// Compares two Array types for equality using the equality
    /// comparator to evaluate each pair of values in the array.
    /// </summary>
-   public sealed class ArrayCompartor : ILinkedCompartor
+   public sealed class ArrayComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
-      private readonly EnumerableCompartor enumComparator;
+      private readonly EnumerableComparator enumComparator;
 
-      public ArrayCompartor(PeerEqualityComparator comparators, EnumerableCompartor enumComparator)
+      public ArrayComparator(PeerEqualityComparator comparators, EnumerableComparator enumComparator)
       {
          this.comparators = comparators;
          this.enumComparator = enumComparator;
       }
+
+      internal PeerEqualityComparator Comparators => comparators;
 
       public bool? Equals(object lhs, object rhs, IDescription mismatchDescription)
       {

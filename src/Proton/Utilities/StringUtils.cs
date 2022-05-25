@@ -163,7 +163,7 @@ namespace Apache.Qpid.Proton.Utilities
             return "\"\"";
          }
 
-         StringBuilder str = new StringBuilder();
+         StringBuilder str = new();
          str.Append('"');
 
          long byteToRead = buffer.ReadableBytes;
@@ -174,7 +174,7 @@ namespace Apache.Qpid.Proton.Utilities
          {
             sbyte c = buffer.GetByte(i);
 
-            if (c > 31 && c < 127 && c != '\\')
+            if (c is > 31 and < 127 and not (sbyte)'\\')
             {
                if (size + 1 <= quotedStringLimit)
                {

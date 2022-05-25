@@ -16,7 +16,6 @@
  */
 
 using System;
-using Apache.Qpid.Proton.Test.Driver.Matchers.Core;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers
 {

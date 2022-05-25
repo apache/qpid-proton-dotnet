@@ -18,7 +18,7 @@
 namespace Apache.Qpid.Proton.Types
 {
    /// <summary>
-   /// Defines an object that can carry an AMQP descriport and some object which
+   /// Defines an object that can carry an AMQP descriptor and some object which
    /// was decoded from the encoding of an AMQP described type not known to the
    /// codec in use when decoding it.
    /// </summary>

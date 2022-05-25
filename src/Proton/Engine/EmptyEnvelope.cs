@@ -20,12 +20,12 @@ using Apache.Qpid.Proton.Types.Transport;
 namespace Apache.Qpid.Proton.Engine
 {
    /// <summary>
-   /// An empty incoming AMQP envelope that is used for singalling
+   /// An empty incoming AMQP envelope that is used for signalling
    /// that an empty AMQP frame was read.
    /// </summary>
    public sealed class EmptyEnvelope : IncomingAmqpEnvelope
    {
-      public static readonly EmptyEnvelope Instance = new EmptyEnvelope();
+      public static readonly EmptyEnvelope Instance = new();
 
       public EmptyEnvelope() : base()
       {

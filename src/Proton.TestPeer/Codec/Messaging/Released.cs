@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -24,10 +23,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
    public class Released : ListDescribedType, IDeliveryState, IOutcome
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:released:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:released:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000026L;
 
-      private static readonly Released INSTANCE = new Released();
+      private static readonly Released INSTANCE = new();
 
       public Released() : base(0)
       {

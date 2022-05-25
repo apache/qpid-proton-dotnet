@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
    public sealed class Discharge : ListDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:discharge:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:discharge:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000032ul;
 
       public Discharge() : base(Enum.GetNames(typeof(DischargeField)).Length)

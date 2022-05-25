@@ -172,7 +172,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       /// <param name="bufferA">The first buffer</param>
       /// <param name="bufferB">The second buffer</param>
-      /// <returns>an interger value indicating the relative difference between to buffers</returns>
+      /// <returns>an integer value indicating the relative difference between to buffers</returns>
       public static int Compare(IProtonBuffer bufferA, IProtonBuffer bufferB)
       {
          Statics.RequireNonNull(bufferA, "a");

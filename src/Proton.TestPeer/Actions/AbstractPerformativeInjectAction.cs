@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 
 namespace Apache.Qpid.Proton.Test.Driver.Actions
@@ -37,9 +36,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.driver = driver;
       }
 
-      public override AbstractPerformativeInjectAction<T> Later(long millis)
+      public override AbstractPerformativeInjectAction<T> Later(long milliseconds)
       {
-         driver.AfterDelay(millis, this);
+         driver.AfterDelay(milliseconds, this);
          return this;
       }
 

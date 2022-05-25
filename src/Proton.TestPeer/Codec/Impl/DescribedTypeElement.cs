@@ -113,18 +113,18 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            stream.WriteByte((byte)0);
+            stream.WriteByte(0);
             if (first == null)
             {
-               stream.WriteByte((byte)0x40);
-               stream.WriteByte((byte)0x40);
+               stream.WriteByte(0x40);
+               stream.WriteByte(0x40);
             }
             else
             {
                first.Encode(stream);
                if (first.Next == null)
                {
-                  stream.WriteByte((byte)0x40);
+                  stream.WriteByte(0x40);
                }
                else
                {

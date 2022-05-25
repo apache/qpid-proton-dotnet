@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
 
       /// <summary>
       /// Create a rejected execution exception with the provided message and an
-      /// inner exception which will be convery along with this exception instance.
+      /// inner exception which will be convey along with this exception instance.
       /// </summary>
       /// <param name="message">The message to convey with this exception</param>
       /// <param name="innerException">A wrapped causal exception </param>

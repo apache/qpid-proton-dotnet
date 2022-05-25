@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Utilities
       /// <summary>
       /// Returns true if the double ended queue is currently empty. This method provides
       /// an optimized means of checking for empty in this collection type where otherwise
-      /// the count propertry might be used which could require a calculation on each call
+      /// the count property might be used which could require a calculation on each call
       /// to determine the current element count.
       /// </summary>
       bool IsEmpty { get; }

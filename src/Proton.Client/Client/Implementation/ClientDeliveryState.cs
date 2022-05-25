@@ -41,13 +41,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public sealed class ClientAccepted : ClientDeliveryState
    {
-      public static readonly ClientAccepted Instance = new ClientAccepted();
+      public static readonly ClientAccepted Instance = new();
 
       private ClientAccepted() { }
 
       public override DeliveryStateType Type => DeliveryStateType.Accepted;
 
-      public override Types.Transport.IDeliveryState ProtonDeliveryState => Types.Messaging.Accepted.Instance;
+      public override Types.Transport.IDeliveryState ProtonDeliveryState => Accepted.Instance;
 
    }
 
@@ -110,7 +110,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    }
 
    /// <summary>
-   /// Client version of the proton Modifed delivery state
+   /// Client version of the proton Modified delivery state
    /// </summary>
    public sealed class ClientModified : ClientDeliveryState
    {
@@ -154,7 +154,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    }
 
    /// <summary>
-   /// Client version of the proton Modifed delivery state
+   /// Client version of the proton Transactional delivery state
    /// </summary>
    public sealed class ClientTransactional : ClientDeliveryState
    {

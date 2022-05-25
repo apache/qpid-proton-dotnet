@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
    public interface IMatcher : ISelfDescribing
    {
       /// <summary>
-      /// Matches the target type defined by a concreate matcher implementation
+      /// Matches the target type defined by a concrete matcher implementation
       /// against the provided value to determine if they match.  The mechanics
       /// of the matching process are deferred to the matcher implementation.
       /// </summary>

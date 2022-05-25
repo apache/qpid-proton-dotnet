@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
    {
       /// <summary>
       /// Creates a matcher instance that matches only if all of the supplied matchers
-      /// match againt the actual value supplied in the match operation.
+      /// match against the actual value supplied in the match operation.
       /// </summary>
       /// <param name="matchers">The list of matchers that must all match</param>
       /// <returns>A new matcher instance that validates the given criteria</returns>
@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
 
       /// <summary>
       /// Creates a matcher instance that matches only if all of the supplied matchers
-      /// match againt the actual value supplied in the match operation.
+      /// match against the actual value supplied in the match operation.
       /// </summary>
       /// <param name="matchers">The list of matchers that must all match</param>
       /// <returns>A new matcher instance that validates the given criteria</returns>
@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       /// the examined object.
       /// </summary>
       /// <param name="type">The type that is expected</param>
-      /// <returns>A new matcher that examins the type of a target object</returns>
+      /// <returns>A new matcher that examines the type of a target object</returns>
       public static IMatcher Any(Type type)
       {
          return IsInstanceOfMatcher.Any(type);
@@ -88,7 +88,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       /// the examined object.
       /// </summary>
       /// <param name="type">The type that is expected</param>
-      /// <returns>A new matcher that examins the type of a target object</returns>
+      /// <returns>A new matcher that examines the type of a target object</returns>
       public static IMatcher InstanceOf(Type type)
       {
          return IsInstanceOfMatcher.InstanceOf(type);
@@ -100,7 +100,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       /// the examined object.
       /// </summary>
       /// <param name="type">The type that is expected</param>
-      /// <returns>A new matcher that examins the type of a target object</returns>
+      /// <returns>A new matcher that examines the type of a target object</returns>
       public static IMatcher IsA(Type type)
       {
          return IsMatcher.IsA(type);
@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
          return IsInMatcher.OneOf(values);
       }
 
-       /// <summary>
+      /// <summary>
       /// Creates a matcher instance that matches the actual value matched against is
       /// contained within the enumeration of possible values provided.
       /// </summary>
@@ -161,5 +161,5 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       {
          return IsInMatcher.In(values);
       }
-  }
+   }
 }

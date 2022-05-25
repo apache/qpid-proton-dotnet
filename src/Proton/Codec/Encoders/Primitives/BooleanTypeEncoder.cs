@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Primitives
       public override void WriteType(IProtonBuffer buffer, IEncoderState state, object value)
       {
          buffer.EnsureWritable(sizeof(byte));
-         buffer.WriteUnsignedByte((byte)((bool)value == true ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
+         buffer.WriteUnsignedByte((byte)((bool)value ? EncodingCodes.BooleanTrue : EncodingCodes.BooleanFalse));
       }
 
       public override void WriteArray(IProtonBuffer buffer, IEncoderState state, Array values)

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections;
 using System.IO;
 
@@ -140,13 +139,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             {
                if (size <= 254 && count <= 255)
                {
-                  stream.WriteByte((byte)0xc1);
+                  stream.WriteByte(0xc1);
                   stream.WriteByte((byte)(size + 1));
                   stream.WriteByte((byte)count);
                }
                else
                {
-                  stream.WriteByte((byte)0xd1);
+                  stream.WriteByte(0xd1);
                   stream.WriteUnsignedInt(size + 4);
                   stream.WriteUnsignedInt(count);
                }

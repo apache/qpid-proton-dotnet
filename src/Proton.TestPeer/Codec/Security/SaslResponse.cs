@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
    public sealed class SaslResponse : SaslDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:sasl-response:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:sasl-response:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000043ul;
 
       public SaslResponse() : base(Enum.GetNames(typeof(SaslResponseField)).Length)
@@ -56,7 +56,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
       public override void Invoke<T>(ISaslPerformativeHandler<T> handler, uint frameSize, byte[] payload, ushort channel, T context)
       {
-        handler.HandleResponse(frameSize, this, context);
+         handler.HandleResponse(frameSize, this, context);
       }
 
       public override string ToString()

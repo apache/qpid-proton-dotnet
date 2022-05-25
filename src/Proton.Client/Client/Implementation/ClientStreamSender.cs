@@ -423,7 +423,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #endregion
 
-      #region Proton Sender lifecycle envent handlers
+      #region Proton Sender lifecycle event handlers
 
       private void HandleLocalOpen(Engine.ISender sender)
       {
@@ -651,7 +651,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          /// <summary>
          /// Indicates if the delivery contained within this envelope is aborted. This does
          /// not transmit the actual aborted status to the remote, the sender must transmit
-         /// the contents of the envelope in order to convery the abort.
+         /// the contents of the envelope in order to convey the abort.
          /// </summary>
          public bool Aborted => delivery?.IsAborted ?? false;
 

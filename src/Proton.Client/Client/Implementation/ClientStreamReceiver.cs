@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// Implements the streaming message receiver which allows for reading of large
    /// messages in smaller chunks. The API allows for multiple calls to receiver but
    /// any call that happens after a large message receives begins will be blocked
-   /// until the previous large messsage is fully read and the next arrives.
+   /// until the previous large message is fully read and the next arrives.
    /// </summary>
    public sealed class ClientStreamReceiver : ClientReceiverLinkType<IStreamReceiver>, IStreamReceiver
    {

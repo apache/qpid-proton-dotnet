@@ -140,7 +140,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Utilities
             return "\"\"";
          }
 
-         StringBuilder str = new StringBuilder();
+         StringBuilder str = new();
          str.Append('"');
 
          int byteToRead = buffer.Length;
@@ -151,7 +151,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Utilities
          {
             byte c = buffer[i];
 
-            if (c > 31 && c < 127 && c != '\\')
+            if (c is > 31 and < 127 and not (byte)'\\')
             {
                if (size + 1 <= stringLength)
                {

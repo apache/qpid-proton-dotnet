@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       /// <typeparam name="T">The type of context that is provided</typeparam>
       /// <param name="handler">The handler instance to visit</param>
       /// <param name="payload">The payload that the performative was sent with</param>
-      /// <param name="channel">The channel the perforamative was sent on</param>
+      /// <param name="channel">The channel the performative was sent on</param>
       /// <param name="context">The context for this visitation</param>
       void Invoke<T>(IPerformativeHandler<T> handler, IProtonBuffer payload, ushort channel, T context);
 

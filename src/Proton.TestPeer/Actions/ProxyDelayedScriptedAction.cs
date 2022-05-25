@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       #region Explicitly failing API methods
 
-      public override ScriptedAction Later(long millis)
+      public override ScriptedAction Later(long milliseconds)
       {
          throw new NotImplementedException("Delayed action proxy cannot be used outside of scheduling");
       }

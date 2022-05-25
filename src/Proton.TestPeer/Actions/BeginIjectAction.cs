@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -31,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    {
       private static readonly uint DEFAULT_WINDOW_SIZE = int.MaxValue;
 
-      private readonly Begin begin = new Begin()
+      private readonly Begin begin = new()
       {
          NextOutgoingId = 1,
          IncomingWindow = DEFAULT_WINDOW_SIZE,

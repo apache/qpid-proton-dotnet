@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       /// <summary>
       /// Provides a scripted expectation the means of initiating some action
-      /// following successful compeltion of the expectation.
+      /// following successful completion of the expectation.
       /// </summary>
       /// <returns>a scripted action to perform following the expectation being me</returns>
       public ScriptedAction PerformAfterwards() => null;

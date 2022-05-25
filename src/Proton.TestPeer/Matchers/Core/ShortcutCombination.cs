@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
    /// <summary>
    /// A shortcut matcher for combinations of matching operations that succeeds
-   /// or fails based on a selection from the concreate implementation which
+   /// or fails based on a selection from the concrete implementation which
    /// selects if success is based on a match or the failure to match any one
    /// matcher in a series of matchers.
    /// </summary>

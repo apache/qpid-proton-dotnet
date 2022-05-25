@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class OpenInjectAction : AbstractPerformativeInjectAction<Open>
    {
-      private readonly Open open = new Open();
+      private readonly Open open = new();
 
       public OpenInjectAction(AMQPTestDriver driver) : base(driver)
       {

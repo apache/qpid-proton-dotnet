@@ -30,10 +30,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
    public static class TerminusExpiryPolicyExtension
    {
-      private static readonly Symbol LinkDetach = new Symbol("link-detach");
-      private static readonly Symbol SessionEnd = new Symbol("session-end");
-      private static readonly Symbol ConnectionClose = new Symbol("connection-close");
-      private static readonly Symbol Never = new Symbol("never");
+      private static readonly Symbol LinkDetach = new("link-detach");
+      private static readonly Symbol SessionEnd = new("session-end");
+      private static readonly Symbol ConnectionClose = new("connection-close");
+      private static readonly Symbol Never = new("never");
 
       public static Symbol ToSymbol(this TerminusExpiryPolicy mode)
       {

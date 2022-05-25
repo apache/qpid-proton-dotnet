@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Engine
       /// now detached due to a call the the detach method. This does not reflect the
       /// state of the remote endpoint and that should be checked separately.
       /// </summary>
-      bool IsLocallDetached { get; }
+      bool IsLocallyDetached { get; }
 
       /// <summary>
       /// Returns true if the endpoint having been previously locally opened is

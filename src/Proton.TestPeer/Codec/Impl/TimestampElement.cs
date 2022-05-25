@@ -41,7 +41,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
       public override object Value => (ulong)value;
 
-      public DateTime TimeValue => new DateTime(value, DateTimeKind.Utc);
+      public DateTime TimeValue => new(value, DateTimeKind.Utc);
 
       public override DataType DataType => DataType.Timestamp;
 

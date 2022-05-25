@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
    public sealed class Coordinator : ListDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:coordinator:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:coordinator:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000030ul;
 
       public Coordinator() : base(Enum.GetNames(typeof(CoordinatorField)).Length)

@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public bool DeliveryFailed { get; set; }
 
       /// <summary>
-      /// Should the delivery be redeliverable on this link or routed elsewhere
+      /// Should the delivery be redelivered on this link or routed elsewhere
       /// </summary>
       public bool UndeliverableHere { get; set; }
 
@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((Modified) other);
+            return Equals((Modified)other);
          }
       }
 

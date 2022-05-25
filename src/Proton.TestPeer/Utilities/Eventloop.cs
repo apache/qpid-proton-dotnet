@@ -32,8 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
       private readonly ChannelWriter<Action> eventWriter;
 
       private readonly Task eventLoop;
-      private readonly AtomicBoolean shutdown = new AtomicBoolean();
-      private readonly CountdownEvent hasShutdown = new CountdownEvent(1);
+      private readonly AtomicBoolean shutdown = new();
+      private readonly CountdownEvent hasShutdown = new(1);
 
       private Thread eventLoopThread;
 

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -24,10 +23,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
    public class Accepted : ListDescribedType, IDeliveryState, IOutcome
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:accepted:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:accepted:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000024UL;
 
-      private static readonly Accepted INSTANCE = new Accepted();
+      private static readonly Accepted INSTANCE = new();
 
       public Accepted() : base(0)
       {

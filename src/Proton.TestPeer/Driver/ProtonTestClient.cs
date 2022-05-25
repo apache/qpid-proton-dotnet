@@ -59,11 +59,11 @@ namespace Apache.Qpid.Proton.Test.Driver
          client.Connect(endpoint);
       }
 
-      public void Connect(string addres, int port)
+      public void Connect(string address, int port)
       {
          CheckClosed();
 
-         transport = client.Connect(addres, port);
+         transport = client.Connect(address, port);
          transport.TransportConnectedHandler(HandleClientConnected);
          transport.TransportConnectFailedHandler(HandleClientConnectFailed);
          transport.TransportDisconnectedHandler(HandleClientDisconnected);

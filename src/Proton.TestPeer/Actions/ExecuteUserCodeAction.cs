@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       /// <summary>
       /// Used only when queuing a scripted user code action which should delay once the
-      /// queued action is finalled reached, this is a rare edge case test mechanism and
+      /// queued action is finally reached, this is a rare edge case test mechanism and
       /// could cause issues if other scripted actions depend on executing after this but
       /// are not suitably delayed themselves.
       /// </summary>
@@ -97,7 +97,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
          this.action = action;
       }
 
-      public override ScriptedAction Later(long millis)
+      public override ScriptedAction Later(long milliseconds)
       {
          return this;
       }

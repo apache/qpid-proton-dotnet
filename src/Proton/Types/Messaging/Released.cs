@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:released:list");
 
       /// <summary>
-      /// The singelton instance of Released outcomes and delivery states
+      /// The singleton instance of Released outcomes and delivery states
       /// </summary>
       public static Released Instance { get; } = new Released();
 

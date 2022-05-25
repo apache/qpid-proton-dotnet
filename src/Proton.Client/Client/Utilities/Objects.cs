@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       /// <summary>
       /// Used to check for a method argument being null when the precondition
       /// states that it should not be, the method provides for the user to supply
-      /// a nessage to use when throwing an Argument null exception if the value
+      /// a message to use when throwing an Argument null exception if the value
       /// that was passed is indeed null.
       /// </summary>
       /// <param name="value">The value to check for null</param>

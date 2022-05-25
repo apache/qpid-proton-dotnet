@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <summary>
       /// Creates a default version of this exception type with the given error condition.
       /// </summary>
-      /// <param name="errorCondition">Symbol contining the error information</param>
+      /// <param name="errorCondition">Symbol containing the error information</param>
       public ProtocolViolationException(Symbol errorCondition) : base()
       {
          ErrorCondition = errorCondition;
@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <summary>
       /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="errorCondition">Symbol contining the error information</param>
+      /// <param name="errorCondition">Symbol containing the error information</param>
       /// <param name="message">Description of the error</param>
       public ProtocolViolationException(Symbol errorCondition, string message) : base(message)
       {
@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <summary>
       /// Create a new instance with the given message that describes the specifics of the error.
       /// </summary>
-      /// <param name="errorCondition">Symbol contining the error information</param>
+      /// <param name="errorCondition">Symbol containing the error information</param>
       /// <param name="message">Description of the error</param>
       /// <param name="cause">The exception that causes this error</param>
       public ProtocolViolationException(Symbol errorCondition, string message, Exception cause) : base(message, cause)
@@ -90,7 +90,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <summary>
       /// Create a new instance with the given exception that describes the specifics of the error.
       /// </summary>
-      /// <param name="errorCondition">Symbol contining the error information</param>
+      /// <param name="errorCondition">Symbol containing the error information</param>
       /// <param name="cause">The exception that causes this error</param>
       public ProtocolViolationException(Symbol errorCondition, Exception cause) : base(cause)
       {

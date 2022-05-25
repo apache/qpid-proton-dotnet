@@ -75,7 +75,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             ArrayElement parent = (ArrayElement)Parent;
             if (parent.ConstructorType == ConstructorType.Small)
             {
-               if (-128 <= value && value <= 127)
+               if (value is >= (-128) and <= 127)
                {
                   return 1;
                }
@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            return (-128 <= value && value <= 127) ? 2u : 5u;
+            return (value is >= (-128) and <= 127) ? 2u : 5u;
          }
       }
    }

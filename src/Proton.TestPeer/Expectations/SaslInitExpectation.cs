@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class SaslInitExpectation : AbstractExpectation<SaslInit>
    {
-      private readonly SaslInitMatcher matcher = new SaslInitMatcher();
+      private readonly SaslInitMatcher matcher = new();
 
       public SaslInitExpectation(AMQPTestDriver driver) : base(driver)
       {

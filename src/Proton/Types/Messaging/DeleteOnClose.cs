@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:delete-on-close:list");
 
       /// <summary>
-      /// The singelton instance of this lifetime policy
+      /// The singleton instance of this lifetime policy
       /// </summary>
       public static DeleteOnClose Instance { get; } = new DeleteOnClose();
 

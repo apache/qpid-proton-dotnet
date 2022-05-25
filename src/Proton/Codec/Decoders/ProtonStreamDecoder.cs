@@ -493,8 +493,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          return encodingCode switch
          {
-            EncodingCodes.Sym8 => (Symbol)symbol8Decoder.ReadValue(stream, state),
-            EncodingCodes.Sym32 => (Symbol)symbol32Decoder.ReadValue(stream, state),
+            EncodingCodes.Sym8 => symbol8Decoder.ReadValue(stream, state),
+            EncodingCodes.Sym32 => symbol32Decoder.ReadValue(stream, state),
             EncodingCodes.Null => null,
             _ => throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode),
          };
@@ -548,9 +548,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          return encodingCode switch
          {
-            EncodingCodes.List0 => (IList<T>)Array.Empty<T>(),
-            EncodingCodes.List8 => (IList<T>)list8Decoder.ReadList<T>(stream, state),
-            EncodingCodes.List32 => (IList<T>)list32Decoder.ReadList<T>(stream, state),
+            EncodingCodes.List0 => Array.Empty<T>(),
+            EncodingCodes.List8 => list8Decoder.ReadList<T>(stream, state),
+            EncodingCodes.List32 => list32Decoder.ReadList<T>(stream, state),
             EncodingCodes.Null => null,
             _ => throw new DecodeException("Expected List type but found encoding: " + encodingCode),
          };
@@ -580,7 +580,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             }
             else
             {
-               return default(T);
+               return default;
             }
          }
          else if (result.GetType().IsAssignableTo(typeof(T)))
@@ -713,7 +713,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                }
                catch (IOException e)
                {
-                  throw new DecodeException("Error while reseting marked stream", e);
+                  throw new DecodeException("Error while resetting marked stream", e);
                }
             }
          }

@@ -147,7 +147,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       private static Detach ReadDetach(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
       {
-         Detach result = new Detach();
+         Detach result = new();
 
          _ = listDecoder.ReadSize(stream, state);
          int count = listDecoder.ReadCount(stream, state);

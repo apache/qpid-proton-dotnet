@@ -15,22 +15,21 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
 {
    /// <summary>
-   /// Compares two IDictionary types for equality meaing that each
+   /// Compares two IDictionary types for equality meaning that each
    /// has the same number of elements and that every entry in the left
    /// is present in the right and that the values mapped to each entry
    /// are equivalent.
    /// </summary>
-   public sealed class DictionaryCompartor : ILinkedCompartor
+   public sealed class DictionaryComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public DictionaryCompartor(PeerEqualityComparator comparators)
+      public DictionaryComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }

@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 {
    /// <summary>
    /// Handler of incoming frames with some API to inform the user of its
-   /// prescirbed frame limitations
+   /// prescribed frame limitations
    /// </summary>
    public interface IFrameHandler
    {

@@ -54,15 +54,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       #region Static ClientMessage factory methods
 
-      public static ClientMessage<T> Create() {
+      public static ClientMessage<T> Create()
+      {
          return new ClientMessage<T>();
       }
 
-      public static ClientMessage<T> Create(ISection body) {
+      public static ClientMessage<T> Create(ISection body)
+      {
          return new ClientMessage<T>(body);
       }
 
-      public static ClientMessage<T> CreateAdvancedMessage() {
+      public static ClientMessage<T> CreateAdvancedMessage()
+      {
          return new ClientMessage<T>();
       }
 

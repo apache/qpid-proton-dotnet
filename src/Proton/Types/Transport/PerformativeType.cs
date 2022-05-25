@@ -22,14 +22,14 @@ namespace Apache.Qpid.Proton.Types.Transport
    /// </summary>
    public enum PerformativeType
    {
-        Attach,
-        Begin,
-        Close,
-        Detach,
-        Disposition,
-        End,
-        Flow,
-        Open,
-        Transfer
+      Attach,
+      Begin,
+      Close,
+      Detach,
+      Disposition,
+      End,
+      Flow,
+      Open,
+      Transfer
    }
 }

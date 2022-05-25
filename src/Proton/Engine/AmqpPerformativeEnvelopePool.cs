@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       /// <param name="envelopeBuilder">A function that can build the envelopes</param>
       public AmqpPerformativeEnvelopePool(Func<AmqpPerformativeEnvelopePool<T>, T> envelopeBuilder) :
-         this(envelopeBuilder, AmqpPerformativeEnvelopePool<T>.DEFAULT_MAX_POOL_SIZE)
+         this(envelopeBuilder, DEFAULT_MAX_POOL_SIZE)
       {
       }
 

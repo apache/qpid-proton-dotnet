@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
    public sealed class DataTypeDecoder : AbstractDescribedTypeDecoder
    {
-      private static readonly Data EmptyData = new Data();
+      private static readonly Data EmptyData = new();
 
       public override Symbol DescriptorSymbol => Data.DescriptorSymbol;
 

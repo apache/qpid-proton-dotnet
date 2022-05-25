@@ -717,7 +717,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
-      public void TestConnectionReportsFailedAfterMaxinitialReconnectAttempts()
+      public void TestConnectionReportsFailedAfterMaxInitialReconnectAttempts()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
          {
@@ -774,7 +774,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
-      public void TestConnectionReportsFailedAfterMaxinitialReconnectAttemptsWithBackOff()
+      public void TestConnectionReportsFailedAfterMaxInitialReconnectAttemptsWithBackOff()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
          {

@@ -27,17 +27,17 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    public interface ISaslCredentialsProvider
    {
       /// <summary>
-      /// Gets the virtual host value the use when perfroming SASL authentication.
+      /// Gets the virtual host value the use when performing SASL authentication.
       /// </summary>
       string VHost { get; }
 
       /// <summary>
-      /// Gets the user name value the use when perfroming SASL authentication.
+      /// Gets the user name value the use when performing SASL authentication.
       /// </summary>
       string Username { get; }
 
       /// <summary>
-      /// Gets the password value the use when perfroming SASL authentication.
+      /// Gets the password value the use when performing SASL authentication.
       /// </summary>
       string Password { get; }
 
@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       IPrincipal LocalPrincipal { get; }
 
       /// <summary>
-      /// Gets a collection of options the use when perfroming SASL authentication.
+      /// Gets a collection of options the use when performing SASL authentication.
       /// </summary>
       IDictionary<string, object> Options => new Dictionary<string, object>();
 

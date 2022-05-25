@@ -23,11 +23,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// Compares two Dictionary Entries and checks if both the entry keys
    /// and the entry values are equivalent.
    /// </summary>
-   public sealed class DictionaryEntryCompartor : ILinkedCompartor
+   public sealed class DictionaryEntryComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public DictionaryEntryCompartor(PeerEqualityComparator comparators)
+      public DictionaryEntryComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }

@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class EmptyFrameExpectation : AbstractExpectation<Heartbeat>
    {
-      private readonly HeartbeatMatcher matcher = new HeartbeatMatcher();
+      private readonly HeartbeatMatcher matcher = new();
 
       public EmptyFrameExpectation(AMQPTestDriver driver) : base(driver)
       {
@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public EmptyFrameInjectAction Respond()
       {
-         EmptyFrameInjectAction response = new EmptyFrameInjectAction(driver);
+         EmptyFrameInjectAction response = new(driver);
          driver.AddScriptedElement(response);
          return response;
       }

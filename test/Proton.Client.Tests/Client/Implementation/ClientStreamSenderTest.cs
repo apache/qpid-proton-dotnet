@@ -583,7 +583,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientUnsupportedOperationException)
             {
-               // Expecteds
+               // Expected
             }
 
             message.Abort();

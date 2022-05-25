@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
       ChannelMax,
       IdleTimeout,
       OutgoingLocales,
-      IncmoningLocales,
+      IncomingLocales,
       OfferedCapabilities,
       DesiredCapabilities,
       Properties,
@@ -95,8 +95,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
 
       public Symbol[] IncomingLocales
       {
-         get => (Symbol[])List[((int)OpenField.IncmoningLocales)];
-         set => List[((int)OpenField.IncmoningLocales)] = value;
+         get => (Symbol[])List[((int)OpenField.IncomingLocales)];
+         set => List[((int)OpenField.IncomingLocales)] = value;
       }
 
       public Symbol[] OfferedCapabilities

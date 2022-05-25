@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
    public sealed class MessageAnnotations : MapDescribedType
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000072UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:message-annotations:map");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:message-annotations:map");
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 

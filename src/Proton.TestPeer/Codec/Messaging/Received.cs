@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
    public sealed class Received : ListDescribedType, IDeliveryState, IOutcome
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:received:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:received:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000023UL;
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;

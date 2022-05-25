@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class DispositionExpectation : AbstractExpectation<Disposition>
    {
-      private readonly DispositionMatcher matcher = new DispositionMatcher();
+      private readonly DispositionMatcher matcher = new();
       private readonly DispositionDeliveryStateBuilder stateBuilder;
 
       public DispositionExpectation(AMQPTestDriver driver) : base(driver)
@@ -220,7 +220,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       {
          byte[] txnId = new byte[4];
 
-         Random rand = new Random(Environment.TickCount);
+         Random rand = new(Environment.TickCount);
 
          rand.NextBytes(txnId);
 
@@ -236,7 +236,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public DispositionTransactionalStateMatcher Transactional()
       {
-         DispositionTransactionalStateMatcher matcher = new DispositionTransactionalStateMatcher(expectation);
+         DispositionTransactionalStateMatcher matcher = new(expectation);
          expectation.WithState(matcher);
          return matcher;
       }

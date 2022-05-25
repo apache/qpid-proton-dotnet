@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class FlowInjectAction : AbstractPerformativeInjectAction<Flow>
    {
-      private readonly Flow flow = new Flow();
+      private readonly Flow flow = new();
 
       private bool explicitlyNullHandle;
 

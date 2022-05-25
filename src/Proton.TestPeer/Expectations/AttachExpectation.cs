@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class AttachExpectation : AbstractExpectation<Attach>
    {
-      private readonly AttachMatcher matcher = new AttachMatcher();
+      private readonly AttachMatcher matcher = new();
 
       private AttachInjectAction response;
       private bool rejecting;
@@ -139,7 +139,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachExpectation WithSenderSettleModeSettled()
       {
-         return WithSndSettleMode(Is.EqualTo((byte)SenderSettleMode.Settked));
+         return WithSndSettleMode(Is.EqualTo((byte)SenderSettleMode.Settled));
       }
 
       public AttachExpectation WithSenderSettleModeUnsettled()
@@ -181,21 +181,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AttachSourceMatcher WithSource()
       {
-         AttachSourceMatcher matcher = new AttachSourceMatcher(this);
+         AttachSourceMatcher matcher = new(this);
          WithSource(matcher);
          return matcher;
       }
 
       public AttachTargetMatcher WithTarget()
       {
-         AttachTargetMatcher matcher = new AttachTargetMatcher(this);
+         AttachTargetMatcher matcher = new(this);
          WithTarget(matcher);
          return matcher;
       }
 
       public AttachCoordinatorMatcher WithCoordinator()
       {
-         AttachCoordinatorMatcher matcher = new AttachCoordinatorMatcher(this);
+         AttachCoordinatorMatcher matcher = new(this);
          WithCoordinator(matcher);
          return matcher;
       }
@@ -204,7 +204,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       {
          if (source != null)
          {
-            SourceMatcher sourceMatcher = new SourceMatcher(source);
+            SourceMatcher sourceMatcher = new(source);
             return WithSource(sourceMatcher);
          }
          else
@@ -217,7 +217,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       {
          if (target != null)
          {
-            TargetMatcher targetMatcher = new TargetMatcher(target);
+            TargetMatcher targetMatcher = new(target);
             return WithTarget(targetMatcher);
          }
          else
@@ -230,7 +230,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       {
          if (coordinator != null)
          {
-            CoordinatorMatcher coordinatorMatcher = new CoordinatorMatcher();
+            CoordinatorMatcher coordinatorMatcher = new();
             return WithCoordinator(coordinatorMatcher);
          }
          else
@@ -625,7 +625,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public override AttachSourceMatcher WithDefaultTimeout()
       {
-         base.WithTimeout(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
+         base.WithTimeout(Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
          return this;
       }
 

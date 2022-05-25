@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Codec
       /// Returns a cached decoder state instance that can be used be single threaded readers that
       /// use this decoder instance.
       /// </summary>
-      /// <returns>A cached decoder state object that can be used by single threaded readerss</returns>
+      /// <returns>A cached decoder state object that can be used by single threaded readers</returns>
       IDecoderState CachedDecoderState { get; }
 
       /// <summary>

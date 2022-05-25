@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    public sealed class ScriptCompleteAction : ScriptedAction
    {
       private readonly AMQPTestDriver driver;
-      private readonly CountdownEvent complete = new CountdownEvent(1);
+      private readonly CountdownEvent complete = new(1);
       private readonly ILogger<ScriptCompleteAction> logger;
 
       public ScriptCompleteAction(AMQPTestDriver driver)
@@ -46,14 +46,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public override ScriptCompleteAction Now()
       {
-         logger.LogTrace("{0} Script compeltion action triggered on Now call", driver.Name);
+         logger.LogTrace("{0} Script completion action triggered on Now call", driver.Name);
          complete.Signal();
          return this;
       }
 
       public override ScriptCompleteAction Perform(AMQPTestDriver driver)
       {
-         logger.LogTrace("{0} Script compeltion action performing action via script driver", driver.Name);
+         logger.LogTrace("{0} Script completion action performing action via script driver", driver.Name);
          complete.Signal();
          return this;
       }

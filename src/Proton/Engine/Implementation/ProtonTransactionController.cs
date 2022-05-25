@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 {
    /// <summary>
    /// Proton transaction controller abstraction that provides the transaction services
-   /// for a Sender link that transmits the transaction Declare and Discharge commads
+   /// for a Sender link that transmits the transaction Declare and Discharge commands
    /// which control the lifetime and outcome of a running transaction.
    /// </summary>
    public sealed class ProtonTransactionController : ProtonEndpoint<ITransactionController>, ITransactionController
@@ -469,7 +469,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
                   if (transactionState == TransactionState.Declaring)
                   {
-                     transaction.State = TransactionState.DelcareFailed;
+                     transaction.State = TransactionState.DeclareFailed;
                      FireDeclareFailureEvent(transaction);
                   }
                   else

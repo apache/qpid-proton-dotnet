@@ -30,7 +30,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       protected override void VerifyReceivedDescribedObject(object described)
       {
-         if (described is not IDictionary) {
+         if (described is not IDictionary)
+         {
             throw new ArgumentException(
                 "Unexpected section contents. Expected Map, but got: " +
                 (described == null ? "null" : described.GetType()));

@@ -32,8 +32,8 @@ namespace Apache.Qpid.Proton.Test.Driver
       private readonly IDictionary<string, LinkTracker> senderByNameMap = new Dictionary<string, LinkTracker>();
       private readonly IDictionary<string, LinkTracker> receiverByNameMap = new Dictionary<string, LinkTracker>();
 
-      private readonly OrderedDictionary localLinks = new OrderedDictionary();
-      private readonly OrderedDictionary remoteLinks = new OrderedDictionary();
+      private readonly OrderedDictionary localLinks = new();
+      private readonly OrderedDictionary remoteLinks = new();
 
       private ushort? localChannel;
       private ushort? remoteChannel;

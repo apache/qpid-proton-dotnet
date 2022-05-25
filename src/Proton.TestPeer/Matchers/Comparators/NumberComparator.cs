@@ -22,14 +22,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// <summary>
    /// Compares two char numeric for equality.
    /// </summary>
-   public sealed class NumberCompartor : ILinkedCompartor
+   public sealed class NumberComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public NumberCompartor(PeerEqualityComparator comparators)
+      public NumberComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }
+
+      internal PeerEqualityComparator Comparators => comparators;
 
       public bool? Equals(object lhs, object rhs, IDescription mismatchDescription)
       {

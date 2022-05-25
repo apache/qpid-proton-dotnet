@@ -122,7 +122,7 @@ namespace Apache.Qpid.Proton.Engine
       /// indicating that the discharge completed on the transaction identified by given
       /// transaction Id has now been retired.
       /// </summary>
-      /// <param name="transaction">The transaction that was dischareged</param>
+      /// <param name="transaction">The transaction that was discharged</param>
       /// <returns>This transaction manager instance</returns>
       ITransactionManager Discharged(ITransaction<ITransactionManager> transaction);
 

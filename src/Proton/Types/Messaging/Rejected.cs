@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override string ToString()
       {
-        return "Rejected{" + "error=" + Error + "}";
+         return "Rejected{" + "error=" + Error + "}";
       }
 
       public object Clone()

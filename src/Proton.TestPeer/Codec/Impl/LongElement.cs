@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
             if (parent.ConstructorType == ConstructorType.Small)
             {
-               if (-128L <= value && value <= 127L)
+               if (value is >= (-128L) and <= 127L)
                {
                   return 1;
                }
@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            return (-128L <= value && value <= 127L) ? 2u : 9u;
+            return (value is >= (-128L) and <= 127L) ? 2u : 9u;
          }
       }
    }

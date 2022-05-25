@@ -16,10 +16,7 @@
  */
 
 using System;
-using System.Collections.Generic;
-using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
-using Apache.Qpid.Proton.Test.Driver.Codec.Utilities;
 
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 {

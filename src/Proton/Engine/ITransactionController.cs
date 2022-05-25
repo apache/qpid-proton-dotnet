@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Engine
       /// with a new transaction Id for that transaction. Upon successful declaration of a new
       /// transaction the remote will respond and the declared event handler will be signaled.
       /// </summary>
-      /// <param name="transaction">The transaction to be dischareged</param>
+      /// <param name="transaction">The transaction to be discharged</param>
       /// <param name="failed">boolean that indicates if the transaction has failed.</param>
       /// <returns>This transaction controller instance</returns>
       ITransactionController Discharge(ITransaction<ITransactionController> transaction, bool failed);

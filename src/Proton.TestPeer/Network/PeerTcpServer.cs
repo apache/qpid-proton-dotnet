@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
    public sealed class PeerTcpServer
    {
       private readonly Socket serverListener;
-      private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly AtomicBoolean closed = new();
 
       private Action<PeerTcpTransport> clientConnectedHandler;
       private Action<PeerTcpServer, Exception> serverFailedHandler;
@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
          this.logger = loggerFactory?.CreateLogger<PeerTcpServer>();
          this.options = options;
 
-         IPEndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 0);
+         IPEndPoint endpoint = new(IPAddress.Loopback, 0);
          serverListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
          serverListener.Bind(endpoint);
       }
@@ -132,7 +132,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       private Stream AuthenticateAsSslServer(Stream ioStream)
       {
-         SslStream sslStream = new SslStream(ioStream, true, RemoteCertificateValidationCallback, null);
+         SslStream sslStream = new(ioStream, true, RemoteCertificateValidationCallback, null);
 
          sslStream.AuthenticateAsServer(options.ServerCertificate,
                                         options.NeedClientAuth,

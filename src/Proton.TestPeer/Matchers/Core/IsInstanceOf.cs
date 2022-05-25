@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
       /// the examined object.
       /// </summary>
       /// <param name="type">The type that is expected</param>
-      /// <returns>A new matcher that examins the type of a target object</returns>
+      /// <returns>A new matcher that examines the type of a target object</returns>
       public static IMatcher InstanceOf(Type type)
       {
          return new IsInstanceOfMatcher(type);
@@ -72,7 +72,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
       /// the examined object.
       /// </summary>
       /// <param name="type">The type that is expected</param>
-      /// <returns>A new matcher that examins the type of a target object</returns>
+      /// <returns>A new matcher that examines the type of a target object</returns>
       public static IMatcher Any(Type type)
       {
          return new IsInstanceOfMatcher(type);

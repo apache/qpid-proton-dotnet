@@ -64,8 +64,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
          else
          {
-            writeBufferSize = Math.Max(StreamSenderOptions.MIN_BUFFER_SIZE_LIMIT,
-                                       (uint)sender.ProtonSender.Connection.MaxFrameSize);
+            writeBufferSize = Math.Max(StreamSenderOptions.MIN_BUFFER_SIZE_LIMIT, sender.ProtonSender.Connection.MaxFrameSize);
          }
       }
 
@@ -160,7 +159,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new ClientIllegalStateException("Cannot create an Stream from a aborted send context");
          }
 
-         if (currentState == StreamState.BODY_WRITTING)
+         if (currentState == StreamState.BODY_WRITING)
          {
             throw new ClientIllegalStateException("Cannot add more body sections while an Stream is active");
          }
@@ -529,7 +528,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new ClientIllegalStateException("Cannot add more body sections to an aborted message");
          }
 
-         if (currentState == StreamState.BODY_WRITTING)
+         if (currentState == StreamState.BODY_WRITING)
          {
             throw new ClientIllegalStateException("Cannot add more body sections while an OutputStream is active");
          }
@@ -578,7 +577,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             throw new ClientIllegalStateException("Cannot create an OutputStream from a aborted send context");
          }
 
-         if (currentState == StreamState.BODY_WRITTING)
+         if (currentState == StreamState.BODY_WRITING)
          {
             throw new ClientIllegalStateException("Cannot add more body sections while an OutputStream is active");
          }
@@ -605,7 +604,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          PREAMBLE,
          BODY_WRITABLE,
-         BODY_WRITTING,
+         BODY_WRITING,
          COMPLETE,
          ABORTED
       }
@@ -779,7 +778,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             this.message = message;
 
             // Stream takes control of state until closed.
-            this.message.currentState = StreamState.BODY_WRITTING;
+            this.message.currentState = StreamState.BODY_WRITING;
          }
 
          #region Stream API implementation

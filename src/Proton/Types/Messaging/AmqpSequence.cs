@@ -16,7 +16,6 @@
  */
 
 using System.Collections;
-using System.Collections.Generic;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
@@ -77,7 +76,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((AmqpSequence) other);
+            return Equals((AmqpSequence)other);
          }
       }
 

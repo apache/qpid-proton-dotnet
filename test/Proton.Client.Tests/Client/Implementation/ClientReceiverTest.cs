@@ -2511,7 +2511,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             try
             {
                _ = delivery.RawInputStream;
-               Assert.Fail("Should not be able to use the inputstream once message is requested");
+               Assert.Fail("Should not be able to use the input stream once message is requested");
             }
             catch (ClientIllegalStateException)
             {
@@ -2567,7 +2567,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             try
             {
                _ = delivery.RawInputStream;
-               Assert.Fail("Should not be able to use the inputstream once message is requested");
+               Assert.Fail("Should not be able to use the input stream once message is requested");
             }
             catch (ClientIllegalStateException)
             {

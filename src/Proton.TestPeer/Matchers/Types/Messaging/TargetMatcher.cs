@@ -36,7 +36,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       protected override Type DescribedTypeClassType => typeof(Target);
 
-      public virtual  TargetMatcher WithAddress(string name)
+      public virtual TargetMatcher WithAddress(string name)
       {
          return WithAddress(Is.EqualTo(name));
       }
@@ -58,7 +58,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
 
       public virtual TargetMatcher WithDefaultTimeout()
       {
-         return WithTimeout(Apache.Qpid.Proton.Test.Driver.Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
+         return WithTimeout(Matchers.Matches.AnyOf(Is.NullValue(), Is.EqualTo(0u)));
       }
 
       public virtual TargetMatcher WithDynamic(bool dynamic)

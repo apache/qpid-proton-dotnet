@@ -24,8 +24,8 @@ namespace Apache.Qpid.Proton.Client.TestSupport
 {
    public static class Wait
    {
-      public static readonly int MAX_WAIT_MILLIS = 30 * 1000;
-      public static readonly int SLEEP_MILLIS = 200;
+      public static readonly int MAX_WAIT_MILLISECONDS = 30 * 1000;
+      public static readonly int SLEEP_MILLISECONDS = 200;
       public static readonly string DEFAULT_FAILURE_MESSAGE = "Expected condition was not met";
 
       public static void AssertTrue(Func<bool> condition)
@@ -45,7 +45,7 @@ namespace Apache.Qpid.Proton.Client.TestSupport
 
       public static void AssertFalse(String failureMessage, Func<bool> condition, int duration)
       {
-         AssertTrue(failureMessage, () => !condition(), duration, SLEEP_MILLIS);
+         AssertTrue(failureMessage, () => !condition(), duration, SLEEP_MILLISECONDS);
       }
 
       public static void AssertFalse(Func<bool> condition, int duration, int sleep)
@@ -55,17 +55,17 @@ namespace Apache.Qpid.Proton.Client.TestSupport
 
       public static void AssertTrue(Func<bool> condition, int duration)
       {
-         AssertTrue(DEFAULT_FAILURE_MESSAGE, condition, duration, SLEEP_MILLIS);
+         AssertTrue(DEFAULT_FAILURE_MESSAGE, condition, duration, SLEEP_MILLISECONDS);
       }
 
       public static void AssertTrue(String failureMessage, Func<bool> condition)
       {
-         AssertTrue(failureMessage, condition, MAX_WAIT_MILLIS);
+         AssertTrue(failureMessage, condition, MAX_WAIT_MILLISECONDS);
       }
 
       public static void AssertTrue(String failureMessage, Func<bool> condition, int duration)
       {
-         AssertTrue(failureMessage, condition, duration, SLEEP_MILLIS);
+         AssertTrue(failureMessage, condition, duration, SLEEP_MILLISECONDS);
       }
 
       public static void AssertTrue(Func<bool> condition, int duration, int sleep)
@@ -85,30 +85,30 @@ namespace Apache.Qpid.Proton.Client.TestSupport
 
       public static bool WaitFor(Func<bool> condition)
       {
-         return WaitFor(condition, MAX_WAIT_MILLIS);
+         return WaitFor(condition, MAX_WAIT_MILLISECONDS);
       }
 
       public static bool WaitFor(Func<bool> condition, int duration)
       {
-         return WaitFor(condition, duration, SLEEP_MILLIS);
+         return WaitFor(condition, duration, SLEEP_MILLISECONDS);
       }
 
-      public static bool WaitFor(Func<bool> condition, long durationMillis, int sleepMillis)
+      public static bool WaitFor(Func<bool> condition, long durationMilliseconds, int sleepMilliseconds)
       {
          try
          {
             Stopwatch watch = Stopwatch.StartNew();
             bool conditionSatisfied = condition();
 
-            while (!conditionSatisfied && watch.ElapsedMilliseconds < durationMillis)
+            while (!conditionSatisfied && watch.ElapsedMilliseconds < durationMilliseconds)
             {
-               if (sleepMillis == 0)
+               if (sleepMilliseconds == 0)
                {
                   Thread.Yield();
                }
                else
                {
-                  Thread.Sleep(sleepMillis);
+                  Thread.Sleep(sleepMilliseconds);
                }
 
                conditionSatisfied = condition();

@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
       /// <summary>
       /// Decorative matcher create method that provides an API for tests that want
       /// to be more expressive of their intent. The original behavior of the wrapped
-      /// matcher is maintined.
+      /// matcher is maintained.
       /// </summary>
       /// <param name="matcher">The actual matcher to decorate</param>
       /// <returns>A new matcher instance</returns>

@@ -95,7 +95,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
             if (parent.ConstructorType == ConstructorType.Small)
             {
-               if (0 <= value && value <= 255)
+               if (value is >= 0 and <= 255)
                {
                   return 1;
                }
@@ -109,7 +109,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
          }
          else
          {
-            return 0 == value ? 1u : (1 <= value && value <= 255) ? 2u : 5u;
+            return 0 == value ? 1u : (value is >= 1 and <= 255) ? 2u : 5u;
          }
       }
    }

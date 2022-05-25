@@ -37,9 +37,9 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// following the given wait time regardless of any queued tasks or
       /// expected inputs.
       /// </summary>
-      /// <param name="millis"></param>
+      /// <param name="milliseconds"></param>
       /// <returns></returns>
-      public abstract ScriptedAction Later(long millis);
+      public abstract ScriptedAction Later(long milliseconds);
 
       /// <summary>
       /// Queues the scripted action for later run after any preceding scripted

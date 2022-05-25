@@ -43,7 +43,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          if (!tracker.IsLocallyAttached)
          {
-            AttachInjectAction attach = new AttachInjectAction(driver);
+            AttachInjectAction attach = new(driver);
 
             attach.OnChannel((ushort)channel);
             attach.WithName(tracker.Name);

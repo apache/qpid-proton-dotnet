@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       /// <summary>
       /// Gets or sets the current write offset in this buffer.  If the write offset is set to
-      /// a value less than the current read offset or larger than the current buffer capcity
+      /// a value less than the current read offset or larger than the current buffer capacity
       /// an exception is thrown.
       /// </summary>
       long WriteOffset { get; set; }

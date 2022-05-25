@@ -29,12 +29,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-         return (ulong) buffer.ReadUnsignedByte();
+         return (ulong)buffer.ReadUnsignedByte();
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         return (ulong) ProtonStreamReadUtils.ReadUnsignedByte(stream);
+         return (ulong)ProtonStreamReadUtils.ReadUnsignedByte(stream);
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)

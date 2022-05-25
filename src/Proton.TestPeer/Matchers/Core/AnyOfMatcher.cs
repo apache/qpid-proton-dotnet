@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
    /// <summary>
-   /// A type matcher that examins a list of matcher and tests them against
+   /// A type matcher that examines a list of matcher and tests them against
    /// some input, if any single matcher succeeds in matching the target value
    /// then testing stops and the match is considered to have passed.
    /// </summary>
@@ -36,12 +36,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 
       public override bool Matches(object actual)
       {
-        return base.Matches(actual, true);
+         return Matches(actual, true);
       }
 
       public override void DescribeTo(IDescription description)
       {
-         base.DescribeTo(description, "or");
+         DescribeTo(description, "or");
       }
 
       /// <summary>

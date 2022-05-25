@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       public static readonly bool DEFAULT_VERIFY_HOST = true;
       public static readonly bool DEFAULT_CHECK_CERT_REVOCATION = false;
       public static readonly int DEFAULT_LOCAL_PORT = 0;
-      public static readonly bool DEFAULT_USE_WEBSOCKETS = false;
+      public static readonly bool DEFAULT_USE_WEB_SOCKETS = false;
       public static readonly bool DEFAULT_FRAGMENT_WEBSOCKET_WRITES = false;
       public static readonly bool DEFAULT_SSL_ENABLED = false;
       public static readonly SslProtocols DEFAULT_SSL_PROTOCOLS = SslProtocols.None;
@@ -73,7 +73,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public bool TraceBytes { get; set; } = DEFAULT_TRACE_BYTES;
 
-      public bool UseWebSockets { get; set; } = DEFAULT_USE_WEBSOCKETS;
+      public bool UseWebSockets { get; set; } = DEFAULT_USE_WEB_SOCKETS;
 
       public bool FragmentWebSocketWrites { get; set; } = DEFAULT_FRAGMENT_WEBSOCKET_WRITES;
 

@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          }
          catch (Exception throwable)
          {
-            AssertionError error = new AssertionError("Frame decode failed.", throwable);
+            AssertionError error = new("Frame decode failed.", throwable);
             TransitionToErrorStage(error);
             throw error;
          }
@@ -161,7 +161,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             if (headerByte == AMQPHeader.HEADER_SIZE_BYTES)
             {
                // Construct a new Header from the read bytes which will validate the contents
-               AMQPHeader header = new AMQPHeader(headerBytes);
+               AMQPHeader header = new(headerBytes);
 
                // Transition to parsing the frames if any pipelined into this buffer.
                decoder.TransitionToFrameSizeParsingStage();

@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Buffer
       public static readonly int DefaultCapacity = 64;
 
       /// <summary>
-      /// Default max cpacity based on maximum array size limit as this
+      /// Default max capacity based on maximum array size limit as this
       /// buffer is backed by a byte array.
       /// </summary>
       public static readonly int DefaultMaximumCapacity = int.MaxValue;
@@ -112,7 +112,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// how large the buffer could ever grow.
       /// </summary>
       /// <param name="backingArray">The actual byte array that backs this buffer</param>
-      /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
+      /// <param name="maxCapacity">The maximum capacity this buffer can grow to</param>
       public ProtonByteBuffer(byte[] backingArray, long maxCapacity) : this(backingArray, 0, maxCapacity)
       {
       }
@@ -124,7 +124,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </summary>
       /// <param name="backingArray">The actual byte array that backs this buffer</param>
       /// <param name="arrayOffset">The offset into the backing array where the buffer starts</param>
-      /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
+      /// <param name="maxCapacity">The maximum capacity this buffer can grow to</param>
       public ProtonByteBuffer(byte[] backingArray, int arrayOffset, long maxCapacity)
        : this(backingArray, arrayOffset, backingArray.Length - arrayOffset, maxCapacity)
       {
@@ -138,7 +138,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <param name="backingArray">The actual byte array that backs this buffer</param>
       /// <param name="arrayOffset">The offset index into the backing array where the buffer starts</param>
       /// <param name="capacity">The capacity limit for this view of the assigned array</param>
-      /// <param name="maxCapacity">The maximum capcity this buffer can grow to</param>
+      /// <param name="maxCapacity">The maximum capacity this buffer can grow to</param>
       public ProtonByteBuffer(byte[] backingArray, int arrayOffset, int capacity, long maxCapacity) : base()
       {
          if (arrayOffset > backingArray.Length)
@@ -887,7 +887,7 @@ namespace Apache.Qpid.Proton.Buffer
          if (requiredWritable > maxCapacity - writeOffset)
          {
             throw new ArgumentOutOfRangeException(string.Format(
-                "writeOffset({0}) + requiredWritable({1}) exceeds maximum buffer capcity({2}): {3}",
+                "writeOffset({0}) + requiredWritable({1}) exceeds maximum buffer capacity({2}): {3}",
                 writeOffset, requiredWritable, maxCapacity, this));
          }
 

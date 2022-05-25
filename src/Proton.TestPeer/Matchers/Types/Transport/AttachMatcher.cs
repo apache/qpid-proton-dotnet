@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
          return WithName(Is.EqualTo(name));
       }
 
-      public AttachMatcher WithHandleu(int handle)
+      public AttachMatcher WithHandle(int handle)
       {
          return WithHandle(Is.EqualTo(handle));
       }
@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
       {
          if (source != null)
          {
-            SourceMatcher sourceMatcher = new SourceMatcher(source);
+            SourceMatcher sourceMatcher = new(source);
             return WithSource(sourceMatcher);
          }
          else
@@ -92,7 +92,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
       {
          if (target != null)
          {
-            TargetMatcher targetMatcher = new TargetMatcher(target);
+            TargetMatcher targetMatcher = new(target);
             return WithTarget(targetMatcher);
          }
          else
@@ -105,7 +105,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
       {
          if (coordinator != null)
          {
-            CoordinatorMatcher coordinatorMatcher = new CoordinatorMatcher();
+            CoordinatorMatcher coordinatorMatcher = new();
             return WithCoordinator(coordinatorMatcher);
          }
          else

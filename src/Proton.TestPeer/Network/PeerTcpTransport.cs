@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       private readonly Socket clientSocket;
       private readonly ChannelReader<Stream> channelOutputSink;
       private readonly ChannelWriter<Stream> channelOutputSource;
-      private readonly AtomicBoolean closed = new AtomicBoolean();
+      private readonly AtomicBoolean closed = new();
 
       private Action<PeerTcpTransport> connectedHandler;
       private Action<PeerTcpTransport, Exception> connectFailedHandler;

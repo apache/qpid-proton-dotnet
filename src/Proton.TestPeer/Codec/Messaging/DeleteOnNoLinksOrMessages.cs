@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 {
    public sealed class DeleteOnNoLinksOrMessages : ListDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:delete-on-no-links-or-messages:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:delete-on-no-links-or-messages:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x000000000000002eUL;
 
       public DeleteOnNoLinksOrMessages() : base(0)

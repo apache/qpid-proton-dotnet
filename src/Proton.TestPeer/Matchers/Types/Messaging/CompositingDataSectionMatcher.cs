@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
    /// </summary>
    public sealed class CompositingDataSectionMatcher : TypeSafeMatcher<Stream>
    {
-      private static readonly Symbol DescriptorSymbol = new Symbol("amqp:data:binary");
+      private static readonly Symbol DescriptorSymbol = new("amqp:data:binary");
       private static readonly ulong DescriptorCode = 0x0000000000000075UL;
 
       private readonly int expectedValueSize;
@@ -178,7 +178,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
                case EncodingCodes.SmallULong:
                   return (ulong)data.ReadUnsignedByte();
                case EncodingCodes.ULong:
-                  return (ulong)data.ReadUnsignedLong();
+                  return data.ReadUnsignedLong();
                case EncodingCodes.Sym8:
                   return ReadSymbol8(data);
                case EncodingCodes.Sym32:

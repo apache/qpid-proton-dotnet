@@ -28,21 +28,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
       /// <summary>
       /// The builtin list of comparators that will be tried
       /// </summary>
-      private readonly IList<ILinkedCompartor> comparators = new List<ILinkedCompartor>();
+      private readonly IList<ILinkedComparator> comparators = new List<ILinkedComparator>();
 
       public PeerEqualityComparator()
       {
-         EnumerableCompartor singletonEnumComparator = new EnumerableCompartor(this);
+         EnumerableComparator singletonEnumComparator = new(this);
 
-         comparators.Add(new ArrayCompartor(this, singletonEnumComparator));
-         comparators.Add(new DictionaryCompartor(this));
-         comparators.Add(new DictionaryEntryCompartor(this));
-         comparators.Add(new KeyValuePairCompartor(this));
+         comparators.Add(new ArrayComparator(this, singletonEnumComparator));
+         comparators.Add(new DictionaryComparator(this));
+         comparators.Add(new DictionaryEntryComparator(this));
+         comparators.Add(new KeyValuePairComparator(this));
          comparators.Add(singletonEnumComparator);
-         comparators.Add(new CharacterCompartor(this));
-         comparators.Add(new SymbolCompartor(this));
-         comparators.Add(new StringCompartor(this));
-         comparators.Add(new NumberCompartor(this));
+         comparators.Add(new CharacterComparator(this));
+         comparators.Add(new SymbolComparator(this));
+         comparators.Add(new StringComparator(this));
+         comparators.Add(new NumberComparator(this));
       }
 
       public bool AreEqual(object lhs, object rhs)
@@ -62,12 +62,12 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
             return false;
          }
 
-         if (object.ReferenceEquals(lhs, rhs))
+         if (ReferenceEquals(lhs, rhs))
          {
             return true;
          }
 
-         foreach (ILinkedCompartor comparer in comparators)
+         foreach (ILinkedComparator comparer in comparators)
          {
             bool? result = comparer.Equals(lhs, rhs, mismatchDescription);
             if (result.HasValue)

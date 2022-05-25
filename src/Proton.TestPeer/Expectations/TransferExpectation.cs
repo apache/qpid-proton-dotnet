@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public class TransferExpectation : AbstractExpectation<Transfer>
    {
-      private readonly TransferMatcher matcher = new TransferMatcher();
+      private readonly TransferMatcher matcher = new();
       private readonly TransferDeliveryStateBuilder stateBuilder;
 
       private IMatcher payloadMatcher = Matches.Any(typeof(byte[]));
@@ -255,7 +255,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       public virtual TransferExpectation WithPayload(byte[] buffer)
       {
          // TODO - Create Matcher which describes the mismatch in detail
-         this.payloadMatcher = Matchers.Is.EqualTo(buffer);
+         this.payloadMatcher = Is.EqualTo(buffer);
          return this;
       }
 
@@ -396,7 +396,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public TransferTransactionalStateMatcher Transactional()
       {
-         TransferTransactionalStateMatcher matcher = new TransferTransactionalStateMatcher(expectation);
+         TransferTransactionalStateMatcher matcher = new(expectation);
          expectation.WithState(matcher);
          return matcher;
       }

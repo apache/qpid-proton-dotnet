@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
@@ -31,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class EndExpectation : AbstractExpectation<End>
    {
-      private readonly EndMatcher matcher = new EndMatcher();
+      private readonly EndMatcher matcher = new();
 
       private EndInjectAction response;
 

@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Utilities
       private readonly IComparer<K> keyComparer = Comparer<K>.Default;
 
       /// <summary>
-      /// Pooled entries used to prevent excessive allocations for rapied insert and removal operations.
+      /// Pooled entries used to prevent excessive allocations for rapid insert and removal operations.
       /// </summary>
       protected readonly RingQueue<SplayedEntry> entryPool = new(64);
 

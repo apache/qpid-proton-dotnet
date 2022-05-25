@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class TransferInjectAction : AbstractPerformativeInjectAction<Transfer>
    {
-      private readonly Transfer transfer = new Transfer();
+      private readonly Transfer transfer = new();
       private readonly DeliveryStateBuilder stateBuilder;
 
       private byte[] payload;
@@ -281,7 +281,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       private byte[] EncodePayload()
       {
          ICodec codec = CodecFactory.Create();
-         MemoryStream encoding = new MemoryStream();
+         MemoryStream encoding = new();
 
          if (header != null)
          {
@@ -617,7 +617,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransferInjectAction Rejected(string condition, string description)
          {
-            Rejected rejected = new Rejected
+            Rejected rejected = new()
             {
                Error = new ErrorCondition(new Symbol(condition), description)
             };
@@ -632,7 +632,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransferInjectAction Modified(bool failed)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed
             };
@@ -642,7 +642,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransferInjectAction Modified(bool failed, bool undeliverableHere)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed,
                UndeliverableHere = undeliverableHere
@@ -653,7 +653,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder Transactional()
          {
-            TransactionalStateBuilder builder = new TransactionalStateBuilder(action);
+            TransactionalStateBuilder builder = new(action);
             action.WithState(builder.State());
             return builder;
          }
@@ -662,7 +662,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       public sealed class TransactionalStateBuilder
       {
          private readonly TransferInjectAction action;
-         private readonly TransactionalState state = new TransactionalState();
+         private readonly TransactionalState state = new();
 
          public TransactionalStateBuilder(TransferInjectAction action)
          {
@@ -719,7 +719,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithRejected(string condition, string description)
          {
-            Rejected rejected = new Rejected
+            Rejected rejected = new()
             {
                Error = new ErrorCondition(new Symbol(condition), description)
             };
@@ -734,7 +734,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithModified(bool failed)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed
             };
@@ -744,7 +744,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithModified(bool failed, bool undeliverableHere)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed,
                UndeliverableHere = undeliverableHere

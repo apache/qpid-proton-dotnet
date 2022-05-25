@@ -215,13 +215,13 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             {
                if (size > 257 || count > 255)
                {
-                  stream.WriteByte((byte)0xf0);
+                  stream.WriteByte(0xf0);
                   stream.WriteUnsignedInt(size - 5);
                   stream.WriteUnsignedInt(count);
                }
                else
                {
-                  stream.WriteByte((byte)0xe0);
+                  stream.WriteByte(0xe0);
                   stream.WriteByte((byte)(size - 2));
                   stream.WriteByte((byte)count);
                }
@@ -243,10 +243,10 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             IElement element = first;
             if (IsDescribed)
             {
-               stream.WriteByte((byte)0);
+               stream.WriteByte(0);
                if (element == null)
                {
-                  stream.WriteByte((byte)0x40);
+                  stream.WriteByte(0x40);
                }
                else
                {
@@ -257,34 +257,34 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             switch (arrayType)
             {
                case DataType.Null:
-                  stream.WriteByte((byte)0x40);
+                  stream.WriteByte(0x40);
                   break;
                case DataType.Bool:
-                  stream.WriteByte((byte)0x56);
+                  stream.WriteByte(0x56);
                   break;
                case DataType.UByte:
-                  stream.WriteByte((byte)0x50);
+                  stream.WriteByte(0x50);
                   break;
                case DataType.Byte:
-                  stream.WriteByte((byte)0x51);
+                  stream.WriteByte(0x51);
                   break;
                case DataType.UShort:
-                  stream.WriteByte((byte)0x60);
+                  stream.WriteByte(0x60);
                   break;
                case DataType.Short:
-                  stream.WriteByte((byte)0x61);
+                  stream.WriteByte(0x61);
                   break;
                case DataType.UInt:
                   switch (ConstructorType)
                   {
                      case ConstructorType.Tiny:
-                        stream.WriteByte((byte)0x43);
+                        stream.WriteByte(0x43);
                         break;
                      case ConstructorType.Small:
-                        stream.WriteByte((byte)0x52);
+                        stream.WriteByte(0x52);
                         break;
                      case ConstructorType.Large:
-                        stream.WriteByte((byte)0x70);
+                        stream.WriteByte(0x70);
                         break;
                   }
                   break;
@@ -292,19 +292,19 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
                   stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0x54 : (byte)0x71);
                   break;
                case DataType.Char:
-                  stream.WriteByte((byte)0x73);
+                  stream.WriteByte(0x73);
                   break;
                case DataType.ULong:
                   switch (ConstructorType)
                   {
                      case ConstructorType.Tiny:
-                        stream.WriteByte((byte)0x44);
+                        stream.WriteByte(0x44);
                         break;
                      case ConstructorType.Small:
-                        stream.WriteByte((byte)0x53);
+                        stream.WriteByte(0x53);
                         break;
                      case ConstructorType.Large:
-                        stream.WriteByte((byte)0x80);
+                        stream.WriteByte(0x80);
                         break;
                   }
                   break;
@@ -312,25 +312,25 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
                   stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0x55 : (byte)0x81);
                   break;
                case DataType.Timestamp:
-                  stream.WriteByte((byte)0x83);
+                  stream.WriteByte(0x83);
                   break;
                case DataType.Float:
-                  stream.WriteByte((byte)0x72);
+                  stream.WriteByte(0x72);
                   break;
                case DataType.Double:
-                  stream.WriteByte((byte)0x82);
+                  stream.WriteByte(0x82);
                   break;
                case DataType.Decimal32:
-                  stream.WriteByte((byte)0x74);
+                  stream.WriteByte(0x74);
                   break;
                case DataType.Decimal64:
-                  stream.WriteByte((byte)0x84);
+                  stream.WriteByte(0x84);
                   break;
                case DataType.Decimal128:
-                  stream.WriteByte((byte)0x94);
+                  stream.WriteByte(0x94);
                   break;
                case DataType.Uuid:
-                  stream.WriteByte((byte)0x98);
+                  stream.WriteByte(0x98);
                   break;
                case DataType.Binary:
                   stream.WriteByte(ConstructorType == ConstructorType.Small ? (byte)0xa0 : (byte)0xb0);

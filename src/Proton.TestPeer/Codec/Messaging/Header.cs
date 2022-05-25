@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
    public sealed class Header : ListDescribedType
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000070UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:header:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:header:list");
 
       public Header() : base(Enum.GetNames(typeof(HeaderField)).Length)
       {

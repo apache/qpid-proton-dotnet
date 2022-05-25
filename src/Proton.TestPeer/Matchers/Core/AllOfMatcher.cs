@@ -20,7 +20,7 @@ using System.Collections.Generic;
 namespace Apache.Qpid.Proton.Test.Driver.Matchers.Core
 {
    /// <summary>
-   /// A type matcher that examins a list of matcher and tests them against
+   /// A type matcher that examines a list of matcher and tests them against
    /// some input, if any single matcher fails to match the testing stops and
    /// an error description is created to describe that mismatch.
    /// </summary>

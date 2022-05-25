@@ -16,7 +16,6 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -26,11 +25,11 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// Compares two KeyValuePair types and checks if both the entry keys
    /// and the entry values are equivalent.
    /// </summary>
-   public sealed class KeyValuePairCompartor : ILinkedCompartor
+   public sealed class KeyValuePairComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public KeyValuePairCompartor(PeerEqualityComparator comparators)
+      public KeyValuePairComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }

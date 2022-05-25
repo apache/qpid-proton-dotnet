@@ -138,7 +138,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (cachedOutcomes == null && remoteSource.Outcomes != null)
             {
-               List<DeliveryStateType> result = new List<DeliveryStateType>(
+               List<DeliveryStateType> result = new(
                   System.Array.ConvertAll(remoteSource.Outcomes, (outcome) => outcome.ToDeliveryStateType()));
                cachedOutcomes = result;
             }

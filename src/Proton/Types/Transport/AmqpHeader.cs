@@ -103,7 +103,7 @@ namespace Apache.Qpid.Proton.Types.Transport
          if (buffer != null)
          {
             byte[] copy = new byte[buffer.ReadableBytes];
-            buffer.CopyInto(0, copy, 0, (int) buffer.ReadableBytes);
+            buffer.CopyInto(0, copy, 0, (int)buffer.ReadableBytes);
             return copy;
          }
          else

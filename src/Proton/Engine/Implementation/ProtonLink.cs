@@ -53,7 +53,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       protected readonly ProtonConnection connection;
       protected readonly ProtonSession session;
 
-      protected readonly Attach localAttach = new Attach();
+      protected readonly Attach localAttach = new();
       protected Attach remoteAttach;
 
       private bool localAttachSent;
@@ -330,7 +330,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public override bool IsRemotelyClosed => RemoteState == LinkState.Closed;
 
-      public bool IsLocallDetached => LinkState == LinkState.Detached;
+      public bool IsLocallyDetached => LinkState == LinkState.Detached;
 
       public bool IsLocallyClosedOrDetached => LinkState > LinkState.Active;
 

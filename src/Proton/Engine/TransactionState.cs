@@ -60,7 +60,7 @@ namespace Apache.Qpid.Proton.Engine
       /// A Transaction is considered failed if the transaction manager responds with an error
       /// to the declaration action.
       /// </summary>
-      DelcareFailed,
+      DeclareFailed,
 
       /// <summary>
       /// A Transaction is considered failed in the transaction manager responds with an error

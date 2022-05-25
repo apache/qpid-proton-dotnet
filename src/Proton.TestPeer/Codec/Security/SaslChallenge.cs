@@ -29,8 +29,8 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
    public sealed class SaslChallenge : SaslDescribedType
    {
-    public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:sasl-challenge:list");
-    public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000042ul;
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:sasl-challenge:list");
+      public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000042ul;
 
       public SaslChallenge() : base(Enum.GetNames(typeof(SaslChallengeField)).Length)
       {
@@ -56,7 +56,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
       public override void Invoke<T>(ISaslPerformativeHandler<T> handler, uint frameSize, byte[] payload, ushort channel, T context)
       {
-        handler.HandleChallenge(frameSize, this, context);
+         handler.HandleChallenge(frameSize, this, context);
       }
 
       public override string ToString()

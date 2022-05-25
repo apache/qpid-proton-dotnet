@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       IDescription AppendText(string text);
 
       /// <summary>
-      /// Appends the descrption of a self describing type into the overall
+      /// Appends the description of a self describing type into the overall
       /// description being accumulated by this description instance.
       /// </summary>
       /// <param name="selfDescribing">The self describing type to append</param>

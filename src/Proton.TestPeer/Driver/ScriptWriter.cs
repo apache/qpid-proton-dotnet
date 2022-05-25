@@ -44,77 +44,77 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public AMQPHeaderExpectation ExpectAMQPHeader()
       {
-         AMQPHeaderExpectation expecting = new AMQPHeaderExpectation(AMQPHeader.Header, Driver);
+         AMQPHeaderExpectation expecting = new(AMQPHeader.Header, Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public OpenExpectation ExpectOpen()
       {
-         OpenExpectation expecting = new OpenExpectation(Driver);
+         OpenExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public CloseExpectation ExpectClose()
       {
-         CloseExpectation expecting = new CloseExpectation(Driver);
+         CloseExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public BeginExpectation ExpectBegin()
       {
-         BeginExpectation expecting = new BeginExpectation(Driver);
+         BeginExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public EndExpectation ExpectEnd()
       {
-         EndExpectation expecting = new EndExpectation(Driver);
+         EndExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public AttachExpectation ExpectAttach()
       {
-         AttachExpectation expecting = new AttachExpectation(Driver);
+         AttachExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public DetachExpectation ExpectDetach()
       {
-         DetachExpectation expecting = new DetachExpectation(Driver);
+         DetachExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public FlowExpectation ExpectFlow()
       {
-         FlowExpectation expecting = new FlowExpectation(Driver);
+         FlowExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public TransferExpectation ExpectTransfer()
       {
-         TransferExpectation expecting = new TransferExpectation(Driver);
+         TransferExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public DispositionExpectation ExpectDisposition()
       {
-         DispositionExpectation expecting = new DispositionExpectation(Driver);
+         DispositionExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public EmptyFrameExpectation ExpectEmptyFrame()
       {
-         EmptyFrameExpectation expecting = new EmptyFrameExpectation(Driver);
+         EmptyFrameExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
@@ -125,7 +125,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public AttachExpectation ExpectCoordinatorAttach()
       {
-         AttachExpectation expecting = new AttachExpectation(Driver);
+         AttachExpectation expecting = new(Driver);
 
          expecting.WithRole(Role.Sender);
          expecting.WithCoordinator(Matches.IsA(typeof(Coordinator)));
@@ -137,7 +137,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public DeclareExpectation ExpectDeclare()
       {
-         DeclareExpectation expecting = new DeclareExpectation(Driver);
+         DeclareExpectation expecting = new(Driver);
 
          expecting.WithHandle(Is.NotNullValue());
          expecting.WithDeliveryId(Is.NotNullValue());
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public DischargeExpectation ExpectDischarge()
       {
-         DischargeExpectation expecting = new DischargeExpectation(Driver);
+         DischargeExpectation expecting = new(Driver);
 
          expecting.WithHandle(Is.NotNullValue());
          expecting.WithDeliveryId(Is.NotNullValue());
@@ -167,42 +167,42 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public AMQPHeaderExpectation ExpectSASLHeader()
       {
-         AMQPHeaderExpectation expecting = new AMQPHeaderExpectation(AMQPHeader.SASLHeader, Driver);
+         AMQPHeaderExpectation expecting = new(AMQPHeader.SASLHeader, Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public SaslMechanismsExpectation ExpectSaslMechanisms()
       {
-         SaslMechanismsExpectation expecting = new SaslMechanismsExpectation(Driver);
+         SaslMechanismsExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public SaslInitExpectation ExpectSaslInit()
       {
-         SaslInitExpectation expecting = new SaslInitExpectation(Driver);
+         SaslInitExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public SaslChallengeExpectation ExpectSaslChallenge()
       {
-         SaslChallengeExpectation expecting = new SaslChallengeExpectation(Driver);
+         SaslChallengeExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public SaslResponseExpectation ExpectSaslResponse()
       {
-         SaslResponseExpectation expecting = new SaslResponseExpectation(Driver);
+         SaslResponseExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
 
       public SaslOutcomeExpectation ExpectSaslOutcome()
       {
-         SaslOutcomeExpectation expecting = new SaslOutcomeExpectation(Driver);
+         SaslOutcomeExpectation expecting = new(Driver);
          Driver.AddScriptedElement(expecting);
          return expecting;
       }
@@ -484,7 +484,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       public BeginInjectAction RespondToLastBegin()
       {
-         BeginInjectAction response = new BeginInjectAction(Driver);
+         BeginInjectAction response = new(Driver);
 
          SessionTracker session = Driver.Sessions.LastRemotelyOpenedSession;
          if (session == null)
@@ -505,7 +505,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// </summary>
       public AttachInjectAction RespondToLastAttach()
       {
-         AttachInjectAction response = new AttachInjectAction(Driver);
+         AttachInjectAction response = new(Driver);
 
          SessionTracker session = Driver.Sessions.LastRemotelyOpenedSession;
          LinkTracker link = session.LastRemotelyOpenedLink;

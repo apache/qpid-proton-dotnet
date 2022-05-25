@@ -20,7 +20,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transport
    public enum SenderSettleMode : byte
    {
       Unsettled,
-      Settked,
+      Settled,
       Mixed
    }
 }

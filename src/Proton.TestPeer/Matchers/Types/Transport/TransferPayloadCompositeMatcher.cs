@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
       private string propertiesMatcherFailureDescription;
       private ApplicationPropertiesMatcher applicationPropertiesMatcher;
       private string applicationPropertiesMatcherFailureDescription;
-      private List<TypeSafeMatcher<Stream>> msgContentMatchers = new List<TypeSafeMatcher<Stream>>();
+      private List<TypeSafeMatcher<Stream>> msgContentMatchers = new();
       private string msgContentMatcherFailureDescription;
       private FooterMatcher footersMatcher;
       private string footerMatcherFailureDescription;
@@ -199,7 +199,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Transport
 
       protected override bool MatchesSafely(byte[] payload)
       {
-         MemoryStream stream = new MemoryStream(payload);
+         MemoryStream stream = new(payload);
          long origLength = stream.Length;
          long bytesConsumed = 0;
 

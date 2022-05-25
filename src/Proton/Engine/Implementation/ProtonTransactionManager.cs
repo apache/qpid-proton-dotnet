@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
-using Apache.Qpid.Proton.Logging;
 using Apache.Qpid.Proton.Engine.Exceptions;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
@@ -30,7 +29,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 {
    /// <summary>
    /// Proton transaction manager abstraction that provides the transaction services
-   /// for a Receiver link that handles the transaction Declare and Discharge commads
+   /// for a Receiver link that handles the transaction Declare and Discharge commands
    /// which control the lifetime and outcome of a running transaction.
    /// </summary>
    public sealed class ProtonTransactionManager : ProtonEndpoint<ITransactionManager>, ITransactionManager
@@ -224,7 +223,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             Error = condition
          };
 
-         txn.State = TransactionState.DelcareFailed;
+         txn.State = TransactionState.DeclareFailed;
          txn.Declare.Disposition(rejected, true);
 
          return this;

@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class SaslMechanismsInjectAction : AbstractSaslPerformativeInjectAction<SaslMechanisms>
    {
-      private readonly SaslMechanisms saslMechanisms = new SaslMechanisms();
+      private readonly SaslMechanisms saslMechanisms = new();
 
       public SaslMechanismsInjectAction(AMQPTestDriver driver) : base(driver)
       {

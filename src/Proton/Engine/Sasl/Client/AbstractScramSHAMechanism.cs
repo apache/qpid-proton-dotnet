@@ -246,9 +246,9 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       protected abstract HMAC CreateHmac(byte[] keyBytes);
 
       /// <summary>
-      /// Dervied SHA based message digest algorithm used by this SASL mechanism
+      /// Derived SHA based message digest algorithm used by this SASL mechanism
       /// </summary>
-      /// <returns>A new hash algorithm that perfrom the digest required by this SASL mechanism</returns>
+      /// <returns>A new hash algorithm that perform the digest required by this SASL mechanism</returns>
       protected abstract HashAlgorithm CreateHashAlgorithm();
 
       public override void VerifyCompletion()

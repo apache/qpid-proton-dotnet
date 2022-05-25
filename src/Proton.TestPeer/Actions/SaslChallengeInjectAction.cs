@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class SaslChallengeInjectAction : AbstractSaslPerformativeInjectAction<SaslChallenge>
    {
-      private readonly SaslChallenge saslChallenge = new SaslChallenge();
+      private readonly SaslChallenge saslChallenge = new();
 
       public SaslChallengeInjectAction(AMQPTestDriver driver) : base(driver)
       {

@@ -101,7 +101,7 @@ namespace Apache.Qpid.Proton.Client.Utilities
       }
 
       /// <summary>
-      /// Shuffle the elements in the pool producing a new randmoized sequence of
+      /// Shuffle the elements in the pool producing a new randomized sequence of
       /// reconnection locations based on the original set.
       /// </summary>
       public void Shuffle()

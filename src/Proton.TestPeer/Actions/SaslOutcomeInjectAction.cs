@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class SaslOutcomeInjectAction : AbstractSaslPerformativeInjectAction<SaslOutcome>
    {
-      private readonly SaslOutcome saslOutcome = new SaslOutcome();
+      private readonly SaslOutcome saslOutcome = new();
 
       public SaslOutcomeInjectAction(AMQPTestDriver driver) : base(driver)
       {

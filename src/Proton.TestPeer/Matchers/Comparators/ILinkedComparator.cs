@@ -19,9 +19,9 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
 {
    /// <summary>
    /// Interface for all .NET type comparators that operate in a linked
-   /// sequence of comparison that can recursive check nested type heirarchies.
+   /// sequence of comparison that can recursive check nested type hierarchies.
    /// </summary>
-   public interface ILinkedCompartor
+   public interface ILinkedComparator
    {
       /// <summary>
       /// Compares the left hand side against the right hand side value and returns

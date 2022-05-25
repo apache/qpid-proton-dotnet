@@ -32,7 +32,7 @@ namespace Apache.Qpid.Proton.Buffer
    public sealed class ProtonCompositeBuffer : IProtonCompositeBuffer
    {
       /// <summary>
-      /// Limit capcity to a value that might still allow for a non-composite
+      /// Limit capacity to a value that might still allow for a non-composite
       /// buffer copy of this buffer to be made if requested.
       /// </summary>
       private const long MAX_CAPACITY = long.MaxValue;
@@ -948,7 +948,7 @@ namespace Apache.Qpid.Proton.Buffer
          // First we need to filter all empty buffers from the input as they don't add anything to
          // the body of a composite buffer and then we need to flatten any composite buffers into
          // our internal view to avoid composites of composite which could allow an overflow on
-         // the compsoed size which we should be proactively trying to prevent.
+         // the composed size which we should be proactively trying to prevent.
          IProtonBuffer[] composite = buffers.Where(IsNotAnEmptyBuffer)
                                             .SelectMany(FlattenedCompositeBuffers)
                                             .ToArray();
@@ -1239,7 +1239,7 @@ namespace Apache.Qpid.Proton.Buffer
 
       #endregion
 
-      #region Internal buffer accessor for use when read / write occurs accross two or more buffers
+      #region Internal buffer accessor for use when read / write occurs across two or more buffers
 
       /// <summary>
       /// When a read or write will cross the boundary of two or more buffers, the split

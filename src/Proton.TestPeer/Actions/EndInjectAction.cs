@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -29,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public sealed class EndInjectAction : AbstractPerformativeInjectAction<End>
    {
-      private readonly End end = new End();
+      private readonly End end = new();
 
       public EndInjectAction(AMQPTestDriver driver) : base(driver)
       {

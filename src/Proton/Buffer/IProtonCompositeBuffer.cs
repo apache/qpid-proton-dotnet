@@ -35,7 +35,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// point should the composite buffer need to allocate a new buffer in order
       /// to accommodate buffer writes a default buffer allocator will be used.
       /// </summary>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       /// <exception cref="NotImplementedException"></exception>
       public static IProtonCompositeBuffer Compose()
       {
@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// to accommodate buffer writes a default buffer allocator will be used.
       /// </summary>
       /// <param name="maxCapacity">The maximum capacity this composite can contain</param>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       /// <exception cref="NotImplementedException"></exception>
       public static IProtonCompositeBuffer Compose(long maxCapacity)
       {
@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// to accommodate buffer writes the provided allocator will be used.
       /// </summary>
       /// <param name="allocator">A buffer allocator that the composite should use</param>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       /// <exception cref="NotImplementedException"></exception>
       public static IProtonCompositeBuffer Compose(IProtonBufferAllocator allocator)
       {
@@ -82,7 +82,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </remarks>
       /// <param name="allocator">A buffer allocator that the composite should use</param>
       /// <param name="buffers">The enumeration of buffers to compose the new composite</param>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       public static IProtonCompositeBuffer Compose(IProtonBufferAllocator allocator, IEnumerable<IProtonBuffer> buffers)
       {
          return new ProtonCompositeBuffer(allocator, buffers);
@@ -98,7 +98,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// </remarks>
       /// <param name="allocator">A buffer allocator that the composite should use</param>
       /// <param name="buffers">The enumeration of buffers to compose the new composite</param>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       public static IProtonCompositeBuffer Compose(IProtonBufferAllocator allocator, params IProtonBuffer[] buffers)
       {
          return new ProtonCompositeBuffer(allocator, buffers);
@@ -113,7 +113,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// may be thrown that indicates the nature of the violation.
       /// </remarks>
       /// <param name="buffers">The enumeration of buffers to compose the new composite</param>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       public static IProtonCompositeBuffer Compose(params IProtonBuffer[] buffers)
       {
          return new ProtonCompositeBuffer(ProtonByteBufferAllocator.Instance, buffers);
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// may be thrown that indicates the nature of the violation.
       /// </remarks>
       /// <param name="buffers">The enumeration of buffers to compose the new composite</param>
-      /// <returns>a new empty composute buffer instance.</returns>
+      /// <returns>a new empty composite buffer instance.</returns>
       public static IProtonCompositeBuffer Compose(IEnumerable<IProtonBuffer> buffers)
       {
          return new ProtonCompositeBuffer(ProtonByteBufferAllocator.Instance, buffers);
@@ -148,7 +148,7 @@ namespace Apache.Qpid.Proton.Buffer
       /// <summary>
       /// Appends the provided buffer to the end of the list of composite buffers already
       /// managed by this buffer.  The given buffer becomes the property of the composite
-      /// and the constraints placed upon buffers managed by the composte implementation
+      /// and the constraints placed upon buffers managed by the composite implementation
       /// are extended to this appended buffer.
       /// </summary>
       /// <param name="extension">The buffer to append to the end of the composite set</param>

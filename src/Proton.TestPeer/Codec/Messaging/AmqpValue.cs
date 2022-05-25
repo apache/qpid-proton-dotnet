@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
    public sealed class AmqpValue : IDescribedType
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000077UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:amqp-value:*");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:amqp-value:*");
 
       private readonly object described;
 
@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
       public override string ToString()
       {
-        return "AmqpValue: [ " + Described + " ]";
+         return "AmqpValue: [ " + Described + " ]";
       }
    }
 }

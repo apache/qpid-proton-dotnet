@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
@@ -31,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class FlowExpectation : AbstractExpectation<Flow>
    {
-      private readonly FlowMatcher matcher = new FlowMatcher();
+      private readonly FlowMatcher matcher = new();
 
       private FlowInjectAction response;
 

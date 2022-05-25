@@ -21,7 +21,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
 {
    /// <summary>
    /// A base class used for matchers that require a non null value of a specific type
-   /// before attempt any futher matching. This matcher provides the basic setup to
+   /// before attempt any further matching. This matcher provides the basic setup to
    /// get as far as asserting that a value is of a given type then the implementation
    /// must finish the comparison.
    /// </summary>
@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers
       /// the type this matcher operates against.
       /// </summary>
       /// <param name="item">The value casted to the expected type</param>
-      /// <returns>The result of the metching test, true if matched</returns>
+      /// <returns>The result of the matching test, true if matched</returns>
       protected abstract bool MatchesSafely(T item);
 
       /// <summary>

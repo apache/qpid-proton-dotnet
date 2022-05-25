@@ -106,7 +106,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging
       {
          receivedFields = valueMap;
 
-         foreach(KeyValuePair<object, IMatcher> entry in FieldMatchers)
+         foreach (KeyValuePair<object, IMatcher> entry in FieldMatchers)
          {
             IMatcher matcher = entry.Value;
             object field = entry.Key;

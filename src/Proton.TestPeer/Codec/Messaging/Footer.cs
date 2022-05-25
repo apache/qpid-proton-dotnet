@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
    public sealed class Footer : MapDescribedType
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000078UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:footer:map");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:footer:map");
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;
 

@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
       {
       }
 
-      public AmqpValue(object value) :this()
+      public AmqpValue(object value) : this()
       {
          Value = value;
       }
@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
          }
          else
          {
-            return Equals((AmqpValue) other);
+            return Equals((AmqpValue)other);
          }
       }
 

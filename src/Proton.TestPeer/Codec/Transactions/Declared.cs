@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Transactions
 
    public sealed class Declared : ListDescribedType, IDeliveryState, IOutcome
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:declared:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:declared:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000033ul;
 
       public Declared() : base(Enum.GetNames(typeof(DeclaredField)).Length)

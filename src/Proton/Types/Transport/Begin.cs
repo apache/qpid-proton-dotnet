@@ -194,16 +194,16 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public override string ToString()
       {
-        return "Begin{" +
-               "remoteChannel=" + (HasRemoteChannel() ? remoteChannel : "null") +
-               ", nextOutgoingId=" + (HasNextOutgoingId() ? nextOutgoingId : "null") +
-               ", incomingWindow=" + (HasIncomingWindow() ? incomingWindow : "null") +
-               ", outgoingWindow=" + (HasOutgoingWindow() ? outgoingWindow : "null") +
-               ", handleMax=" + (HasHandleMax() ? handleMax : "null") +
-               ", offeredCapabilities=" + (offeredCapabilities == null ? "null" : offeredCapabilities) +
-               ", desiredCapabilities=" + (desiredCapabilities == null ? "null" : desiredCapabilities) +
-               ", properties=" + properties +
-               '}';
+         return "Begin{" +
+                "remoteChannel=" + (HasRemoteChannel() ? remoteChannel : "null") +
+                ", nextOutgoingId=" + (HasNextOutgoingId() ? nextOutgoingId : "null") +
+                ", incomingWindow=" + (HasIncomingWindow() ? incomingWindow : "null") +
+                ", outgoingWindow=" + (HasOutgoingWindow() ? outgoingWindow : "null") +
+                ", handleMax=" + (HasHandleMax() ? handleMax : "null") +
+                ", offeredCapabilities=" + (offeredCapabilities == null ? "null" : offeredCapabilities) +
+                ", desiredCapabilities=" + (desiredCapabilities == null ? "null" : desiredCapabilities) +
+                ", properties=" + properties +
+                '}';
       }
 
       public override bool Equals(object obj)
@@ -231,7 +231,7 @@ namespace Apache.Qpid.Proton.Types.Transport
 
       public override int GetHashCode()
       {
-         HashCode hash = new HashCode();
+         HashCode hash = new();
          hash.Add(modified);
          hash.Add(remoteChannel);
          hash.Add(nextOutgoingId);

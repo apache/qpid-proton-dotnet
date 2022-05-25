@@ -30,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Security
 
    public sealed class SaslOutcome : SaslDescribedType
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:sasl-outcome:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:sasl-outcome:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000044ul;
 
       public SaslOutcome() : base(Enum.GetNames(typeof(SaslOutcomeField)).Length)

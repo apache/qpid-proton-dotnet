@@ -35,7 +35,6 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-
          return new Decimal128(ProtonStreamReadUtils.ReadUnsignedLong(stream), ProtonStreamReadUtils.ReadUnsignedLong(stream));
       }
 

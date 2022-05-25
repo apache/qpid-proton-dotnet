@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class DeclareExpectation : TransferExpectation
    {
-      private readonly AmqpValueMatcher defaultPayloadMatcher = new AmqpValueMatcher(new DeclareMatcher());
+      private readonly AmqpValueMatcher defaultPayloadMatcher = new(new DeclareMatcher());
 
       public DeclareExpectation(AMQPTestDriver driver) : base(driver)
       {
@@ -42,7 +42,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
       {
          byte[] txnId = new byte[4];
 
-         Random rand = new Random(Environment.TickCount);
+         Random rand = new(Environment.TickCount);
          rand.NextBytes(txnId);
 
          return Accept(txnId);
@@ -50,7 +50,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       /// <summary>
       /// Indicate a successful transaction declaration and provides a
-      /// transaction Id value that identifies the new tranaction.
+      /// transaction Id value that identifies the new transaction.
       /// </summary>
       /// <param name="txnId">The transaction id for the newly declared transaction</param>
       /// <returns>A disposition inject action that will be sent as a response.</returns>
@@ -73,7 +73,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       /// <summary>
       /// Indicate a successful transaction declaration and provides a
-      /// transaction Id value that identifies the new tranaction.
+      /// transaction Id value that identifies the new transaction.
       /// </summary>
       /// <param name="txnId">The transaction id for the newly declared transaction</param>
       /// <returns>A disposition inject action that will be sent as a response.</returns>

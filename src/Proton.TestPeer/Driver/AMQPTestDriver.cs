@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Test.Driver
    /// </summary>
    public class AMQPTestDriver : IFrameHandler
    {
-      private readonly Mutex mutex = new Mutex();
+      private readonly Mutex mutex = new();
       private readonly string driverName;
       private readonly FrameDecoder frameParser;
       private readonly FrameEncoder frameEncoder;
@@ -69,7 +69,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       /// Uses a thread safe queue to avoid contention on adding script entries
       /// and processing incoming data (although you should probably not do that).
       /// </summary>
-      private readonly Queue<IScriptedElement> script = new Queue<IScriptedElement>();
+      private readonly Queue<IScriptedElement> script = new();
 
       public AMQPTestDriver(string name, Action<Stream> frameConsumer) :
          this(name, frameConsumer, null, NullLoggerFactory.Instance)
@@ -259,7 +259,7 @@ namespace Apache.Qpid.Proton.Test.Driver
                }
             }
 
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = new();
             frameEncoder.HandleWrite(stream, performative, channel, payload, null);
             logger.LogTrace("{0} Writing out buffer of size:{1} to consumer: {2}", driverName, stream.Length, frameConsumer);
             frameConsumer.Invoke(stream);
@@ -287,7 +287,7 @@ namespace Apache.Qpid.Proton.Test.Driver
             }
 
             logger.LogTrace("{0} Sending sasl performative: {1}", driverName, performative);
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = new();
             frameEncoder.HandleWrite(stream, performative, channel);
             frameConsumer.Invoke(stream);
          }
@@ -306,7 +306,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          mutex.WaitOne();
          try
          {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = new();
             frameEncoder.HandleWrite(stream, null, channel, null, null);
             frameConsumer.Invoke(stream);
          }

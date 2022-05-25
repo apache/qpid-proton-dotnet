@@ -342,7 +342,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                case TransactionState.Discharged:
                case TransactionState.DischargeFailed:
-               case TransactionState.DelcareFailed:
+               case TransactionState.DeclareFailed:
                   break;
                case TransactionState.Declaring:
                   throw new ClientIllegalStateException("A transaction is already in the process of being started");
@@ -372,7 +372,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   throw new ClientIllegalStateException("Commit called before transaction declare completed.");
                case TransactionState.Discharging:
                   throw new ClientIllegalStateException("Commit called before transaction discharge completed.");
-               case TransactionState.DelcareFailed:
+               case TransactionState.DeclareFailed:
                   throw new ClientTransactionNotActiveException("Commit called on a transaction that has failed due to an error during declare.");
                case TransactionState.DischargeFailed:
                   throw new ClientTransactionNotActiveException("Commit called on a transaction that has failed due to an error during discharge.");
@@ -400,7 +400,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   throw new ClientIllegalStateException("Rollback called before transaction declare completed.");
                case TransactionState.Discharging:
                   throw new ClientIllegalStateException("Rollback called before transaction discharge completed.");
-               case TransactionState.DelcareFailed:
+               case TransactionState.DeclareFailed:
                   throw new ClientTransactionNotActiveException("Rollback called on a transaction that has failed due to an error during declare.");
                case TransactionState.DischargeFailed:
                   throw new ClientTransactionNotActiveException("Rollback called on a transaction that has failed due to an error during discharge.");

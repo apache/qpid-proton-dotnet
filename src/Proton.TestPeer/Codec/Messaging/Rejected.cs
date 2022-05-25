@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
    public sealed class Rejected : ListDescribedType, IDeliveryState, IOutcome
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:rejected:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:rejected:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000025UL;
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;

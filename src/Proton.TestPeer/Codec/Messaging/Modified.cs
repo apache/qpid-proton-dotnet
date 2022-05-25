@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
 
    public sealed class Modified : ListDescribedType, IDeliveryState, IOutcome
    {
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:modified:list");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:modified:list");
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000027UL;
 
       public override object Descriptor => DESCRIPTOR_SYMBOL;

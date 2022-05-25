@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Actions;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
@@ -31,7 +30,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
    /// </summary>
    public sealed class OpenExpectation : AbstractExpectation<Open>
    {
-      private readonly OpenMatcher matcher = new OpenMatcher();
+      private readonly OpenMatcher matcher = new();
 
       private OpenInjectAction response;
       private bool explicitlyNullContainerId;
@@ -52,7 +51,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
          response = new OpenInjectAction(driver);
          driver.AddScriptedElement(response);
 
-         CloseInjectAction closeAction = new CloseInjectAction(driver);
+         CloseInjectAction closeAction = new(driver);
          driver.AddScriptedElement(closeAction);
 
          return closeAction;

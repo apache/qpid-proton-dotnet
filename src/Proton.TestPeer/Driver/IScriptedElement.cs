@@ -20,7 +20,7 @@ using System;
 namespace Apache.Qpid.Proton.Test.Driver
 {
    /// <summary>
-   /// Base interface for all scriptable test types.
+   /// Base interface for all scripted test types.
    /// </summary>
    public interface IScriptedElement
    {

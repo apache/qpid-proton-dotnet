@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
-using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Transport;
 using Apache.Qpid.Proton.Utilities;
 
@@ -110,7 +109,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       /// <summary>
-      /// Convery the writability at this point in time
+      /// Convey the writability at this point in time
       /// </summary>
       internal bool IsSendable => writeable;
 

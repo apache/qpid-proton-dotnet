@@ -239,7 +239,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
-      public void TestCreateConnectionWithUnconfiguredContainerId()
+      public void TestCreateConnectionWithNotConfiguredContainerId()
       {
          using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
          {
@@ -444,7 +444,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       }
 
       [Test]
-      public void TestConnectionCloseGetsResponseWithErrorDoesNotThrowUntimedGet()
+      public void TestConnectionCloseGetsResponseWithErrorDoesNotThrowNonTimedGet()
       {
          DoTestConnectionCloseGetsResponseWithErrorDoesNotThrow(false);
       }

@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Messaging
    public sealed class Data : IDescribedType
    {
       public static readonly ulong DESCRIPTOR_CODE = 0x0000000000000075UL;
-      public static readonly Symbol DESCRIPTOR_SYMBOL = new Symbol("amqp:data:binary");
+      public static readonly Symbol DESCRIPTOR_SYMBOL = new("amqp:data:binary");
 
       private readonly Binary described;
 

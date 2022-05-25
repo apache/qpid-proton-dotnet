@@ -44,7 +44,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
             Filter = new Dictionary<Symbol, object>(other.Filter);
          }
          DefaultOutcome = other.DefaultOutcome;
-         Outcomes = (Symbol[]) other.Outcomes?.Clone();
+         Outcomes = (Symbol[])other.Outcomes?.Clone();
          Capabilities = other.Capabilities;
       }
 

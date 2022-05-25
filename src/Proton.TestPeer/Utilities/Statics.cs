@@ -107,7 +107,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
 
       /// <summary>
       /// Checks if the range specified by the provided index + the size of the
-      /// range provided is within the provided length.  The method consideres the
+      /// range provided is within the provided length.  The method considers the
       /// index as being within the range specified and considers zero as a value
       /// that lies within the range of valid lengths.
       /// </summary>
@@ -120,7 +120,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
          if ((length | index | size) < 0 || size > (length - index))
          {
             throw new ArgumentOutOfRangeException(string.Format(
-               "The given range specied by index {0} + size {1} is outside the specified region length {2}",
+               "The given range specified by index {0} + size {1} is outside the specified region length {2}",
                index, size, length));
          }
          return index;
@@ -128,7 +128,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
 
       /// <summary>
       /// Checks if the range specified by the provided index + the size of the
-      /// range provided is within the provided length.  The method consideres the
+      /// range provided is within the provided length.  The method considers the
       /// index as being within the range specified and considers zero as a value
       /// that lies within the range of valid lengths.
       /// </summary>
@@ -141,7 +141,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
          if ((length | index | size) < 0 || size > (length - index))
          {
             throw new ArgumentOutOfRangeException(string.Format(
-               "The given range specied by index {0} + size {1} is outside the specified region length {2}",
+               "The given range specified by index {0} + size {1} is outside the specified region length {2}",
                index, size, length));
          }
          return index;
@@ -150,7 +150,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Utilities
       /// <summary>
       /// Used to check for a method argument being null when the precondition
       /// states that it should not be, the method provides for the user to supply
-      /// a nessage to use when throwing an Argument null exception if the value
+      /// a message to use when throwing an Argument null exception if the value
       /// that was passed is indeed null.
       /// </summary>
       /// <param name="value">The value to check for null</param>

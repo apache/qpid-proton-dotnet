@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transactions;
@@ -29,7 +28,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class DispositionInjectAction : AbstractPerformativeInjectAction<Disposition>
    {
-      private readonly Disposition disposition = new Disposition();
+      private readonly Disposition disposition = new();
       private readonly DeliveryStateBuilder stateBuilder;
 
       public DispositionInjectAction(AMQPTestDriver driver) : base(driver)
@@ -126,7 +125,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public DispositionInjectAction Rejected(string condition, string description)
          {
-            Rejected rejected = new Rejected
+            Rejected rejected = new()
             {
                Error = new ErrorCondition(new Symbol(condition), description)
             };
@@ -141,7 +140,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public DispositionInjectAction Modified(bool failed)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed
             };
@@ -151,7 +150,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public DispositionInjectAction Modified(bool failed, bool undeliverableHere)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed,
                UndeliverableHere = undeliverableHere
@@ -162,7 +161,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder Transactional()
          {
-            TransactionalStateBuilder builder = new TransactionalStateBuilder(action);
+            TransactionalStateBuilder builder = new(action);
             action.WithState(builder.State());
             return builder;
          }
@@ -171,7 +170,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
       public sealed class TransactionalStateBuilder
       {
          private readonly DispositionInjectAction action;
-         private readonly TransactionalState state = new TransactionalState();
+         private readonly TransactionalState state = new();
 
          public TransactionalStateBuilder(DispositionInjectAction action)
          {
@@ -228,7 +227,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithRejected(string condition, string description)
          {
-            Rejected rejected = new Rejected
+            Rejected rejected = new()
             {
                Error = new ErrorCondition(new Symbol(condition), description)
             };
@@ -243,7 +242,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithModified(bool failed)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed
             };
@@ -253,7 +252,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
          public TransactionalStateBuilder WithModified(bool failed, bool undeliverableHere)
          {
-            Modified modified = new Modified
+            Modified modified = new()
             {
                DeliveryFailed = failed,
                UndeliverableHere = undeliverableHere

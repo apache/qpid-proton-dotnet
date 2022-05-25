@@ -64,7 +64,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       {
          Statics.RequireNonNull(endpoint, "Cannot connect when the end point given is null");
 
-         Socket clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+         Socket clientSocket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
          try
          {
@@ -101,10 +101,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
 
       private Stream AuthenticateAsClient(Stream ioStream)
       {
-         SslStream sslStream = new SslStream(ioStream,
-                                             false,
-                                             RemoteCertificateValidationCallback,
-                                             LocalCertificateSelectionCallback);
+         SslStream sslStream = new(ioStream, false, RemoteCertificateValidationCallback, LocalCertificateSelectionCallback);
 
          sslStream.AuthenticateAsClient(address, options.ClientCertificates, options.CheckForCertificateRevocation);
 

@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public sealed class AttachInjectAction : AbstractPerformativeInjectAction<Attach>
    {
-      private readonly Attach attach = new Attach();
+      private readonly Attach attach = new();
 
       private bool explicitlyNullName;
       private bool explicitlyNullHandle;
@@ -114,7 +114,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
 
       public AttachInjectAction WithSenderSettleModeSettled()
       {
-         attach.SenderSettleMode = SenderSettleMode.Settked;
+         attach.SenderSettleMode = SenderSettleMode.Settled;
          return this;
       }
 

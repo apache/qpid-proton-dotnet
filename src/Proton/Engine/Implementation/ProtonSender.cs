@@ -34,8 +34,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonSender>();
 
       private readonly ProtonSessionOutgoingWindow sessionWindow;
-      private readonly LinkedSplayedDictionary<uint, ProtonOutgoingDelivery> unsettled =
-         new LinkedSplayedDictionary<uint, ProtonOutgoingDelivery>();
+      private readonly LinkedSplayedDictionary<uint, ProtonOutgoingDelivery> unsettled = new();
 
       private Action<IOutgoingDelivery> deliveryUpdatedEventHandler = null;
 

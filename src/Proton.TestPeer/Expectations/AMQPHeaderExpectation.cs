@@ -37,21 +37,21 @@ namespace Apache.Qpid.Proton.Test.Driver.Expectations
 
       public AMQPHeaderInjectAction RespondWithAMQPHeader()
       {
-         AMQPHeaderInjectAction response = new AMQPHeaderInjectAction(driver, AMQPHeader.Header);
+         AMQPHeaderInjectAction response = new(driver, AMQPHeader.Header);
          driver.AddScriptedElement(response);
          return response;
       }
 
       public AMQPHeaderInjectAction RespondWithSASLHeader()
       {
-         AMQPHeaderInjectAction response = new AMQPHeaderInjectAction(driver, AMQPHeader.SASLHeader);
+         AMQPHeaderInjectAction response = new(driver, AMQPHeader.SASLHeader);
          driver.AddScriptedElement(response);
          return response;
       }
 
       public RawBytesInjectAction RespondWithBytes(byte[] buffer)
       {
-         RawBytesInjectAction response = new RawBytesInjectAction(driver, buffer);
+         RawBytesInjectAction response = new(driver, buffer);
          driver.AddScriptedElement(response);
          return response;
       }

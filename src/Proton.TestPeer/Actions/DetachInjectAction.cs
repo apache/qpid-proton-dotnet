@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-using System;
 using System.Collections.Generic;
 using Apache.Qpid.Proton.Test.Driver.Codec.Primitives;
 using Apache.Qpid.Proton.Test.Driver.Codec.Transport;
@@ -30,7 +29,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class DetachInjectAction : AbstractPerformativeInjectAction<Detach>
    {
-      private readonly Detach detach = new Detach();
+      private readonly Detach detach = new();
 
       public DetachInjectAction(AMQPTestDriver driver) : base(driver)
       {

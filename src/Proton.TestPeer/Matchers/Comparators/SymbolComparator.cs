@@ -22,14 +22,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// <summary>
    /// Compares two Symbol types for equality.
    /// </summary>
-   public sealed class SymbolCompartor : ILinkedCompartor
+   public sealed class SymbolComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public SymbolCompartor(PeerEqualityComparator comparators)
+      public SymbolComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }
+
+      internal PeerEqualityComparator Comparators => comparators;
 
       public bool? Equals(object lhs, object rhs, IDescription mismatchDescription)
       {

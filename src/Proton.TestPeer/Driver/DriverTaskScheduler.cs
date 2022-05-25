@@ -35,11 +35,10 @@ namespace Apache.Qpid.Proton.Test.Driver
    {
       private static readonly int DEFAULT_TIMER_INTERVAL = 10;
 
-      private readonly SortedDictionary<long, Queue<ScriptedAction>> eventHeap =
-         new SortedDictionary<long, Queue<ScriptedAction>>();
+      private readonly SortedDictionary<long, Queue<ScriptedAction>> eventHeap = new();
 
       private readonly AMQPTestDriver driver;
-      private readonly Timer timer = new Timer();
+      private readonly Timer timer = new();
 
       private readonly ILogger<DriverTaskScheduler> logger;
 
@@ -73,7 +72,7 @@ namespace Apache.Qpid.Proton.Test.Driver
       private void RunPendingTasks(object sender, ElapsedEventArgs args)
       {
          long timeNow = Environment.TickCount64;
-         List<long> toRemove = new List<long>();
+         List<long> toRemove = new();
 
          foreach (KeyValuePair<long, Queue<ScriptedAction>> entry in eventHeap)
          {

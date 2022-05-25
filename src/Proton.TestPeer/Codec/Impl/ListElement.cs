@@ -128,17 +128,17 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
             {
                if (count == 0)
                {
-                  stream.WriteByte((byte)0x45);
+                  stream.WriteByte(0x45);
                }
                else if (size <= 254 && count <= 255)
                {
-                  stream.WriteByte((byte)0xc0);
+                  stream.WriteByte(0xc0);
                   stream.WriteByte((byte)(size + 1));
                   stream.WriteByte((byte)count);
                }
                else
                {
-                  stream.WriteByte((byte)0xd0);
+                  stream.WriteByte(0xd0);
                   stream.WriteUnsignedInt((size + 4));
                   stream.WriteUnsignedInt(count);
                }

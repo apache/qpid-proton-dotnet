@@ -20,14 +20,16 @@ namespace Apache.Qpid.Proton.Test.Driver.Matchers.Comparators
    /// <summary>
    /// Compares two char types for equality.
    /// </summary>
-   public sealed class CharacterCompartor : ILinkedCompartor
+   public sealed class CharacterComparator : ILinkedComparator
    {
       private readonly PeerEqualityComparator comparators;
 
-      public CharacterCompartor(PeerEqualityComparator comparators)
+      public CharacterComparator(PeerEqualityComparator comparators)
       {
          this.comparators = comparators;
       }
+
+      internal PeerEqualityComparator Comparators => comparators;
 
       public bool? Equals(object lhs, object rhs, IDescription mismatchDescription)
       {

@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-        return buffer.ReadByte();
+         return buffer.ReadByte();
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)

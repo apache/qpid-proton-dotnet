@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Actions
    /// </summary>
    public class DischargeInjectAction : TransferInjectAction
    {
-      private readonly Discharge discharge = new Discharge();
+      private readonly Discharge discharge = new();
 
       public DischargeInjectAction(AMQPTestDriver driver) : base(driver)
       {

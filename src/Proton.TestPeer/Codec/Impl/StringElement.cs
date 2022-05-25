@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Impl
 
          if (IsElementOfArray())
          {
-            ArrayElement parent = (ArrayElement) Parent;
+            ArrayElement parent = (ArrayElement)Parent;
 
             if (parent.ConstructorType == ConstructorType.Small)
             {

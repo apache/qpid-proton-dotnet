@@ -100,7 +100,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       public override bool Equals(object symbol)
       {
-         if (symbol == null || symbol is not Symbol)
+         if (symbol is null or not Symbol)
          {
             return false;
          }

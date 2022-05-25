@@ -24,17 +24,17 @@ namespace Apache.Qpid.Proton.Engine
    /// </summary>
    public sealed class HeaderEnvelope : PerformativeEnvelope<AmqpHeader>
    {
-      public static readonly byte HeaderFrameType = (byte)1;
+      public static readonly byte HeaderFrameType = 1;
 
       /// <summary>
       /// A singleton instance of an SASL header that can be used to avoid additional allocations.
       /// </summary>
-      public static readonly HeaderEnvelope SASL_HEADER_ENVELOPE = new HeaderEnvelope(AmqpHeader.GetSASLHeader());
+      public static readonly HeaderEnvelope SASL_HEADER_ENVELOPE = new(AmqpHeader.GetSASLHeader());
 
       /// <summary>
       /// A singleton instance of an AMQP header that can be used to avoid additional allocations.
       /// </summary>
-      public static readonly HeaderEnvelope AMQP_HEADER_ENVELOPE = new HeaderEnvelope(AmqpHeader.GetAMQPHeader());
+      public static readonly HeaderEnvelope AMQP_HEADER_ENVELOPE = new(AmqpHeader.GetAMQPHeader());
 
       /// <summary>
       /// Create an header envelope with the given AMQHeader body.
@@ -74,7 +74,7 @@ namespace Apache.Qpid.Proton.Engine
       /// Invoke the correct handler based on whether this header is a SASL or AMQP header instance.
       /// </summary>
       /// <typeparam name="T">The context type for the handler invocation</typeparam>
-      /// <param name="handler">The header hander to invoke</param>
+      /// <param name="handler">The header handler to invoke</param>
       /// <param name="context">The context to supply to the handler method.</param>
       public void Invoke<T>(IHeaderHandler<T> handler, T context)
       {

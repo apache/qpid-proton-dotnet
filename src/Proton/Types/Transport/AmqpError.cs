@@ -86,7 +86,7 @@ namespace Apache.Qpid.Proton.Types.Transport
       /// a link with a large unsettled map the endpoint MAY make use of the incomplete-unsettled flag to avoid the need
       /// for overly large frames.
       /// </summary>
-     public static readonly Symbol FRAME_SIZE_TOO_SMALL = Symbol.Lookup("amqp:frame-size-too-small");
+      public static readonly Symbol FRAME_SIZE_TOO_SMALL = Symbol.Lookup("amqp:frame-size-too-small");
 
    }
 }
