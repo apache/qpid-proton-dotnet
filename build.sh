@@ -17,13 +17,13 @@
 #  limitations under the License.
 #
 
-set -xe
+# set -xe
 cd "${0%/*}"
 
 VERSION=$(<VERSION.txt)
 
 usage() {
-  echo "Usage: $0 {test|docs|dist|sign|clean|docker-test|rat}"
+  echo "Usage: $0 {test|docs|dist|sign|clean|docker-test|podman-test|rat}"
   exit 1
 }
 
@@ -60,6 +60,7 @@ do
 
       # build documentation
       (env DOXYGEN_OUTPUT_PATH=${DOC_DIR} doxygen Proton.dox)
+      cp README.md LICENSE NOTICE ${DOC_DIR}
       echo "Wrote documentation to directory: $DOC_DIR"
       ;;
 
@@ -108,6 +109,7 @@ do
 
       # build documentation release archive
       (env DOXYGEN_OUTPUT_PATH="dist/${DOC_DIR}" doxygen Proton.dox)
+      cp README.md LICENSE NOTICE dist/${DOC_DIR}
       (cd dist; tar czf "../dist/${VERSION}/${DOC_DIR}.tar.gz" "${DOC_DIR}")
 
       ;;
