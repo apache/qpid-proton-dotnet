@@ -17,7 +17,12 @@
 #  limitations under the License.
 #
 
-# set -xe
+if [ "$DEBUG" == 'true' ]; then
+   set -xe
+else
+   set -e
+fi
+
 cd "${0%/*}"
 
 VERSION=$(<VERSION.txt)
