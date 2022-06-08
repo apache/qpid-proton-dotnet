@@ -20,6 +20,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(DefaultUnitTestTargetFrameworks)</TargetFramework>
+    <RollForward>$(DefaultUnitTestsRollForwardPolicy)</RollForward>
     <IsPackable>false</IsPackable>
     <RootNamespace>Apache.Qpid.Proton</RootNamespace>
     <AssemblyName>Qpid.Proton.TestPeer.Tests</AssemblyName>

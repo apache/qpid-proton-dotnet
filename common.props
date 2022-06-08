@@ -44,6 +44,10 @@
     <DefaultLibraryTargetFrameworks>$(DefaultTargetFrameworkVersion)</DefaultLibraryTargetFrameworks>
     <!-- Unit Tests -->
     <DefaultUnitTestTargetFrameworks>$(DefaultTargetFrameworkVersion)</DefaultUnitTestTargetFrameworks>
+    <!-- Rolling policies-->
+    <DefaultRollForwardPolicy>LatestMajor</DefaultRollForwardPolicy>
+    <DefaultExeRollForwardPolicy>$(DefaultRollForwardPolicy)</DefaultExeRollForwardPolicy>
+    <DefaultUnitTestsRollForwardPolicy>$(DefaultRollForwardPolicy)</DefaultUnitTestsRollForwardPolicy>
   </PropertyGroup>
 
   <PropertyGroup Label="Common NuGet Properties">

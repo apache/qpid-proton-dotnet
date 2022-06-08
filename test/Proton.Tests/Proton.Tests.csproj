@@ -26,6 +26,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateProgramFile>true</GenerateProgramFile>
     <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
+    <RollForward>$(DefaultUnitTestsRollForwardPolicy)</RollForward>
   </PropertyGroup>
 
   <ItemGroup>

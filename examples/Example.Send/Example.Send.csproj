@@ -20,6 +20,7 @@
 
   <PropertyGroup>
     <TargetFramework>$(DefaultExeTargetFrameworks)</TargetFramework>
+    <RollForward>$(DefaultExeRollForwardPolicy)</RollForward>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
