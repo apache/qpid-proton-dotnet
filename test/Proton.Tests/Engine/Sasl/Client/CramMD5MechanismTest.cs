@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Security.Cryptography;
 using Apache.Qpid.Proton.Buffer;
 using NUnit.Framework;
 
@@ -32,6 +33,14 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
 
       private static readonly string TEST_USERNAME = "tim";
       private static readonly string TEST_PASSWORD = "tanstaaftanstaaf";
+
+      [SetUp]
+      public void TestSetUp()
+      {
+         // Test if MD5 API works, if not we assume the system has disabled access to that
+         // algorithm and ignore these tests.
+         Assume.That(() => new HMACMD5(Guid.NewGuid().ToByteArray()), Throws.Nothing);
+      }
 
       [Test]
       public void TestSuccessfulAuthentication()

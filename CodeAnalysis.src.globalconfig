@@ -1451,7 +1451,7 @@ dotnet_diagnostic.IDE0053.severity = silent
 dotnet_diagnostic.IDE0054.severity = suggestion
 
 # IDE0055: Fix formatting
-dotnet_diagnostic.IDE0055.severity = suggestion
+dotnet_diagnostic.IDE0055.severity = silent
 
 # IDE0056: Use index operator
 dotnet_diagnostic.IDE0056.severity = silent
