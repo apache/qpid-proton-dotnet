@@ -55,6 +55,7 @@
     <Copyright>Copyright © 2022 The Apache Software Foundation.</Copyright>
     <PackageIcon>qpid.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://qpid.apache.org/</PackageProjectUrl>
     <PackageTags>Qpid;Apache;AMQP;Messaging;Protocol</PackageTags>
     <RepositoryUrl Condition="'$(RepositoryUrl)' == ''">https://github.com/apache/qpid-proton-dotnet.git</RepositoryUrl>
@@ -64,6 +65,7 @@
     <None Include="$(MSBuildThisFileDirectory)\LICENSE" Pack="true" Visible="false" PackagePath=""/>
     <None Include="$(MSBuildThisFileDirectory)\NOTICE" Pack="true" Visible="false" PackagePath=""/>
     <None Include="$(MSBuildThisFileDirectory)\qpid.png" Pack="true" Visible="false" PackagePath=""/>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <PropertyGroup>
