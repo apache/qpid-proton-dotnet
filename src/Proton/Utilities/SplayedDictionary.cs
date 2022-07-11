@@ -993,6 +993,9 @@ namespace Apache.Qpid.Proton.Utilities
          {
             replacement = Splay(node.left, node.Key);
             replacement.right = node.right;
+            if (replacement.right != null) {
+                replacement.right.parent = replacement;
+            }
          }
 
          if (replacement != null)

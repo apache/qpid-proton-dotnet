@@ -1115,6 +1115,30 @@ namespace Apache.Qpid.Proton.Utilities
          }
       }
 
+      [Test]
+      public void TestRemoveFromNonRootLocations()
+      {
+         SplayedDictionary<uint, string> testMap = new();
+
+         for (uint i = 0; i < 9; i++)
+         {
+            uint x = i;
+            testMap.Add(x, i.ToString());
+         }
+
+         Assert.IsTrue(testMap.Contains(3u));
+
+         Assert.IsTrue(testMap.RemoveValue("3"));
+         Assert.IsTrue(testMap.RemoveValue("7"));
+         Assert.IsTrue(testMap.RemoveValue("1"));
+         Assert.IsTrue(testMap.RemoveValue("0"));
+         Assert.IsTrue(testMap.RemoveValue("8"));
+         Assert.IsTrue(testMap.RemoveValue("5"));
+         Assert.IsTrue(testMap.RemoveValue("6"));
+         Assert.IsTrue(testMap.RemoveValue("2"));
+         Assert.IsTrue(testMap.RemoveValue("4"));
+      }
+
       protected void DumpRandomDataSet(int iterations, bool bounded)
       {
          uint[] dataSet = new uint[iterations];
