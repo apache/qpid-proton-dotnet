@@ -15,29 +15,11 @@
 #  limitations under the License.
 #
 
-FROM ubuntu:20.04
+FROM alpine:3.16
 WORKDIR /root
 
-ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=isolemnlysweariamuptonogood \
-    DEBIAN_FRONTEND=noninteractive
-
 # Install dependencies from vanilla system packages
-RUN apt-get -qqy update \
- && apt-get -qqy install --no-install-recommends ant \
-                                                 apt-transport-https \
-                                                 apt-utils \
-                                                 asciidoc \
-                                                 bison \
-                                                 build-essential \
-                                                 bzip2 \
-                                                 curl \
-                                                 doxygen \
-                                                 git \
-                                                 gnupg2 \
-                                                 libssl-dev \
-                                                 openjdk-11-jdk \
-                                                 wget \
- && apt-get -qqy clean
+RUN apk add bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib git doxygen
 
 # Install a maven release  -------------------------------------------
 # Inspired from https://github.com/apache/accumulo-docker/blob/master/Dockerfile#L53
@@ -71,7 +53,6 @@ ENV PATH="/opt/maven/bin:${PATH}"
 # Install .NET SDK
 RUN cd /opt ; \
     wget https://dot.net/v1/dotnet-install.sh ; \
-    bash ./dotnet-install.sh --channel "5.0" --install-dir "/opt/dotnet" ;  \
     bash ./dotnet-install.sh --channel "6.0" --install-dir "/opt/dotnet" ;
 
 ENV PATH $PATH:/opt/dotnet
