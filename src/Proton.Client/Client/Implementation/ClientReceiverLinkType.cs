@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      protected void ReplenishCreditIfNeeded()
+      protected virtual void ReplenishCreditIfNeeded()
       {
          uint creditWindow = options.CreditWindow;
          if (creditWindow > 0)

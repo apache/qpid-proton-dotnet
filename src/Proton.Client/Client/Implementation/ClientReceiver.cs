@@ -37,6 +37,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private readonly IDeque<TaskCompletionSource<IDelivery>> receiveRequests =
          new ArrayDeque<TaskCompletionSource<IDelivery>>();
+      private readonly IDeque<IIncomingDelivery> prefetch = new ArrayDeque<IIncomingDelivery>();
 
       internal ClientReceiver(ClientSession session, ReceiverOptions options, string receiverId, Engine.IReceiver receiver)
        : base(session, options, receiverId, receiver)
@@ -77,21 +78,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             if (NotClosedOrFailed(receive))
             {
-               IIncomingDelivery delivery = null;
-
-               // Scan all unsettled deliveries in the link and check if any are still
-               // lacking a linked stream delivery instance which indicates they have
-               // not been made part of a receive yet.
-               foreach (IIncomingDelivery candidate in protonLink.Unsettled)
-               {
-                  if (candidate.LinkedResource == null && !candidate.IsPartial)
-                  {
-                     delivery = candidate;
-                     break;
-                  }
-               }
-
-               if (delivery == null)
+               // Check prefetch for an available message
+               if (!prefetch.TryDequeue(out IIncomingDelivery delivery))
                {
                   if (timeout == TimeSpan.Zero)
                   {
@@ -161,6 +149,34 @@ namespace Apache.Qpid.Proton.Client.Implementation
       internal ReceiverOptions ReceiverOptions => options;
 
       protected override IReceiver Self => this;
+
+      protected override void ReplenishCreditIfNeeded()
+      {
+         uint creditWindow = options.CreditWindow;
+         if (creditWindow > 0)
+         {
+            uint currentCredit = protonLink.Credit;
+            if (currentCredit <= creditWindow * 0.5)
+            {
+               uint potentialPrefetch = currentCredit + (uint)prefetch.Count;
+
+               if (potentialPrefetch <= creditWindow * 0.7)
+               {
+                  uint additionalCredit = creditWindow - potentialPrefetch;
+
+                  LOG.Trace("Receiver granting additional credit: {0}", additionalCredit);
+                  try
+                  {
+                     protonLink.AddCredit(additionalCredit);
+                  }
+                  catch (Exception ex)
+                  {
+                     LOG.Debug("Error caught during credit top-up", ex);
+                  }
+               }
+            }
+         }
+      }
 
       #endregion
 
@@ -388,6 +404,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (!delivery.IsPartial)
          {
+            // Either there is a waiter or we enqueue this into the prefetch buffer far
+            // later receive calls. If there was a waiter we must either auto accept or
+            // check for credit window expansion to complete the async operation.
             LOG.Trace("{0} has incoming Message(s).", this);
             if (receiveRequests.TryDequeue(out TaskCompletionSource<IDelivery> entry))
             {
@@ -403,9 +422,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             else
             {
-               // Ensure the credit window is expanded to allow the prefetch
-               // to fill since we are delivering fully read messages from this
-               // receiver
+               prefetch.Enqueue(delivery);
+               // Allow the prefetch to fill even in the case there is a session window
+               // that would otherwise prevent new incoming bytes.
                delivery.ClaimAvailableBytes();
             }
          }
