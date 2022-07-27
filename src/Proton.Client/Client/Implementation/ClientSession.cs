@@ -22,6 +22,7 @@ using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Utilities;
 using Apache.Qpid.Proton.Logging;
+using System.Threading;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -428,8 +429,6 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal void Execute(Action action) => connection.Execute(action);
 
-      internal void Schedule(Action action, TimeSpan delay) => connection.Schedule(action, delay);
-
       internal ClientSession Open()
       {
          protonSession.LocalOpenHandler(HandleLocalOpen)
@@ -450,16 +449,24 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return this;
       }
 
+      internal void Schedule(Action action, TimeSpan delay) => connection.Schedule(action, delay);
+
+      internal void Schedule(Action action, TimeSpan delay, CancellationToken token)
+      {
+         connection.Schedule(action, delay, token);
+      }
+
       internal void ScheduleRequestTimeout<T>(TaskCompletionSource<T> request, long timeout, Func<ClientException> errorSupplier)
       {
          if (timeout != INFINITE)
          {
             connection.Schedule(() =>
-               _ = request.TrySetException(errorSupplier.Invoke()), TimeSpan.FromMilliseconds(timeout));
-         }
-         else
-         {
-            // TODO return null;
+            {
+               if (!request.Task.IsCompleted)
+               {
+                  _ = request.TrySetException(errorSupplier.Invoke());
+               }
+            }, TimeSpan.FromMilliseconds(timeout));
          }
       }
 

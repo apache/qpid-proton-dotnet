@@ -185,7 +185,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             session.Schedule(() =>
             {
-               send.Failed(send.CreateSendTimedOutException());
+               if (!send.Request.IsCompleted)
+               {
+                  send.Failed(send.CreateSendTimedOutException());
+               }
             },
             TimeSpan.FromMilliseconds(Options.SendTimeout));
          }
@@ -491,6 +494,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          /// due to lack of any credit on the link or in the session window.
          /// </summary>
          public IOutgoingDelivery Delivery => delivery;
+
+         /// <summary>
+         /// Gets the Task that backs the send operation.
+         /// </summary>
+         public Task Request => request.Task;
 
          public void Complete()
          {

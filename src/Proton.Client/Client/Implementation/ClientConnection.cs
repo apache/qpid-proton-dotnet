@@ -629,8 +629,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       internal void Schedule(Action action, TimeSpan delay)
       {
-         // TODO: Either add scheduling to event loop or handle timeouts here somehow
          Task.Delay(delay).ContinueWith((t) => Execute(action));
+      }
+
+      internal Task Schedule(Action action, TimeSpan delay, CancellationToken token)
+      {
+         return Task.Delay(delay, token).ContinueWith(
+            (t) => Execute(action), token, TaskContinuationOptions.NotOnCanceled, TaskScheduler.Default);
       }
 
       #endregion

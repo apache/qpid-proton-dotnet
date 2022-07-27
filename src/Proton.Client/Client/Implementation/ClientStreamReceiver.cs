@@ -102,8 +102,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
                      {
                         session.Schedule(() =>
                         {
-                           receiveRequests.Remove(receive);
-                           receive.TrySetResult(null);
+                           if (!receive.Task.IsCompleted)
+                           {
+                              receiveRequests.Remove(receive);
+                              receive.TrySetResult(null);
+                           }
                         }, timeout);
                      }
 

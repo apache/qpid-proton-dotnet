@@ -290,7 +290,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             session.Schedule(() =>
             {
-               send.Failed(send.CreateSendTimedOutException());
+               if (!send.Request.IsCompleted)
+               {
+                  send.Failed(send.CreateSendTimedOutException());
+               }
             },
             TimeSpan.FromMilliseconds(Options.SendTimeout));
          }
@@ -664,6 +667,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          /// The encoded message payload this envelope wraps.
          /// </summary>
          public IProtonBuffer Payload => payload;
+
+         /// <summary>
+         /// Gets the task that tracks the completion of this send operation.
+         /// </summary>
+         public Task Request => request.Task;
 
          /// <summary>
          /// Returns the proton outgoing delivery object that is contained in this envelope
