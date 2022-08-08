@@ -21,23 +21,23 @@
 
 <Project>
   <PropertyGroup Label="Build, Test, Code Analysis">
-    <MicrosoftBuildFrameworkVersion>17.1.0</MicrosoftBuildFrameworkVersion>
-    <MicrosoftBuildUtilitiesCoreVersion>17.1.0</MicrosoftBuildUtilitiesCoreVersion>
-    <MicrosoftCodeAnalysisVersion>4.3.0-1.final</MicrosoftCodeAnalysisVersion>
-    <MicrosoftCodeAnalysisCSharpVersion>4.3.0-1.final</MicrosoftCodeAnalysisCSharpVersion>
-    <MicrosoftCodeAnalysisCSharpCodeStyleVersion>4.3.0-1.final</MicrosoftCodeAnalysisCSharpCodeStyleVersion>
+    <MicrosoftBuildFrameworkVersion>17.2.0</MicrosoftBuildFrameworkVersion>
+    <MicrosoftBuildUtilitiesCoreVersion>17.2.0</MicrosoftBuildUtilitiesCoreVersion>
+    <MicrosoftCodeAnalysisVersion>4.3.0-3.final</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisCSharpVersion>4.3.0-3.final</MicrosoftCodeAnalysisCSharpVersion>
+    <MicrosoftCodeAnalysisCSharpCodeStyleVersion>4.3.0-3.final</MicrosoftCodeAnalysisCSharpCodeStyleVersion>
     <MicrosoftExtensionsCachingMemoryVersion>5.0.0</MicrosoftExtensionsCachingMemoryVersion>
     <MicrosoftExtensionsLoggingVersion>5.0.0</MicrosoftExtensionsLoggingVersion>
     <!-- When .NET 7 SDK is released or the package is not in preview, update this version -->
     <MicrosoftCodeAnalysisNetAnalyzersVersion Condition="'$(TargetFramework)' != 'net7.0'">6.0.0</MicrosoftCodeAnalysisNetAnalyzersVersion>
     <MicrosoftCodeAnalysisNetAnalyzersVersion Condition="'$(TargetFramework)' == 'net7.0'">7.0.0-preview*</MicrosoftCodeAnalysisNetAnalyzersVersion>
-    <MicrosoftNETTestSdkVersion>17.1.0</MicrosoftNETTestSdkVersion>
-    <MoqVersion>4.18.1</MoqVersion>
+    <MicrosoftNETTestSdkVersion>17.2.0</MicrosoftNETTestSdkVersion>
+    <MoqVersion>4.18.2</MoqVersion>
     <NUnitVersion>3.13.3</NUnitVersion>
-    <NUnitConsoleRunnerVersion>3.15.0</NUnitConsoleRunnerVersion>
+    <NUnitConsoleRunnerVersion>3.15.2</NUnitConsoleRunnerVersion>
     <NUnit3TestAdapterVersion>4.2.1</NUnit3TestAdapterVersion>
     <NLogVersion>4.7.15</NLogVersion>
-    <NLogExtensionsVersion>1.7.4</NLogExtensionsVersion>
+    <NLogExtensionsVersion>1.7.5</NLogExtensionsVersion>
     <StyleCopAnalyzersVersion>1.1.118</StyleCopAnalyzersVersion>
   </PropertyGroup>
 </Project>
