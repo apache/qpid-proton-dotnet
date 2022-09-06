@@ -139,7 +139,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          link.RemoteTransfer(transfer, payload, out ProtonIncomingDelivery delivery);
 
-         if (!delivery.IsRemotelySettled && delivery.IsFirstTransfer)
+         if (!delivery.IsSettled && !delivery.IsRemotelySettled && delivery.IsFirstTransfer)
          {
             unsettled.Add(delivery.DeliveryId, delivery);
          }

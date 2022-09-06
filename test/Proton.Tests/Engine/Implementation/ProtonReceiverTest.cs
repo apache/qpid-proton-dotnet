@@ -4965,5 +4965,69 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsNull(failure);
       }
+
+      [Test]
+      public void TestReceiveDeliveriesAndSendDispositionUponReceipt()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler(result => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payload = new byte[] { 1 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond().WithNextOutgoingId(0);
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(3);
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 1 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithPayload(payload).Queue();
+         peer.ExpectDisposition().WithFirst(0)
+                                 .WithSettled(true)
+                                 .WithState().Accepted();
+         peer.RemoteTransfer().WithDeliveryId(1)
+                              .WithDeliveryTag(new byte[] { 2 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithPayload(payload).Queue();
+         peer.ExpectDisposition().WithFirst(1)
+                                 .WithSettled(true)
+                                 .WithState().Accepted();
+         peer.RemoteTransfer().WithDeliveryId(2)
+                              .WithDeliveryTag(new byte[] { 3 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithPayload(payload).Queue();
+         peer.ExpectDisposition().WithFirst(2)
+                                 .WithSettled(true)
+                                 .WithState().Accepted();
+
+         IConnection connection = engine.Start().Open();
+         ISession session = connection.Session().Open();
+         IReceiver receiver = session.Receiver("receiver");
+         receiver.DeliveryReadHandler((delivery) =>
+         {
+            delivery.Disposition(Accepted.Instance, true);
+         });
+
+         receiver.AddCredit(3);
+         receiver.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectDetach().Respond();
+         peer.ExpectEnd().Respond();
+         peer.ExpectClose().Respond();
+
+         receiver.Close();
+         session.Close();
+         connection.Close();
+
+         // Check post conditions and done.
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
    }
 }
