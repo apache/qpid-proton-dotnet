@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using Apache.Qpid.Proton.Engine;
 
 namespace Apache.Qpid.Proton.Client
 {
@@ -56,6 +57,8 @@ namespace Apache.Qpid.Proton.Client
          other.RequestTimeout = RequestTimeout;
          other.OpenTimeout = OpenTimeout;
          other.CloseTimeout = CloseTimeout;
+         other.DeliveryTagGeneratorSupplier = DeliveryTagGeneratorSupplier;
+
          if (OfferedCapabilities != null && OfferedCapabilities.Length > 0)
          {
             string[] copyOf = new string[OfferedCapabilities.Length];
@@ -148,6 +151,22 @@ namespace Apache.Qpid.Proton.Client
       /// a new sender.
       /// </summary>
       public IDictionary<string, object> Properties { get; set; }
+
+      /// <summary>
+      /// Configures a supplier that provides the Delivery Tag Generator instance which the
+      /// Sender created using these options will use when setting the delivery tag on outgoing
+      /// deliveries.
+      /// </summary>
+      /// <remarks>
+      /// The client sender will use a default delivery tag generator unless a supplier is
+      /// configured here as such this options is not required to be used. In some cases a
+      /// client application may want to control exactly what form of delivery tag is used
+      /// on outgoing deliveries and this mechanism provides that control. The caller is
+      /// responsible for providing a supplier that will provide unique instance of a tag
+      /// generator for any sender created with this options instance as the tag generators
+      /// are not meant to be shared resources.
+      /// </remarks>
+      public Func<IDeliveryTagGenerator> DeliveryTagGeneratorSupplier { get; set; }
 
    }
 }

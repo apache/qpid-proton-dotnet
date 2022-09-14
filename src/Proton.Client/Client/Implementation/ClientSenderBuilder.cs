@@ -16,6 +16,8 @@
  */
 
 using Apache.Qpid.Proton.Client.Concurrent;
+using Apache.Qpid.Proton.Client.Utilities;
+using Apache.Qpid.Proton.Engine;
 using Apache.Qpid.Proton.Engine.Implementation;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
@@ -124,14 +126,25 @@ namespace Apache.Qpid.Proton.Client.Implementation
          protonSender.Target = CreateTarget(address, options);
          protonSender.Source = CreateSource(senderId, options);
 
-         // Use a tag generator that will reuse old tags.  Later we might make this configurable.
-         if (protonSender.SenderSettleMode == SenderSettleMode.Settled)
+         IDeliveryTagGenerator tagGenerator = options.DeliveryTagGeneratorSupplier == null ? null :
+            Objects.RequireNonNull(options.DeliveryTagGeneratorSupplier(),
+               "Cannot assign a null tag generator from a custom supplier");
+
+         if (tagGenerator == null)
          {
-            protonSender.DeliveryTagGenerator = ProtonDeliveryTagTypes.Empty.NewTagGenerator();
+            // Use a tag generator that will reuse old tags.  Later we might make this configurable.
+            if (protonSender.SenderSettleMode == SenderSettleMode.Settled)
+            {
+               protonSender.DeliveryTagGenerator = ProtonDeliveryTagTypes.Empty.NewTagGenerator();
+            }
+            else
+            {
+               protonSender.DeliveryTagGenerator = ProtonDeliveryTagTypes.Pooled.NewTagGenerator();
+            }
          }
          else
          {
-            protonSender.DeliveryTagGenerator = ProtonDeliveryTagTypes.Pooled.NewTagGenerator();
+            protonSender.DeliveryTagGenerator = tagGenerator;
          }
 
          return protonSender;

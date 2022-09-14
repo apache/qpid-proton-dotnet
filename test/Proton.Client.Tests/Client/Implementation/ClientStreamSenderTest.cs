@@ -29,6 +29,8 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Text;
+using Apache.Qpid.Proton.Engine;
+using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -3115,6 +3117,135 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             sender.Close();
             connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      private static IDeliveryTagGenerator CustomTagGenerator()
+      {
+         return new CustomDeliveryTagGenerator();
+      }
+
+      private static IDeliveryTagGenerator CustomNullTagGenerator()
+      {
+         return null;
+      }
+
+      private class CustomDeliveryTagGenerator : IDeliveryTagGenerator
+      {
+         private int count = 1;
+
+         IDeliveryTag IDeliveryTagGenerator.NextTag()
+         {
+            switch (count++)
+            {
+               case 1:
+                  return new DeliveryTag(new byte[] { 1, 1, 1 });
+               case 2:
+                  return new DeliveryTag(new byte[] { 2, 2, 2 });
+               case 3:
+                  return new DeliveryTag(new byte[] { 3, 3, 3 });
+               default:
+                  throw new InvalidOperationException("Only supports creating three tags");
+            }
+         }
+      }
+
+      [Test]
+      public void TestSenderUsesCustomDeliveryTagGeneratorConfiguration()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(10).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+
+            StreamSenderOptions options = new StreamSenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtLeastOnce,
+               AutoSettle = true,
+               DeliveryTagGeneratorSupplier = CustomTagGenerator
+            };
+            IStreamSender sender = connection.OpenStreamSender("test-tags", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .WithDeliveryTag(new byte[] { 1, 1, 1 }).Respond().WithSettled(true).WithState().Accepted();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .WithDeliveryTag(new byte[] { 2, 2, 2 }).Respond().WithSettled(true).WithState().Accepted();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .WithDeliveryTag(new byte[] { 3, 3, 3 }).Respond().WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            IStreamTracker tracker1 = sender.Send(message);
+            IStreamTracker tracker2 = sender.Send(message);
+            IStreamTracker tracker3 = sender.Send(message);
+
+            Assert.IsNotNull(tracker1);
+            Assert.IsNotNull(tracker1.SettlementTask.Result);
+            Assert.IsNotNull(tracker2);
+            Assert.IsNotNull(tracker2.SettlementTask.Result);
+            Assert.IsNotNull(tracker3);
+            Assert.IsNotNull(tracker3.SettlementTask.Result);
+
+            sender.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCannotCreateSenderWhenTagGeneratorReturnsNull()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            StreamSenderOptions options = new StreamSenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtLeastOnce,
+               AutoSettle = true,
+               DeliveryTagGeneratorSupplier = CustomNullTagGenerator
+            };
+
+            try
+            {
+               _ = connection.OpenStreamSender("test-tags", options).OpenTask.Result;
+               Assert.Fail("Should not create a sender if the tag generator is not supplied");
+            }
+            catch (ClientException)
+            {
+               // Expected
+            }
+
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
 
             peer.WaitForScriptToComplete();
          }

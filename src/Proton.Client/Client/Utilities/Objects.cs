@@ -34,12 +34,14 @@ namespace Apache.Qpid.Proton.Client.Utilities
       /// <param name="value">The value to check for null</param>
       /// <param name="errorMessage">The message to supply when throwing an error</param>
       /// <exception cref="ArgumentNullException">If the given value is null</exception>
-      public static void RequireNonNull(object value, string errorMessage)
+      public static T RequireNonNull<T>(T value, string errorMessage)
       {
          if (value == null)
          {
             throw new ArgumentNullException(errorMessage ?? "Value provided cannot be null");
          }
+
+         return value;
       }
    }
 }
