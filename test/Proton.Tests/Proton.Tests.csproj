@@ -27,6 +27,7 @@
     <GenerateProgramFile>true</GenerateProgramFile>
     <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
     <RollForward>$(DefaultUnitTestsRollForwardPolicy)</RollForward>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>

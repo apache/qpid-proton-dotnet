@@ -23,6 +23,7 @@
     <RollForward>$(DefaultUnitTestsRollForwardPolicy)</RollForward>
     <AssemblyName>Qpid.Proton.Client.Tests</AssemblyName>
     <RootNamespace>Apache.Qpid.Proton.Client</RootNamespace>
+    <PublicSign>true</PublicSign>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
     <IsPackable>false</IsPackable>

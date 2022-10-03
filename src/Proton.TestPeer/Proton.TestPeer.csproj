@@ -24,6 +24,7 @@
     <RootNamespace>Apache.Qpid.Proton</RootNamespace>
     <IsPackable>false</IsPackable>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <PublicSign>true</PublicSign>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>

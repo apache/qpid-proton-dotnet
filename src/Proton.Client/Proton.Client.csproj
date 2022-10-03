@@ -22,6 +22,7 @@
     <TargetFramework>$(DefaultLibraryTargetFrameworks)</TargetFramework>
     <AssemblyName>Qpid.Proton.Client</AssemblyName>
     <RootNamespace>Apache.Qpid.Proton.Client</RootNamespace>
+    <PublicSign>true</PublicSign>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\key\proton-dotnet.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>..\..\Proton.ruleset</CodeAnalysisRuleSet>
