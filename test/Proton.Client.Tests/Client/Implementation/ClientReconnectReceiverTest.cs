@@ -20,6 +20,7 @@ using System.Threading;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
 using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types.Transport;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
@@ -256,5 +257,87 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNotNull(delivery);
          }
       }
+
+      [Test]
+      public void TestReceiverWaitsWhenConnectionForcedDisconnect()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer firstPeer = new ProtonTestServer(loggerFactory))
+         using (ProtonTestServer secondPeer = new ProtonTestServer(loggerFactory))
+         {
+            firstPeer.ExpectSASLAnonymousConnect();
+            firstPeer.ExpectOpen().Respond();
+            firstPeer.ExpectBegin().Respond();
+            firstPeer.ExpectAttach().OfReceiver().Respond();
+            firstPeer.ExpectFlow().WithLinkCredit(10);
+            firstPeer.RemoteClose()
+                     .WithErrorCondition(ConnectionError.CONNECTION_FORCED.ToString(), "Forced disconnect").Queue().AfterDelay(20);
+            firstPeer.ExpectClose();
+            firstPeer.Start();
+
+            secondPeer.ExpectSASLAnonymousConnect();
+            secondPeer.ExpectOpen().Respond();
+            secondPeer.ExpectBegin().Respond();
+            secondPeer.ExpectAttach().OfReceiver().Respond();
+            secondPeer.ExpectFlow().WithLinkCredit(10);
+            secondPeer.RemoteTransfer().WithHandle(0)
+                                       .WithDeliveryId(0)
+                                       .WithDeliveryTag(new byte[] { 1 })
+                                       .WithMore(false)
+                                       .WithSettled(true)
+                                       .WithMessageFormat(0)
+                                       .WithPayload(payload).Queue().AfterDelay(5);
+            secondPeer.Start();
+
+            string primaryAddress = firstPeer.ServerAddress;
+            int primaryPort = firstPeer.ServerPort;
+            string backupAddress = secondPeer.ServerAddress;
+            int backupPort = secondPeer.ServerPort;
+
+            logger.LogInformation("Test started, first peer listening on: {0}:{1}", primaryAddress, primaryPort);
+            logger.LogInformation("Test started, backup peer listening on: {0}:{1}", backupAddress, backupPort);
+
+            ConnectionOptions options = new ConnectionOptions();
+            options.ReconnectOptions.ReconnectEnabled = true;
+            options.ReconnectOptions.AddReconnectLocation(backupAddress, backupPort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(primaryAddress, primaryPort, options);
+            ISession session = connection.OpenSession();
+            ReceiverOptions rcvOpts = new ReceiverOptions()
+            {
+               AutoAccept = false
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", rcvOpts);
+
+            IDelivery delivery = null;
+            try
+            {
+               delivery = receiver.Receive(TimeSpan.FromSeconds(10));
+            }
+            catch (Exception ex)
+            {
+               Assert.Fail("Should not have failed on blocking receive call." + ex.Message);
+            }
+
+            Assert.IsNotNull(delivery);
+
+            firstPeer.WaitForScriptToComplete();
+            secondPeer.WaitForScriptToComplete();
+            secondPeer.ExpectDetach().Respond();
+            secondPeer.ExpectEnd().Respond();
+            secondPeer.ExpectClose().Respond();
+
+            delivery.Accept();
+
+            receiver.Close();
+            session.Close();
+            connection.Close();
+
+            Assert.IsNotNull(delivery);
+         }
+      }
+
    }
 }

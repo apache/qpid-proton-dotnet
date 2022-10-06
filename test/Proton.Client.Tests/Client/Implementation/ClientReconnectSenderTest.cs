@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Apache.Qpid.Proton.Client.Concurrent;
 using Apache.Qpid.Proton.Client.Exceptions;
 using Apache.Qpid.Proton.Test.Driver;
+using Apache.Qpid.Proton.Types.Transport;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
@@ -376,6 +377,85 @@ namespace Apache.Qpid.Proton.Client.Implementation
             connection.Close();
 
             finalPeer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestInFlightSendFailedAfterConnectionForcedCloseAndNotResent()
+      {
+         using (ProtonTestServer firstPeer = new ProtonTestServer(loggerFactory))
+         using (ProtonTestServer secondPeer = new ProtonTestServer(loggerFactory))
+         {
+            firstPeer.ExpectSASLAnonymousConnect();
+            firstPeer.ExpectOpen().Respond();
+            firstPeer.ExpectBegin().Respond();
+            firstPeer.ExpectAttach().OfSender().WithTarget().WithAddress("test").And().Respond();
+            firstPeer.RemoteFlow().WithLinkCredit(1).Queue();
+            firstPeer.ExpectTransfer().WithNonNullPayload();
+            firstPeer.RemoteClose()
+                     .WithErrorCondition(ConnectionError.CONNECTION_FORCED.ToString(), "Forced disconnect").Queue().AfterDelay(20);
+            firstPeer.ExpectClose();
+            firstPeer.Start();
+
+            secondPeer.ExpectSASLAnonymousConnect();
+            secondPeer.ExpectOpen().Respond();
+            secondPeer.ExpectBegin().Respond();
+            secondPeer.ExpectAttach().OfSender().WithTarget().WithAddress("test").And().Respond();
+            secondPeer.Start();
+
+            string primaryAddress = firstPeer.ServerAddress;
+            int primaryPort = firstPeer.ServerPort;
+            string backupAddress = secondPeer.ServerAddress;
+            int backupPort = secondPeer.ServerPort;
+
+            logger.LogInformation("Test started, first peer listening on: {0}:{1}", primaryAddress, primaryPort);
+            logger.LogInformation("Test started, backup peer listening on: {0}:{1}", backupAddress, backupPort);
+
+            ConnectionOptions options = new ConnectionOptions();
+            options.ReconnectOptions.ReconnectEnabled = true;
+            options.ReconnectOptions.AddReconnectLocation(backupAddress, backupPort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(primaryAddress, primaryPort, options);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("test");
+
+            AtomicReference<ITracker> tracker = new();
+            AtomicReference<ClientException> error = new();
+            CountdownEvent latch = new CountdownEvent(1);
+
+            Task.Run(() =>
+            {
+               try
+               {
+                  tracker.Set(sender.Send(IMessage<string>.Create("Hello")));
+               }
+               catch (ClientException e)
+               {
+                  error.Set(e);
+               }
+               finally
+               {
+                  latch.Signal();
+               }
+            });
+
+            firstPeer.WaitForScriptToComplete();
+            secondPeer.WaitForScriptToComplete();
+            secondPeer.ExpectDetach().WithClosed(true).Respond();
+            secondPeer.ExpectEnd().Respond();
+            secondPeer.ExpectClose().Respond();
+
+            Assert.IsTrue(latch.Wait(TimeSpan.FromSeconds(10)), "Should have failed previously sent message");
+            Assert.IsNull(error.Get());
+            Assert.IsNotNull(tracker.Get());
+            Assert.Throws<ClientConnectionRemotelyClosedException>(() => tracker.Get().AwaitSettlement());
+
+            sender.Close();
+            session.Close();
+            connection.Close();
+
+            secondPeer.WaitForScriptToComplete();
          }
       }
    }
