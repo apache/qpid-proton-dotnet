@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using Apache.Qpid.Proton.Utilities;
 using Apache.Qpid.Proton.Types.Messaging;
 using System.IO;
+using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -2881,10 +2882,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       [Test]
       public void TestCreateReceiverWithUserConfiguredSourceAndTargetOptions()
       {
-         IDictionary<string, Object> filtersToObject = new Dictionary<string, object>();
+         IDictionary<string, object> filtersToObject = new Dictionary<string, object>();
          filtersToObject.Add("x-opt-filter", "a = b");
 
-         IDictionary<string, string> filters = new Dictionary<string, string>();
+         IDictionary<string, object> filters = new Dictionary<string, object>();
          filters.Add("x-opt-filter", "a = b");
 
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
@@ -3130,6 +3131,110 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
 
             peer.ExpectClose().Respond();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      private class AmqpJmsSelectorType : IDescribedType
+      {
+         private string selector;
+
+         public object Descriptor => 0x0000468C00000004UL;
+
+         public object Described => selector;
+
+         public AmqpJmsSelectorType(string selector)
+         {
+            this.selector = selector;
+         }
+
+         public override string ToString()
+         {
+            return "AmqpJmsSelectorType{" + selector + "}";
+         }
+      }
+
+      private class PeerJmsSelectorType : Apache.Qpid.Proton.Test.Driver.Codec.Primitives.UnknownDescribedType
+      {
+         public PeerJmsSelectorType(string selector) : base(0x0000468C00000004UL, selector)
+         {
+         }
+      }
+
+      [Test]
+      public void TestCreateReceiverWithUserConfiguredSourceWithJMSStyleSelector()
+      {
+         IDescribedType clientJmsSelector = new AmqpJmsSelectorType("myProperty=42");
+         IDictionary<string, object> filters = new Dictionary<string, object>();
+         filters.Add("jms-selector", clientJmsSelector);
+
+         PeerJmsSelectorType peerJmsSelector = new PeerJmsSelectorType("myProperty=42");
+         IDictionary<string, object> filtersAtPeer = new Dictionary<string, object>();
+         filtersAtPeer.Add("jms-selector", peerJmsSelector);
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource().WithAddress("test-queue")
+                                            .WithDistributionMode("copy")
+                                            .WithTimeout(128)
+                                            .WithDurable(Test.Driver.Codec.Messaging.TerminusDurability.UnsettledState)
+                                            .WithExpiryPolicy(Test.Driver.Codec.Messaging.TerminusExpiryPolicy.ConnectionClose)
+                                            .WithDefaultOutcome(new Test.Driver.Codec.Messaging.Released())
+                                            .WithCapabilities("QUEUE")
+                                            .WithFilter(filtersAtPeer)
+                                            .WithOutcomes("amqp:accepted:list", "amqp:rejected:list")
+                                            .Also()
+                               .WithTarget().WithAddress(Test.Driver.Matchers.Is.NotNullValue())
+                                            .WithCapabilities("QUEUE")
+                                            .WithDurable(Test.Driver.Codec.Messaging.TerminusDurability.Configuration)
+                                            .WithExpiryPolicy(Test.Driver.Codec.Messaging.TerminusExpiryPolicy.SessionEnd)
+                                            .WithTimeout(42)
+                                            .WithDynamic(Test.Driver.Matchers.Matches.AnyOf(
+                                                         Test.Driver.Matchers.Is.NullValue(),
+                                                         Test.Driver.Matchers.Is.EqualTo(false)))
+                                            .WithDynamicNodeProperties(Test.Driver.Matchers.Is.NullValue())
+                               .And().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            ReceiverOptions receiverOptions = new ReceiverOptions();
+
+            receiverOptions.SourceOptions.Capabilities = new string[] { "QUEUE" };
+            receiverOptions.SourceOptions.DistributionMode = DistributionMode.Copy;
+            receiverOptions.SourceOptions.Timeout = 128;
+            receiverOptions.SourceOptions.DurabilityMode = DurabilityMode.UnsettledState;
+            receiverOptions.SourceOptions.ExpiryPolicy = ExpiryPolicy.ConnectionClose;
+            receiverOptions.SourceOptions.DefaultOutcome = ClientReleased.Instance;
+            receiverOptions.SourceOptions.Filters = filters;
+            receiverOptions.SourceOptions.Outcomes =
+               new DeliveryStateType[] { DeliveryStateType.Accepted, DeliveryStateType.Rejected };
+
+            receiverOptions.TargetOptions.Capabilities = new string[] { "QUEUE" };
+            receiverOptions.TargetOptions.DurabilityMode = DurabilityMode.Configuration;
+            receiverOptions.TargetOptions.ExpiryPolicy = ExpiryPolicy.SessionClose;
+            receiverOptions.TargetOptions.Timeout = 42;
+
+            IReceiver receiver = session.OpenReceiver("test-queue", receiverOptions).OpenTask.GetAwaiter().GetResult();
+
+            receiver.Close();
+            session.Close();
             connection.Close();
 
             peer.WaitForScriptToComplete();

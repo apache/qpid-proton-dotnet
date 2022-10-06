@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Test.Driver.Codec.Primitives
 
       public override bool Equals(object obj)
       {
-         return obj is UnknownDescribedType type &&
+         return obj is IDescribedType type &&
                 EqualityComparer<object>.Default.Equals(Descriptor, type.Descriptor) &&
                 EqualityComparer<object>.Default.Equals(Described, type.Described);
       }

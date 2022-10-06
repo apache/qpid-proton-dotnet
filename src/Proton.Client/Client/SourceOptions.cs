@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client
@@ -57,7 +56,7 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// The filters that are assigned to the source configuration.
       /// </summary>
-      public IDictionary<string, string> Filters { get; set; }
+      public IDictionary<string, object> Filters { get; set; }
 
       /// <summary>
       /// The default outcome to assign to the source configuration.

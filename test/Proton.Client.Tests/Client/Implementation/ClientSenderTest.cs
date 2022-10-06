@@ -2768,7 +2768,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          IDictionary<string, object> filtersToObject = new Dictionary<string, object>();
          filtersToObject.Add("x-opt-filter", "a = b");
 
-         IDictionary<string, string> filters = new Dictionary<string, string>();
+         IDictionary<string, object> filters = new Dictionary<string, object>();
          filters.Add("x-opt-filter", "a = b");
 
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
