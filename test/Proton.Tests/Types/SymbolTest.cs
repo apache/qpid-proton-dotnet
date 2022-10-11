@@ -112,7 +112,7 @@ namespace Apache.Qpid.Proton.Types
       }
 
       [Test]
-      public void TestHashcode()
+      public void TestHashCode()
       {
          string symbolString1 = "Symbol-1";
          string symbolString2 = "Symbol-2";
@@ -200,7 +200,7 @@ namespace Apache.Qpid.Proton.Types
       }
 
       [Test]
-      public void TestToStringProducesSingelton()
+      public void TestToStringProducesSingleton()
       {
          string symbolString = "Symbol-string";
 

@@ -18,17 +18,14 @@
 using Apache.Qpid.Proton.Buffer;
 using System;
 using System.Text;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 namespace Apache.Qpid.Proton.Types
 {
    public sealed class Symbol : IEquatable<Symbol>, IComparable, IComparable<Symbol>
    {
-      private static readonly IDictionary<IProtonBuffer, Symbol> buffersToSymbols =
-         new ConcurrentDictionary<IProtonBuffer, Symbol>();
-      private static readonly IDictionary<string, Symbol> stringsToSymbols =
-         new ConcurrentDictionary<string, Symbol>();
+      private static readonly ConcurrentDictionary<IProtonBuffer, Symbol> buffersToSymbols = new();
+      private static readonly ConcurrentDictionary<string, Symbol> stringsToSymbols = new();
 
       private static readonly Symbol EMPTY_SYMBOL = new();
 
