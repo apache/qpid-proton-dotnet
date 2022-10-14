@@ -21,11 +21,11 @@
 
 <Project>
   <PropertyGroup Label="Build, Test, Code Analysis">
-    <MicrosoftBuildFrameworkVersion>17.2.0</MicrosoftBuildFrameworkVersion>
-    <MicrosoftBuildUtilitiesCoreVersion>17.2.0</MicrosoftBuildUtilitiesCoreVersion>
-    <MicrosoftCodeAnalysisVersion>4.3.0-3.final</MicrosoftCodeAnalysisVersion>
-    <MicrosoftCodeAnalysisCSharpVersion>4.3.0-3.final</MicrosoftCodeAnalysisCSharpVersion>
-    <MicrosoftCodeAnalysisCSharpCodeStyleVersion>4.3.0-3.final</MicrosoftCodeAnalysisCSharpCodeStyleVersion>
+    <MicrosoftBuildFrameworkVersion>17.3.1</MicrosoftBuildFrameworkVersion>
+    <MicrosoftBuildUtilitiesCoreVersion>17.3.1</MicrosoftBuildUtilitiesCoreVersion>
+    <MicrosoftCodeAnalysisVersion>4.4.0-2.final</MicrosoftCodeAnalysisVersion>
+    <MicrosoftCodeAnalysisCSharpVersion>4.4.0-2.final</MicrosoftCodeAnalysisCSharpVersion>
+    <MicrosoftCodeAnalysisCSharpCodeStyleVersion>4.4.0-2.final</MicrosoftCodeAnalysisCSharpCodeStyleVersion>
     <MicrosoftExtensionsCachingMemoryVersion>5.0.0</MicrosoftExtensionsCachingMemoryVersion>
     <MicrosoftExtensionsLoggingVersion>5.0.0</MicrosoftExtensionsLoggingVersion>
     <!-- When .NET 7 SDK is released or the package is not in preview, update this version -->
