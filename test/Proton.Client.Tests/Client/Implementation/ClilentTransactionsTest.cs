@@ -1725,5 +1725,63 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestAwaitSettlementWorksForMessageSentInTransaction()
+      {
+         byte[] txnId = new byte[] { 0, 1, 2, 3 };
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(1).Queue();
+            peer.ExpectCoordinatorAttach().Respond();
+            peer.RemoteFlow().WithLinkCredit(2).Queue();
+            peer.ExpectDeclare().Accept(txnId);
+            peer.ExpectTransfer().WithHandle(0)
+                                 .WithNonNullPayload()
+                                 .WithState().Transactional().WithTxnId(txnId).And()
+                                 .Respond()
+                                 .WithState().Transactional().WithTxnId(txnId).WithAccepted().And()
+                                 .WithSettled(true);
+            peer.ExpectDischarge().WithFail(false).WithTxnId(txnId).Accept();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            ISender sender = session.OpenSender("address").OpenTask.Result;
+
+            session.BeginTransaction();
+
+            ITracker tracker = sender.Send(IMessage<string>.Create("test-message"));
+
+            Assert.IsNotNull(tracker);
+            Assert.IsNotNull(tracker.AwaitAccepted());
+            Assert.IsTrue(tracker.RemoteState.IsAccepted);
+            Assert.AreEqual(tracker.RemoteState.Type, DeliveryStateType.Transactional,
+                           "Delivery inside transaction should have Transactional state");
+            Assert.AreEqual(tracker.State.Type, DeliveryStateType.Transactional,
+                           "Delivery inside transaction should have Transactional state: " + tracker.State.Type);
+            Wait.AssertTrue("Delivery in transaction should be locally settled after response", () => tracker.Settled);
+
+            session.CommitTransaction();
+
+            session.CloseAsync();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }

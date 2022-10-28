@@ -28,7 +28,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// </summary>
    public abstract class ClientDeliveryState : IDeliveryState
    {
-      public bool IsAccepted => Type == DeliveryStateType.Accepted;
+      public virtual bool IsAccepted => Type == DeliveryStateType.Accepted;
 
       public abstract DeliveryStateType Type { get; }
 
@@ -165,6 +165,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
          this.txnState.Outcome = txnState.Outcome;
          this.txnState.TxnId = txnState.TxnId.Copy();
       }
+
+      public override bool IsAccepted => txnState.Outcome is Accepted;
 
       public override DeliveryStateType Type => DeliveryStateType.Transactional;
 
