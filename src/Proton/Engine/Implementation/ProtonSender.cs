@@ -54,7 +54,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public override uint Credit => CreditState.Credit;
 
-      public bool IsSendable => sendable && sessionWindow.IsSendable;
+      public bool IsSendable => sendable = sendable && sessionWindow.IsSendable;
 
       public override bool IsDraining => CreditState.IsDrain;
 

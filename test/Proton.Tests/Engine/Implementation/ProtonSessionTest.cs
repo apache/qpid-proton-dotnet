@@ -2780,6 +2780,190 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
+      public void TestBothSendersNotifiedAfterSessionOutgoingWindowOpenedWhenBothRequestedSendableState()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         Queue<Action> asyncIOCallbacks = new Queue<Action>();
+         ProtonTestConnector peer = CreateTestPeer(engine, asyncIOCallbacks);
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+         IDeliveryTagGenerator generator = ProtonDeliveryTagTypes.Pooled.NewTagGenerator();
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithMaxFrameSize(1024).Respond();
+         peer.ExpectBegin().WithNextOutgoingId(0).Respond().WithNextOutgoingId(0);
+         peer.ExpectAttach().Respond();
+         peer.RemoteFlow().WithLinkCredit(20).WithNextIncomingId(0).WithIncomingWindow(8192).Queue();
+         peer.ExpectAttach().Respond();
+         peer.RemoteFlow().WithLinkCredit(20).WithNextIncomingId(0).WithIncomingWindow(8192).Queue();
+
+         IConnection connection = engine.Start();
+         connection.MaxFrameSize = 1024;
+         connection.Open();
+         ISession session = connection.Session();
+         session.OutgoingCapacity = 1024;
+         session.Open();
+         ISender sender1 = session.Sender("test1");
+         sender1.DeliveryTagGenerator = generator;
+         sender1.Open();
+         ISender sender2 = session.Sender("test2");
+         sender2.DeliveryTagGenerator = generator;
+         sender2.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectTransfer().WithPayload(payload);
+
+         int sender1CreditStateUpdated = 0;
+         sender1.CreditStateUpdateHandler((self) =>
+         {
+            sender1CreditStateUpdated++;
+         });
+
+         int sender2CreditStateUpdated = 0;
+         sender2.CreditStateUpdateHandler((self) =>
+         {
+            sender2CreditStateUpdated++;
+         });
+
+         Assert.IsTrue(sender1.IsSendable);
+         Assert.AreEqual(1024, session.RemainingOutgoingCapacity);
+         Assert.IsTrue(sender2.IsSendable);
+         Assert.AreEqual(1024, session.RemainingOutgoingCapacity);
+
+         // Open, Begin, Attach, Attach
+         Assert.AreEqual(4, asyncIOCallbacks.Count);
+         foreach (Action action in asyncIOCallbacks)
+         {
+            action.Invoke();
+         }
+         asyncIOCallbacks.Clear();
+
+         IOutgoingDelivery delivery = sender1.Next();
+         delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+
+         peer.WaitForScriptToComplete();
+
+         Assert.AreEqual(1, asyncIOCallbacks.Count);
+
+         Assert.IsFalse(sender1.IsSendable);
+         Assert.AreEqual(0, session.RemainingOutgoingCapacity);
+         // Sender 2 shouldn't be able to send since sender 1 consumed the outgoing window
+         Assert.IsFalse(sender2.IsSendable);
+         Assert.AreEqual(0, session.RemainingOutgoingCapacity);
+
+         // Free a frame's worth of window which should trigger both senders sendable update event
+         asyncIOCallbacks.Dequeue().Invoke();
+         Assert.AreEqual(0, asyncIOCallbacks.Count);
+
+         Assert.IsTrue(sender1.IsSendable);
+         Assert.AreEqual(1024, session.RemainingOutgoingCapacity);
+         Assert.AreEqual(1, sender1CreditStateUpdated);
+         Assert.IsTrue(sender2.IsSendable);
+         Assert.AreEqual(1024, session.RemainingOutgoingCapacity);
+         Assert.AreEqual(1, sender2CreditStateUpdated);
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestSingleSenderUpdatedWhenOutgoingWindowOpenedForTwoIfFirstConsumesSessionOutgoingWindow()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+         Queue<Action> asyncIOCallbacks = new Queue<Action>();
+         ProtonTestConnector peer = CreateTestPeer(engine, asyncIOCallbacks);
+
+         byte[] payload = new byte[] { 0, 1, 2, 3, 4 };
+         IDeliveryTagGenerator generator = ProtonDeliveryTagTypes.Pooled.NewTagGenerator();
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithMaxFrameSize(1024).Respond();
+         peer.ExpectBegin().WithNextOutgoingId(0).Respond().WithNextOutgoingId(0);
+         peer.ExpectAttach().Respond();
+         peer.RemoteFlow().WithLinkCredit(20).WithNextIncomingId(0).WithIncomingWindow(8192).Queue();
+         peer.ExpectAttach().Respond();
+         peer.RemoteFlow().WithLinkCredit(20).WithNextIncomingId(0).WithIncomingWindow(8192).Queue();
+
+         IConnection connection = engine.Start();
+         connection.MaxFrameSize = 1024;
+         connection.Open();
+         ISession session = connection.Session();
+         session.OutgoingCapacity = 1024;
+         session.Open();
+         ISender sender1 = session.Sender("test1");
+         sender1.DeliveryTagGenerator = generator;
+         sender1.Open();
+         ISender sender2 = session.Sender("test2");
+         sender2.DeliveryTagGenerator = generator;
+         sender2.Open();
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectTransfer().WithPayload(payload);
+
+         int sender1CreditStateUpdated = 0;
+         sender1.CreditStateUpdateHandler((self) =>
+         {
+            sender1CreditStateUpdated++;
+            if (self.IsSendable)
+            {
+               IOutgoingDelivery delivery = self.Next();
+               delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+            }
+         });
+
+         int sender2CreditStateUpdated = 0;
+         sender2.CreditStateUpdateHandler((self) =>
+         {
+            sender2CreditStateUpdated++;
+         });
+
+         Assert.IsTrue(sender1.IsSendable);
+         Assert.AreEqual(1024, session.RemainingOutgoingCapacity);
+         Assert.IsTrue(sender2.IsSendable);
+         Assert.AreEqual(1024, session.RemainingOutgoingCapacity);
+
+         // Open, Begin, Attach, Attach
+         Assert.AreEqual(4, asyncIOCallbacks.Count);
+         foreach (Action action in asyncIOCallbacks)
+         {
+            action.Invoke();
+         }
+         asyncIOCallbacks.Clear();
+
+         IOutgoingDelivery delivery = sender1.Next();
+         delivery.WriteBytes(ProtonByteBufferAllocator.Instance.Wrap(payload));
+
+         peer.WaitForScriptToComplete();
+         peer.ExpectTransfer().WithPayload(payload);
+
+         Assert.AreEqual(1, asyncIOCallbacks.Count);
+
+         Assert.IsFalse(sender1.IsSendable);
+         Assert.AreEqual(0, session.RemainingOutgoingCapacity);
+         // Sender 2 shouldn't be able to send since sender 1 consumed the outgoing window
+         Assert.IsFalse(sender2.IsSendable);
+         Assert.AreEqual(0, session.RemainingOutgoingCapacity);
+
+         // Should trigger sender 1 to send which should exhaust the outgoing credit
+         asyncIOCallbacks.Dequeue().Invoke();
+         Assert.AreEqual(1, asyncIOCallbacks.Count);
+
+         Assert.IsFalse(sender1.IsSendable);
+         Assert.AreEqual(0, session.RemainingOutgoingCapacity);
+         Assert.AreEqual(1, sender1CreditStateUpdated);
+         Assert.IsFalse(sender2.IsSendable);
+         Assert.AreEqual(0, session.RemainingOutgoingCapacity);
+         // Should not have triggered an event for sender 2 being able to send since
+         // sender one consumed the outgoing window already.
+         Assert.AreEqual(0, sender2CreditStateUpdated);
+
+         peer.WaitForScriptToComplete();
+         Assert.IsNull(failure);
+      }
+
+      [Test]
       public void TestHandleInUseErrorReturnedIfAttachWithAlreadyBoundHandleArrives()
       {
          IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
