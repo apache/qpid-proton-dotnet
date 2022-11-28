@@ -48,6 +48,14 @@ namespace Apache.Qpid.Proton.Test.Driver.Network
       {
          this.address = address;
 
+         if (IPAddress.TryParse(address, out IPAddress parsedAddress))
+         {
+            if (parsedAddress.AddressFamily == AddressFamily.InterNetwork)
+            {
+               return Connect(new IPEndPoint(parsedAddress, port));
+            }
+         }
+
          IPHostEntry entry = Dns.GetHostEntry(address);
          foreach (IPAddress ipAddress in entry.AddressList)
          {

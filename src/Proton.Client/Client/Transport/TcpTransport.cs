@@ -248,24 +248,33 @@ namespace Apache.Qpid.Proton.Client.Transport
 
       private static IPAddress ResolveIPAddress(string address)
       {
-         IPHostEntry entry = Dns.GetHostEntry(address);
-         IPAddress result = default;
-
-         foreach (IPAddress ipAddress in entry.AddressList)
+         // If we can parse the address then we do that as that is what the caller requested
+         // instead of looking up host entries etc.
+         if (IPAddress.TryParse(address, out IPAddress parsed) && parsed.AddressFamily == AddressFamily.InterNetwork)
          {
-            if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+            return parsed;
+         }
+         else
+         {
+            IPHostEntry entry = Dns.GetHostEntry(address);
+            IPAddress result = default;
+
+            foreach (IPAddress ipAddress in entry.AddressList)
             {
-               result = ipAddress;
+               if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
+               {
+                  result = ipAddress;
+               }
             }
-         }
 
-         if (result == default(IPAddress))
-         {
-            throw new IOException(
-               string.Format("Could not resolve a remote address from the given host: {0}", address));
-         }
+            if (result == default(IPAddress))
+            {
+               throw new IOException(
+                  string.Format("Could not resolve a remote address from the given host: {0}", address));
+            }
 
-         return result;
+            return result;
+         }
       }
 
       private void CheckConnected(IProtonBuffer output)
