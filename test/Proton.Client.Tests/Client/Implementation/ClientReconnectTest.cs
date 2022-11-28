@@ -61,8 +61,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             ConnectionOptions options = new ConnectionOptions();
             options.ReconnectOptions.ReconnectEnabled = true;
-            options.ReconnectOptions.MaxReconnectAttempts = 5;
-            options.ReconnectOptions.ReconnectDelay = 10;
+            options.ReconnectOptions.MaxReconnectAttempts = 2;
+            options.ReconnectOptions.ReconnectDelay = 5;
             options.ReconnectOptions.UseReconnectBackOff = false;
             options.ReconnectOptions.AddReconnectLocation(backupAddress, backupPort);
             options.ConnectedHandler = (connection, context) =>
@@ -103,7 +103,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsTrue(connected.Wait(TimeSpan.FromSeconds(5)));
             Assert.IsTrue(disconnected.Wait(TimeSpan.FromSeconds(5)));
             Assert.IsTrue(reconnected.Wait(TimeSpan.FromSeconds(5)));
-            Assert.IsTrue(failed.Wait(TimeSpan.FromSeconds(5)));
+            Assert.IsTrue(failed.Wait(TimeSpan.FromSeconds(15)));
 
             connection.Close();
 
