@@ -773,7 +773,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      [Test]
+      [Test, Timeout(40_000)]
       public void TestConnectionReportsFailedAfterMaxInitialReconnectAttemptsWithBackOff()
       {
          using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
@@ -790,11 +790,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
             ConnectionOptions options = new ConnectionOptions();
             options.ReconnectOptions.ReconnectEnabled = true;
             options.ReconnectOptions.MaxReconnectAttempts = -1; // Try forever if connect succeeds once.
-            options.ReconnectOptions.MaxInitialConnectionAttempts = 10;
+            options.ReconnectOptions.MaxInitialConnectionAttempts = 5;
             options.ReconnectOptions.WarnAfterReconnectAttempts = 2;
             options.ReconnectOptions.ReconnectDelay = 10;
             options.ReconnectOptions.UseReconnectBackOff = true;
-            options.ReconnectOptions.MaxReconnectDelay = 100;
+            options.ReconnectOptions.MaxReconnectDelay = 50;
 
             IClient container = IClient.Create();
             IConnection connection = container.Connect(primaryAddress, primaryPort, options);
