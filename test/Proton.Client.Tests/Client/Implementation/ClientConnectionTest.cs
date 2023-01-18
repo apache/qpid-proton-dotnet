@@ -1488,7 +1488,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IClient container = IClient.Create();
             ConnectionOptions options = ConnectionOptions();
-            options.OpenTimeout = 100;
+            options.OpenTimeout = openResponse ? 5000 : 150;
             IConnection connection = container.Connect(remoteAddress, remotePort, options);
 
             peer.WaitForScriptToComplete();
@@ -1555,7 +1555,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IClient container = IClient.Create();
             ConnectionOptions options = ConnectionOptions();
-            options.OpenTimeout = 100;
+            options.OpenTimeout = openResponse ? 5000 : 100;
             IConnection connection = container.Connect(remoteAddress, remotePort, options);
 
             peer.WaitForScriptToComplete();

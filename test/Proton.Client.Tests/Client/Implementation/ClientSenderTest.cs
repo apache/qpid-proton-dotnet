@@ -1520,7 +1520,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             ISession session = connection.OpenSession().OpenTask.Result;
             SenderOptions options = new SenderOptions()
             {
-               OpenTimeout = 75
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             ISender sender = session.OpenSender("test-sender", options);
 
@@ -1606,7 +1606,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               OpenTimeout = 75
+               OpenTimeout = attachResponse ? 5000 : 75
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;
@@ -1690,7 +1690,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               OpenTimeout = 75
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;

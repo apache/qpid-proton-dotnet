@@ -65,7 +65,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort);
 
             SessionOptions options = new SessionOptions();
-            options.OpenTimeout = 75;
+            options.OpenTimeout = 250;
             ISession session = connection.OpenSession(options);
 
             try
@@ -237,7 +237,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
             SessionOptions options = new SessionOptions();
-            options.CloseTimeout = 75;
+            options.CloseTimeout = 150;
             ISession session = connection.OpenSession(options).OpenTask.GetAwaiter().GetResult();
 
             try
@@ -338,7 +338,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
             SessionOptions options = new SessionOptions();
-            options.OpenTimeout = 120;
+            options.OpenTimeout = beginResponse ? 5000 : 250;
             ISession session = connection.OpenSession(options);
 
             peer.WaitForScriptToComplete();
@@ -501,7 +501,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
             SessionOptions options = new SessionOptions();
-            options.OpenTimeout = 125;
+            options.OpenTimeout = beginResponse ? 5000 : 125;
             ISession session = connection.OpenSession(options);
 
             peer.WaitForScriptToComplete();

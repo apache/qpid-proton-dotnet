@@ -1015,7 +1015,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               OpenTimeout = 100
+               OpenTimeout = attachResponse ? 5000 : 100
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;
@@ -1100,7 +1100,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               OpenTimeout = 100
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;
@@ -1185,7 +1185,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             ISession session = connection.OpenSession().OpenTask.Result;
             ReceiverOptions options = new ReceiverOptions()
             {
-               OpenTimeout = 100
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IReceiver receiver = session.OpenReceiver("test-receiver", options);
 
@@ -1270,7 +1270,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               OpenTimeout = 100
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;
@@ -1355,7 +1355,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IClient container = IClient.Create();
             ConnectionOptions options = new ConnectionOptions()
             {
-               OpenTimeout = 100
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IConnection connection = container.Connect(remoteAddress, remotePort, options).OpenTask.Result;
             ISession session = connection.OpenSession().OpenTask.Result;

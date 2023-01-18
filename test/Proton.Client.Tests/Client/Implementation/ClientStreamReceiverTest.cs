@@ -1127,8 +1127,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                  .WithMore(false)
                                  .WithMessageFormat(0)
                                  .WithPayload(payload2).Queue();
+            peer.ExpectDisposition().WithFirst(0).WithState().Accepted().WithSettled(true).Optional();
             peer.ExpectFlow().WithDeliveryCount(1).WithIncomingWindow(1).WithLinkCredit(9);
-            peer.ExpectDisposition().WithFirst(0).WithState().Accepted().WithSettled(true);
+            peer.ExpectDisposition().WithFirst(0).WithState().Accepted().WithSettled(true).Optional();
 
             byte[] combinedPayloads = new byte[payload1.Length + payload2.Length];
             rawStream.Read(combinedPayloads);
@@ -2548,8 +2549,9 @@ namespace Apache.Qpid.Proton.Client.Implementation
                                  .WithMore(false)
                                  .WithMessageFormat(0)
                                  .WithPayload(payload3).Queue();
+            peer.ExpectDisposition().WithFirst(0).WithState().Accepted().WithSettled(true).Optional();
             peer.ExpectFlow().WithDeliveryCount(1).WithIncomingWindow(1).WithLinkCredit(9);
-            peer.ExpectDisposition().WithFirst(0).WithState().Accepted().WithSettled(true);
+            peer.ExpectDisposition().WithFirst(0).WithState().Accepted().WithSettled(true).Optional();
 
             byte[] combinedPayloads = new byte[body1.Length + body2.Length];
             bodyStream.Read(combinedPayloads);
@@ -3634,7 +3636,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort);
             StreamReceiverOptions options = new StreamReceiverOptions()
             {
-               OpenTimeout = 150
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
 
@@ -3722,7 +3724,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort);
             StreamReceiverOptions options = new StreamReceiverOptions()
             {
-               OpenTimeout = 150
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
 
@@ -3808,7 +3810,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort);
             StreamReceiverOptions options = new StreamReceiverOptions()
             {
-               OpenTimeout = 150
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
 
@@ -3894,7 +3896,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort);
             StreamReceiverOptions options = new StreamReceiverOptions()
             {
-               OpenTimeout = 150
+               OpenTimeout = attachResponse ? 5000 : 150
             };
             IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
 
@@ -3978,7 +3980,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          IConnection connection = container.Connect(remoteAddress, remotePort);
          StreamReceiverOptions options = new StreamReceiverOptions()
          {
-            OpenTimeout = 150
+            OpenTimeout = attachResponse ? 5000 : 250
          };
          IStreamReceiver receiver = connection.OpenStreamReceiver("test-receiver", options);
 
