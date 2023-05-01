@@ -29,6 +29,7 @@ using Apache.Qpid.Proton.Test.Driver.Matchers.Types.Messaging;
 using System.Linq;
 using Apache.Qpid.Proton.Test.Driver.Codec.Messaging;
 using Apache.Qpid.Proton.Client.TestSupport;
+using Apache.Qpid.Proton.Test.Driver.Codec.Security;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -1918,6 +1919,98 @@ namespace Apache.Qpid.Proton.Client.Implementation
             _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
 
             Assert.IsTrue(failed.Wait(TimeSpan.FromSeconds(10)));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithNoVHostCarriesRemoteHost()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            peer.ExpectSASLHeader().RespondWithSASLHeader();
+            peer.RemoteSaslMechanisms().WithMechanisms("ANONYMOUS").Queue();
+            peer.ExpectSaslInit().WithMechanism("ANONYMOUS").WithHostname(remoteAddress);
+            peer.RemoteSaslOutcome().WithCode(SaslCode.Ok).Queue();
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().WithHostname(remoteAddress).Respond();
+            peer.ExpectClose().Respond();
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort, ConnectionOptions());
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithSpecifiedVHost()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLHeader().RespondWithSASLHeader();
+            peer.RemoteSaslMechanisms().WithMechanisms("ANONYMOUS").Queue();
+            peer.ExpectSaslInit().WithMechanism("ANONYMOUS").WithHostname("test");
+            peer.RemoteSaslOutcome().WithCode(SaslCode.Ok).Queue();
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().WithHostname("test").Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+            options.VirtualHost = "test";
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateConnectionWithEmptyVHostSendsNullValueInOpen()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(TestServerOptions(), loggerFactory))
+         {
+            peer.ExpectSASLHeader().RespondWithSASLHeader();
+            peer.RemoteSaslMechanisms().WithMechanisms("ANONYMOUS").Queue();
+            peer.ExpectSaslInit().WithMechanism("ANONYMOUS").WithHostname(Test.Driver.Matchers.Is.NullValue());
+            peer.RemoteSaslOutcome().WithCode(SaslCode.Ok).Queue();
+            peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+            peer.ExpectOpen().WithHostname(Test.Driver.Matchers.Is.NullValue()).Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions();
+            options.VirtualHost = "";
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait();
 
             peer.WaitForScriptToComplete();
          }

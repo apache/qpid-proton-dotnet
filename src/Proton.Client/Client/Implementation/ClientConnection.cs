@@ -979,10 +979,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
             protonConnection.ContainerId = connectionId;
          }
 
+         if (options.VirtualHost != null)
+         {
+            protonConnection.Hostname = options.VirtualHost.Length == 0 ? null : options.VirtualHost;
+         }
+         else
+         {
+            protonConnection.Hostname = location.Host;
+         }
+
          protonConnection.LinkedResource = this;
          protonConnection.ChannelMax = options.ChannelMax;
          protonConnection.MaxFrameSize = options.MaxFrameSize;
-         protonConnection.Hostname = location.Host;
          protonConnection.IdleTimeout = (uint)options.IdleTimeout;
          protonConnection.OfferedCapabilities = ClientConversionSupport.ToSymbolArray(options.OfferedCapabilities);
          protonConnection.DesiredCapabilities = ClientConversionSupport.ToSymbolArray(options.DesiredCapabilities);
@@ -1298,7 +1306,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             this.options = connection.options;
          }
 
-         public string VHost => options.VirtualHost;
+         public string VHost => connection.protonConnection.Hostname;
 
          public string Username => options.User;
 
