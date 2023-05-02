@@ -53,6 +53,18 @@ namespace Apache.Qpid.Proton.Types
       }
 
       /// <summary>
+      /// Allows a string value to be implicitly converted to a Symbol
+      /// </summary>
+      /// <param name="symbolString">The String to convert</param>
+      public static implicit operator Symbol(string symbolString) => Lookup(symbolString);
+
+      /// <summary>
+      /// Allows a Symbol object to be implicitly converted to a string value.
+      /// </summary>
+      /// <param name="value">The Symbol to convert</param>
+      public static implicit operator string(Symbol value) => value?.ToString();
+
+      /// <summary>
       /// Lookup or create a singleton instance of the given Symbol that has the
       /// matching name to the string value provided.
       /// </summary>

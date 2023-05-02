@@ -226,5 +226,55 @@ namespace Apache.Qpid.Proton.Types
          Assert.AreNotSame(symbol1, symbol2);
          Assert.AreNotSame(symbol1.ToString(), symbol2.ToString());
       }
+
+      [Test]
+      public void TestImplicitToStringHandlesNull()
+      {
+         string symbolString = null;
+
+         Symbol symbol1 = (Symbol)symbolString;
+
+         Assert.IsNull(symbol1);
+      }
+
+      [Test]
+      public void TestImplicitToSymbolHandlesNull()
+      {
+         Symbol symbol = null;
+
+         string symString = (string)symbol;
+
+         Assert.IsNull(symString);
+      }
+
+      [Test]
+      public void TestImplicitToSymbolProducesSingleton()
+      {
+         string symbolString = "Symbol-string";
+
+         Symbol symbol1 = (Symbol)symbolString;
+         Symbol symbol2 = (Symbol)symbolString;
+
+         Assert.AreEqual(symbolString, symbol1.ToString());
+         Assert.AreEqual(symbolString, symbol2.ToString());
+
+         Assert.AreSame(symbol1, symbol2);
+         Assert.AreSame(symbol1.ToString(), symbol2.ToString());
+      }
+
+      [Test]
+      public void TestImplicitToStringProducesSingleton()
+      {
+         string symbolString = "Symbol-string";
+
+         Symbol symbol1 = (Symbol)symbolString;
+         Symbol symbol2 = (Symbol)symbolString;
+
+         Assert.AreEqual(symbolString, (string)symbol1);
+         Assert.AreEqual(symbolString, (string)symbol2);
+
+         Assert.AreSame(symbol1, symbol2);
+         Assert.AreSame((string)symbol1, (string)symbol2);
+      }
    }
 }
