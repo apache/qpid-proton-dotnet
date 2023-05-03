@@ -1747,6 +1747,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             try
             {
+               logger.LogInformation("Test sending message from connection anonymous sender");
                connection.Send(IMessage<string>.Create("Hello World"));
                Assert.Fail("Open of Sender should fail as remote did not advertise anonymous relay support: ");
             }

@@ -34,6 +34,9 @@
     <VersionSuffix Condition="'$(VersionSuffix)' == '' AND $(ProtonVersion.Contains('-'))">$(ProtonVersion.Split('-')[1])</VersionSuffix>
     <AssemblyVersion>$(MajorVersion).$(MinorVersion).0.0</AssemblyVersion>
     <FileVersion>$(MajorVersion).$(MinorVersion).$(BuildNumber).0</FileVersion>
+
+    <!-- Suppress warnings about EOL frameworks as we want to support users on past releases -->
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Label="Target Frameworks">

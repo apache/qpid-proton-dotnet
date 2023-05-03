@@ -15,7 +15,7 @@
 #  limitations under the License.
 #
 
-FROM alpine:3.16
+FROM alpine:3.17.3
 WORKDIR /root
 
 # Install dependencies from vanilla system packages
@@ -23,7 +23,7 @@ RUN apk add bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib git 
 
 # Install a maven release  -------------------------------------------
 # Inspired from https://github.com/apache/accumulo-docker/blob/master/Dockerfile#L53
-ENV MAVEN_VERSION 3.8.4
+ENV MAVEN_VERSION 3.9.1
 ENV APACHE_DIST_URLS \
   https://www.apache.org/dyn/closer.cgi?action=download&filename= \
   # if the version is outdated (or we're grabbing the .asc file), we might have to pull from the dist/archive :/
