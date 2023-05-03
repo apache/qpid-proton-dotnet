@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private ClientReceiver SelectRandomReceiver()
       {
          IEnumerable<Engine.IReceiver> receivers = session.ProtonSession.Receivers.
-            Where(r => r.LinkedResource is ClientReceiver receiver && receiver.QueuedDeliveries > 0);
+            Where(r => r.LinkedResource is ClientReceiver receiver && receiver.GetQueuedDeliveries() > 0);
 
          Engine.IReceiver receiver = receivers.ElementAtOrDefault(random.Next(0, receivers.Count()));
 
@@ -163,7 +163,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                {
                   if (foundLast)
                   {
-                     if (candidate.QueuedDeliveries > 0)
+                     if (candidate.GetQueuedDeliveries() > 0)
                      {
                         result = candidate;
                      }
@@ -187,7 +187,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          Engine.IReceiver receiver =
             session.ProtonSession.Receivers.Where(
-               r => r.LinkedResource is ClientReceiver receiver && receiver.QueuedDeliveries > 0).FirstOrDefault();
+               r => r.LinkedResource is ClientReceiver receiver && receiver.GetQueuedDeliveries() > 0).FirstOrDefault();
 
          return (ClientReceiver)receiver?.LinkedResource;
       }
@@ -195,7 +195,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private ClientReceiver SelectLargestBacklog()
       {
          IEnumerable<Engine.IReceiver> receivers = session.ProtonSession.Receivers.
-            Where(r => r.LinkedResource is ClientReceiver receiver && receiver.QueuedDeliveries > 0);
+            Where(r => r.LinkedResource is ClientReceiver receiver && receiver.GetQueuedDeliveries() > 0);
 
          ClientReceiver result = null;
 
@@ -203,7 +203,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             ClientReceiver candidate = (ClientReceiver)receiver.LinkedResource;
 
-            if (result == null || result.QueuedDeliveries < candidate.QueuedDeliveries)
+            if (result == null || result.GetQueuedDeliveries() < candidate.GetQueuedDeliveries())
             {
                result = candidate;
             }
@@ -215,7 +215,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private ClientReceiver SelectSmallestBacklog()
       {
          IEnumerable<Engine.IReceiver> receivers = session.ProtonSession.Receivers.
-            Where(r => r.LinkedResource is ClientReceiver receiver && receiver.QueuedDeliveries > 0);
+            Where(r => r.LinkedResource is ClientReceiver receiver && receiver.GetQueuedDeliveries() > 0);
 
          ClientReceiver result = null;
 
@@ -223,7 +223,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             ClientReceiver candidate = (ClientReceiver)receiver.LinkedResource;
 
-            if (result == null || result.QueuedDeliveries > candidate.QueuedDeliveries)
+            if (result == null || result.GetQueuedDeliveries() > candidate.GetQueuedDeliveries())
             {
                result = candidate;
             }

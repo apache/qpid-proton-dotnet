@@ -49,7 +49,30 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
-      public virtual int QueuedDeliveries => protonLink.Unsettled.Count(delivery => delivery.LinkedResource == null);
+      internal int GetQueuedDeliveries()
+      {
+         // Internal implementation operates on the current thread which should generally
+         // be the connection execution thread.
+         return protonLink.Unsettled.Count(delivery => delivery.LinkedResource == null);
+      }
+
+      public virtual int QueuedDeliveries
+      {
+         get
+         {
+            CheckClosedOrFailed();
+            TaskCompletionSource<int> queuedCount = new();
+            session.Execute(() =>
+            {
+               if (NotClosedOrFailed(queuedCount))
+               {
+                  _ = queuedCount.TrySetResult(GetQueuedDeliveries());
+               }
+            });
+
+            return queuedCount.Task.ConfigureAwait(false).GetAwaiter().GetResult();
+         }
+      }
 
       public LinkType AddCredit(uint credit)
       {
