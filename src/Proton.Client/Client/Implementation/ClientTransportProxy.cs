@@ -68,7 +68,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          {
             LOG.Debug("Transport reports connect attempt failed: {0}", transport);
             engine.EngineFailed(
-               new IOException(string.Format("Connection to remote {0} failed.", transport.EndPoint)));
+               new IOException(string.Format("Connection to remote {0}:{1} failed.", transport.Host, transport.Port)));
          }
       }
 
