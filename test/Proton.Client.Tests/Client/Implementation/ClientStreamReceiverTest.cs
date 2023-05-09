@@ -4189,7 +4189,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             IClient container = IClient.Create();
             IConnection connection = container.Connect(remoteAddress, remotePort);
-            IStreamReceiver receiver = (IStreamReceiver)connection.OpenStreamReceiver("test-queue").OpenTask.Result;
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue").OpenTask.Result;
 
             byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
 
@@ -4229,6 +4229,53 @@ namespace Apache.Qpid.Proton.Client.Implementation
             delivery.Accept();
             receiver.CloseAsync();
             connection.CloseAsync().Wait();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestDeliveryReadWithLongTimeoutValue()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow().WithLinkCredit(10);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithDeliveryTag(new byte[] { 1 })
+                                 .WithMore(false)
+                                 .WithSettled(true)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).AfterDelay(20).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue");
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => receiver.Receive(TimeSpan.FromDays(50)));
+
+            IStreamDelivery delivery = receiver.Receive(TimeSpan.FromDays(49));
+            Assert.IsNotNull(delivery);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            receiver.Close();
+            connection.Close();
 
             peer.WaitForScriptToComplete();
          }

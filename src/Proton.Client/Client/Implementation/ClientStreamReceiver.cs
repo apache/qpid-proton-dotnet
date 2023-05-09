@@ -100,6 +100,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
                   {
                      if (timeout != TimeSpan.MaxValue)
                      {
+                        if (timeout.TotalMilliseconds > uint.MaxValue)
+                        {
+                           receive.TrySetException(new ArgumentOutOfRangeException(
+                              "Receive timeout must convert to a value less than UInt32.MaxValue Milliseconds"));
+                        }
+
                         session.Schedule(() =>
                         {
                            if (!receive.Task.IsCompleted)
