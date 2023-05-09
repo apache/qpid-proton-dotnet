@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Types.Messaging
    public class ApplicationPropertiesTest
    {
       [Test]
-      public void TestTostringOnEmptyObject()
+      public void TestToStringOnEmptyObject()
       {
          Assert.IsNotNull(new ApplicationProperties((IDictionary<string, object>)null).ToString());
       }

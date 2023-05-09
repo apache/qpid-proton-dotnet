@@ -16,6 +16,8 @@
  */
 
 using System.Collections;
+using System.Linq;
+using System.Text;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
@@ -57,7 +59,22 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override string ToString()
       {
-         return "AmqpSequence{ " + Value + " }";
+         StringBuilder apStr = new();
+
+         apStr.Append("AmqpSequence{ ");
+
+         if (Value != null && Value.Count > 0)
+         {
+            apStr.Append(string.Join(", ", Enumerable.Range(0, Value.Count).Select(i => Value[i]).ToArray()));
+         }
+         else
+         {
+            apStr.Append("<empty>");
+         }
+
+         apStr.Append(" }");
+
+         return apStr.ToString();
       }
 
       public override int GetHashCode()

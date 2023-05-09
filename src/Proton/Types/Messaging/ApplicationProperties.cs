@@ -16,6 +16,7 @@
  */
 
 using System.Collections.Generic;
+using System.Text;
 
 namespace Apache.Qpid.Proton.Types.Messaging
 {
@@ -57,7 +58,22 @@ namespace Apache.Qpid.Proton.Types.Messaging
 
       public override string ToString()
       {
-         return "ApplicationProperties{ " + Value + " }";
+         StringBuilder apStr = new();
+
+         apStr.Append("ApplicationProperties{ ");
+
+         if (Value != null && Value.Count > 0)
+         {
+            apStr.Append(string.Join(", ", Value));
+         }
+         else
+         {
+            apStr.Append("<empty>");
+         }
+
+         apStr.Append(" }");
+
+         return apStr.ToString();
       }
 
       public override int GetHashCode()
