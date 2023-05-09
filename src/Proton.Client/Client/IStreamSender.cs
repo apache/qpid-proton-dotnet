@@ -76,7 +76,7 @@ namespace Apache.Qpid.Proton.Client
       Task<IStreamTracker> TrySendAsync<T>(IMessage<T> message, IDictionary<string, object> deliveryAnnotations = null);
 
       /// <summary>
-      /// Creates and returns a new streamable message that can be used by the caller to perform
+      /// Creates and returns a new stream capable message that can be used by the caller to perform
       /// streaming sends of large message payload data.  Only one streamed message can be active
       /// at a time so any successive calls to begin a new streaming message will throw an error
       /// to indicate that the previous instance has not yet been completed.

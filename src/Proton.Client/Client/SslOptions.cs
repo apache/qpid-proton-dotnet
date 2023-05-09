@@ -114,12 +114,12 @@ namespace Apache.Qpid.Proton.Client
       /// <summary>
       /// Allows the user to override the TLS version that the client will request from the O/S
       /// when performing the TLS handshake.  By default the client will let the system choose the
-      /// best TLS version, however the user may wish to enforce a specifc value.
+      /// best TLS version, however the user may wish to enforce a specific value.
       /// </summary>
       public SslProtocols TlsVersionOverride { get; set; } = SslProtocols.None;
 
       /// <summary>
-      /// Provides a means of overrideing the default allowable SSL policy errors when validating
+      /// Provides a means of overriding the default allowable SSL policy errors when validating
       /// the server certificate during the TLS handshake. By default no errors are allowed and
       /// any that do occur will fail the TLS handshake.
       /// </summary>

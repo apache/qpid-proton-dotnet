@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Client
    {
       /// <summary>
       /// At most once delivery mode which configures the sender or receiver to
-      /// request presettled deliveries.  This is lowest level of reliability but
+      /// request pre-settled deliveries.  This is lowest level of reliability but
       /// the fastest overall mode as it does not require round trips from the
       /// remote to accept or settle the delivery.
       /// </summary>
