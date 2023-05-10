@@ -17,6 +17,7 @@
 
 using System;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Logging;
 
 namespace Apache.Qpid.Proton.Engine.Implementation
 {
@@ -27,6 +28,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
    /// </summary>
    public sealed class ProtonEngineConfiguration : IEngineConfiguration
    {
+      private static readonly IProtonLogger LOG = ProtonLoggerFactory.GetLogger<ProtonEngine>();
+
       private readonly ProtonEngine engine;
 
       private IProtonBufferAllocator allocator = ProtonByteBufferAllocator.Instance;
@@ -47,8 +50,28 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public bool TraceFrames
       {
-         get => throw new NotImplementedException();
-         set => throw new NotImplementedException();
+         get
+         {
+            if (engine.Pipeline.Find(ProtonConstants.FrameLoggingHandler) is ProtonFrameLoggingHandler loggingHandler)
+            {
+               return loggingHandler.TraceFrames;
+            }
+            else
+            {
+               return false;
+            }
+         }
+         set
+         {
+            if (engine.Pipeline.Find(ProtonConstants.FrameLoggingHandler) is ProtonFrameLoggingHandler loggingHandler)
+            {
+               loggingHandler.TraceFrames = value;
+            }
+            else
+            {
+               LOG.Debug("Engine not configured with a frame logging handler: cannot apply traceFrames={0}", value);
+            }
+         }
       }
 
       public uint OutboundMaxFrameSize => effectiveMaxOutboundFrameSize;

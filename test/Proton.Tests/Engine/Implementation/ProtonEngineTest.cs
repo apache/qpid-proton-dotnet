@@ -1432,5 +1432,25 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          peer.WaitForScriptToComplete();
       }
+
+      [Test]
+      public void TestEngineConfigurationAllowsTraceFramesWhenHandlerPresent()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((error) => failure = error.FailureCause);
+
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         IConnection connection = engine.Connection.Open();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsFalse(engine.Configuration.TraceFrames);
+         engine.Configuration.TraceFrames = true;
+         Assert.IsTrue(engine.Configuration.TraceFrames);
+         Assert.IsNull(failure);
+
+         peer.WaitForScriptToComplete();
+      }
    }
 }
