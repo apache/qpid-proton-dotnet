@@ -20,10 +20,12 @@ The following options are available for configuration when creating a new **Clie
 
 The ConnectionOptions object can be provided to a Client instance when creating a new connection and allows configuration of several different aspects of the resulting Connection instance.
 
+```
      ConnectionOptions connectionOptions = new();
      connectionOptions.Username = "user";
      connectionOptions.Password = "pass";
-     IConnection connection = client.connect(serverHost, serverPort, connectionOptions);
+     IConnection connection = client.Connect(serverHost, serverPort, connectionOptions);
+```
 
 The following options are available for configuration when creating a new **Connection**.
 
@@ -42,11 +44,13 @@ The following options are available for configuration when creating a new **Conn
 
 The ConnectionOptions object exposes a set of configuration options for the underlying I/O transport layer known as the TransportOptions which allows for fine grained configuration of network level options.
 
+```
      ConnectionOptions connectionOptions = new();
      connectionOptions.TransportOptions.TcpNoDelay = false;
      connectionOptions.Username = "user";
      connectionOptions.Password = "pass";
-     IConnection connection = client.connect(serverHost, serverPort, connectionOptions);
+     IConnection connection = client.Connect(serverHost, serverPort, connectionOptions);
+```
 
 The following transport layer options are available for configuration when creating a new **Connection**.
 
@@ -59,17 +63,19 @@ The following transport layer options are available for configuration when creat
 
 If an secure connection is desired the ConnectionOptions exposes another options type for configuring the client for that, the SslOptions.
 
+```
      ConnectionOptions connectionOptions = new();
      connectionOptions.Username = "user";
      connectionOptions.Password = "pass";
      connectionOptions.SslOptions.SslEnabled = true;
      connectionOptions.SslOptions.VerifyHost = true;
-     IConnection connection = client.connect(serverHost, serverPort, connectionOptions);
+     IConnection connection = client.Connect(serverHost, serverPort, connectionOptions);
+```
 
 The following SSL layer options are available for configuration when creating a new **Connection**.
 
 + **SslOptions.SslEnabled** Enables or disables the use of the SSL transport layer, default is false.
-+ **SslOptions.EnableCertificateRevocationChecks**  Should Cerfiticate revocation checks be enabled (defaults to false).
++ **SslOptions.EnableCertificateRevocationChecks**  Should Certificate revocation checks be enabled (defaults to false).
 + **SslOptions.VerifyHost** Whether to verify that the hostname being connected to matches with the provided server certificate. Defaults to true.
 + **SslOptions.ServerNameOverride** Value used to validate the common name (server name) provided in the server certificate, the default is to use the host name used on connect.
 
@@ -77,13 +83,15 @@ The following SSL layer options are available for configuration when creating a 
 
 When creating a new connection it is possible to configure that connection to perform automatic connection recovery.
 
+```
      ConnectionOptions connectionOptions = new();
      connectionOptions.Username = "user";
      connectionOptions.Password = "pass";
      connectionOptions.ReconnectionOptions.ReconnectEnabled = true;
      connectionOptions.ReconnectionOptions.ReconnectDelay = 30_000;
      connectionOptions.ReconnectionOptions.AddReconnectLocation(hostname, port);
-     IConnection connection = client.connect(serverHost, serverPort, connectionOptions);
+     IConnection connection = client.Connect(serverHost, serverPort, connectionOptions);
+```
 
 The following connection automatic reconnect options are available for configuration when creating a new **Connection**.
 
@@ -101,8 +109,10 @@ The following connection automatic reconnect options are available for configura
 
 When creating a new Session the **SessionOptions** object can be provided which allows some control over various behaviors of the session.
 
+```
      SessionOptions sessionOptions = new();
      ISession session = connection.OpenSession(sessionOptions);
+```
 
 The following options are available for configuration when creating a new **Session**.
 
@@ -145,8 +155,10 @@ The following options are available for configuration when creating a new **Rece
 
 When creating a new Sender the **SenderOptions** object can be provided which allows some control over various behaviors of the sender.
 
+```
      StreamSenderOptions streamSenderOptions = new();
      IStreamSender streamSender = connection.OpenStreamSender("address", streamSenderOptions);
+```
 
 The following options are available for configuration when creating a new **StreamSender**.
 
@@ -159,8 +171,10 @@ The following options are available for configuration when creating a new **Stre
 
 When creating a new Receiver the **ReceiverOptions** object can be provided which allows some control over various behaviors of the receiver.
 
+```
      StreamReceiverOptions streamReceiverOptions = new();
-     IStreamReceiver streamReceiver = connection.openStreamReceiver("address", streamReceiverOptions);
+     IStreamReceiver streamReceiver = connection.OpenStreamReceiver("address", streamReceiverOptions);
+```
 
 The following options are available for configuration when creating a new **StreamReceiver**.
 
