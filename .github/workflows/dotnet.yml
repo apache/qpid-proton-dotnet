@@ -1,22 +1,22 @@
 name: .NET
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dotnet: [ 6.0.x, 8.0.x ]
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET 6
+    - name: Setup .NET ${{ matrix.dotnet }}
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: ${{ matrix.dotnet }}
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
