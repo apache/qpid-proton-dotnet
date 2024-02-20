@@ -1353,7 +1353,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientUnsupportedOperationException unsupported)
             {
-               logger.LogInformation("Caught expected error: ", unsupported);
+               logger.LogInformation("Caught expected error: {0}", unsupported.Message);
             }
 
             connection.Close();
@@ -1397,7 +1397,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientUnsupportedOperationException unsupported)
             {
-               logger.LogInformation("Caught expected error: ", unsupported);
+               logger.LogInformation("Caught expected error: {0}", unsupported.Message);
             }
 
             connection.Close();
@@ -1553,7 +1553,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1563,7 +1563,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (AggregateException ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent.");
             }
 
@@ -1639,7 +1639,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1649,7 +1649,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent.");
             }
 
@@ -1723,7 +1723,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1733,7 +1733,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent.");
             }
 
@@ -2354,7 +2354,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("send failed with error: ", e);
+                  logger.LogInformation("send failed with error: {0}", e.Message);
                   sendFailed = true;
                }
             });
@@ -2423,7 +2423,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("send failed with error: ", e);
+                  logger.LogInformation("send failed with error: {0}", e.Message);
                   sendFailed = true;
                }
             });
@@ -2577,7 +2577,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("Test send 1 failed with error: ", e);
+                  logger.LogInformation("Test send 1 failed with error: {0}", e.Message);
                   sendFailed = true;
                }
             });
@@ -2594,7 +2594,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("Test send 2 failed with error: ", e);
+                  logger.LogInformation("Test send 2 failed with error: {0}", e.Message);
                   sendFailed = true;
                }
             });
@@ -2661,7 +2661,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("Test send 1 failed with error: ", e);
+                  logger.LogInformation("Test send 1 failed with error: {0}", e.Message);
                   sendFailed = true;
                }
             });
@@ -2678,7 +2678,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogInformation("Test send 2 failed with error: ", e);
+                  logger.LogInformation("Test send 2 failed with error: {0}", e.Message);
                   sendFailed = true;
                }
             });

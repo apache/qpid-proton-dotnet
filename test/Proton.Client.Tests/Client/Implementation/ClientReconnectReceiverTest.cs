@@ -177,7 +177,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientConnectionRemotelyClosedException ex)
             {
-               logger.LogTrace("Error caught: ", ex);
+               logger.LogTrace("Error caught: {0}", ex.Message);
             }
 
             receiver.Close();

@@ -598,7 +598,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientIllegalStateException);
             }
 
@@ -908,7 +908,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from address call", ex);
+                  logger.LogDebug("Caught expected exception from address call: {0}", ex.Message);
                }
             }
 
@@ -918,7 +918,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent");
             }
 
@@ -1048,7 +1048,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1058,7 +1058,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent");
             }
 
@@ -1131,7 +1131,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1141,7 +1141,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent");
             }
 
@@ -1218,7 +1218,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1228,7 +1228,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent");
             }
 
@@ -1303,7 +1303,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1313,7 +1313,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent");
             }
 
@@ -1388,7 +1388,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1398,7 +1398,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and detach sent");
             }
 
@@ -1929,7 +1929,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientIllegalStateException cliEx)
             {
-               logger.LogDebug("Receiver threw error on receive call", cliEx);
+               logger.LogDebug("Receiver threw error on receive call: {0}", cliEx.Message);
             }
 
             peer.ExpectClose().Respond();
@@ -2076,7 +2076,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientIllegalStateException cliEx)
             {
-               logger.LogDebug("Receiver threw error on receive call", cliEx);
+               logger.LogDebug("Receiver threw error on receive call: {0}", cliEx.Message);
             }
 
             peer.ExpectClose().Respond();
@@ -2143,7 +2143,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientException);
             }
 
@@ -2200,7 +2200,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientException);
             }
 
@@ -2244,7 +2244,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientException);
             }
 
@@ -2285,7 +2285,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientException);
             }
 
@@ -2330,7 +2330,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientOperationTimedOutException);
             }
 
@@ -2375,7 +2375,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientOperationTimedOutException);
             }
 
@@ -2420,7 +2420,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception cliEx)
             {
-               logger.LogDebug("Receiver threw error on drain call", cliEx);
+               logger.LogDebug("Receiver threw error on drain call: {0}", cliEx.Message);
                Assert.IsTrue(cliEx.InnerException is ClientOperationTimedOutException);
             }
 

@@ -145,7 +145,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientTransactionRolledBackException cliEx)
             {
-               logger.LogInformation("Caught expected error from test", cliEx);
+               logger.LogInformation("Caught expected error from test: {0}", cliEx);
             }
 
             connection.Close();
@@ -216,7 +216,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientTransactionRolledBackException cliEx)
             {
-               logger.LogInformation("Caught expected error from test", cliEx);
+               logger.LogInformation("Caught expected error from test: {0}", cliEx.Message);
             }
 
             connection.Close();
@@ -292,7 +292,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientTransactionRolledBackException cliEx)
             {
-               logger.LogInformation("Caught expected error from test", cliEx);
+               logger.LogInformation("Caught expected error from test: {0}", cliEx.Message);
             }
 
             session.BeginTransaction();
@@ -313,7 +313,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (ClientException cliEx)
             {
-               logger.LogInformation("Caught unexpected error from test", cliEx);
+               logger.LogInformation("Caught unexpected error from test: {0}", cliEx.Message);
                Assert.Fail("Should not have failed to declare transaction");
             }
 

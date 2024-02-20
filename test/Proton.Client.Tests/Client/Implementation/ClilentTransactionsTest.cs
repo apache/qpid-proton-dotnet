@@ -599,7 +599,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception ex)
                {
-                  logger.LogDebug("Caught unexpected exception from rollback", ex);
+                  logger.LogDebug("Caught unexpected exception from rollback: {0}", ex.Message);
                   Assert.Fail("Rollback should not have failed after link closed.");
                }
             }
@@ -1404,7 +1404,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             catch (ClientException cliEx)
             {
                // Expected error as connection was dropped
-               logger.LogDebug("Client threw error on begin after connection drop", cliEx);
+               logger.LogDebug("Client threw error on begin after connection drop: {0}", cliEx.Message);
             }
 
             connection.Close();

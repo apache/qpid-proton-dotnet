@@ -83,7 +83,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception error)
             {
-               logger.LogInformation("Session open failed with error: ", error.Message);
+               logger.LogInformation("Session open failed with error: {0}", error.Message);
             }
 
             connection.CloseAsync().Wait();
@@ -138,7 +138,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception error)
             {
-               logger.LogInformation("Session open failed with error: ", error.Message);
+               logger.LogInformation("Session open failed with error: {0}", error.Message);
                Assert.IsTrue(error.InnerException is ClientIOException);
             }
 
@@ -197,7 +197,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception error)
             {
-               logger.LogInformation("Session close failed with error: ", error);
+               logger.LogInformation("Session close failed with error: {0}", error);
             }
 
             connection.CloseAsync().Wait();
@@ -370,7 +370,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -380,7 +380,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and end was sent");
             }
 
@@ -451,7 +451,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -461,7 +461,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex.Message);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and end was sent");
             }
 
@@ -531,7 +531,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -541,7 +541,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception ex)
             {
-               logger.LogDebug("Caught unexpected exception from close call", ex);
+               logger.LogDebug("Caught unexpected exception from close call: {0}", ex.Message);
                Assert.Fail("Should not fail to close when connection not closed and end sent");
             }
 

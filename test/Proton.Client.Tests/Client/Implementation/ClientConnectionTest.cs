@@ -1452,7 +1452,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1519,7 +1519,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 
@@ -1586,7 +1586,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (ClientException ex)
                {
-                  logger.LogDebug("Caught expected exception from blocking call", ex.Message);
+                  logger.LogDebug("Caught expected exception from blocking call: {0}", ex.Message);
                }
             }
 

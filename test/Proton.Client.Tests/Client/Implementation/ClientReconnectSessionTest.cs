@@ -267,7 +267,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             }
             catch (Exception error)
             {
-               logger.LogInformation("Session open failed with error: ", error);
+               logger.LogInformation("Session open failed with error: {0}", error.Message);
             }
 
             connection.Close();
@@ -360,7 +360,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
                }
                catch (Exception e)
                {
-                  logger.LogDebug("Exception in next receiver task", e);
+                  logger.LogDebug("Exception in next receiver task: {0}", e.Message);
                }
             });
 
