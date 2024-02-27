@@ -162,7 +162,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectOpen().Respond();
             peer.ExpectBegin().Respond();
             peer.ExpectAttach().OfSender()
-                               .WithTarget().WithCapabilities("queue").And()
+                               .WithTarget().WithAddress("test-queue").WithCapabilities("queue").And()
+                               .WithSource().WithAddress("test-queue").And()
                                .Respond();
             peer.ExpectDetach().Respond();
             peer.ExpectEnd().Respond();

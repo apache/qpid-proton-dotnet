@@ -54,7 +54,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectSASLAnonymousConnect();
             peer.ExpectOpen().Respond();
             peer.ExpectBegin().Respond();
-            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectAttach().OfReceiver()
+                               .WithSource().WithAddress("test-queue").And()
+                               .WithTarget().WithAddress("test-queue").And()
+                               .Respond();
             peer.ExpectFlow().WithLinkCredit(10);
             peer.ExpectDetach().WithClosed(close).Respond();
             peer.ExpectEnd().Respond();

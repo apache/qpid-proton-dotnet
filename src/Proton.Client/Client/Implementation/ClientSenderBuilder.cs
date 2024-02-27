@@ -124,7 +124,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          protonSender.DesiredCapabilities = ClientConversionSupport.ToSymbolArray(options.DesiredCapabilities);
          protonSender.Properties = ClientConversionSupport.ToSymbolKeyedMap(options.Properties);
          protonSender.Target = CreateTarget(address, options);
-         protonSender.Source = CreateSource(senderId, options);
+         protonSender.Source = CreateSource(address, options);
 
          IDeliveryTagGenerator tagGenerator = options.DeliveryTagGeneratorSupplier == null ? null :
             Objects.RequireNonNull(options.DeliveryTagGeneratorSupplier(),
