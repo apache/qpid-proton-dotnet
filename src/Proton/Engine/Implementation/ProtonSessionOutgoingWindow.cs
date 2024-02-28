@@ -296,14 +296,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          try
          {
             cachedTransfer.DeliveryId = delivery.DeliveryId;
-            if (delivery.MessageFormat != 0)
-            {
-               cachedTransfer.MessageFormat = delivery.MessageFormat;
-            }
-            else
-            {
-               cachedTransfer.ClearMessageFormat();
-            }
             cachedTransfer.Handle = sender.Handle;
             cachedTransfer.Settled = delivery.IsSettled;
             cachedTransfer.DeliveryState = delivery.State;
@@ -320,10 +312,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                // Only the first transfer requires the delivery tag, afterwards we can omit it for efficiency.
                if (delivery.TransferCount == 0)
                {
+                  cachedTransfer.MessageFormat = delivery.MessageFormat;
                   cachedTransfer.DeliveryTag = delivery.DeliveryTag;
                }
                else
                {
+                  cachedTransfer.ClearMessageFormat();
                   cachedTransfer.DeliveryTag = null;
                }
                cachedTransfer.More = !complete;

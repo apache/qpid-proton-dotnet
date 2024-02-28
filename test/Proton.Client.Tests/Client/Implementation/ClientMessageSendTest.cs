@@ -77,7 +77,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             payloadMatcher.MessageContentMatcher = bodyMatcher;
 
             peer.WaitForScriptToComplete();
-            peer.ExpectTransfer().WithPayload(payloadMatcher).Accept();
+            peer.ExpectTransfer().WithMessageFormat(0).WithPayload(payloadMatcher).Accept();
             peer.ExpectDetach().Respond();
             peer.ExpectClose().Respond();
 

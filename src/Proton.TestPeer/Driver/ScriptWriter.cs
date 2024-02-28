@@ -142,7 +142,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          expecting.WithHandle(Is.NotNullValue());
          expecting.WithDeliveryId(Is.NotNullValue());
          expecting.WithDeliveryTag(Is.NotNullValue());
-         expecting.WithMessageFormat(Matches.OneOf(null, 0));
+         expecting.WithMessageFormat(0);
 
          Driver.AddScriptedElement(expecting);
          return expecting;
@@ -155,7 +155,7 @@ namespace Apache.Qpid.Proton.Test.Driver
          expecting.WithHandle(Is.NotNullValue());
          expecting.WithDeliveryId(Is.NotNullValue());
          expecting.WithDeliveryTag(Is.NotNullValue());
-         expecting.WithMessageFormat(Matches.OneOf(null, 0));
+         expecting.WithMessageFormat(0);
 
          Driver.AddScriptedElement(expecting);
          return expecting;
@@ -273,12 +273,20 @@ namespace Apache.Qpid.Proton.Test.Driver
 
       public DeclareInjectAction RemoteDeclare()
       {
-         return new DeclareInjectAction(Driver);
+         DeclareInjectAction declare = new DeclareInjectAction(Driver);
+
+         declare.WithMessageFormat(0);
+
+         return declare;
       }
 
       public DischargeInjectAction RemoteDischarge()
       {
-         return new DischargeInjectAction(Driver);
+         DischargeInjectAction discharge = new DischargeInjectAction(Driver);
+
+         discharge.WithMessageFormat(0);
+
+         return discharge;
       }
 
       public EmptyFrameInjectAction RemoteEmptyFrame()

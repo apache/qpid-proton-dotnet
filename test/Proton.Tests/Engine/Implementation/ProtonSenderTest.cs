@@ -1333,6 +1333,60 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       }
 
       [Test]
+      public void TestSendTransferWithDefaultMessageFormat()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler((result) => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         byte[] payloadBuffer = new byte[] { 0, 1, 2, 3, 4 };
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().OfSender().Respond();
+         peer.RemoteFlow().WithDeliveryCount(0)
+                          .WithLinkCredit(10)
+                          .WithIncomingWindow(1024)
+                          .WithOutgoingWindow(10)
+                          .WithNextIncomingId(0)
+                          .WithNextOutgoingId(1).Queue();
+         peer.ExpectTransfer().WithMessageFormat(0).WithPayload(payloadBuffer);
+         peer.ExpectDetach().WithHandle(0).Respond();
+
+         IConnection connection = engine.Start();
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+
+         IProtonBuffer payload = ProtonByteBufferAllocator.Instance.Wrap(payloadBuffer);
+
+         ISender sender = session.Sender("sender-1");
+
+         Assert.IsFalse(sender.IsSendable);
+
+         sender.CreditStateUpdateHandler(handler =>
+         {
+            if (handler.IsSendable)
+            {
+               IOutgoingDelivery delivery = handler.Next();
+
+               delivery.DeliveryTagBytes = new byte[] { 0 };
+               delivery.MessageFormat = 0;
+               delivery.WriteBytes(payload);
+            }
+         });
+
+         sender.Open();
+         sender.Close();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNull(failure);
+      }
+
+      [Test]
       public void TestSenderSignalsDeliveryUpdatedOnSettledThenSettleFromLinkAPI()
       {
          DoTestSenderSignalsDeliveryUpdatedOnSettled(true);
@@ -1933,18 +1987,21 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                               .WithSettled(true)
                               .WithState().Accepted()
                               .WithDeliveryId(0)
+                              .WithMessageFormat(0)
                               .WithMore(true)
                               .WithDeliveryTag(new byte[] { 1 });
          peer.ExpectTransfer().WithHandle(0)
                               .WithSettled(true)
                               .WithState().Accepted()
                               .WithDeliveryId(0)
+                              .WithMessageFormat(Is.NullValue())
                               .WithMore(false)
                               .WithDeliveryTag(Is.NullValue());
          peer.ExpectTransfer().WithHandle(1)
                               .WithSettled(true)
                               .WithState().Accepted()
                               .WithDeliveryId(1)
+                              .WithMessageFormat(0)
                               .WithMore(bothDeliveriesMultiFrame)
                               .WithDeliveryTag(new byte[] { 2 });
          if (bothDeliveriesMultiFrame)
@@ -1953,6 +2010,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                                  .WithSettled(true)
                                  .WithState().Accepted()
                                  .WithDeliveryId(1)
+                                 .WithMessageFormat(Is.NullValue())
                                  .WithMore(false)
                                  .WithDeliveryTag(Is.NullValue());
          }
@@ -3636,7 +3694,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectTransfer().WithHandle(0)
                               .WithState(Is.NullValue())
                               .WithDeliveryId(0)
-                              .WithMessageFormat(42)
+                              .WithMessageFormat(Is.NullValue())
                               .WithAborted(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
                               .WithSettled(false)
                               .WithMore(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
@@ -3722,7 +3780,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectTransfer().WithHandle(0)
                               .WithState().Accepted()
                               .WithDeliveryId(0)
-                              .WithMessageFormat(42)
+                              .WithMessageFormat(Is.NullValue())
                               .WithAborted(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
                               .WithSettled(settle)
                               .WithMore(Matches.AnyOf(Is.NullValue(), Matches.Is(false)))
