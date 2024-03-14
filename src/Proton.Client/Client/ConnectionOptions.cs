@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Client
       public static readonly long DEFAULT_CLOSE_TIMEOUT = 60000;
       public static readonly long DEFAULT_SEND_TIMEOUT = INFINITE;
       public static readonly long DEFAULT_REQUEST_TIMEOUT = INFINITE;
-      public static readonly long DEFAULT_IDLE_TIMEOUT = 60000;
+      public static readonly uint DEFAULT_IDLE_TIMEOUT = 60000;
       public static readonly long DEFAULT_DRAIN_TIMEOUT = 60000;
       public static readonly ushort DEFAULT_CHANNEL_MAX = 65535;
       public static readonly uint DEFAULT_MAX_FRAME_SIZE = 65536;
@@ -161,8 +161,9 @@ namespace Apache.Qpid.Proton.Client
       /// defaults if child resources are not created with their own options type.  Controls
       /// the idle processing timeout that is sent to the remote informing it up the clients
       /// expectation for how long it can remain idle before needing to send a heart beat.
+      /// The client sends half the configured value to the remote
       /// </summary>
-      public long IdleTimeout { get; set; } = DEFAULT_IDLE_TIMEOUT;
+      public uint IdleTimeout { get; set; } = DEFAULT_IDLE_TIMEOUT;
 
       /// <summary>
       /// Gets or sets the connection level drain timeout value which will be used as the

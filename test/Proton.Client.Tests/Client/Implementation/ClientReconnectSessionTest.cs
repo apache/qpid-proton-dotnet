@@ -165,7 +165,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             ConnectionOptions options = new ConnectionOptions();
             options.ReconnectOptions.ReconnectEnabled = true;
-            options.IdleTimeout = TimeSpan.FromSeconds(5).Milliseconds;
+            options.IdleTimeout = (uint)TimeSpan.FromSeconds(5).Milliseconds;
             options.ReconnectOptions.AddReconnectLocation(intermediateAddress, intermediatePort);
             options.ReconnectOptions.AddReconnectLocation(finalAddress, finalPort);
 

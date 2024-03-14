@@ -2017,6 +2017,44 @@ namespace Apache.Qpid.Proton.Client.Implementation
          }
       }
 
+      [Test]
+      public void TestCreateConnectionSendsHalfIdleTimeout()
+      {
+         DoTestCreateConnectionSendsExpectedIdleTimeout(10_000U, 5_000U);
+      }
+
+      [Test]
+      public void TestCreateConnectionSendsConfiguredZeroTimeout()
+      {
+         DoTestCreateConnectionSendsExpectedIdleTimeout(0U, 0U);
+      }
+
+      private void DoTestCreateConnectionSendsExpectedIdleTimeout(uint configured, uint expected)
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().WithIdleTimeOut(expected).Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = ConnectionOptions("guest", "guest");
+            options.IdleTimeout = configured;
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+
+            _ = connection.OpenTask.Wait(TimeSpan.FromSeconds(10));
+            _ = connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
       [Ignore("Client local bind not yet implemented")]
       [Test]
       public void TestLocalPortOption()

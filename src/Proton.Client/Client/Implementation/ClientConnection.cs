@@ -991,7 +991,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
          protonConnection.LinkedResource = this;
          protonConnection.ChannelMax = options.ChannelMax;
          protonConnection.MaxFrameSize = options.MaxFrameSize;
-         protonConnection.IdleTimeout = (uint)options.IdleTimeout;
+         protonConnection.IdleTimeout = options.IdleTimeout / 2;
          protonConnection.OfferedCapabilities = ClientConversionSupport.ToSymbolArray(options.OfferedCapabilities);
          protonConnection.DesiredCapabilities = ClientConversionSupport.ToSymbolArray(options.DesiredCapabilities);
          protonConnection.Properties = ClientConversionSupport.ToSymbolKeyedMap(options.Properties);
