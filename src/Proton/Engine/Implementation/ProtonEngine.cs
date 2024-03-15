@@ -231,18 +231,20 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             throw new EngineNotWritableException("Engine is currently not accepting new input");
          }
 
-         try
+         if (input.IsReadable)
          {
-            long startIndex = input.ReadOffset;
-            pipeline.FireRead(input);
-            if (input.ReadOffset != startIndex)
+            try
+            {
+               pipeline.FireRead(input);
+            }
+            catch (Exception error)
+            {
+               throw EngineFailed(error);
+            }
+            finally
             {
                inputSequence++;
             }
-         }
-         catch (Exception error)
-         {
-            throw EngineFailed(error);
          }
 
          return this;
