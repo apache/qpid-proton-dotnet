@@ -72,6 +72,10 @@
                   <exclude>**/target/</exclude>
                   <exclude>**/install/</exclude>
                   <exclude>**/README.md</exclude>
+                  <exclude>**/Reconnection.md</exclude>
+                  <exclude>**/GettingStarted.md</exclude>
+                  <exclude>**/LargeMessages.md</exclude>
+                  <exclude>**/Configuration.md</exclude>
                   <exclude>**/VERSION.txt</exclude>
                   <exclude>**/licenses/**</exclude>
                   <exclude>qpid-proton/**</exclude>
