@@ -3251,5 +3251,69 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestSendTimesOutWhenNoCreditIssuedAndThenIssueCredit()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            ConnectionOptions options = new ConnectionOptions()
+            {
+               SendTimeout = 10
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            IStreamSender sender = connection.OpenStreamSender("test-queue").OpenTask.Result;
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            try
+            {
+               sender.Send(message);
+               Assert.Fail("Should throw a send timed out exception");
+            }
+            catch (ClientSendTimedOutException)
+            {
+               // Expected error, ignore
+            }
+
+            peer.WaitForScriptToComplete();
+            peer.RemoteFlow().WithLinkCredit(1).Now();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.ExpectTransfer().WithNonNullPayload();
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            // Ensure the send happens after the remote has sent a flow with credit
+            _ = connection.OpenSender("test-queue-2").OpenTask.Result;
+
+            try
+            {
+               sender.Send(IMessage<string>.Create("Hello World 2"));
+            }
+            catch (ClientException ex)
+            {
+               logger.LogTrace("Error on second send: {0}", ex);
+               Assert.Fail("Should not throw an exception");
+            }
+
+            sender.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }

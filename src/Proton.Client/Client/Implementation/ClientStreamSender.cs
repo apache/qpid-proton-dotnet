@@ -286,24 +286,37 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       private void AddToTailOfBlockedQueue(ClientOutgoingEnvelope send)
       {
+         blocked.EnqueueBack(send);
          if (Options.SendTimeout > 0)
          {
             session.Schedule(() =>
             {
                if (!send.Request.IsCompleted)
                {
+                  blocked.Remove(send);
                   send.Failed(send.CreateSendTimedOutException());
                }
             },
             TimeSpan.FromMilliseconds(Options.SendTimeout));
          }
-
-         blocked.EnqueueBack(send);
       }
 
       private void AddToHeadOfBlockedQueue(ClientOutgoingEnvelope send)
       {
          blocked.EnqueueFront(send);
+         if (Options.SendTimeout > 0 && !send.TimeoutApplied)
+         {
+            send.TimeoutApplied = true;
+            session.Schedule(() =>
+            {
+               if (!send.Request.IsCompleted)
+               {
+                  blocked.Remove(send);
+                  send.Failed(send.CreateSendTimedOutException());
+               }
+            },
+            TimeSpan.FromMilliseconds(Options.SendTimeout));
+         }
       }
 
       private IStreamTracker CreateTracker(IOutgoingDelivery delivery)
@@ -681,6 +694,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
          /// </summary>
          public IOutgoingDelivery Delivery => delivery;
 
+         /// <summary>
+         /// Gets or sets if a timeout has been assigned to time out a blocked send operation.
+         /// </summary>
+         public bool TimeoutApplied { get; set; }
+
          public void Abort()
          {
             delivery.Abort();
@@ -756,6 +774,18 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          public ClientOutgoingEnvelope Failed(ClientException exception)
          {
+            if (delivery != null)
+            {
+               try
+               {
+                  delivery.Abort();
+               }
+               catch (Exception)
+               {
+                  // Can fail is offline so ignore any exceptions from abort.
+               }
+            }
+
             request.TrySetException(exception);
             return this;
          }
