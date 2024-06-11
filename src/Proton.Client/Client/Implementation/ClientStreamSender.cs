@@ -83,35 +83,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
       public IStreamSenderMessage BeginMessage(IDictionary<string, object> deliveryAnnotations = null)
       {
          CheckClosedOrFailed();
-         DeliveryAnnotations annotations = null;
-         TaskCompletionSource<IStreamSenderMessage> request = new();
+         return DoBeginMessageAsync(deliveryAnnotations).ConfigureAwait(false).GetAwaiter().GetResult();
+      }
 
-         if (deliveryAnnotations != null)
-         {
-            annotations = new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations));
-         }
-
-         ClientSession.Execute(() =>
-         {
-            if (ProtonSender.Current != null)
-            {
-               request.TrySetException(new ClientIllegalStateException(
-                   "Cannot initiate a new streaming send until the previous one is complete"));
-            }
-            else
-            {
-               // Grab the next delivery and hold for stream writes, no other sends
-               // can occur while we hold the delivery.
-               IOutgoingDelivery streamDelivery = ProtonSender.Next();
-               ClientStreamTracker streamTracker = new(this, streamDelivery);
-
-               streamDelivery.LinkedResource = streamTracker;
-
-               request.TrySetResult(new ClientStreamSenderMessage(this, streamTracker, annotations));
-            }
-         });
-
-         return request.Task.ConfigureAwait(false).GetAwaiter().GetResult();
+      public Task<IStreamSenderMessage> BeginMessageAsync(IDictionary<string, object> deliveryAnnotations = null)
+      {
+         CheckClosedOrFailed();
+         return DoBeginMessageAsync(deliveryAnnotations);
       }
 
       internal string SenderId => senderId;
@@ -327,6 +305,40 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private IStreamTracker CreateNoOpTracker()
       {
          return new ClientNoOpStreamTracker(this);
+      }
+
+      private Task<IStreamSenderMessage> DoBeginMessageAsync(IDictionary<string, object> deliveryAnnotations = null)
+      {
+         CheckClosedOrFailed();
+         DeliveryAnnotations annotations = null;
+         TaskCompletionSource<IStreamSenderMessage> request = new();
+
+         if (deliveryAnnotations != null)
+         {
+            annotations = new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations));
+         }
+
+         ClientSession.Execute(() =>
+         {
+            if (ProtonSender.Current != null)
+            {
+               request.TrySetException(new ClientIllegalStateException(
+                   "Cannot initiate a new streaming send until the previous one is complete"));
+            }
+            else
+            {
+               // Grab the next delivery and hold for stream writes, no other sends
+               // can occur while we hold the delivery.
+               IOutgoingDelivery streamDelivery = ProtonSender.Next();
+               ClientStreamTracker streamTracker = new(this, streamDelivery);
+
+               streamDelivery.LinkedResource = streamTracker;
+
+               request.TrySetResult(new ClientStreamSenderMessage(this, streamTracker, annotations));
+            }
+         });
+
+         return request.Task;
       }
 
       private Task<IStreamTracker> DoSendMessageAsync<T>(IAdvancedMessage<T> message, IDictionary<string, object> deliveryAnnotations, bool waitForCredit)

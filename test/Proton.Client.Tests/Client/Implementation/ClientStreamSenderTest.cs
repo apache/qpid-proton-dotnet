@@ -542,6 +542,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
                // Expected
             }
 
+            try
+            {
+               sender.BeginMessageAsync().GetAwaiter().GetResult();
+               Assert.Fail("Should not be able create a new streaming sender message before last one is completed.");
+            }
+            catch (ClientIllegalStateException)
+            {
+               // Expected
+            }
+
             message.Abort();
 
             Assert.Throws<ClientIllegalStateException>(() => message.Complete());
@@ -706,6 +716,48 @@ namespace Apache.Qpid.Proton.Client.Implementation
             IConnection connection = container.Connect(remoteAddress, remotePort);
             IStreamSender sender = connection.OpenStreamSender("test-qos");
             IStreamSenderMessage tracker = sender.BeginMessage();
+
+            OutputStreamOptions options = new OutputStreamOptions();
+            Stream stream = tracker.GetBodyStream(options);
+
+            Assert.IsNotNull(stream);
+
+            sender.OpenTask.Wait();
+
+            stream.Close();
+
+            sender.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCreateStreamFromAsyncBegin()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(1).Queue();
+            peer.ExpectTransfer().WithMore(false).WithNullPayload();
+            peer.ExpectDetach().WithClosed(true).Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamSender sender = connection.OpenStreamSender("test-qos");
+            IStreamSenderMessage tracker = sender.BeginMessageAsync().GetAwaiter().GetResult();
 
             OutputStreamOptions options = new OutputStreamOptions();
             Stream stream = tracker.GetBodyStream(options);
