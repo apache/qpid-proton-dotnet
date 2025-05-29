@@ -57,7 +57,7 @@
     <!-- Reference: https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target -->
     <Copyright>Copyright © 2022 The Apache Software Foundation.</Copyright>
     <PackageIcon>qpid.png</PackageIcon>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>APACHE-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://qpid.apache.org/</PackageProjectUrl>
     <PackageTags>Qpid;Apache;AMQP;Messaging;Protocol</PackageTags>
