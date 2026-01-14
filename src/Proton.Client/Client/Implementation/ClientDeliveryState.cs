@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Types.Transactions;
+using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -30,6 +31,14 @@ namespace Apache.Qpid.Proton.Client.Implementation
    {
       public virtual bool IsAccepted => Type == DeliveryStateType.Accepted;
 
+      public virtual bool IsRejected => Type == DeliveryStateType.Rejected;
+
+      public virtual bool IsReleased => Type == DeliveryStateType.Released;
+
+      public virtual bool IsModified => Type == DeliveryStateType.Modified;
+
+      public virtual bool IsTransactional => Type == DeliveryStateType.Transactional;
+
       public abstract DeliveryStateType Type { get; }
 
       public abstract Types.Transport.IDeliveryState ProtonDeliveryState { get; }
@@ -39,11 +48,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// <summary>
    /// Client version of the proton Accepted delivery state
    /// </summary>
-   public sealed class ClientAccepted : ClientDeliveryState
+   public sealed class ClientAccepted : ClientDeliveryState, IAccepted
    {
       public static readonly ClientAccepted Instance = new();
 
       private ClientAccepted() { }
+
+      public override bool IsAccepted => true;
 
       public override DeliveryStateType Type => DeliveryStateType.Accepted;
 
@@ -54,11 +65,13 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// <summary>
    /// Client version of the proton Released delivery state
    /// </summary>
-   public sealed class ClientReleased : ClientDeliveryState
+   public sealed class ClientReleased : ClientDeliveryState, IReleased
    {
       public static readonly ClientReleased Instance = new();
 
       private ClientReleased() { }
+
+      public override bool IsReleased => true;
 
       public override DeliveryStateType Type => DeliveryStateType.Released;
 
@@ -69,7 +82,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
    /// <summary>
    /// Client version of the proton Rejected delivery state
    /// </summary>
-   public sealed class ClientRejected : ClientDeliveryState
+   public sealed class ClientRejected : ClientDeliveryState, IRejected
    {
       private readonly Rejected rejected = new();
 
@@ -85,7 +98,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       /// <param name="description">The description value to convey to the remote</param>
       public ClientRejected(string condition, string description)
       {
-         this.rejected.Error = new Types.Transport.ErrorCondition(condition, description);
+         rejected.Error = new Types.Transport.ErrorCondition(condition, description);
       }
 
       /// <summary>
@@ -105,14 +118,35 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public override DeliveryStateType Type => DeliveryStateType.Rejected;
 
+      public override bool IsRejected => true;
+
       public override Types.Transport.IDeliveryState ProtonDeliveryState => rejected;
 
+      public string Condition => rejected.Error?.Condition?.ToString();
+
+      public string Description => rejected.Error?.Description;
+
+      public IReadOnlyDictionary<string, object> Info => ClientConversionSupport.ToStringKeyedMap(rejected.Error?.Info);
+
+      internal static Rejected FromUnknownClientType(IDeliveryState deliveryState)
+      {
+         if (deliveryState is IRejected rejected)
+         {
+            return new Rejected(new ErrorCondition(rejected.Condition,
+                                                   rejected.Description,
+                                                   ClientConversionSupport.ToSymbolKeyedMap(rejected.Info)));
+         }
+         else
+         {
+            return new Rejected(); // TODO: This loses data from the source but remains backwards compatible
+         }
+      }
    }
 
    /// <summary>
    /// Client version of the proton Modified delivery state
    /// </summary>
-   public sealed class ClientModified : ClientDeliveryState
+   public sealed class ClientModified : ClientDeliveryState, IModified
    {
       private readonly Modified modified = new();
 
@@ -120,7 +154,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
       {
          this.modified.DeliveryFailed = modified.DeliveryFailed;
          this.modified.UndeliverableHere = modified.UndeliverableHere;
-         this.modified.MessageAnnotations = new Dictionary<Symbol, object>(modified.MessageAnnotations);
+         if (modified.MessageAnnotations != null)
+         {
+            this.modified.MessageAnnotations = new Dictionary<Symbol, object>(modified.MessageAnnotations);
+         }
       }
 
       /// <summary>
@@ -151,12 +188,31 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public override Types.Transport.IDeliveryState ProtonDeliveryState => modified;
 
+      public override bool IsModified => true;
+
+      public bool DeliveryFailed => modified.DeliveryFailed;
+
+      public bool UndeliverableHere => modified.UndeliverableHere;
+
+      public IReadOnlyDictionary<string, object> MessageAnnotations => ClientConversionSupport.ToStringKeyedMap(modified.MessageAnnotations);
+
+      internal static Modified FromUnknownClientType(IDeliveryState deliveryState)
+      {
+         if (deliveryState is IModified modified)
+         {
+            return new Modified(modified.DeliveryFailed, modified.UndeliverableHere, ClientConversionSupport.ToSymbolKeyedMap(modified.MessageAnnotations));
+         }
+         else
+         {
+            return new Modified(); // TODO: This loses data from the source but remains backwards compatible
+         }
+      }
    }
 
    /// <summary>
    /// Client version of the proton Transactional delivery state
    /// </summary>
-   public sealed class ClientTransactional : ClientDeliveryState
+   public sealed class ClientTransactional : ClientDeliveryState, ITransactional
    {
       private readonly TransactionalState txnState = new();
 
@@ -168,9 +224,19 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public override bool IsAccepted => txnState.Outcome is Accepted;
 
+      public override bool IsReleased => txnState.Outcome is Released;
+
+      public override bool IsRejected => txnState.Outcome is Rejected;
+
+      public override bool IsModified => txnState.Outcome is Modified;
+
+      public override bool IsTransactional => true;
+
       public override DeliveryStateType Type => DeliveryStateType.Transactional;
 
       public override Types.Transport.IDeliveryState ProtonDeliveryState => txnState;
+
+      public IDeliveryState Outcome => DeliveryStateExtensions.ToClientDeliveryState(txnState.Outcome);
 
    }
 
@@ -252,8 +318,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             {
                DeliveryStateType.Accepted => Accepted.Instance,
                DeliveryStateType.Released => Released.Instance,
-               DeliveryStateType.Rejected => new Rejected(),// TODO - How do we aggregate the different values into one DeliveryState Object
-               DeliveryStateType.Modified => new Modified(),// TODO - How do we aggregate the different values into one DeliveryState Object
+               DeliveryStateType.Rejected => ClientRejected.FromUnknownClientType(state),
+               DeliveryStateType.Modified => ClientModified.FromUnknownClientType(state),
                DeliveryStateType.Transactional => throw new ArgumentException("Cannot manually enlist delivery in AMQP Transactions"),
                _ => throw new InvalidOperationException("Client does not support the given Delivery State type: " + state.Type),
             };

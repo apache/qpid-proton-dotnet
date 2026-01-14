@@ -15,10 +15,16 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
 using Apache.Qpid.Proton.Client.Implementation;
 
 namespace Apache.Qpid.Proton.Client
 {
+   /// <summary>
+   /// Delivery state instance have a type (e.g. Accepted, Rejected ...) and can in
+   /// case of a transactional delivery state, carry an outcome and in those cases the is
+   /// outcome APIs return the value of the nested outcome carried in the transactional
+   /// </summary>
    public interface IDeliveryState
    {
       /// <summary>
@@ -31,6 +37,26 @@ namespace Apache.Qpid.Proton.Client
       /// Quick access to determine if the state value indicates the delivery was accepted.
       /// </summary>
       bool IsAccepted { get; }
+
+      /// <summary>
+      /// Quick access to determine if the state value indicates the delivery was rejected.
+      /// </summary>
+      bool IsRejected { get; }
+
+      /// <summary>
+      /// Quick access to determine if the state value indicates the delivery was released.
+      /// </summary>
+      bool IsReleased { get; }
+
+      /// <summary>
+      /// Quick access to determine if the state value indicates the delivery was modified.
+      /// </summary>
+      bool IsModified { get; }
+
+      /// <summary>
+      /// Quick access to determine if the state value indicates the delivery was transactional.
+      /// </summary>
+      bool IsTransactional { get; }
 
       /// <summary>
       /// Returns an instance of a delivery state that accepts a delivery
@@ -48,13 +74,13 @@ namespace Apache.Qpid.Proton.Client
       /// Returns an instance of a delivery state that rejects a delivery
       /// </summary>
       /// <returns>An rejected delivery state type</returns>
-      static IDeliveryState Rejected(string condition, string description = null) => new ClientRejected(condition, description);
+      static IDeliveryState Rejected(string condition, string description = null, IDictionary<string, object> info = null) => new ClientRejected(condition, description, info);
 
       /// <summary>
       /// Returns an instance of a delivery state that modifies a delivery
       /// </summary>
       /// <returns>An modified delivery state type</returns>
-      static IDeliveryState Modified(bool deliveryFailed, bool undeliverableHere = false) => new ClientModified(deliveryFailed, undeliverableHere);
+      static IDeliveryState Modified(bool deliveryFailed, bool undeliverableHere = false, IDictionary<string, object> annotations = null) => new ClientModified(deliveryFailed, undeliverableHere, annotations);
 
    }
 }

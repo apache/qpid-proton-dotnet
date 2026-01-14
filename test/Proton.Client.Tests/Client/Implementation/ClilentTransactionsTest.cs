@@ -1086,6 +1086,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
                Assert.IsNotNull(tracker);
                Assert.IsNotNull(tracker.SettlementTask.Result);
+               Assert.IsTrue(tracker.RemoteState.IsTransactional);
                Assert.AreEqual(tracker.RemoteState.Type, DeliveryStateType.Transactional);
                Assert.IsNotNull(tracker.State);
                Assert.AreEqual(tracker.State.Type, DeliveryStateType.Transactional,
@@ -1355,6 +1356,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             ITracker tracker = sender.Send(IMessage<string>.Create("test-message"));
             Assert.IsNotNull(tracker.SettlementTask.Result);
+            Assert.IsTrue(tracker.RemoteState.IsTransactional);
             Assert.AreEqual(tracker.RemoteState.Type, DeliveryStateType.Transactional);
 
             try
@@ -1719,6 +1721,12 @@ namespace Apache.Qpid.Proton.Client.Implementation
             delivery2.Release();
 
             session.CommitTransaction();
+
+            Assert.IsFalse(delivery1.State.IsReleased);
+            Assert.IsTrue(delivery1.State.IsAccepted);
+            Assert.IsTrue(delivery2.State.IsReleased);
+            Assert.IsFalse(delivery2.State.IsAccepted);
+
             receiver.Close();
             connection.Close();
 
@@ -1769,6 +1777,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
             Assert.IsNotNull(tracker);
             Assert.IsNotNull(tracker.AwaitAccepted());
             Assert.IsTrue(tracker.RemoteState.IsAccepted);
+            Assert.IsTrue(tracker.RemoteState.IsTransactional);
             Assert.AreEqual(tracker.RemoteState.Type, DeliveryStateType.Transactional,
                            "Delivery inside transaction should have Transactional state");
             Assert.AreEqual(tracker.State.Type, DeliveryStateType.Transactional,
@@ -1779,6 +1788,79 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             session.CloseAsync();
             connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestModifiedDispositionInTransaction()
+      {
+         byte[] txnId = new byte[] { 0, 1, 2, 3 };
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            ISession session = connection.OpenSession();
+            ReceiverOptions options = new ReceiverOptions()
+            {
+               AutoAccept = false,
+               AutoSettle = false
+            };
+            IReceiver receiver = session.OpenReceiver("test-queue", options).OpenTask.Result;
+
+            peer.ExpectCoordinatorAttach().Respond();
+            peer.RemoteFlow().WithLinkCredit(2).Queue();
+            peer.ExpectDeclare().Accept(txnId);
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithDeliveryTag(new byte[] { 1 })
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.ExpectDisposition().WithSettled(true)
+                                    .WithState()
+                                    .Transactional()
+                                    .WithTxnId(txnId)
+                                    .WithModified(true, true);
+
+            peer.ExpectDischarge().WithFail(false).WithTxnId(txnId).Accept();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            session.BeginTransaction();
+
+            IDelivery delivery = receiver.Receive(TimeSpan.FromSeconds(1));
+
+            Assert.IsNotNull(delivery);
+            Assert.IsFalse(delivery.Settled);
+            Assert.IsNull(delivery.State);
+
+            delivery.Modified(true, true);
+
+            session.CommitTransaction();
+            receiver.CloseAsync();
+            connection.CloseAsync();
+
+            Assert.IsTrue(delivery.State is ITransactional);
+
+            ITransactional txn = (ITransactional)delivery.State;
+
+            Assert.IsTrue(txn.Outcome is IModified);
 
             peer.WaitForScriptToComplete();
          }

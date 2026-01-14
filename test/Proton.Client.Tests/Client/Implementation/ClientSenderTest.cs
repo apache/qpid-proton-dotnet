@@ -3391,5 +3391,63 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestSendIsRejectedAndTrackerReflectsState()
+      {
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfSender().Respond();
+            peer.RemoteFlow().WithLinkCredit(1).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+
+            IConnection connection = container.Connect(remoteAddress, remotePort).OpenTask.Result;
+            ISession session = connection.OpenSession().OpenTask.Result;
+            SenderOptions options = new SenderOptions()
+            {
+               DeliveryMode = DeliveryMode.AtLeastOnce,
+               AutoSettle = false
+            };
+            ISender sender = session.OpenSender("test-tags", options).OpenTask.Result;
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectTransfer().WithNonNullPayload()
+                                 .WithDeliveryTag(new byte[] { 0 })
+                                 .Respond()
+                                 .WithSettled(true)
+                                 .WithState().Rejected("no-space", "disk full");
+
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            IMessage<string> message = IMessage<string>.Create("Hello World");
+            ITracker tracker = sender.Send(message);
+
+            Assert.IsNotNull(tracker);
+            Assert.IsNotNull(tracker.SettlementTask.Result);
+            Assert.AreEqual(DeliveryStateType.Rejected, tracker.RemoteState.Type);
+
+            IRejected rejected = (IRejected)tracker.RemoteState;
+
+            Assert.IsNotNull(rejected);
+            Assert.AreEqual("no-space", rejected.Condition);
+            Assert.AreEqual("disk full", rejected.Description);
+
+            sender.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+            connection.CloseAsync().Wait(TimeSpan.FromSeconds(10));
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }

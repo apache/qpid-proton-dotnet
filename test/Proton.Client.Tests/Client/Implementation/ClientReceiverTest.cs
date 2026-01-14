@@ -3293,5 +3293,64 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.WaitForScriptToComplete();
          }
       }
+
+      [Test]
+      public void TestReceiveMessageAndSendModifiedDispositionToRemote()
+      {
+         byte[] payload = CreateEncodedMessage(new AmqpValue("Hello World"));
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithDeliveryTag(new byte[] { 1 })
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload)
+                                 .Queue();
+            peer.ExpectDisposition().WithFirst(0)
+                                    .WithSettled(false)
+                                    .WithState().Modified(true, true);
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+
+            ConnectionOptions options = new ConnectionOptions();
+            ReceiverOptions receiverOptions = new ReceiverOptions()
+            {
+               AutoSettle = false,
+               AutoAccept = false
+            };
+            IConnection connection = container.Connect(remoteAddress, remotePort, options);
+            IReceiver receiver = connection.OpenReceiver("test-queue", receiverOptions);
+            IDelivery delivery = receiver.Receive();
+            IMessage<object> message = delivery.Message();
+
+            Assert.IsNotNull(message.Body);
+
+            delivery.Disposition(IDeliveryState.Modified(true, true), false);
+
+            peer.WaitForScriptToComplete();
+            peer.ExpectDetach().Respond();
+            peer.ExpectClose().Respond();
+
+            Assert.IsNotNull(delivery);
+
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
    }
 }

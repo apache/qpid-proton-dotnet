@@ -18,12 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Apache.Qpid.Proton.Utilities;
 
 namespace Apache.Qpid.Proton.Types.Transport
 {
    public sealed class ErrorCondition : ICloneable
    {
-      public static readonly ulong DescriptorCode = 0x000000000000001dUL;
+      public static readonly ulong DescriptorCode  = 0x000000000000001dUL;
       public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:error:list");
 
       public ErrorCondition(string condition) : this(Symbol.Lookup(condition), null, null) { }
