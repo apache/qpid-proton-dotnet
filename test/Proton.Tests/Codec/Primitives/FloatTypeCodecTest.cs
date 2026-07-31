@@ -359,5 +359,44 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          float[] array = (float[])result;
          Assert.AreEqual(source.Length, array.Length);
       }
+
+      [Test]
+      public void TestEncodeAndDecodeArrayOfPrimitiveFloatsAsUnregisteredType()
+      {
+         DoTestEncodeAndDecodeArrayOfPrimitiveFloatsAsUnregisteredType(false);
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeArrayOfPrimitiveFloatsAsUnregisteredTypeFS()
+      {
+         DoTestEncodeAndDecodeArrayOfPrimitiveFloatsAsUnregisteredType(true);
+      }
+
+      private void DoTestEncodeAndDecodeArrayOfPrimitiveFloatsAsUnregisteredType(bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         float[] floats = new float[] { 0.1f, 0.2f, 1.1f, 1.2f };
+
+         encoder.WriteObject(buffer, encoderState, floats);
+
+         object result;
+         if (fromStream)
+         {
+            result = streamDecoder.ReadObject(stream, streamDecoderState);
+         }
+         else
+         {
+            result = decoder.ReadObject(buffer, decoderState);
+         }
+
+         Assert.IsTrue(result.GetType().IsArray);
+         Assert.IsTrue(result.GetType().GetElementType().IsPrimitive);
+
+         float[] resultArray = (float[])result;
+
+         Assert.AreEqual(floats, resultArray);
+      }
    }
 }

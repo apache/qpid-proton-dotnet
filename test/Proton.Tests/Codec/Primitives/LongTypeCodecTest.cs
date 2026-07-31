@@ -402,7 +402,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          if (encoding == EncodingCodes.Long)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
-            buffer.WriteInt(25);  // Size
+            buffer.WriteInt(21);  // Size
             buffer.WriteInt(2);   // Count
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Long));
             buffer.WriteLong(1L);   // [0]
@@ -411,7 +411,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          else if (encoding == EncodingCodes.SmallLong)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
-            buffer.WriteInt(11);  // Size
+            buffer.WriteInt(7);  // Size
             buffer.WriteInt(2);   // Count
             buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallLong));
             buffer.WriteUnsignedByte(1);   // [0]
@@ -437,6 +437,83 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Assert.AreEqual(2, array.Length);
          Assert.AreEqual(1, array[0]);
          Assert.AreEqual(2, array[1]);
+      }
+
+      [Test]
+      public void TestReadLongArrayFailsWhenSizeIsToLarge()
+      {
+         DoTestReadLongArrayFailsWhenSizeIsToLarge(EncodingCodes.Long);
+      }
+
+      [Test]
+      public void TestReadSmallLongArrayFailsWhenSizeIsToLarge()
+      {
+         DoTestReadLongArrayFailsWhenSizeIsToLarge(EncodingCodes.SmallLong);
+      }
+
+      public void DoTestReadLongArrayFailsWhenSizeIsToLarge(EncodingCodes encoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+
+         if (encoding == EncodingCodes.Long)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(25);  // Size
+            buffer.WriteInt(2);   // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Long);
+            buffer.WriteLong(1);   // [0]
+            buffer.WriteLong(-2);  // [1]
+         }
+         else if (encoding == EncodingCodes.SmallLong)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte(11); // Size
+            buffer.WriteUnsignedByte(2);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.SmallLong);
+            buffer.WriteUnsignedByte(1);  // [0]
+            buffer.WriteUnsignedByte(2);  // [1]
+         }
+
+         Assert.Throws<DecodeException>(() => decoder.ReadObject(buffer, decoderState));
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType()
+      {
+         DoTestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType(false);
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredTypeFS()
+      {
+         DoTestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType(true);
+      }
+
+      private void DoTestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType(bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         long[] values = new long[] { 0, 1, 2, 3 };
+
+         encoder.WriteObject(buffer, encoderState, values);
+
+         object result;
+         if (fromStream)
+         {
+            result = streamDecoder.ReadObject(stream, streamDecoderState);
+         }
+         else
+         {
+            result = decoder.ReadObject(buffer, decoderState);
+         }
+
+         Assert.IsTrue(result.GetType().IsArray);
+         Assert.IsTrue(result.GetType().GetElementType().IsPrimitive);
+
+         long[] resultArray = (long[])result;
+
+         Assert.AreEqual(values, resultArray);
       }
    }
 }

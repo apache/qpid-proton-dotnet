@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
-   public sealed class TargetTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class TargetTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinTargetListEntries = 0;
       private static readonly int MaxTargetListEntries = 7;
@@ -35,53 +35,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(Target);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinTargetListEntries;
 
-         return ReadTarget(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxTargetListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Target[] result = new Target[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadTarget(buffer, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Target ReadTarget(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Target ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Target result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinTargetListEntries)
-         {
-            throw new DecodeException("Not enough entries in Target list encoding: " + count);
-         }
-
-         if (count > MaxTargetListEntries)
-         {
-            throw new DecodeException("To many entries in Target list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -116,53 +76,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadTarget(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Target[] result = new Target[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadTarget(stream, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Target ReadTarget(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Target ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Target result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinTargetListEntries)
-         {
-            throw new DecodeException("Not enough entries in Target list encoding: " + count);
-         }
-
-         if (count > MaxTargetListEntries)
-         {
-            throw new DecodeException("To many entries in Target list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

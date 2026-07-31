@@ -37,7 +37,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       {
          try
          {
-            SaslMechanisms.Lookup(Symbol.Lookup("TEST"));
+            SaslMechanisms.Lookup(Symbol.SaslLookup("TEST"));
             Assert.Fail("Should throw when invalid mechanism name given.");
          }
          catch (ArgumentException)

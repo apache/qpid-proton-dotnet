@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 {
-   public sealed class OpenTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class OpenTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinOpenListEntries = 1;
       private static readonly int MaxOpenListEntries = 10;
@@ -35,51 +35,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       public override Type DecodesType => typeof(Open);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinOpenListEntries;
 
-         return ReadOpen(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxOpenListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         Open[] result = new Open[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadOpen(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Open ReadOpen(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Open ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Open result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         if (count < MinOpenListEntries)
-         {
-            throw new DecodeException("The container-id field cannot be omitted from the Open");
-         }
-
-         if (count > MaxOpenListEntries)
-         {
-            throw new DecodeException("To many entries in Open list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -136,51 +98,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadOpen(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         Open[] result = new Open[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadOpen(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Open ReadOpen(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Open ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Open result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         if (count < MinOpenListEntries)
-         {
-            throw new DecodeException("The container-id field cannot be omitted from the Open");
-         }
-
-         if (count > MaxOpenListEntries)
-         {
-            throw new DecodeException("To many entries in Open list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

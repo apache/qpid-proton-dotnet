@@ -259,8 +259,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal bool IsFirstTransfer => transferCount <= 1;
 
-      internal uint IncrementAndGetTransferCount() => ++transferCount;
-
       internal uint DeliveryId => deliveryId;
 
       internal ProtonIncomingDelivery Aborted()
@@ -307,19 +305,24 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       internal ProtonIncomingDelivery AppendTransferPayload(IProtonBuffer buffer)
       {
-         if (payload == null)
-         {
-            payload = buffer;
-         }
-         else if (aggregate != null)
-         {
-            aggregate.Append(buffer);
-         }
-         else
-         {
-            IProtonBuffer previous = payload;
+         ++transferCount;
 
-            payload = aggregate = IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, previous, buffer);
+         if (buffer != null)
+         {
+            if (payload == null)
+            {
+               payload = buffer;
+            }
+            else if (aggregate != null)
+            {
+               aggregate.Append(buffer);
+            }
+            else
+            {
+               IProtonBuffer previous = payload;
+
+               payload = aggregate = IProtonCompositeBuffer.Compose(ProtonByteBufferAllocator.Instance, previous, buffer);
+            }
          }
 
          return this;

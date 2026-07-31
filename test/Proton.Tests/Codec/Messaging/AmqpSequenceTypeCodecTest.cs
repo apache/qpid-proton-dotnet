@@ -391,5 +391,84 @@ namespace Apache.Qpid.Proton.Codec.Messaging
             Assert.AreEqual(array[i].Value, resultArray[i].Value);
          }
       }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray8()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array8, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray32()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array32, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray8FS()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array8, true);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray32FS()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array32, true);
+      }
+
+      private void DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes arrayType, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         // First show that we can do this if the data is correct
+         if (arrayType == EncodingCodes.Array32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(8);  // Size
+            buffer.WriteInt(2);  // Count
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte((byte)5);  // Size
+            buffer.WriteUnsignedByte((byte)2);  // Count
+         }
+         buffer.WriteUnsignedByte((byte)0); // Described Type Indicator
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)AmqpSequence.DescriptorCode);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.List0);
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.AreEqual(typeof(Array), typeDecoder.DecodesType);
+            Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.AreEqual(typeof(Array), typeDecoder.DecodesType);
+            Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(buffer, decoderState));
+         }
+
+         buffer.ReadOffset = 0;  // Reset and try with limits lifted
+
+         decoderState.MaxZeroWidthArrayElements = 2;
+         streamDecoderState.MaxZeroWidthArrayElements = 2;
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.AreEqual(typeof(Array), typeDecoder.DecodesType);
+            Assert.IsTrue(typeDecoder.ReadValue(stream, streamDecoderState) is AmqpSequence[]);
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.AreEqual(typeof(Array), typeDecoder.DecodesType);
+            Assert.IsTrue(typeDecoder.ReadValue(buffer, decoderState) is AmqpSequence[]);
+         }
+      }
    }
 }

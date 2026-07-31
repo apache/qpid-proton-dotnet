@@ -20,6 +20,8 @@ using NUnit.Framework;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Types;
 using System.IO;
+using System.Collections.Generic;
+using Apache.Qpid.Proton.Test.Driver.Codec.Impl;
 
 namespace Apache.Qpid.Proton.Codec.Decoders
 {
@@ -44,7 +46,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          buffer.WriteByte(((sbyte)EncodingCodes.Null));
 
          Assert.IsNull(streamDecoder.ReadObject(stream, streamDecoderState));
-         Assert.Throws(typeof(InvalidCastException), () => streamDecoder.ReadObject<Guid>(stream, streamDecoderState));
+         Assert.Throws(typeof(DecodeException), () => streamDecoder.ReadObject<Guid>(stream, streamDecoderState));
       }
 
       [Test]
@@ -94,7 +96,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             streamDecoder.ReadObject<string>(stream, streamDecoderState);
             Assert.Fail("Should not allow for conversion to String type");
          }
-         catch (InvalidCastException)
+         catch (DecodeException)
          {
          }
       }
@@ -107,7 +109,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          buffer.WriteUnsignedByte(((byte)EncodingCodes.Null));
 
-         Assert.IsNull(streamDecoder.ReadMultiple<Guid>(stream, streamDecoderState));
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadMultiple<Guid>(stream, streamDecoderState));
       }
 
       [Test]
@@ -127,6 +129,19 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       }
 
       [Test]
+      public void TestReadObjectRequestsWrongType()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte(((byte)EncodingCodes.Uuid));
+         buffer.WriteLong(256L);
+         buffer.WriteLong(128L);
+
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadObject<string>(stream, streamDecoderState));
+      }
+
+      [Test]
       public void TestReadMultipleRequestsWrongTypeForArray()
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
@@ -141,7 +156,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             streamDecoder.ReadMultiple<string>(stream, streamDecoderState);
             Assert.Fail("Should not be able to convert to wrong resulting array type");
          }
-         catch (InvalidCastException) { }
+         catch (DecodeException) { }
       }
 
       [Test]
@@ -159,7 +174,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             streamDecoder.ReadMultiple<string>(stream, streamDecoderState);
             Assert.Fail("Should not be able to convert to wrong resulting array type");
          }
-         catch (InvalidCastException) { }
+         catch (DecodeException) { }
       }
 
       [Test]
@@ -266,7 +281,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          Assert.IsNotNull(((ProtonStreamDecoderState)streamDecoderState).Utf8Decoder);
 
-         String result = streamDecoder.ReadString(stream, streamDecoderState);
+         string result = streamDecoder.ReadString(stream, streamDecoderState);
 
          Assert.AreEqual("string-streamDecoder", result);
          Assert.IsTrue(buffer.IsReadable); // We didn't read anything so buffer was untouched
@@ -278,7 +293,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
          Stream stream = new ProtonBufferInputStream(buffer);
 
-         buffer.WriteUnsignedByte(((byte)EncodingCodes.Str32));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str32);
          buffer.WriteInt(16);
          buffer.WriteBytes(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
 
@@ -286,6 +301,195 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          Assert.IsNotNull(((ProtonStreamDecoderState)streamDecoderState).Utf8Decoder);
          Assert.Throws(typeof(DecodeException), () => streamDecoder.ReadString(stream, streamDecoderState));
+      }
+
+      [Test]
+      public void TestDecodeUnknownDescribedTypeFailsWhenInSASLMode()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         ProtonStreamDecoder streamDecoder = ProtonStreamDecoderFactory.CreateSasl();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte(255);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Uuid);
+         buffer.WriteLong(250L);
+         buffer.WriteLong(128L);
+
+         Assert.Throws(typeof(DecodeException), () => streamDecoder.ReadObject(stream, streamDecoderState));
+
+         streamDecoder = ProtonStreamDecoderFactory.Create();
+         buffer.ReadOffset = 0;
+
+         Assert.DoesNotThrow(() => streamDecoder.ReadObject(stream, streamDecoderState));
+      }
+
+      [Test]
+      public void TestDecodeUnknownDescribedTypeWithRestrictedDescriptorFailsWhenInSASLMode()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         ProtonStreamDecoder streamDecoder = ProtonStreamDecoderFactory.CreateSasl();
+         IStreamDecoderState state = streamDecoder.NewDecoderState();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallUInt);
+         buffer.WriteUnsignedByte(255);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Uuid);
+         buffer.WriteLong(256L);
+         buffer.WriteLong(128L);
+
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadObject(stream, state));
+      }
+
+      [Test]
+      public void TestLargeSymbolDescriptorsAreNotPutInUnknownTypeCache()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         ProtonStreamDecoder decoder = ProtonStreamDecoderFactory.Create();
+         IStreamDecoderState state = streamDecoder.NewDecoderState();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         int descriptorLength = ProtonStreamDecoder.UnknownDescribedTypeDescriptorSizeLimit + 1;
+
+         for (int i = 0; i < ProtonStreamDecoder.UnknownDescribedTypeCacheLimit; ++i)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.DescribedTypeIndicator);
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym8);
+            buffer.WriteUnsignedByte((byte)descriptorLength);
+            for (int j = 0; j < descriptorLength; ++j)
+            {
+               buffer.WriteUnsignedByte(65);
+            }
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Uuid);
+            buffer.WriteLong(256L);
+            buffer.WriteLong(128L);
+         }
+
+         ISet<IStreamTypeDecoder> typeDecoders = new HashSet<IStreamTypeDecoder>();
+
+         for (int i = 0; i < ProtonStreamDecoder.UnknownDescribedTypeCacheLimit; ++i)
+         {
+            IStreamTypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(stream, state);
+            Assert.IsTrue(typeDecoder is UnknownDescribedTypeDecoder);
+            Assert.IsTrue(typeDecoders.Add(typeDecoder));
+            UnknownDescribedType result = (UnknownDescribedType)typeDecoder.ReadValue(stream, state);
+            Assert.IsTrue(result.Descriptor is Symbol);
+            Assert.IsTrue(result.Described is Guid);
+         }
+
+         Assert.AreEqual(ProtonStreamDecoder.UnknownDescribedTypeCacheLimit, typeDecoders.Count);
+      }
+
+      [Test]
+      public void TestReadObjectArray8FailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter()
+      {
+         TestReadObjectFailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter(EncodingCodes.Array8);
+      }
+
+      [Test]
+      public void TestReadObjectArray32FailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter()
+      {
+         TestReadObjectFailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter(EncodingCodes.Array32);
+      }
+
+      private void TestReadObjectFailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter(EncodingCodes arrayType)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         if (EncodingCodes.Array32 == arrayType)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(8); // Size
+            buffer.WriteInt(3);  // Count
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte((byte)5);
+            buffer.WriteUnsignedByte((byte)3);
+         }
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Byte);
+         buffer.WriteUnsignedByte((byte)1);
+         buffer.WriteUnsignedByte((byte)2);
+         buffer.WriteUnsignedByte((byte)3);
+
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadObject<Symbol>(stream, streamDecoderState));
+
+         Assert.IsTrue(stream.Length > 0); // Should not have read array contents
+      }
+
+      [Test]
+      public void TestReadMultipleArray8FailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter()
+      {
+         TestReadMultipleFailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter(EncodingCodes.Array8);
+      }
+
+      [Test]
+      public void TestReadMultipleArray32FailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter()
+      {
+         TestReadMultipleFailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter(EncodingCodes.Array32);
+      }
+
+      private void TestReadMultipleFailsBeforeDecodingContentsIfEncodingDoesNotMatchFilter(EncodingCodes arrayType)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         if (EncodingCodes.Array32 == arrayType)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(8); // Size
+            buffer.WriteInt(3);  // Count
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte((byte)5);
+            buffer.WriteUnsignedByte((byte)3);
+         }
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Byte);
+         buffer.WriteUnsignedByte((byte)1);
+         buffer.WriteUnsignedByte((byte)2);
+         buffer.WriteUnsignedByte((byte)3);
+
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadMultiple<Symbol>(stream, streamDecoderState));
+
+         Assert.IsTrue(stream.Length > 0); // Should not have read array contents
+      }
+
+      [Test]
+      public void TestReadObjectForObjectDoesNotDecodeIfFilterDoesNotMatch()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Uuid);
+         buffer.WriteLong(255);
+         buffer.WriteLong(512);
+
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadObject<string>(stream, streamDecoderState));
+
+         Assert.IsTrue(stream.CanRead); // Should not have read array contents
+      }
+
+      [Test]
+      public void TestReadMultipleForObjectDoesNotDecodeIfFilterDoesNotMatch()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Uuid);
+         buffer.WriteLong(127);
+         buffer.WriteLong(128);
+
+         Assert.Throws<DecodeException>(() => streamDecoder.ReadMultiple<string>(stream, streamDecoderState));
+
+         Assert.IsTrue(stream.CanRead); // Should not have read array contents
       }
    }
 
@@ -305,4 +509,3 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       }
    }
 }
-

@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
    {
       public static readonly ProtonDefaultSaslServerAuthenticator Instance = new();
 
-      private static readonly Symbol[] PLAIN = { Symbol.Lookup("PLAIN") };
+      private static readonly Symbol[] PLAIN = { Symbol.SaslLookup("PLAIN") };
 
       public void HandleSaslHeader(ISaslServerContext context, AmqpHeader header)
       {

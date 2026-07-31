@@ -25,7 +25,7 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
-   public sealed class RejectedTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class RejectedTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinRejectedListEntries = 0;
       private static readonly int MaxRejectedListEntries = 1;
@@ -36,123 +36,29 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(Rejected);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinRejectedListEntries;
 
-         return ReadRejected(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxRejectedListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Rejected[] result = new Rejected[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadRejected(buffer, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Rejected ReadRejected(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Rejected ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Rejected result = new Rejected();
 
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinRejectedListEntries)
+         if (count == 1)
          {
-            throw new DecodeException("Not enough entries in Rejected list encoding: " + count);
-         }
-
-         if (count > MaxRejectedListEntries)
-         {
-            throw new DecodeException("To many entries in Rejected list encoding: " + count);
-         }
-
-         for (int index = 0; index < count; ++index)
-         {
-            switch (index)
-            {
-               case 0:
-                  result.Error = state.Decoder.ReadObject<ErrorCondition>(buffer, state);
-                  break;
-            }
+            result.Error = state.Decoder.ReadObject<ErrorCondition>(buffer, state);
          }
 
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadRejected(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Rejected[] result = new Rejected[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadRejected(stream, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Rejected ReadRejected(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Rejected ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Rejected result = new Rejected();
 
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinRejectedListEntries)
+         if (count == 1)
          {
-            throw new DecodeException("Not enough entries in Rejected list encoding: " + count);
-         }
-
-         if (count > MaxRejectedListEntries)
-         {
-            throw new DecodeException("To many entries in Rejected list encoding: " + count);
-         }
-
-         for (int index = 0; index < count; ++index)
-         {
-            switch (index)
-            {
-               case 0:
-                  result.Error = state.Decoder.ReadObject<ErrorCondition>(stream, state);
-                  break;
-            }
+            result.Error = state.Decoder.ReadObject<ErrorCondition>(stream, state);
          }
 
          return result;

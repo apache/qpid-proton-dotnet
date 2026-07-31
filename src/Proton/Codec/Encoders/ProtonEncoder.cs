@@ -26,6 +26,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 {
    public sealed class ProtonEncoder : IEncoder
    {
+      public enum EncoderMode
+      {
+         Sasl,
+         Default
+      }
+
       // The encoders for primitives are fixed and cannot be altered by users who want
       // to register custom encoders, these encoders are stateless so they can be safely
       // made static to reduce overhead of creating and destroying this type.
@@ -90,6 +96,24 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          [ulongEncoder.EncodesType] = ulongEncoder,
          [deliveryTagEncoder.EncodesType] = deliveryTagEncoder
       };
+
+      private readonly Func<string, Symbol> stringToSymbolSupplier;
+
+      public ProtonEncoder() : this(EncoderMode.Default)
+      {
+      }
+
+      public ProtonEncoder(EncoderMode mode)
+      {
+         if (mode == EncoderMode.Sasl)
+         {
+            stringToSymbolSupplier = Symbol.SaslLookup;
+         }
+         else
+         {
+            stringToSymbolSupplier = Symbol.Lookup;
+         }
+      }
 
       public IEncoderState NewEncoderState()
       {
@@ -270,7 +294,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
          }
          else
          {
-            symbolEncoder.WriteType(buffer, state, Symbol.Lookup(value));
+            symbolEncoder.WriteType(buffer, state, stringToSymbolSupplier.Invoke(value));
          }
       }
 

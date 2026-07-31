@@ -54,6 +54,28 @@ namespace Apache.Qpid.Proton.Utilities
       }
 
       /// <summary>
+      /// Given an array of string objects, convert them to a matching array of
+      /// their Symbol equivalent values using the SASL Symbol cache as the source.
+      /// </summary>
+      /// <param name="stringArray"></param>
+      /// <returns>A new Symbol array with values that correspond to the input stings</returns>
+      public static Symbol[] ToSaslSymbolArray(string[] stringArray)
+      {
+         Symbol[] result = null;
+
+         if (stringArray != null)
+         {
+            result = new Symbol[stringArray.Length];
+            for (int i = 0; i < stringArray.Length; ++i)
+            {
+               result[i] = Symbol.SaslLookup(stringArray[i]);
+            }
+         }
+
+         return result;
+      }
+
+      /// <summary>
       /// Given an array of Symbol objects, convert them to a matching array of
       /// their string equivalent values.
       /// </summary>
@@ -90,6 +112,32 @@ namespace Apache.Qpid.Proton.Utilities
             foreach (string value in strings)
             {
                result.Add(Symbol.Lookup(value));
+            }
+         }
+         else
+         {
+            result = null;
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Converts an enumeration of string values into a set of Symbol values.
+      /// Uses the SASL Symbol cache as the source of cached value.
+      /// </summary>
+      /// <param name="strings">an enumeration of string values</param>
+      /// <returns>a set of Symbol value that match the input strings</returns>
+      public static ISet<Symbol> ToSaslSymbolSet(in IEnumerable<string> strings)
+      {
+         ISet<Symbol> result;
+
+         if (strings != null)
+         {
+            result = new HashSet<Symbol>();
+            foreach (string value in strings)
+            {
+               result.Add(Symbol.SaslLookup(value));
             }
          }
          else

@@ -4448,14 +4448,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          peer.ExpectOpen().Respond().WithContainerId("driver");
          peer.ExpectBegin().Respond();
          peer.ExpectAttach().OfReceiver().Respond();
-         peer.ExpectFlow().WithLinkCredit(2).WithIncomingWindow(1);
+         peer.ExpectFlow().WithLinkCredit(2).WithIncomingWindow(2);
          peer.ExpectDetach().Respond();
 
          IConnection connection = engine.Start();
          connection.MaxFrameSize = 1024;
          connection.Open();
          ISession session = connection.Session();
-         session.IncomingCapacity = 1024;
+         session.IncomingCapacity = 2048;
          session.Open();
          IReceiver receiver = session.Receiver("test");
 
@@ -5028,6 +5028,207 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          // Check post conditions and done.
          peer.WaitForScriptToComplete();
          Assert.IsNull(failure);
+      }
+
+      [Test]
+      public void TestFailureOnViolationOfPerDeliveryTransferLimit()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler(result => failure = result.FailureCause);
+         engine.Configuration.MaxTransfersPerDelivery = 2;
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         string text = "test-string-for-split-frame-delivery";
+         byte[] encoded = Encoding.UTF8.GetBytes(text);
+         byte[] first = new byte[encoded.Length / 2];
+         byte[] second = new byte[encoded.Length - first.Length];
+
+         string description = "Delivery not completed within configured max Transfers per delivery value: 2";
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(1);
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(true)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(first).Also().Queue();
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(true)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(second).Also().Queue();
+         peer.ExpectClose().WithError(LinkError.TRANSFER_LIMIT_EXCEEDED.ToString(), description);
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+
+         bool deliveryArrived = false;
+         IIncomingDelivery receivedDelivery = null;
+         int deliverReads = 0;
+
+         receiver.DeliveryReadHandler(delivery =>
+         {
+            deliveryArrived = true;
+            receivedDelivery = delivery;
+            deliverReads++;
+         });
+
+         receiver.Open();
+         receiver.AddCredit(1);
+
+         Assert.IsTrue(deliveryArrived, "Delivery did not arrive at the receiver");
+         Assert.IsTrue(receivedDelivery.IsPartial, "Delivery should be partial");
+         Assert.AreEqual(1, deliverReads, "Deliver should have been read once for two transfers");
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsTrue(engine.IsFailed);
+
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      public void TestFailureOnViolationOfPerDeliveryTransferLimitWithEmptyTransfers()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler(result => failure = result.FailureCause);
+         engine.Configuration.MaxTransfersPerDelivery = 3;
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         string text = "test-string-for-split-frame-delivery";
+         byte[] encoded = Encoding.UTF8.GetBytes(text);
+         byte[] first = new byte[encoded.Length / 2];
+         byte[] second = new byte[encoded.Length - first.Length];
+
+         string description = "Delivery not completed within configured max Transfers per delivery value: 3";
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(1);
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(true)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(first).Also().Queue();
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(true)
+                              .WithMessageFormat(0)
+                              .Queue();
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(true)
+                              .WithMessageFormat(0)
+                              .Queue();
+         peer.ExpectClose().WithError(LinkError.TRANSFER_LIMIT_EXCEEDED.ToString(), description);
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+
+         bool deliveryArrived = false;
+         IIncomingDelivery receivedDelivery = null;
+         int deliverReads = 0;
+
+         receiver.DeliveryReadHandler(delivery =>
+         {
+            deliveryArrived = true;
+            receivedDelivery = delivery;
+            deliverReads++;
+         });
+
+         receiver.Open();
+         receiver.AddCredit(1);
+
+         Assert.IsTrue(deliveryArrived, "Delivery did not arrive at the receiver");
+         Assert.IsTrue(receivedDelivery.IsPartial, "Delivery should be partial");
+         Assert.AreEqual(2, deliverReads, "Deliver should have been read twice for three transfers");
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsTrue(engine.IsFailed);
+
+         Assert.IsNotNull(failure);
+      }
+
+      [Test]
+      public void TestFailureOnViolationOfPerDeliveryTransferLimitSetToOneTransfer()
+      {
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler(result => failure = result.FailureCause);
+         // Essentially limits all deliveries to be contained in one transfer
+         engine.Configuration.MaxTransfersPerDelivery = 1;
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         string text = "test-string-for-split-frame-delivery";
+         byte[] encoded = Encoding.UTF8.GetBytes(text);
+         byte[] first = new byte[encoded.Length / 2];
+         byte[] second = new byte[encoded.Length - first.Length];
+
+         string description = "Delivery not completed within configured max Transfers per delivery value: 1";
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().Respond().WithContainerId("driver");
+         peer.ExpectBegin().Respond();
+         peer.ExpectAttach().Respond();
+         peer.ExpectFlow().WithLinkCredit(1);
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(true)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(first).Also().Queue();
+         peer.ExpectClose().WithError(LinkError.TRANSFER_LIMIT_EXCEEDED.ToString(), description);
+
+         IConnection connection = engine.Start();
+
+         // Default engine should start and return a connection immediately
+         Assert.IsNotNull(connection);
+
+         connection.Open();
+         ISession session = connection.Session();
+         session.Open();
+         IReceiver receiver = session.Receiver("test");
+
+         bool deliveryArrived = false;
+         IIncomingDelivery receivedDelivery = null;
+         int deliverReads = 0;
+
+         receiver.DeliveryReadHandler(delivery =>
+         {
+            deliveryArrived = true;
+            receivedDelivery = delivery;
+            deliverReads++;
+         });
+
+         receiver.Open();
+         receiver.AddCredit(1);
+
+         Assert.IsFalse(deliveryArrived, "Delivery should not arrive at the receiver");
+         Assert.AreEqual(0, deliverReads, "Deliver should not be called in this configuration");
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsTrue(engine.IsFailed);
+
+         Assert.IsNotNull(failure);
       }
    }
 }

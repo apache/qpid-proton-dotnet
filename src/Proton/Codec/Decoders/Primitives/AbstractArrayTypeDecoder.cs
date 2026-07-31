@@ -25,76 +25,160 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    {
       public override Type DecodesType => typeof(Array);
 
+      public override bool IsArrayType => true;
+
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-         int size = ReadSize(buffer, state);
-         int count = ReadCount(buffer, state);
+         return ReadValue(buffer, state, typeof(object));
+      }
 
-         if (EncodingCode == EncodingCodes.Array32)
-         {
-            size -= 8; // 4 bytes each for size and count;
-         }
-         else
-         {
-            size -= 2; // 1 byte each for size and count;
-         }
+      public object ReadValue(IProtonBuffer buffer, IDecoderState state, Type ofType)
+      {
+         state.IncreaseDepth();
 
-         if (size > buffer.ReadableBytes)
+         try
          {
-            throw new DecodeException(string.Format(
-                "Array size indicated {0} is greater than the amount of data available to decode ({1})",
-                size, buffer.ReadableBytes));
-         }
+            int size = ReadSize(buffer, state);
 
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         if (decoder is IPrimitiveArrayTypeDecoder arrayDecoder)
-         {
-            object[] array = new object[count];
-            for (int i = 0; i < count; i++)
+            if (size > buffer.ReadableBytes || size < 0)
             {
-               array[i] = arrayDecoder.ReadValue(buffer, state);
+               throw new DecodeException(string.Format(
+                  "Array size indicated {0} is greater than the amount of data available to decode ({1})",
+                  (uint) size, buffer.ReadableBytes));
+            }
+
+            long startOffset = buffer.ReadOffset;
+            int count = ReadCount(buffer, state);
+
+            ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+
+            if (!decoder.DecodesType.IsAssignableTo(ofType))
+            {
+               throw new DecodeException(String.Format(
+                  "Unexpected type {0}. Expected a type assignable to {1}", decoder.DecodesType,ofType.Name));
+            }
+
+            Array array;
+
+            if (decoder is IPrimitiveArrayTypeDecoder arrayDecoder)
+            {
+               if (count > buffer.ReadableBytes || count < 0)
+               {
+                  throw new DecodeException(string.Format(
+                     "Array count indicated {0} is greater than the amount of data available to decode ({1})",
+                     (uint) count, buffer.ReadableBytes));
+               }
+
+               array = Array.CreateInstance(decoder.DecodesType, count);
+
+               for (int i = 0; i < count; i++)
+               {
+                  array.SetValue(arrayDecoder.ReadValue(buffer, state), i);
+               }
+            }
+            else
+            {
+               array = decoder.ReadArrayElements(buffer, state, count);
+            }
+
+            if (buffer.ReadOffset - startOffset != size)
+            {
+               throw new DecodeException(
+                  "Encoded size indicates the array encoding should have been " + size +
+                  " bytes but the actual bytes read was " + (buffer.ReadOffset - startOffset));
             }
 
             return array;
          }
-         else
+         finally
          {
-            return decoder.ReadArrayElements(buffer, state, count);
+            state.DecreaseDepth();
          }
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         _ = ReadSize(stream, state);
-         int count = ReadCount(stream, state);
+         return ReadValue(stream, state, typeof(object));
+      }
 
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
+      public object ReadValue(Stream stream, IStreamDecoderState state, Type ofType)
+      {
+         state.IncreaseDepth();
 
-         if (decoder is IPrimitiveArrayTypeDecoder arrayDecoder)
+         try
          {
-            object[] array = new object[count];
-            for (int i = 0; i < count; i++)
+            int size = ReadSize(stream, state);
+
+            if (size > state.MaxArraySize || size < 0)
             {
-               array[i] = arrayDecoder.ReadValue(stream, state);
+               throw new DecodeException(string.Format(
+                  "Array size indicated {0} is greater than the maximum encoded length to decode ({1})",
+                  (uint) size, state.MaxArraySize));
             }
 
-            return array;
+            int count = ReadCount(stream, state);
+
+            IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
+
+            if (!decoder.DecodesType.IsAssignableTo(ofType))
+            {
+               throw new DecodeException(String.Format(
+                  "Unexpected type {0}. Expected a type assignable to {1}", decoder.DecodesType,ofType.Name));
+            }
+
+            if (decoder is IPrimitiveArrayTypeDecoder arrayDecoder)
+            {
+               if (count > size || count < 0)
+               {
+                  throw new DecodeException(string.Format(
+                     "Array length indicated {0} is greater than the encoded array size ({1})", (uint) count, size));
+               }
+
+               object[] array = new object[count];
+               for (int i = 0; i < count; i++)
+               {
+                  array[i] = arrayDecoder.ReadValue(stream, state);
+               }
+
+               return array;
+            }
+            else
+            {
+               return decoder.ReadArrayElements(stream, state, count);
+            }
          }
-         else
+         finally
          {
-            return decoder.ReadArrayElements(stream, state, count);
+            state.DecreaseDepth();
          }
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         buffer.SkipBytes(ReadSize(buffer, state));
+         int size = ReadSize(buffer, state);
+
+         if (size > buffer.ReadableBytes || size < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array size indicated {0} is greater than the amount of data available to decode ({1})",
+               (uint) size, buffer.ReadableBytes));
+         }
+
+         buffer.SkipBytes(size);
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         ProtonStreamReadUtils.SkipBytes(stream, ReadSize(stream, state));
+         int size = ReadSize(stream, state);
+
+         if (size > state.MaxArraySize || size < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array size indicated {0} is greater than the maximum encoded length to decode ({1})",
+               (uint) size, state.MaxArraySize));
+         }
+
+         ProtonStreamReadUtils.SkipBytes(stream, size);
       }
 
       protected abstract int ReadSize(IProtonBuffer buffer, IDecoderState state);

@@ -119,35 +119,42 @@ namespace Apache.Qpid.Proton.Client.Implementation
          ApplicationProperties applicationProperties = message.ApplicationProperties;
          Footer footer = message.Footer;
 
-         if (header != null)
+         try
          {
-            encoder.WriteObject(buffer, encoderState, header);
-         }
-         if (deliveryAnnotations != null)
-         {
-            encoder.WriteObject(buffer, encoderState, new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations)));
-         }
-         if (messageAnnotations != null)
-         {
-            encoder.WriteObject(buffer, encoderState, messageAnnotations);
-         }
-         if (properties != null)
-         {
-            encoder.WriteObject(buffer, encoderState, properties);
-         }
-         if (applicationProperties != null)
-         {
-            encoder.WriteObject(buffer, encoderState, applicationProperties);
-         }
+            if (header != null)
+            {
+               encoder.WriteObject(buffer, encoderState, header);
+            }
+            if (deliveryAnnotations != null)
+            {
+               encoder.WriteObject(buffer, encoderState, new DeliveryAnnotations(ClientConversionSupport.ToSymbolKeyedMap(deliveryAnnotations)));
+            }
+            if (messageAnnotations != null)
+            {
+               encoder.WriteObject(buffer, encoderState, messageAnnotations);
+            }
+            if (properties != null)
+            {
+               encoder.WriteObject(buffer, encoderState, properties);
+            }
+            if (applicationProperties != null)
+            {
+               encoder.WriteObject(buffer, encoderState, applicationProperties);
+            }
 
-         message.ForEachBodySection(section => encoder.WriteObject(buffer, encoderState, section));
+            message.ForEachBodySection(section => encoder.WriteObject(buffer, encoderState, section));
 
-         if (footer != null)
-         {
-            encoder.WriteObject(buffer, encoderState, footer);
+            if (footer != null)
+            {
+               encoder.WriteObject(buffer, encoderState, footer);
+            }
+
+            return buffer;
          }
-
-         return buffer;
+         finally
+         {
+            encoderState.Reset();
+         }
       }
 
       #endregion
@@ -159,15 +166,34 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return DecodeMessage(DEFAULT_DECODER, DEFAULT_DECODER.NewDecoderState(), buffer, daConsumer);
       }
 
+      public static ClientMessage<object> DecodeMessage(IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer, DecodeOptions options)
+      {
+         IDecoderState state = DEFAULT_DECODER.NewDecoderState();
+
+         state.DepthLimit = options.DepthLimit;
+         state.MaxZeroWidthArrayElements = options.MaxZeroWidthArrayElements;
+
+         return DecodeMessage(DEFAULT_DECODER, state, buffer, daConsumer);
+      }
+
       public static ClientMessage<object> DecodeMessage(IDecoder decoder, IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
       {
          return DecodeMessage(decoder, decoder.NewDecoderState(), buffer, daConsumer);
       }
 
+      public static ClientMessage<object> DecodeMessage(IDecoder decoder, IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer, DecodeOptions options)
+      {
+         IDecoderState state = decoder.NewDecoderState();
+
+         state.DepthLimit = options.DepthLimit;
+         state.MaxZeroWidthArrayElements = options.MaxZeroWidthArrayElements;
+
+         return DecodeMessage(decoder, state, buffer, daConsumer);
+      }
+
       public static ClientMessage<object> DecodeMessage(IDecoder decoder, IDecoderState decoderState,
                                                         IProtonBuffer buffer, Action<DeliveryAnnotations> daConsumer)
       {
-
          ClientMessage<object> message = new();
 
          ISection section;
@@ -181,6 +207,10 @@ namespace Apache.Qpid.Proton.Client.Implementation
             catch (Exception e)
             {
                throw ClientExceptionSupport.CreateNonFatalOrPassthrough(e);
+            }
+            finally
+            {
+               decoderState.Reset();
             }
 
             switch (section.Type)

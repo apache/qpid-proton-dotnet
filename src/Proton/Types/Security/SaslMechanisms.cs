@@ -22,7 +22,7 @@ namespace Apache.Qpid.Proton.Types.Security
    public class SaslMechanisms : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000040UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-mechanisms:list");
+      public static readonly Symbol DescriptorSymbol = Symbol.SaslLookup("amqp:sasl-mechanisms:list");
 
       private Symbol[] mechanisms;
 

@@ -143,7 +143,7 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
          buffer.WriteUnsignedByte(((byte)Rejected.DescriptorCode));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.List8));
-         buffer.WriteUnsignedByte((byte)0);  // Size
+         buffer.WriteUnsignedByte((byte)1);  // Size
          buffer.WriteUnsignedByte((byte)0);  // Count
 
          object result;
@@ -181,7 +181,7 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
          buffer.WriteUnsignedByte(((byte)Rejected.DescriptorCode));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.List32));
-         buffer.WriteInt((byte)0);  // Size
+         buffer.WriteInt((byte)4);  // Size
          buffer.WriteInt((byte)0);  // Count
 
          object result;

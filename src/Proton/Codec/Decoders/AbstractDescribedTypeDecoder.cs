@@ -75,22 +75,26 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return (T)actual;
       }
 
-      protected static void CheckIsExpectedType<T>(ITypeDecoder actual)
+      protected static ITypeDecoder CheckIsExpectedType<T>(ITypeDecoder actual)
       {
          if (!typeof(T).IsAssignableFrom(actual.GetType()))
          {
             throw new DecodeException(
                 "Expected " + typeof(T) + "encoding but got decoder for type: " + actual.GetType().Name);
          }
+
+         return actual;
       }
 
-      protected static void CheckIsExpectedType<T>(IStreamTypeDecoder actual)
+      protected static IStreamTypeDecoder CheckIsExpectedType<T>(IStreamTypeDecoder actual)
       {
          if (!typeof(T).IsAssignableFrom(actual.GetType()))
          {
             throw new DecodeException(
                 "Expected " + typeof(T) + "encoding but got decoder for type: " + actual.GetType().Name);
          }
+
+         return actual;
       }
    }
 }

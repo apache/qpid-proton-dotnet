@@ -66,7 +66,7 @@ namespace Apache.Qpid.Proton.Types.Security
 
          init.Hostname = "localhost";
          init.InitialResponse = binary;
-         init.Mechanism = Symbol.Lookup("ANONYMOUS");
+         init.Mechanism = Symbol.SaslLookup("ANONYMOUS");
 
          SaslInit copy = init.Copy();
 
@@ -74,6 +74,7 @@ namespace Apache.Qpid.Proton.Types.Security
          Assert.AreEqual(init.Hostname, copy.Hostname);
          Assert.AreEqual(init.InitialResponse, copy.InitialResponse);
          Assert.AreEqual(init.Mechanism, copy.Mechanism);
+         Assert.AreSame(init.Mechanism, copy.Mechanism);
       }
 
       [Test]

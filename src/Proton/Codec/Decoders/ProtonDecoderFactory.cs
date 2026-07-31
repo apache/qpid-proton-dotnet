@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
    {
       public static ProtonDecoder Create()
       {
-         ProtonDecoder decoder = new();
+         ProtonDecoder decoder = new(ProtonDecoder.DecoderMode.Default);
 
          AddMessagingTypeDecoders(decoder);
          AddTransactionTypeDecoders(decoder);
@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public static ProtonDecoder CreateSasl()
       {
-         ProtonDecoder decoder = new();
+         ProtonDecoder decoder = new(ProtonDecoder.DecoderMode.Sasl);
 
          AddSaslTypeDecoders(decoder);
 

@@ -79,7 +79,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          Stream stream = new ProtonBufferInputStream(buffer);
 
          SaslInit input = new SaslInit();
-         input.Mechanism = Symbol.Lookup("ANONYMOUS");
+         input.Mechanism = Symbol.SaslLookup("ANONYMOUS");
 
          encoder.WriteObject(buffer, encoderState, input);
 
@@ -93,7 +93,7 @@ namespace Apache.Qpid.Proton.Codec.Security
             result = (SaslInit)decoder.ReadObject(buffer, decoderState);
          }
 
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), result.Mechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), result.Mechanism);
          Assert.IsNull(result.Hostname);
          Assert.IsNull(result.InitialResponse);
       }
@@ -118,7 +118,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          byte[] initialResponse = new byte[] { 1, 2, 3, 4 };
 
          SaslInit input = new SaslInit();
-         input.Mechanism = Symbol.Lookup("ANONYMOUS");
+         input.Mechanism = Symbol.SaslLookup("ANONYMOUS");
          input.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(initialResponse);
 
          encoder.WriteObject(buffer, encoderState, input);
@@ -133,7 +133,7 @@ namespace Apache.Qpid.Proton.Codec.Security
             result = (SaslInit)decoder.ReadObject(buffer, decoderState);
          }
 
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), result.Mechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), result.Mechanism);
          Assert.IsNull(result.Hostname);
          Assert.AreEqual(ProtonByteBufferAllocator.Instance.Wrap(initialResponse), result.InitialResponse);
       }
@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          byte[] initialResponse = new byte[] { 1, 2, 3, 4 };
 
          SaslInit input = new SaslInit();
-         input.Mechanism = Symbol.Lookup("ANONYMOUS");
+         input.Mechanism = Symbol.SaslLookup("ANONYMOUS");
 
          // Ensure that a null is handled without NPE and that it does indeed clear old value.
          input.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(initialResponse);
@@ -176,7 +176,7 @@ namespace Apache.Qpid.Proton.Codec.Security
             result = (SaslInit)decoder.ReadObject(buffer, decoderState);
          }
 
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), result.Mechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), result.Mechanism);
          Assert.IsNull(result.Hostname);
          Assert.IsNull(result.InitialResponse);
       }
@@ -199,7 +199,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          Stream stream = new ProtonBufferInputStream(buffer);
 
          SaslInit input = new SaslInit();
-         input.Mechanism = Symbol.Lookup("ANONYMOUS");
+         input.Mechanism = Symbol.SaslLookup("ANONYMOUS");
          input.Hostname = "test";
 
          encoder.WriteObject(buffer, encoderState, input);
@@ -214,7 +214,7 @@ namespace Apache.Qpid.Proton.Codec.Security
             result = (SaslInit)decoder.ReadObject(buffer, decoderState);
          }
 
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), result.Mechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), result.Mechanism);
          Assert.AreEqual("test", result.Hostname);
          Assert.IsNull(result.InitialResponse);
       }
@@ -241,7 +241,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          SaslInit input = new SaslInit();
          input.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(initialResponse);
          input.Hostname = "test";
-         input.Mechanism = Symbol.Lookup("ANONYMOUS");
+         input.Mechanism = Symbol.SaslLookup("ANONYMOUS");
 
          encoder.WriteObject(buffer, encoderState, input);
 
@@ -256,7 +256,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          }
 
          Assert.AreEqual("test", result.Hostname);
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), result.Mechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), result.Mechanism);
          Assert.AreEqual(ProtonByteBufferAllocator.Instance.Wrap(initialResponse), result.InitialResponse);
       }
 
@@ -289,7 +289,7 @@ namespace Apache.Qpid.Proton.Codec.Security
 
          init.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1, 2 });
          init.Hostname = "localhost";
-         init.Mechanism = Symbol.Lookup("PLAIN");
+         init.Mechanism = Symbol.SaslLookup("PLAIN");
 
          encoder.WriteObject(buffer, encoderState, init);
 
@@ -325,7 +325,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          SaslInit value = result;
          Assert.AreEqual(ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1, 2 }), value.InitialResponse);
          Assert.AreEqual("localhost", value.Hostname);
-         Assert.AreEqual(Symbol.Lookup("PLAIN"), value.Mechanism);
+         Assert.AreEqual(Symbol.SaslLookup("PLAIN"), value.Mechanism);
       }
 
       [Test]
@@ -489,13 +489,13 @@ namespace Apache.Qpid.Proton.Codec.Security
 
          array[0].InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 0 });
          array[0].Hostname = "test-1";
-         array[0].Mechanism = Symbol.Lookup("ANONYMOUS");
+         array[0].Mechanism = Symbol.SaslLookup("ANONYMOUS");
          array[1].InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 1 });
          array[1].Hostname = "test-2";
-         array[1].Mechanism = Symbol.Lookup("PLAIN");
+         array[1].Mechanism = Symbol.SaslLookup("PLAIN");
          array[2].InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[] { 2 });
          array[2].Hostname = "test-2";
-         array[2].Mechanism = Symbol.Lookup("EXTERNAL");
+         array[2].Mechanism = Symbol.SaslLookup("EXTERNAL");
 
          encoder.WriteObject(buffer, encoderState, array);
 

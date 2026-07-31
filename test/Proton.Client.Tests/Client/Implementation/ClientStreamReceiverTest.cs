@@ -29,6 +29,8 @@ using System.IO;
 using Apache.Qpid.Proton.Utilities;
 using Apache.Qpid.Proton.Types;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Codec;
+using System.Collections;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -4282,6 +4284,280 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
             peer.WaitForScriptToComplete();
          }
+      }
+
+      [Test]
+      public void TestReceiveMessageThatExceedsDepthLimit()
+      {
+         byte[] payload = CreateNestedEncodedMessage(20);
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.RemoteTransfer().WithHandle(0)
+                .WithDeliveryId(0)
+                .WithDeliveryTag(new byte[] { 1 })
+                .WithMore(false)
+                .WithMessageFormat(0)
+                .WithPayload(payload).Queue();
+
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", new StreamReceiverOptions() { AutoAccept = false });
+            IStreamDelivery delivery = receiver.Receive();
+
+            peer.ExpectDisposition().WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            Assert.IsNotNull(delivery);
+            IStreamReceiverMessage received = delivery.Message(new StreamDecodeOptions() { DepthLimit = 20 });
+            Assert.IsTrue(received.HasAnnotation("A"));
+
+            delivery.Accept();
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCannotReceiveMessageThatExceedsDepthLimit()
+      {
+         byte[] payload = CreateNestedEncodedMessage(10);
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.RemoteTransfer().WithHandle(0)
+                                 .WithDeliveryId(0)
+                                 .WithDeliveryTag(new byte[] { 1 })
+                                 .WithMore(false)
+                                 .WithMessageFormat(0)
+                                 .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", new StreamReceiverOptions() { AutoAccept = false });
+            IStreamDelivery delivery = receiver.Receive();
+
+            receiver.OpenTask.Wait();
+
+            peer.ExpectDisposition().WithSettled(true).WithState().Rejected(
+               "amqp:error", "The nesting of types in the object being decoded exceeded the configured limit: 5");
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            Assert.IsNotNull(delivery);
+
+            try
+            {
+               delivery.Message(new StreamDecodeOptions() { DepthLimit = 5 }).HasAnnotation("A");
+               Assert.Fail("Should have thrown due to large nesting of elements");
+            }
+            catch (ClientException e)
+            {
+               delivery.Reject("amqp:error", e.Message);
+            }
+
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestReceiveMessageWithZeroWidthArrays()
+      {
+         byte[] payload = CreateEncodedMessageWithZeroWidthArray(10);
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.RemoteTransfer().WithHandle(0)
+                .WithDeliveryId(0)
+                .WithDeliveryTag(new byte[] { 1 })
+                .WithMore(false)
+                .WithMessageFormat(0)
+                .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", new StreamReceiverOptions() { AutoAccept = false });
+            IStreamDelivery delivery = receiver.Receive();
+
+            peer.ExpectDisposition().WithSettled(true).WithState().Accepted();
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            Assert.IsNotNull(delivery);
+            IStreamReceiverMessage received = delivery.Message(new StreamDecodeOptions() { MaxZeroWidthArrayElements = 10 });
+            Assert.IsTrue(received.HasAnnotation("A"));
+
+            delivery.Accept();
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      [Test]
+      public void TestCannotReceiveMessageWithZeroWidthArray()
+      {
+         byte[] payload = CreateEncodedMessageWithZeroWidthArray(10);
+
+         using (ProtonTestServer peer = new ProtonTestServer(loggerFactory))
+         {
+            peer.ExpectSASLAnonymousConnect();
+            peer.ExpectOpen().Respond();
+            peer.ExpectBegin().Respond();
+            peer.ExpectAttach().OfReceiver().Respond();
+            peer.ExpectFlow();
+            peer.RemoteTransfer().WithHandle(0)
+                .WithDeliveryId(0)
+                .WithDeliveryTag(new byte[] { 1 })
+                .WithMore(false)
+                .WithMessageFormat(0)
+                .WithPayload(payload).Queue();
+            peer.Start();
+
+            string remoteAddress = peer.ServerAddress;
+            int remotePort = peer.ServerPort;
+
+            logger.LogInformation("Test started, peer listening on: {0}:{1}", remoteAddress, remotePort);
+
+            IClient container = IClient.Create();
+            IConnection connection = container.Connect(remoteAddress, remotePort);
+            IStreamReceiver receiver = connection.OpenStreamReceiver("test-queue", new StreamReceiverOptions() { AutoAccept = false });
+            IStreamDelivery delivery = receiver.Receive();
+
+            peer.ExpectDisposition().WithSettled(true).WithState().Rejected(
+               "amqp:error", "Array size indicated 10 is greater than the amount of elements allowed for zero sized primitives (0)");
+            peer.ExpectDetach().Respond();
+            peer.ExpectEnd().Respond();
+            peer.ExpectClose().Respond();
+
+            Assert.IsNotNull(delivery);
+
+            try
+            {
+               // Defaults won't allow a decode of zero width arrays
+               delivery.Message(new StreamDecodeOptions()).HasAnnotation("A");
+               Assert.Fail("Should have thrown due to large nesting of elements");
+            }
+            catch (ClientException e)
+            {
+               delivery.Reject("amqp:error", e.Message);
+            }
+
+            receiver.Close();
+            connection.Close();
+
+            peer.WaitForScriptToComplete();
+         }
+      }
+
+      protected new byte[] CreateEncodedMessageWithZeroWidthArray(int length)
+      {
+         if (length > byte.MaxValue)
+         {
+            throw new ArgumentException("Length must be within the range of an unsigned byte");
+         }
+
+         IProtonBuffer buffer = new ProtonByteBufferAllocator().Allocate();
+
+         buffer.WriteUnsignedByte(0); // Described Type Indicator
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)MessageAnnotations.DescriptorCode);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Map8);
+         buffer.WriteUnsignedByte(8);
+         buffer.WriteUnsignedByte(2);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Sym8);
+         buffer.WriteUnsignedByte(1);
+         buffer.WriteUnsignedByte(65);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+         buffer.WriteUnsignedByte(2);
+         buffer.WriteUnsignedByte((byte) length);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.BooleanTrue);
+
+         byte[] result = new byte[buffer.ReadableBytes];
+
+         buffer.CopyInto(buffer.ReadOffset, result, 0, result.Length);
+
+         return result;
+      }
+
+      protected new byte[] CreateNestedEncodedMessage(int depth)
+      {
+         if (depth == 0 || depth > byte.MaxValue)
+         {
+            throw new ArgumentException("Depth should be within the range 1 => 127");
+         }
+
+         IEncoder encoder = CodecFactory.Encoder;
+         IProtonBuffer buffer = new ProtonByteBufferAllocator().Allocate();
+
+         IList lists = new List<object>();
+         IList current = lists;
+
+         // One top level Map, and a top level list
+         for (int i = 0; i < depth - 2; ++i)
+         {
+            IList next = new List<object>();
+
+            current.Add(next);
+            current = next;
+         }
+
+         IDictionary<Symbol, object> map = new Dictionary<Symbol, object>();
+         map.Add(Symbol.Lookup("A"), lists);
+
+         MessageAnnotations annotations = new MessageAnnotations(map);
+
+         encoder.WriteObject(buffer, encoder.CachedEncoderState, annotations);
+
+         byte[] result = new byte[buffer.ReadableBytes];
+
+         buffer.CopyInto(buffer.ReadOffset, result, 0, result.Length);
+
+         return result;
       }
    }
 }

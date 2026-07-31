@@ -39,7 +39,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private Action<IIncomingDelivery> deliveryUpdatedEventHandler = null;
 
       private readonly ProtonSessionIncomingWindow sessionWindow;
-      private readonly LinkedSplayedDictionary<uint, ProtonIncomingDelivery> unsettled = new();
+      private readonly UnsettledDictionary<ProtonIncomingDelivery> unsettled = new(delivery => delivery.DeliveryId);
 
       private uint? currentDeliveryId;
 
@@ -154,23 +154,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          IList<uint> toRemove = new List<uint>();
 
-         foreach (KeyValuePair<uint, ProtonIncomingDelivery> delivery in unsettled)
+         unsettled.ForEach((deliveryId, delivery) =>
          {
-            if (filter.Invoke(delivery.Value))
+            if (filter.Invoke(delivery))
             {
                if (state != null)
                {
-                  delivery.Value.LocalState(state);
+                  delivery.LocalState(state);
                }
                if (settle)
                {
-                  delivery.Value.LocallySettled();
-                  toRemove.Add(delivery.Key);
+                  delivery.LocallySettled();
+                  toRemove.Add(deliveryId);
                }
-
-               sessionWindow.ProcessDisposition(this, delivery.Value);
+               sessionWindow.ProcessDisposition(this, delivery);
             }
-         }
+         });
 
          if (toRemove.Count > 0)
          {
@@ -285,8 +284,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             currentDeliveryId = transfer.DeliveryId;
          }
 
-         delivery.IncrementAndGetTransferCount();
-
          if (transfer.HasState())
          {
             delivery.RemoteState = transfer.DeliveryState;
@@ -297,12 +294,10 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             delivery.RemotelySettled();
          }
 
-         if (payload != null)
-         {
-            delivery.AppendTransferPayload(payload);
-         }
+         delivery.AppendTransferPayload(payload);
 
          bool done = transfer.Aborted || !transfer.More;
+
          if (done)
          {
             CreditState.DecrementCredit();
@@ -317,6 +312,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             {
                delivery.Completed();
             }
+         }
+         else if (delivery.TransferCount >= engine.Configuration.MaxTransfersPerDelivery)
+         {
+            engine.EngineFailed(new ProtocolViolationException(LinkError.TRANSFER_LIMIT_EXCEEDED,
+                "Delivery not completed within configured max Transfers per delivery value: " +
+                engine.Configuration.MaxTransfersPerDelivery));
+
+            return;
          }
 
          if (transfer.Aborted)

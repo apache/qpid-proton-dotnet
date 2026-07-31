@@ -24,32 +24,42 @@ namespace Apache.Qpid.Proton.Types
 {
    public sealed class Symbol : IEquatable<Symbol>, IComparable, IComparable<Symbol>
    {
-      private static readonly ConcurrentDictionary<IProtonBuffer, Symbol> buffersToSymbols = new();
-      private static readonly ConcurrentDictionary<string, Symbol> stringsToSymbols = new();
+      // Prevents the Symbol cache from growing overly large if abused by creating overly
+      // large Symbols which would all be stored in the symbol cache. The SASL symbol cache
+      // is kept considerably smaller since there shouldn't be many entries used for the
+      // mechanisms and descriptor symbols as compared to the main application level cache.
+
+      private static readonly uint MaxSymbolCacheEntries = 8192;
+      private static readonly uint MaxCachedSymbolSize = 64;
+
+      private static readonly uint MaxSaslSymbolCacheEntries = 128;
+      private static readonly uint MaxCachedSaslSymbolSize = 32;
+
+      private static readonly SymbolCache CachedSymbols = new SymbolCache(MaxSymbolCacheEntries, MaxCachedSymbolSize);
+      private static readonly SymbolCache CachedSaslSymbols = new SymbolCache(MaxSaslSymbolCacheEntries, MaxCachedSaslSymbolSize);
 
       private static readonly Symbol EMPTY_SYMBOL = new();
-
-      // Prevents the Symbol cache from growing overly large if abused by creating overly
-      // large Symbols which would all be stored in the symbol cache.
-      private static readonly uint MAX_CACHED_SYMBOL_SIZE = 64;
 
       // Lazy allocated based on calls to stringify the given Symbol
       private string symbolString;
 
       private readonly IProtonBuffer underlying;
       private readonly int hashCode;
+      private readonly SymbolCache symbolCache;
 
       private Symbol()
       {
          underlying = ProtonByteBufferAllocator.Instance.Allocate(0, 0);
          symbolString = "";
          hashCode = 32;
+         symbolCache = null;
       }
 
-      private Symbol(IProtonBuffer buffer)
+      private Symbol(IProtonBuffer buffer, SymbolCache cache)
       {
          underlying = buffer;
          hashCode = buffer.GetHashCode();
+         symbolCache = cache;
       }
 
       /// <summary>
@@ -82,19 +92,7 @@ namespace Apache.Qpid.Proton.Types
          }
          else
          {
-            if (!stringsToSymbols.TryGetValue(value, out Symbol symbol))
-            {
-               symbol = Lookup(ProtonByteBufferAllocator.Instance.Wrap(Encoding.ASCII.GetBytes(value)));
-
-               if (symbol.Length <= MAX_CACHED_SYMBOL_SIZE)
-               {
-                  // Try and keep the Symbol instance consistent with the one that is stored
-                  // in the buffer to symbol dictionary.
-                  stringsToSymbols[value] = symbol;
-               }
-            }
-
-            return symbol;
+            return CachedSymbols.Lookup(value);
          }
       }
 
@@ -131,29 +129,69 @@ namespace Apache.Qpid.Proton.Types
          }
          else
          {
-            if (!buffersToSymbols.TryGetValue(value, out Symbol symbol))
-            {
-               if (copyOnCreate)
-               {
-                  long symbolSize = value.ReadableBytes;
-                  IProtonBuffer copy = ProtonByteBufferAllocator.Instance.Allocate(symbolSize, symbolSize);
-                  value.CopyInto(value.ReadOffset, copy, 0, symbolSize);
-                  copy.WriteOffset = symbolSize;
-                  value = copy;
-               }
+            return CachedSymbols.Lookup(value, copyOnCreate);
+         }
+      }
 
-               symbol = new Symbol(value);
+      /// <summary>
+      /// Lookup or create a singleton instance of the given Symbol that has the
+      /// matching name to the string value provided. This method looks in the
+      /// smaller SASL symbol cache for the matching Symbol value.
+      /// </summary>
+      /// <param name="value">the stringified symbol name</param>
+      /// <returns>A singleton instance of the named Symbol</returns>
+      public static Symbol SaslLookup(string value)
+      {
+         if (value == null)
+         {
+            return null;
+         }
+         else if (value.Length == 0)
+         {
+            return EMPTY_SYMBOL;
+         }
+         else
+         {
+            return CachedSaslSymbols.Lookup(value);
+         }
+      }
 
-               if (symbol.Length <= MAX_CACHED_SYMBOL_SIZE)
-               {
-                  if (!buffersToSymbols.TryAdd(value, symbol))
-                  {
-                     symbol = buffersToSymbols[value];
-                  }
-               }
-            }
+      /// <summary>
+      /// Lookup or create a singleton instance of the given Symbol that has the
+      /// matching byte contents as the given buffer, if none exists a new Symbol
+      /// is created using the given buffer which is not copied but used directly.
+      /// This method looks in the smaller SASL Symbol cache for the matching value.
+      /// </summary>
+      /// <param name="value">the stringified symbol name</param>
+      /// <returns>A singleton instance of the named Symbol</returns>
+      public static Symbol SaslLookup(IProtonBuffer value)
+      {
+         return SaslLookup(value, false);
+      }
 
-            return symbol;
+      /// <summary>
+      /// Lookup or create a singleton instance of the given Symbol that has the
+      /// matching byte contents as the given buffer, if none exists a new Symbol
+      /// is created using the given buffer which is not copied if the provided
+      /// boolean option requests it. This method looks in the smaller SASL Symbol
+      /// cache for the matching value.
+      /// </summary>
+      /// <param name="value">the stringified symbol name</param>
+      /// <param name="copyOnCreate">should the given buffer be copied if a Symbol is created</param>
+      /// <returns>A singleton instance of the named Symbol</returns>
+      public static Symbol SaslLookup(IProtonBuffer value, bool copyOnCreate)
+      {
+         if (value == null)
+         {
+            return null;
+         }
+         else if (!value.IsReadable)
+         {
+            return EMPTY_SYMBOL;
+         }
+         else
+         {
+            return CachedSaslSymbols.Lookup(value, copyOnCreate);
          }
       }
 
@@ -180,14 +218,7 @@ namespace Apache.Qpid.Proton.Types
       {
          if (symbolString == null && underlying.IsReadable)
          {
-            symbolString = underlying.ToString(Encoding.ASCII);
-            if (symbolString.Length <= MAX_CACHED_SYMBOL_SIZE)
-            {
-               if (!stringsToSymbols.TryAdd(symbolString, this))
-               {
-                  symbolString = stringsToSymbols[symbolString].symbolString;
-               }
-            }
+            symbolCache.ToString(this);
          }
 
          return symbolString ?? "";
@@ -226,6 +257,118 @@ namespace Apache.Qpid.Proton.Types
       public int CompareTo(object other)
       {
          return CompareTo(other as Symbol);
+      }
+
+      private static Symbol CreateSymbol(SymbolCache cache, IProtonBuffer buffer, bool copyOnCreate)
+      {
+            if (copyOnCreate)
+            {
+               long symbolSize = buffer.ReadableBytes;
+               IProtonBuffer copy = ProtonByteBufferAllocator.Instance.Allocate(symbolSize, symbolSize);
+               buffer.CopyInto(buffer.ReadOffset, copy, 0, symbolSize);
+               copy.WriteOffset = symbolSize;
+               buffer = copy;
+            }
+
+            return new Symbol(buffer, cache);
+      }
+
+      private sealed class SymbolCache
+      {
+         private readonly ConcurrentDictionary<IProtonBuffer, Symbol> buffersToSymbols = new();
+         private readonly ConcurrentDictionary<string, Symbol> stringsToSymbols = new();
+
+         private readonly uint maxCachedSymbols;
+         private readonly uint maxCachedSymbolSize;
+
+         public SymbolCache(uint maxCachedSymbols, uint maxCachedSymbolSize)
+         {
+            this.maxCachedSymbols = maxCachedSymbols;
+            this.maxCachedSymbolSize = maxCachedSymbolSize;
+         }
+
+         public Symbol Lookup(string value)
+         {
+            if (!stringsToSymbols.TryGetValue(value, out Symbol symbol))
+            {
+               symbol = Lookup(ProtonByteBufferAllocator.Instance.Wrap(Encoding.ASCII.GetBytes(value)));
+
+               if (symbol.symbolString == null)
+               {
+                  // In case of a new Symbol object being created we want to ensure the String value
+                  // is loaded now since we know what it is and future calls won't need to access the
+                  // cache for no reason.
+                  symbol.symbolString = value;
+               }
+
+               if (symbol.Length <= maxCachedSymbolSize && stringsToSymbols.Count < maxCachedSymbols)
+               {
+                  // Try and keep the Symbol instance consistent with the one that is stored
+                  // in the buffer to symbol dictionary.
+                  stringsToSymbols[value] = symbol;
+               }
+            }
+
+            return symbol;
+         }
+
+         public Symbol Lookup(IProtonBuffer value)
+         {
+            return Lookup(value, false);
+         }
+
+         public Symbol Lookup(IProtonBuffer value, bool copyOnCreate)
+         {
+            bool canCache = value.ReadableBytes <= maxCachedSymbolSize;
+
+            if (canCache)
+            {
+               if (!buffersToSymbols.TryGetValue(value, out Symbol symbol))
+               {
+                  // Lock to prevent the cache from possibly growing beyond the max cache size
+                  // due to races on early fills from multiple connection threads.
+                  lock (EMPTY_SYMBOL)
+                  {
+                     if (!buffersToSymbols.TryGetValue(value, out symbol))
+                     {
+                        symbol = CreateSymbol(this, value, copyOnCreate);
+
+                        if (buffersToSymbols.Count < maxCachedSymbols)
+                        {
+                           if (!buffersToSymbols.TryAdd(value, symbol))
+                           {
+                              symbol = buffersToSymbols[value];
+                           }
+                        }
+                     }
+                  }
+               }
+
+               return symbol;
+            }
+            else
+            {
+               return CreateSymbol(this, value, copyOnCreate);
+            }
+         }
+
+         public string ToString(Symbol symbol)
+         {
+            if (symbol.symbolString == null && symbol.underlying.IsReadable)
+            {
+               symbol.symbolString = symbol.underlying.ToString(Encoding.ASCII);
+
+               if (symbol.symbolString.Length <= maxCachedSymbolSize && stringsToSymbols.Count < maxCachedSymbols)
+               {
+                  if (!stringsToSymbols.TryAdd(symbol.symbolString, symbol))
+                  {
+                     symbol.symbolString = stringsToSymbols[symbol.symbolString].symbolString;
+                  }
+               }
+            }
+
+            return symbol.symbolString ?? "";
+         }
       }
    }
 }

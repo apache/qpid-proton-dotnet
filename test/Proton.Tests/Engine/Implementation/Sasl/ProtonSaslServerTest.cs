@@ -215,12 +215,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          public void HandleSaslHeader(ISaslServerContext context, AmqpHeader header)
          {
-            context.SendMechanisms(new Symbol[] { Symbol.Lookup("ANONYMOUS") });
+            context.SendMechanisms(new Symbol[] { Symbol.SaslLookup("ANONYMOUS") });
          }
 
          public void HandleSaslInit(ISaslServerContext context, Symbol mechanism, IProtonBuffer initResponse)
          {
-            if (mechanism.Equals(Symbol.Lookup("ANONYMOUS")))
+            if (mechanism.Equals(Symbol.SaslLookup("ANONYMOUS")))
             {
                context.SendOutcome(SaslAuthOutcome.SaslOk, null);
             }
@@ -240,12 +240,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       {
          public void HandleSaslHeader(ISaslServerContext context, AmqpHeader header)
          {
-            context.SendMechanisms(new Symbol[] { Symbol.Lookup("PLAIN") });
+            context.SendMechanisms(new Symbol[] { Symbol.SaslLookup("PLAIN") });
          }
 
          public void HandleSaslInit(ISaslServerContext context, Symbol mechanism, IProtonBuffer initResponse)
          {
-            if (mechanism.Equals(Symbol.Lookup("PLAIN")))
+            if (mechanism.Equals(Symbol.SaslLookup("PLAIN")))
             {
                context.SendOutcome(SaslAuthOutcome.SaslOk, null);
             }

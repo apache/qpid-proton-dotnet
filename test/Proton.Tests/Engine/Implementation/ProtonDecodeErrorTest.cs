@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          byte[] bytes = new byte[] { 0x00, 0x00, 0x00, 0x0F, // Frame size = 15 bytes.
                                      0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
                                      0x00, 0x53, 0x10, (byte) 0xC0, // Described-type, ulong type, open descriptor, list0.
-                                     0x03, 0x01, 0x40 }; // size (3), count (1), container-id (null).
+                                     0x03, 0x01, 0x40, 0x40 }; // size (3), count (1), container-id (null).
 
          DoInvalidOpenProvokesDecodeErrorTestImpl(bytes, "The container-id field cannot be omitted from the Open");
       }
@@ -47,7 +47,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
                                      0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
                                      0x00, 0x53, 0x10, 0x45};// Described-type, ulong type, open descriptor, list0.
 
-         DoInvalidOpenProvokesDecodeErrorTestImpl(bytes, "The container-id field cannot be omitted from the Open");
+         DoInvalidOpenProvokesDecodeErrorTestImpl(bytes, "Not enough list elements indicated in the encoded count, expected 1 but got 0");
       }
 
       private void DoInvalidOpenProvokesDecodeErrorTestImpl(byte[] bytes, String errorDescription)
@@ -82,7 +82,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x11, 0x45};// Described-type, ulong type, Begin descriptor, list0.
 
-         DoInvalidBeginProvokesDecodeErrorTestImpl(bytes, "The next-outgoing-id field cannot be omitted from the Begin");
+         DoInvalidBeginProvokesDecodeErrorTestImpl(bytes, "Not enough list elements indicated in the encoded count, expected 4 but got 0");
       }
 
       [Test]
@@ -93,7 +93,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x0F, // Frame size = 15 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x11, (byte) 0xC0, // Described-type, ulong type, Begin descriptor, list8.
-            0x03, 0x01, 0x40 }; // size (3), count (1), remote-channel (null).
+            0x05, 0x04, 0x40, 0x40, 0x40, 0x40, 0x40 }; // size (3), count (1), remote-channel (null).
 
          DoInvalidBeginProvokesDecodeErrorTestImpl(bytes, "The next-outgoing-id field cannot be omitted from the Begin");
       }
@@ -106,7 +106,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x11, // Frame size = 17 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x11, (byte) 0xC0, // Described-type, ulong type, Begin descriptor, list8.
-            0x05, 0x03, 0x40, 0x43, 0x43 }; // size (5), count (3), remote-channel (null), next-outgoing-id (uint0), incoming-window (uint0).
+            0x05, 0x04, 0x40, 0x43, 0x43, 0x40 }; // size (5), count (3), remote-channel (null), next-outgoing-id (uint0), incoming-window (uint0).
 
          DoInvalidBeginProvokesDecodeErrorTestImpl(bytes, "The outgoing-window field cannot be omitted from the Begin");
       }
@@ -119,7 +119,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x12, // Frame size = 18 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x11, (byte) 0xC0, // Described-type, ulong type, Begin descriptor, list8.
-            0x06, 0x04, 0x40, 0x43, 0x43, 0x40 }; // size (5), count (4), remote-channel (null), next-outgoing-id (uint0), incoming-window (uint0), outgoing-window (null).
+            0x06, 0x04, 0x40, 0x43, 0x43, 0x40, 0x40 }; // size (5), count (4), remote-channel (null), next-outgoing-id (uint0), incoming-window (uint0), outgoing-window (null).
 
          DoInvalidBeginProvokesDecodeErrorTestImpl(bytes, "The outgoing-window field cannot be omitted from the Begin");
       }
@@ -156,7 +156,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x13, 0x45};// Described-type, ulong type, Flow descriptor, list0.
 
-         DoInvalidFlowProvokesDecodeErrorTestImpl(bytes, "The incoming-window field cannot be omitted from the Flow");
+         DoInvalidFlowProvokesDecodeErrorTestImpl(bytes, "Not enough list elements indicated in the encoded count, expected 4 but got 0");
       }
 
       [Test]
@@ -167,7 +167,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x0F, // Frame size = 15 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x13, (byte) 0xC0, // Described-type, ulong type, Flow descriptor, list8.
-            0x03, 0x01, 0x43 }; // size (3), count (1), next-incoming-id (uint0).
+            0x04, 0x04, 0x43, 0x40, 0x40, 0x40 }; // size (3), count (1), next-incoming-id (uint0).
 
          DoInvalidFlowProvokesDecodeErrorTestImpl(bytes, "The incoming-window field cannot be omitted from the Flow");
       }
@@ -180,7 +180,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x11, // Frame size = 17 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x13, (byte) 0xC0, // Described-type, ulong type, Flow descriptor, list8.
-            0x05, 0x03, 0x43, 0x43, 0x43 }; // size (5), count (3), next-incoming-id (0), incoming-window (uint0), next-outgoing-id (uint0).
+            0x05, 0x04, 0x43, 0x43, 0x43, 0x40 }; // size (5), count (3), next-incoming-id (0), incoming-window (uint0), next-outgoing-id (uint0).
 
          DoInvalidFlowProvokesDecodeErrorTestImpl(bytes, "The outgoing-window field cannot be omitted from the Flow");
       }
@@ -193,7 +193,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x12, // Frame size = 18 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x13, (byte) 0xC0, // Described-type, ulong type, Flow descriptor, list8.
-            0x06, 0x04, 0x43, 0x43, 0x43, 0x40 }; // size (5), count (4), next-incoming-id (0), incoming-window (uint0), next-outgoing-id (uint0), outgoing-window (null).
+            0x06, 0x04, 0x43, 0x43, 0x43, 0x40, 0x40 }; // size (5), count (4), next-incoming-id (0), incoming-window (uint0), next-outgoing-id (uint0), outgoing-window (null).
 
          DoInvalidFlowProvokesDecodeErrorTestImpl(bytes, "The outgoing-window field cannot be omitted from the Flow");
       }
@@ -229,7 +229,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x14, 0x45};// Described-type, ulong type, Transfer descriptor, list0.
 
-         DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "The handle field cannot be omitted from the Transfer");
+         DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "Not enough list elements indicated in the encoded count, expected 1 but got 0");
       }
 
       [Test]
@@ -240,7 +240,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x0F, // Frame size = 15 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x14, (byte) 0xC0, // Described-type, ulong type, Transfer descriptor, list8.
-            0x03, 0x01, 0x40 }; // size (3), count (1), handle (null / not-present).
+            0x03, 0x01, 0x40, 0x00 }; // size (3), count (1), handle (null / not-present).
 
          DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "The handle field cannot be omitted from the Transfer");
       }
@@ -253,7 +253,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x0F, // Frame size = 15 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x14, (byte) 0xC0, // Described-type, ulong type, Transfer descriptor, list8.
-            0x03, 0x01, (byte) 0xA3 }; // size (3), count (1), handle (invalid sym8 type constructor given, not really present).
+            0x03, 0x01, 0xA3, 0x40 }; // size (3), count (1), handle (invalid sym8 type constructor given, not really present).
 
          DoInvalidTransferProvokesDecodeErrorTestImpl(bytes, "Expected Unsigned Integer type but found encoding: Sym8");
       }
@@ -294,7 +294,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x15, 0x45};// Described-type, ulong type, Disposition descriptor, list0.
 
-         DoInvalidDispositionProvokesDecodeErrorTestImpl(bytes, "The role field cannot be omitted from the Disposition");
+         DoInvalidDispositionProvokesDecodeErrorTestImpl(bytes, "Not enough list elements indicated in the encoded count, expected 2 but got 0");
       }
 
       [Test]
@@ -305,7 +305,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             0x00, 0x00, 0x00, 0x10, // Frame size = 16 bytes.
             0x02, 0x00, 0x00, 0x00, // DOFF, TYPE, 2x CHANNEL
             0x00, 0x53, 0x15, (byte) 0xC0, // Described-type, ulong type, Disposition descriptor, list8.
-            0x04, 0x02, 0x41, 0x40 }; // size (4), count (2), role (receiver - the peers perspective), first ( null / not-present)
+            0x04, 0x02, 0x41, 0x40, 0x40 }; // size (4), count (2), role (receiver - the peers perspective), first ( null / not-present)
 
          DoInvalidDispositionProvokesDecodeErrorTestImpl(bytes, "The first field cannot be omitted from the Disposition");
       }

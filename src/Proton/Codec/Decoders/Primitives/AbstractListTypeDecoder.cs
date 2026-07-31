@@ -29,50 +29,91 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
    /// </summary>
    public abstract class AbstractListTypeDecoder : AbstractPrimitiveTypeDecoder, IListTypeDecoder
    {
+      private static readonly int MAX_LIST_PREALLOCATION = 256;
+
       public override Type DecodesType => typeof(IList);
 
       public IList<T> ReadList<T>(IProtonBuffer buffer, IDecoderState state)
       {
-         int size = ReadSize(buffer, state);
+         state.IncreaseDepth();
 
-         // Ensure we do not allocate an array of size greater then the available data, otherwise there is a risk for an OOM error
-         if (size > buffer.ReadableBytes)
+         try
          {
-            throw new DecodeException(string.Format(
-                    "List element size {0} is specified to be greater than the amount " +
-                    "of data available ({1})", size, buffer.ReadableBytes));
+            int size = ReadSize(buffer, state);
+            long expectedEndPos = buffer.ReadOffset + size;
+
+            // Ensure we do not allocate an array of size greater then the available data, otherwise there is a risk for an OOM error
+            if (size > buffer.ReadableBytes || size < 0)
+            {
+               throw new DecodeException(string.Format(
+                     "List element size {0} is specified to be greater than the amount " +
+                     "of data available ({1})", (uint) size, buffer.ReadableBytes));
+            }
+
+            int count = ReadCount(buffer, state);
+
+            if (count > size || count < 0)
+            {
+               throw new DecodeException(String.Format(
+                     "List encoded element count is specified to be greater than the encoded size " +
+                     "s:(%d) c:(%d)", size, count));
+            }
+
+            IList<T> list = new List<T>(Math.Min(MAX_LIST_PREALLOCATION, count));
+            for (int i = 0; i < count; i++)
+            {
+               list.Add(state.Decoder.ReadObject<T>(buffer, state));
+            }
+
+            if (buffer.ReadOffset != expectedEndPos)
+            {
+               throw new DecodeException("List decoding did not read the expected amount of bytes: " + size);
+            }
+
+            return list;
          }
-
-         int count = ReadCount(buffer, state);
-
-         if (count > buffer.ReadableBytes)
+         finally
          {
-            throw new DecodeException(string.Format(
-                    "List encoded element count {0} is specified to be greater than the amount " +
-                    "of data available ({1})", count, buffer.ReadableBytes));
+            state.DecreaseDepth();
          }
-
-         IList<T> list = new List<T>(count);
-         for (int i = 0; i < count; i++)
-         {
-            list.Add(state.Decoder.ReadObject<T>(buffer, state));
-         }
-
-         return list;
       }
 
       public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
       {
-         ReadSize(stream, state);
-         int count = ReadCount(stream, state);
+         state.IncreaseDepth();
 
-         IList<T> list = new List<T>(count);
-         for (int i = 0; i < count; i++)
+         try
          {
-            list.Add(state.Decoder.ReadObject<T>(stream, state));
-         }
+            int size = ReadSize(stream, state);
 
-         return list;
+            if (size > state.MaxListSize || size < 0)
+            {
+               throw new DecodeException(String.Format(
+                     "List encoding size is specified to be greater than the maximum allowed size " +
+                     "c:(%d) m:(%d)", (uint) size, state.MaxListSize));
+            }
+
+            int count = ReadCount(stream, state);
+
+            if (count > size || count < 0)
+            {
+               throw new DecodeException(String.Format(
+                     "List encoded element count is specified to be greater than the encoded size " +
+                     "s:(%d) c:(%d)", size, count));
+            }
+
+            IList<T> list = new List<T>(Math.Min(MAX_LIST_PREALLOCATION, count));
+            for (int i = 0; i < count; i++)
+            {
+               list.Add(state.Decoder.ReadObject<T>(stream, state));
+            }
+
+            return list;
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
@@ -87,18 +128,47 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         buffer.SkipBytes(ReadSize(buffer, state));
+         int size = ReadSize(buffer, state);
+
+         if (size > buffer.ReadableBytes || size < 0)
+         {
+            throw new DecodeException(string.Format(
+                    "List element size {0} is specified to be greater than the amount " +
+                    "of data available ({1})", (uint) size, buffer.ReadableBytes));
+         }
+
+         state.IncreaseDepth();
+
+         try
+         {
+            buffer.SkipBytes(size);
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
+         int size = ReadSize(stream, state);
+
+         if (size > state.MaxListSize || size < 0)
+         {
+            throw new DecodeException(String.Format(
+                  "List encoding size is specified to be greater than the maximum allowed size " +
+                  "c:(%d) m:(%d)", (uint) size, state.MaxListSize));
+         }
+
+         state.IncreaseDepth();
+
          try
          {
-            ProtonStreamReadUtils.SkipBytes(stream, ReadSize(stream, state));
+            ProtonStreamReadUtils.SkipBytes(stream, size);
          }
-         catch (IOException ex)
+         finally
          {
-            throw new DecodeException("Error while reading List payload bytes", ex);
+            state.DecreaseDepth();
          }
       }
 

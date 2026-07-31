@@ -104,6 +104,22 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return message;
       }
 
+      public IMessage<object> Message(DecodeOptions options)
+      {
+         if (rawInputStream != null)
+         {
+            throw new ClientIllegalStateException("Cannot access Delivery Annotations API after requesting an InputStream");
+         }
+
+         IMessage<object> message = cachedMessage;
+         if (message == null && payload.IsReadable)
+         {
+            message = cachedMessage = ClientMessageSupport.DecodeMessage(payload, SetDeliveryAnnotations, options);
+         }
+
+         return message;
+      }
+
       public IDelivery Disposition(IDeliveryState state, bool settled)
       {
          return receiver.DispositionAsync(this, state?.AsProtonType(), settled).ConfigureAwait(false).GetAwaiter().GetResult();

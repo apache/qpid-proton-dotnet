@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+using System;
+using System.IO;
+using Apache.Qpid.Proton.Buffer;
+
 namespace Apache.Qpid.Proton.Codec
 {
    /// <summary>
@@ -22,5 +26,35 @@ namespace Apache.Qpid.Proton.Codec
    /// </summary>
    public interface IPrimitiveArrayTypeDecoder : IPrimitiveTypeDecoder
    {
+      /// <summary>
+      /// Reads the given array from the bytes in the buffer but only if the type encoding
+      /// of the given array matches the given Type filter. This allows the caller to
+      /// effectively limit if the given array is decoded at all if the type encoding is
+      /// not a match and also can act to limit an array to only a single level as the type
+      /// encoding of nested arrays will not be the value type until the bottom of the array
+      /// is reached. To allow all types and any array nesting the caller should pass the
+      /// object Type.
+      /// </summary>
+      /// <param name="buffer"></param>
+      /// <param name="state"></param>
+      /// <param name="ofType"></param>
+      /// <returns>An array containing elements of the given type</returns>
+      object ReadValue(IProtonBuffer buffer, IDecoderState state, Type ofType);
+
+      /// <summary>
+      /// Reads the given array from the bytes in the buffer but only if the type encoding
+      /// of the given array matches the given Type filter. This allows the caller to
+      /// effectively limit if the given array is decoded at all if the type encoding is
+      /// not a match and also can act to limit an array to only a single level as the type
+      /// encoding of nested arrays will not be the value type until the bottom of the array
+      /// is reached. To allow all types and any array nesting the caller should pass the
+      /// object Type.
+      /// </summary>
+      /// <param name="stream"></param>
+      /// <param name="state"></param>
+      /// <param name="ofType"></param>
+      /// <returns>An array containing elements of the given type</returns>
+      object ReadValue(Stream stream, IStreamDecoderState state, Type ofType);
+
    }
 }

@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
+using System;
 using System.Text;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Utilities;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 namespace Apache.Qpid.Proton.Types
 {
@@ -119,12 +122,23 @@ namespace Apache.Qpid.Proton.Types
 
          Symbol symbol1 = Symbol.Lookup(symbolString1);
          Symbol symbol2 = Symbol.Lookup(symbolString2);
+         Symbol symbol3 = Symbol.SaslLookup(symbolString1);
+         Symbol symbol4 = Symbol.SaslLookup(symbolString2);
 
          Assert.AreNotEqual(symbol1, symbol2);
          Assert.AreNotEqual(symbol1.GetHashCode(), symbol2.GetHashCode());
+         Assert.AreNotEqual(symbol3, symbol4);
+         Assert.AreNotEqual(symbol3.GetHashCode(), symbol4.GetHashCode());
+
+         Assert.AreEqual(symbol1, symbol3);
+         Assert.AreEqual(symbol1.GetHashCode(), symbol3.GetHashCode());
+         Assert.AreEqual(symbol2, symbol4);
+         Assert.AreEqual(symbol2.GetHashCode(), symbol4.GetHashCode());
 
          Assert.AreEqual(symbol1.GetHashCode(), Symbol.Lookup(symbolString1).GetHashCode());
          Assert.AreEqual(symbol2.GetHashCode(), Symbol.Lookup(symbolString2).GetHashCode());
+         Assert.AreEqual(symbol3.GetHashCode(), Symbol.SaslLookup(symbolString1).GetHashCode());
+         Assert.AreEqual(symbol4.GetHashCode(), Symbol.SaslLookup(symbolString2).GetHashCode());
       }
 
       [Test]
@@ -228,6 +242,19 @@ namespace Apache.Qpid.Proton.Types
       }
 
       [Test]
+      public void TestLargeSASLSymbolNotCached()
+      {
+         Encoding ASCII = new ASCIIEncoding();
+
+         Symbol symbol1 = Symbol.SaslLookup(LARGE_SYMBOL_VALUE);
+         Symbol symbol2 = Symbol.SaslLookup(
+             ProtonByteBufferAllocator.Instance.Wrap(ASCII.GetBytes(LARGE_SYMBOL_VALUE)));
+
+         Assert.AreNotSame(symbol1, symbol2);
+         Assert.AreNotSame(symbol1.ToString(), symbol2.ToString());
+      }
+
+      [Test]
       public void TestImplicitToStringHandlesNull()
       {
          string symbolString = null;
@@ -275,6 +302,145 @@ namespace Apache.Qpid.Proton.Types
 
          Assert.AreSame(symbol1, symbol2);
          Assert.AreSame((string)symbol1, (string)symbol2);
+      }
+
+      [Test]
+      public void TestGetSASLSymbols()
+      {
+         string[] symbolStrings = new string[] { "one", "two", "three" };
+
+         Symbol[] symbols1 = StringUtils.ToSaslSymbolArray(symbolStrings);
+         Symbol[] symbols2 = StringUtils.ToSaslSymbolArray(symbolStrings);
+
+         Assert.AreEqual(symbolStrings.Length, symbols1.Length);
+         Assert.AreEqual(symbolStrings.Length, symbols2.Length);
+         Assert.AreEqual(symbols1, symbols2);
+
+         for (int i = 0; i < symbolStrings.Length; ++i)
+         {
+            Assert.AreSame(symbols1[i], symbols2[i]);
+         }
+      }
+
+      [Test]
+      //[Ignore("Cache is static so running has side effects.")]
+      public void TestGetSymbolsCachingMaxesOut()
+      {
+         bool notSame = false;
+         int attempts;
+
+         for (attempts = 0; attempts < short.MaxValue; ++attempts)
+         {
+            Symbol symbol1 = Symbol.Lookup(Convert.ToString(attempts));
+            Symbol symbol2 = Symbol.Lookup(Convert.ToString(attempts));
+
+            if (symbol1 != symbol2)
+            {
+               notSame = true;
+               break;
+            }
+         }
+
+         Assert.IsTrue(notSame);
+         Assert.IsTrue(attempts > byte.MaxValue);
+      }
+
+      [Test]
+      [Ignore("Cache is static so running has side effects.")]
+      public void TestGetSASLSymbolsCachingMaxesOut()
+      {
+         bool notSame = false;
+         int attempts;
+
+         for (attempts = 0; attempts < short.MaxValue; ++attempts)
+         {
+            Symbol symbol1 = Symbol.SaslLookup(Convert.ToString(attempts));
+            Symbol symbol2 = Symbol.SaslLookup(Convert.ToString(attempts));
+
+            if (symbol1 != symbol2)
+            {
+               notSame = true;
+               break;
+            }
+         }
+
+         Assert.IsTrue(notSame);
+         Assert.IsTrue(attempts > sbyte.MaxValue);
+      }
+
+      [Test]
+      [Ignore("Cache is static so running has side effects.")]
+      public void TestGetSymbolFromBufferCachingMaxesOut()
+      {
+         bool notSame = false;
+         int attempts;
+         Encoding ASCII = new ASCIIEncoding();
+
+         for (attempts = 0; attempts < short.MaxValue; ++attempts)
+         {
+            IProtonBuffer bytes = ProtonByteBufferAllocator.Instance.Wrap(ASCII.GetBytes(Convert.ToString(attempts)));
+
+            Symbol symbol1 = Symbol.Lookup(bytes);
+            Symbol symbol2 = Symbol.Lookup(bytes);
+
+            if (symbol1 != symbol2)
+            {
+               notSame = true;
+               break;
+            }
+         }
+
+         Assert.IsTrue(notSame);
+         Assert.IsTrue(attempts > byte.MaxValue);
+      }
+
+      [Test]
+      [Ignore("Cache is static so running has side effects.")]
+      public void TestGetSASLSymbolFromBufferCachingMaxesOut()
+      {
+         bool notSame = false;
+         int attempts;
+         Encoding ASCII = new ASCIIEncoding();
+
+         for (attempts = 0; attempts < short.MaxValue; ++attempts)
+         {
+            IProtonBuffer bytes = ProtonByteBufferAllocator.Instance.Wrap(ASCII.GetBytes(Convert.ToString(attempts)));
+
+            Symbol symbol1 = Symbol.SaslLookup(bytes);
+            Symbol symbol2 = Symbol.SaslLookup(bytes);
+
+            if (symbol1 != symbol2)
+            {
+               notSame = true;
+               break;
+            }
+         }
+
+         Assert.IsTrue(notSame);
+         Assert.IsTrue(attempts > sbyte.MaxValue);
+      }
+
+      [Test]
+      public void TestGetSymbolAndGetSASLSymbolUseDifferentCaches()
+      {
+         string symbolString = "Symbol-String";
+
+         Symbol symbol1 = Symbol.Lookup(symbolString);
+         Symbol symbol2 = Symbol.Lookup(symbolString);
+
+         Symbol symbol3 = Symbol.SaslLookup(symbolString);
+         Symbol symbol4 = Symbol.SaslLookup(symbolString);
+
+         Assert.AreEqual(symbolString, symbol1.ToString());
+         Assert.AreEqual(symbolString, symbol2.ToString());
+         Assert.AreEqual(symbolString, symbol3.ToString());
+         Assert.AreEqual(symbolString, symbol4.ToString());
+
+         Assert.AreSame(symbol1, symbol2);
+         Assert.AreSame(symbol3, symbol4);
+
+         Assert.AreNotSame(symbol1, symbol3);
+         Assert.AreNotSame(symbol2, symbol4);
       }
    }
 }

@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    /// </summary>
    public sealed class CramMD5Mechanism : AbstractMechanism
    {
-      public static readonly Symbol CRAM_MD5 = Symbol.Lookup("CRAM-MD5");
+      public static readonly Symbol CRAM_MD5 = Symbol.SaslLookup("CRAM-MD5");
 
       private bool sentResponse;
 

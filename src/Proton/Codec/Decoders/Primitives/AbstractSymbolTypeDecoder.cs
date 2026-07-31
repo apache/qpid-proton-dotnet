@@ -39,18 +39,18 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
             return Symbol.Lookup("");
          }
 
-         if (length > buffer.ReadableBytes)
+         if (length > buffer.ReadableBytes || length < 0)
          {
             throw new DecodeException(string.Format(
                     "Symbol encoded size {0} is specified to be greater than the amount " +
-                    "of data available {1}", length, buffer.ReadableBytes));
+                    "of data available {1}", (uint) length, buffer.ReadableBytes));
          }
 
          IProtonBuffer symbolBuffer = buffer.Copy(buffer.ReadOffset, length);
 
          buffer.SkipBytes(length);
 
-         return Symbol.Lookup(symbolBuffer);
+         return SymbolLookup(symbolBuffer, true);
       }
 
       public override Symbol ReadValue(Stream stream, IStreamDecoderState state)
@@ -60,6 +60,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
          if (length == 0)
          {
             return Symbol.Lookup("");
+         }
+
+         if (length > state.MaxSymbolSize || length < 0)
+         {
+            throw new DecodeException(String.Format(
+                  "Binary encoded length is specified to be greater than the maximum allowed length " +
+                  "l:(%d) m:(%d)", (uint) length, state.MaxSymbolSize));
          }
 
          byte[] symbolBytes;
@@ -73,29 +80,52 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
             throw new DecodeException("Error while reading Symbol payload bytes", ex);
          }
 
-         return Symbol.Lookup(ProtonByteBufferAllocator.Instance.Wrap(symbolBytes));
+         return SymbolLookup(ProtonByteBufferAllocator.Instance.Wrap(symbolBytes), false);
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         buffer.SkipBytes(ReadSize(buffer, state));
+         int length = ReadSize(buffer, state);
+
+         if (length > buffer.ReadableBytes || length < 0)
+         {
+            throw new DecodeException(string.Format(
+                  "Symbol encoded size {0} is specified to be greater than the amount " +
+                  "of data available {1}", (uint) length, buffer.ReadableBytes));
+         }
+
+         buffer.SkipBytes(length);
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         try
+         int length = ReadSize(stream, state);
+
+         if (length > state.MaxSymbolSize || length < 0)
          {
-            ProtonStreamReadUtils.SkipBytes(stream, ReadSize(stream, state));
+            throw new DecodeException(String.Format(
+                  "Binary encoded length is specified to be greater than the maximum allowed length " +
+                  "l:(%d) m:(%d)", (uint) length, state.MaxSymbolSize));
          }
-         catch (IOException ex)
-         {
-            throw new DecodeException("Error while reading String payload bytes", ex);
-         }
+
+         ProtonStreamReadUtils.SkipBytes(stream, length);
       }
 
       protected abstract int ReadSize(IProtonBuffer buffer, IDecoderState state);
 
       protected abstract int ReadSize(Stream stream, IStreamDecoderState state);
 
+      /// <summary>
+      /// Gets a singleton Symbol instance that matches the given IProtonBuffer byte view
+      /// of the Symbol. A subclass can override this to produce the Symbol singleton from
+      /// a source other than the default which is the general symbol cache.
+      /// </summary>
+      /// <param name="buffer"></param>
+      /// <param name="copyOnCreate"></param>
+      /// <returns>A Symbol object that is backed by the value in the buffer</returns>
+      protected virtual Symbol SymbolLookup(IProtonBuffer buffer, bool copyOnCreate)
+      {
+         return Symbol.Lookup(buffer, copyOnCreate);
+      }
    }
 }

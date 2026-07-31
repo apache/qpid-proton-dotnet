@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Types.Security
    public sealed class SaslChallenge : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000042UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-challenge:list");
+      public static readonly Symbol DescriptorSymbol = Symbol.SaslLookup("amqp:sasl-challenge:list");
 
       private IProtonBuffer challenge;
 

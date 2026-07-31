@@ -29,7 +29,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
    {
       public static ProtonEncoder Create()
       {
-         ProtonEncoder encoder = new();
+         ProtonEncoder encoder = new(ProtonEncoder.EncoderMode.Default);
 
          AddMessagingTypeEncoders(encoder);
          AddTransactionTypeEncoders(encoder);
@@ -40,7 +40,7 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
       public static ProtonEncoder CreateSasl()
       {
-         return AddSaslTypeEncoders(new ProtonEncoder());
+         return AddSaslTypeEncoders(new ProtonEncoder(ProtonEncoder.EncoderMode.Sasl));
       }
 
       private static ProtonEncoder AddMessagingTypeEncoders(ProtonEncoder encoder)

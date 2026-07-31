@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Types.Security
    public class SaslInit : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000041UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-init:list");
+      public static readonly Symbol DescriptorSymbol = Symbol.SaslLookup("amqp:sasl-init:list");
 
       private Symbol mechanism;
       private IProtonBuffer initialResponse;

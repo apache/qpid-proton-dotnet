@@ -54,6 +54,30 @@ namespace Apache.Qpid.Proton.Client
       IMessage<object> Message();
 
       /// <summary>
+      /// Decodes the payload of the delivery and returns a new message.
+      ///
+      /// Calling this message claims the payload of the delivery for the returned Message
+      /// and excludes use of the RawInputStream method of the delivery object. Calling the
+      /// RawInputStream method after calling this method throws ClientIllegalStateException.
+      ///
+      /// The default implementation simply calls the normal message API without any options
+      /// to preserve backwards compatibility.
+      /// </summary>
+      /// <remarks>
+      /// If the incoming message carried any delivery annotations they can be accessed
+      /// via the Annotations method.  Re-sending the returned message will not also
+      /// send the incoming delivery annotations, the sender must include them in the
+      /// sender's send call if they are to be forwarded onto the next recipient.
+      /// </remarks>
+      /// <typeparam name="T">Body type of the message</typeparam>
+      /// <param name="options">The decode options to use when decoding the message</param>
+      /// <returns>the decoded message from the delivery payload</returns>
+      IMessage<object> Message(DecodeOptions options)
+      {
+         return Message();
+      }
+
+      /// <summary>
       /// Create and return an read-only Stream that reads the raw payload bytes of the
       /// given delivery. Calling this method claims the payload of the delivery for the
       /// returned Stream and excludes use of the message and annotations API methods of

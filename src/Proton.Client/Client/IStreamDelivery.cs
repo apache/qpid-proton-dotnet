@@ -55,6 +55,28 @@ namespace Apache.Qpid.Proton.Client
       IStreamReceiverMessage Message();
 
       /// <summary>
+      /// Returns a stream receiver message type that will perform a decode of message
+      /// payload as portions of the streamed message arrive. The message API is inherently
+      /// a blocking API as the decoder will need to wait in some cases to decode a full
+      /// section the incoming message when it is requested.
+      ///
+      /// The default implementation of this method simply calls the original bare message
+      /// to preserve backwards compatibility.
+      /// </summary>
+      /// <remarks>
+      /// If the incoming message carried any delivery annotations they can be accessed
+      /// via the Annotations method.  Re-sending the returned message will not also
+      /// send the incoming delivery annotations, the sender must include them in the
+      /// sender's send call if they are to be forwarded onto the next recipient.
+      /// </remarks>
+      /// <typeparam name="T">Body type of the message</typeparam>
+      /// <returns>the decoded message from the delivery payload</returns>
+      IStreamReceiverMessage Message(StreamDecodeOptions options)
+      {
+         return Message();
+      }
+
+      /// <summary>
       /// Decodes the delivery payload and returns a dictionary containing a copy of any
       /// associated delivery annotations that were transmitted with the message payload.
       ///

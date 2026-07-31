@@ -81,7 +81,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
       /// authentication error if that mechanism matches the highest priority value offered by the remote
       /// peer.
       /// </remarks>
-      /// <returns>true if the mechanim should used without it having been requested</returns>
+      /// <returns>true if the mechanism should used without it having been requested</returns>
       bool IsEnabledByDefault();
 
    }

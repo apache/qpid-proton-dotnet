@@ -201,7 +201,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             .HeaderHandler((context, header) =>
             {
                saslHeaderRead = true;
-               context.SendMechanisms(new Symbol[] { Symbol.Lookup("ANONYMOUS") });
+               context.SendMechanisms(new Symbol[] { Symbol.SaslLookup("ANONYMOUS") });
             });
 
          engine.Pipeline.FireRead(HeaderEnvelope.SASL_HEADER_ENVELOPE);
@@ -247,7 +247,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             .HeaderHandler((context, header) =>
             {
                saslHeaderRead = true;
-               context.SendMechanisms(new Symbol[] { Symbol.Lookup("ANONYMOUS") });
+               context.SendMechanisms(new Symbol[] { Symbol.SaslLookup("ANONYMOUS") });
             })
             .InitHandler((context, mechanism, initialResponse) =>
             {
@@ -268,14 +268,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          SaslInit clientInit = new SaslInit();
          clientInit.Hostname = "HOST-NAME";
-         clientInit.Mechanism = Symbol.Lookup("ANONYMOUS");
+         clientInit.Mechanism = Symbol.SaslLookup("ANONYMOUS");
          clientInit.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[0]);
 
          // Check for Initial Response processing
          engine.Pipeline.FireRead(new SaslEnvelope(clientInit));
 
          Assert.AreEqual("HOST-NAME", clientHostname);
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), clientMechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), clientMechanism);
          Assert.IsTrue(emptyResponse, "Response should be an empty byte array");
 
          Assert.AreEqual(1, testHandler.HeadersWritten.Count);
@@ -291,7 +291,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.AreEqual(SaslPerformativeType.Mechanisms, firstSaslSend.Body.Type);
          SaslMechanisms mechanisms = (SaslMechanisms)firstSaslSend.Body;
          Assert.AreEqual(1, mechanisms.Mechanisms.Length);
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), mechanisms.Mechanisms[0]);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), mechanisms.Mechanisms[0]);
 
          Assert.AreEqual(SaslPerformativeType.Outcome, secondSaslSend.Body.Type);
          SaslOutcome outcome = (SaslOutcome)secondSaslSend.Body;
@@ -313,7 +313,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             .HeaderHandler((context, header) =>
             {
                saslHeaderRead = true;
-               context.SendMechanisms(new Symbol[] { Symbol.Lookup("ANONYMOUS") });
+               context.SendMechanisms(new Symbol[] { Symbol.SaslLookup("ANONYMOUS") });
             })
             .InitHandler((context, mechanism, initialResponse) =>
             {
@@ -334,14 +334,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          SaslInit clientInit = new SaslInit();
          clientInit.Hostname = "HOST-NAME";
-         clientInit.Mechanism = Symbol.Lookup("ANONYMOUS");
+         clientInit.Mechanism = Symbol.SaslLookup("ANONYMOUS");
          clientInit.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[0]);
 
          // Check for Initial Response processing
          engine.Pipeline.FireRead(new SaslEnvelope(clientInit));
 
          Assert.AreEqual("HOST-NAME", clientHostname);
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), clientMechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), clientMechanism);
          Assert.IsTrue(emptyResponse, "Response should be an empty byte array");
 
          Assert.AreEqual(1, testHandler.HeadersWritten.Count);
@@ -375,7 +375,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          SaslInit clientInit = new SaslInit();
          clientInit.Hostname = "HOST-NAME";
-         clientInit.Mechanism = Symbol.Lookup("ANONYMOUS");
+         clientInit.Mechanism = Symbol.SaslLookup("ANONYMOUS");
          clientInit.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[0]);
 
          // Check for Initial Response processing
@@ -394,7 +394,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.AreEqual(SaslPerformativeType.Mechanisms, firstSaslSend.Body.Type);
          SaslMechanisms mechanisms = (SaslMechanisms)firstSaslSend.Body;
          Assert.AreEqual(1, mechanisms.Mechanisms.Length);
-         Assert.AreEqual(Symbol.Lookup("PLAIN"), mechanisms.Mechanisms[0]);
+         Assert.AreEqual(Symbol.SaslLookup("PLAIN"), mechanisms.Mechanisms[0]);
 
          Assert.AreEqual(SaslPerformativeType.Outcome, secondSaslSend.Body.Type);
          SaslOutcome outcome = (SaslOutcome)secondSaslSend.Body;
@@ -415,7 +415,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             .HeaderHandler((context, header) =>
             {
                saslHeaderRead = true;
-               context.SendMechanisms(new Symbol[] { Symbol.Lookup("ANONYMOUS") });
+               context.SendMechanisms(new Symbol[] { Symbol.SaslLookup("ANONYMOUS") });
             })
             .InitHandler((context, mechanism, initialResponse) =>
             {
@@ -430,14 +430,14 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          SaslInit clientInit = new SaslInit();
          clientInit.Hostname = "HOST-NAME";
-         clientInit.Mechanism = Symbol.Lookup("ANONYMOUS");
+         clientInit.Mechanism = Symbol.SaslLookup("ANONYMOUS");
          clientInit.InitialResponse = ProtonByteBufferAllocator.Instance.Wrap(new byte[0]);
 
          // Check for Initial Response processing
          engine.Pipeline.FireRead(new SaslEnvelope(clientInit));
 
          Assert.AreEqual("HOST-NAME", clientHostname);
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), clientMechanism);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), clientMechanism);
 
          Assert.AreEqual(1, testHandler.HeadersWritten.Count);
          Assert.AreEqual(1, testHandler.SaslFramesWritten.Count);
@@ -460,7 +460,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          Assert.AreEqual(SaslPerformativeType.Mechanisms, firstSaslSend.Body.Type);
          SaslMechanisms mechanisms = (SaslMechanisms)firstSaslSend.Body;
          Assert.AreEqual(1, mechanisms.Mechanisms.Length);
-         Assert.AreEqual(Symbol.Lookup("ANONYMOUS"), mechanisms.Mechanisms[0]);
+         Assert.AreEqual(Symbol.SaslLookup("ANONYMOUS"), mechanisms.Mechanisms[0]);
       }
 
       private IEngine CreateSaslServerEngine()

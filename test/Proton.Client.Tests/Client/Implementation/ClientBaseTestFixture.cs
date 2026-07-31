@@ -19,9 +19,12 @@ using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using NLog.Extensions.Logging;
 using Apache.Qpid.Proton.Logging;
-using Apache.Qpid.Proton.Types.Messaging;
 using Apache.Qpid.Proton.Buffer;
 using Apache.Qpid.Proton.Codec;
+using System;
+using System.Collections.Generic;
+using Apache.Qpid.Proton.Types.Messaging;
+using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Client.Implementation
 {
@@ -166,6 +169,57 @@ namespace Apache.Qpid.Proton.Client.Implementation
          buffer[3] = (byte)EncodingCodes.List32; // Should be map based
 
          return buffer;
+      }
+
+      protected byte[] CreateNestedEncodedMessage(int depth)
+      {
+         IEncoder encoder = CodecFactory.Encoder;
+         IProtonBuffer buffer = new ProtonByteBufferAllocator().Allocate();
+         encoder.WriteObject(buffer, encoder.NewEncoderState(), new AmqpValue(CreateNode(depth, 0)));
+         byte[] result = new byte[buffer.ReadableBytes];
+         buffer.CopyInto(buffer.ReadOffset, result, 0, result.Length);
+         return result;
+      }
+
+      private UnknownDescribedType CreateNode(int limit, int depth)
+      {
+         ulong DESCRIPTOR_CODE = 0xAA00468C00000003UL;
+
+         if (++depth > limit)
+         {
+            return new UnknownDescribedType(DESCRIPTOR_CODE, null);
+         }
+         else
+         {
+            List<UnknownDescribedType> list = new List<UnknownDescribedType>();
+            list.Add(CreateNode(limit, depth));
+
+            return new UnknownDescribedType(DESCRIPTOR_CODE, list);
+         }
+      }
+
+      protected byte[] CreateEncodedMessageWithZeroWidthArray(int length)
+      {
+         if (length > byte.MaxValue)
+         {
+            throw new ArgumentException("Length must be within the range of an unsigned byte");
+         }
+
+         IProtonBuffer buffer = new ProtonByteBufferAllocator().Allocate();
+
+         buffer.WriteUnsignedByte(0); // Described Type Indicator - 1
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)AmqpValue.DescriptorCode);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+         buffer.WriteUnsignedByte(2);
+         buffer.WriteUnsignedByte((byte)length);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.BooleanTrue);
+
+         byte[] result = new byte[buffer.ReadableBytes];
+
+         buffer.CopyInto(buffer.ReadOffset, result, 0, result.Length);
+
+         return result;
       }
    }
 }

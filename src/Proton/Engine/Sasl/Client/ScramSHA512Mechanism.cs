@@ -26,7 +26,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    /// </summary>
    public sealed class ScramSHA512Mechanism : AbstractScramSHAMechanism
    {
-      public static readonly Symbol SCRAM_SHA_512 = Symbol.Lookup("SCRAM-SHA-512");
+      public static readonly Symbol SCRAM_SHA_512 = Symbol.SaslLookup("SCRAM-SHA-512");
 
       public ScramSHA512Mechanism() : this(Guid.NewGuid().ToString())
       {

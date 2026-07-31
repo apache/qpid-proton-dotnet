@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
-   public sealed class PropertiesTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class PropertiesTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinPropertiesListEntries = 0;
       private static readonly int MaxPropertiesListEntries = 13;
@@ -35,53 +35,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(Properties);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinPropertiesListEntries;
 
-         return ReadProperties(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxPropertiesListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Properties[] result = new Properties[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadProperties(buffer, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Properties ReadProperties(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Properties ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Properties result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinPropertiesListEntries)
-         {
-            throw new DecodeException("Not enough entries in Properties list encoding: " + count);
-         }
-
-         if (count > MaxPropertiesListEntries)
-         {
-            throw new DecodeException("To many entries in Properties list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -142,53 +102,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadProperties(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Properties[] result = new Properties[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadProperties(stream, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Properties ReadProperties(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Properties ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Properties result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinPropertiesListEntries)
-         {
-            throw new DecodeException("Not enough entries in Properties list encoding: " + count);
-         }
-
-         if (count > MaxPropertiesListEntries)
-         {
-            throw new DecodeException("To many entries in Properties list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

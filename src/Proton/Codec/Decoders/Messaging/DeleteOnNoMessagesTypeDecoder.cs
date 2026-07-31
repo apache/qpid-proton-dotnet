@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
-   public sealed class DeleteOnNoMessagesTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class DeleteOnNoMessagesTypeDecoder : AbstractDescribedListTypeDecoder
    {
       public override Symbol DescriptorSymbol => DeleteOnNoMessages.DescriptorSymbol;
 
@@ -32,78 +32,32 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(DeleteOnNoMessages);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      protected override int MinListElements => 0;
+
+      protected override int MaxListElements => 0;
+
+      protected sealed override DeleteOnNoMessages ReadSingle(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder decoder)
       {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
          decoder.SkipValue(buffer, state);
 
          return DeleteOnNoMessages.Instance;
       }
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
+      protected sealed override DeleteOnNoMessages ReadSingle(Stream stream, IStreamDecoderState state, IListTypeDecoder decoder)
       {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         DeleteOnNoMessages[] result = new DeleteOnNoMessages[count];
-
-         for (int i = 0; i < count; ++i)
-         {
-            decoder.SkipValue(buffer, state);
-            result[i] = DeleteOnNoMessages.Instance;
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
          decoder.SkipValue(stream, state);
 
          return DeleteOnNoMessages.Instance;
       }
 
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
+      protected override DeleteOnNoMessages ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         DeleteOnNoMessages[] result = new DeleteOnNoMessages[count];
-
-         for (int i = 0; i < count; ++i)
-         {
-            decoder.SkipValue(stream, state);
-            result[i] = DeleteOnNoMessages.Instance;
-         }
-
-         return result;
+         throw new NotImplementedException("Should not be called for this AMQP type");
       }
 
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
+      protected override DeleteOnNoMessages ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
+         throw new NotImplementedException("Should not be called for this AMQP type");
       }
    }
 }

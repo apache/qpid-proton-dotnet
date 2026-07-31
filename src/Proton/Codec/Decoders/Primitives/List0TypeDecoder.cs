@@ -29,6 +29,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override Type DecodesType => typeof(IList);
 
+      public override bool IsZeroWidth => true;
+
       public int ReadCount(IProtonBuffer buffer, IDecoderState state)
       {
          return 0;
@@ -41,12 +43,30 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public IList<T> ReadList<T>(IProtonBuffer buffer, IDecoderState state)
       {
-         return (IList<T>) Array.Empty<T>();
+         state.IncreaseDepth();
+
+         try
+         {
+            return (IList<T>)Array.Empty<T>();
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public IList<T> ReadList<T>(Stream stream, IStreamDecoderState state)
       {
-         return (IList<T>) Array.Empty<T>();
+         state.IncreaseDepth();
+
+         try
+         {
+            return (IList<T>)Array.Empty<T>();
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public int ReadSize(IProtonBuffer buffer, IDecoderState state)
@@ -61,20 +81,74 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-         return (IList) Array.Empty<object>();
+         state.IncreaseDepth();
+
+         try
+         {
+            return (IList) Array.Empty<object>();
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
-         return (IList) Array.Empty<object>();
+         state.IncreaseDepth();
+
+         try
+         {
+            return (IList) Array.Empty<object>();
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
+         try
+         {
+            state.IncreaseDepth();
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
+         try
+         {
+            state.IncreaseDepth();
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
+      }
+
+      protected override void ValidateArrayPreconditions(IProtonBuffer buffer, IDecoderState state, int count)
+      {
+         if (count > state.MaxZeroWidthArrayElements || count < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array size indicated {0} is greater than the amount of elements allowed for zero sized primitives ({1})",
+               (uint) count, state.MaxZeroWidthArrayElements));
+         }
+      }
+
+      protected override void ValidateArrayPreconditions(Stream stream, IStreamDecoderState state, int count)
+      {
+         if (count > state.MaxZeroWidthArrayElements || count < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array size indicated {0} is greater than the amount of elements allowed for zero sized primitives ({1})",
+               (uint) count, state.MaxZeroWidthArrayElements));
+         }
       }
    }
 }

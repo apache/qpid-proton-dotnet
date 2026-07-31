@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    /// </summary>
    public sealed class ExternalMechanism : AbstractMechanism
    {
-      public static readonly Symbol EXTERNAL = Symbol.Lookup("EXTERNAL");
+      public static readonly Symbol EXTERNAL = Symbol.SaslLookup("EXTERNAL");
 
       public override Symbol Name => EXTERNAL;
 

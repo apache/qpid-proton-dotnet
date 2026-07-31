@@ -23,10 +23,14 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 {
    public abstract class AbstractPrimitiveTypeDecoder : IPrimitiveTypeDecoder
    {
-      public bool IsArrayType => false;
+      public virtual bool IsArrayType => false;
 
-      public Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
+      public virtual bool IsZeroWidth => false;
+
+      public virtual Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
       {
+         ValidateArrayPreconditions(buffer, state, count);
+
          Array array = Array.CreateInstance(DecodesType, count);
          for (int i = 0; i < count; ++i)
          {
@@ -36,8 +40,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return array;
       }
 
-      public Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
+      public virtual Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
       {
+         ValidateArrayPreconditions(stream, state, count);
+
          Array array = Array.CreateInstance(DecodesType, count);
          for (int i = 0; i < count; ++i)
          {
@@ -45,6 +51,26 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
 
          return array;
+      }
+
+      protected virtual void ValidateArrayPreconditions(IProtonBuffer buffer, IDecoderState state, int count)
+      {
+         if (count > buffer.ReadableBytes || count < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array count indicated {0} is greater than the amount of data available to decode ({1})",
+               (uint) count, buffer.ReadableBytes));
+         }
+      }
+
+      protected virtual void ValidateArrayPreconditions(Stream stream, IStreamDecoderState state, int count)
+      {
+         if (count > state.MaxArraySize || count < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array count indicated {0} is greater than the amount of the configured max array size ({1})",
+               (uint) count, state.MaxArraySize));
+         }
       }
 
       #region Interface methods handed off to the subclass

@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
 
       private class TestMechanism : AbstractMechanism
       {
-         public override Symbol Name => Symbol.Lookup("TEST");
+         public override Symbol Name => Symbol.SaslLookup("TEST");
 
          public override bool IsApplicable(ISaslCredentialsProvider credentials) => true;
 

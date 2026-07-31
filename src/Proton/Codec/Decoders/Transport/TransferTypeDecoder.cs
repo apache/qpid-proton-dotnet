@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 {
-   public sealed class TransferTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class TransferTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinTransferListEntries = 1;
       private static readonly int MaxTransferListEntries = 11;
@@ -35,51 +35,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       public override Type DecodesType => typeof(Transfer);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinTransferListEntries;
 
-         return ReadTransfer(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxTransferListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         Transfer[] result = new Transfer[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadTransfer(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Transfer ReadTransfer(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Transfer ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Transfer result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         if (count < MinTransferListEntries)
-         {
-            throw new DecodeException("The handle field cannot be omitted from the Transfer");
-         }
-
-         if (count > MaxTransferListEntries)
-         {
-            throw new DecodeException("To many entries in Transfer list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -140,51 +102,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadTransfer(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         Transfer[] result = new Transfer[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadTransfer(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Transfer ReadTransfer(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Transfer ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Transfer result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         if (count < MinTransferListEntries)
-         {
-            throw new DecodeException("The handle field cannot be omitted from the Transfer");
-         }
-
-         if (count > MaxTransferListEntries)
-         {
-            throw new DecodeException("To many entries in Transfer list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

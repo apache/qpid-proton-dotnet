@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    /// </summary>
    public sealed class AnonymousMechanism : AbstractMechanism
    {
-      public static readonly Symbol ANONYMOUS = Symbol.Lookup("ANONYMOUS");
+      public static readonly Symbol ANONYMOUS = Symbol.SaslLookup("ANONYMOUS");
 
       public override Symbol Name => ANONYMOUS;
 

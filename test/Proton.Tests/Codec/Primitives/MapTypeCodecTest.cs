@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using Apache.Qpid.Proton.Buffer;
 using System.Text;
 using System.Collections;
+using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 
 namespace Apache.Qpid.Proton.Codec.Primitives
 {
@@ -357,16 +358,16 @@ namespace Apache.Qpid.Proton.Codec.Primitives
       [Test]
       public void TestSizeToLargeValidationMAP32()
       {
-         dotestSizeToLargeValidation(EncodingCodes.Map32, true);
+         doTestSizeToLargeValidation(EncodingCodes.Map32, true);
       }
 
       [Test]
       public void TestSizeToLargeValidationMAP8()
       {
-         dotestSizeToLargeValidation(EncodingCodes.Map8, true);
+         doTestSizeToLargeValidation(EncodingCodes.Map8, true);
       }
 
-      private void dotestSizeToLargeValidation(EncodingCodes encodingCode, bool fromStream)
+      private void doTestSizeToLargeValidation(EncodingCodes encodingCode, bool fromStream)
       {
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
          Stream stream = new ProtonBufferInputStream(buffer);
@@ -411,7 +412,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
                streamDecoder.ReadObject(stream, streamDecoderState);
                Assert.Fail("should throw an ArgumentException");
             }
-            catch (DecodeEOFException) { }
+            catch (DecodeException) { }
          }
          else
          {
@@ -645,6 +646,320 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          {
             Assert.IsTrue(iae.Message.Contains("Cannot find encoder for type"));
             Assert.IsTrue(iae.Message.Contains(typeof(MyUnknownTestType).Name));
+         }
+      }
+
+      [Test]
+      public void TestCountGreaterThanAvailableDataCausesExceptionMap32()
+      {
+         DoTestCountGreaterThanAvailableDataCausesExceptionMap(EncodingCodes.Map32, false);
+      }
+
+      [Test]
+      public void TestCountGreaterThanAvailableDataCausesExceptionMap8()
+      {
+         DoTestCountGreaterThanAvailableDataCausesExceptionMap(EncodingCodes.Map8, false);
+      }
+
+      [Test]
+      public void TestCountGreaterThanAvailableDataCausesExceptionMap32FS()
+      {
+         DoTestCountGreaterThanAvailableDataCausesExceptionMap(EncodingCodes.Map32, true);
+      }
+
+      [Test]
+      public void TestCountGreaterThanAvailableDataCausesExceptionMap8FS()
+      {
+         DoTestCountGreaterThanAvailableDataCausesExceptionMap(EncodingCodes.Map8, true);
+      }
+
+      private void DoTestCountGreaterThanAvailableDataCausesExceptionMap(EncodingCodes encodingCode, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte((byte)encodingCode);
+         if (encodingCode == EncodingCodes.Map32)
+         {
+            buffer.WriteInt(4);   // Size
+            buffer.WriteInt(16);  // Count
+         }
+         else
+         {
+            buffer.WriteUnsignedByte(1);  // Size
+            buffer.WriteUnsignedByte(16); // Count
+         }
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsTrue(typeDecoder is AbstractMapTypeDecoder);
+            AbstractMapTypeDecoder mapDecoder = (AbstractMapTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => mapDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.IsTrue(typeDecoder is AbstractMapTypeDecoder);
+            AbstractMapTypeDecoder mapDecoder = (AbstractMapTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => mapDecoder.ReadValue(buffer, decoderState));
+         }
+      }
+
+      [Test]
+      public void TestStreamDecodeFailsWhenEncodedLengthExceedsConfigurationSym8()
+      {
+         DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(true);
+      }
+
+      [Test]
+      public void TestStreamDecodeFailsWhenEncodedLengthExceedsConfigurationSym32()
+      {
+         DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(false);
+      }
+
+      private void DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         byte[] payload = new byte[256];
+
+         streamDecoderState.MaxMapSize = 24;
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map8);
+            buffer.WriteUnsignedByte(136);
+            buffer.WriteUnsignedByte(2);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map32);
+            buffer.WriteInt(139);
+            buffer.WriteInt(2);
+         }
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str8);
+         buffer.WriteUnsignedByte(4);
+         buffer.WriteBytes(new UTF8Encoding().GetBytes("test"));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.VBin8);
+         buffer.WriteUnsignedByte(127);
+         buffer.WriteBytes(payload);
+
+         IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(stream, streamDecoderState));
+      }
+
+      [Test]
+      public void TestStreamSkipValueFailsWhenEncodedLengthExceedsConfigurationSym8()
+      {
+         DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(true);
+      }
+
+      [Test]
+      public void TestStreamSkipValueFailsWhenEncodedLengthExceedsConfigurationSym32()
+      {
+         DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(false);
+      }
+
+      private void DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         byte[] payload = new byte[127];
+
+         streamDecoderState.MaxMapSize = 24;
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map8);
+            buffer.WriteUnsignedByte(136);
+            buffer.WriteUnsignedByte(2);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map32);
+            buffer.WriteInt(139);
+            buffer.WriteInt(2);
+         }
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str8);
+         buffer.WriteUnsignedByte((byte)4);
+         buffer.WriteBytes(new UTF8Encoding().GetBytes("test"));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.VBin8);
+         buffer.WriteUnsignedByte((byte)127);
+         buffer.WriteBytes(payload);
+
+         IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.SkipValue(stream, streamDecoderState));
+      }
+
+      [Test]
+      public void TestReadValueFailsWhenEncodedLengthExceedsAvailableMap8()
+      {
+         DoTestReadValueFailsWhenEncodedLengthExceedsAvailable(true);
+      }
+
+      [Test]
+      public void TestReadValueFailsWhenEncodedLengthExceedsAvailableMap32()
+      {
+         DoTestReadValueFailsWhenEncodedLengthExceedsAvailable(false);
+      }
+
+      private void DoTestReadValueFailsWhenEncodedLengthExceedsAvailable(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+
+         byte[] payload = new byte[127];
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map8);
+            buffer.WriteUnsignedByte((byte)137);
+            buffer.WriteUnsignedByte((byte)2);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map32);
+            buffer.WriteInt(143);
+            buffer.WriteInt(2);
+         }
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str8);
+         buffer.WriteUnsignedByte((byte)4);
+         buffer.WriteBytes(new UTF8Encoding().GetBytes("test"));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.VBin8);
+         buffer.WriteUnsignedByte((byte)127);
+         buffer.WriteBytes(payload);
+
+         ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(buffer, decoderState));
+      }
+
+      [Test]
+      public void TestSkipValueFailsWhenEncodedLengthExceedsAvailableMap8()
+      {
+         DoTestSkipValueFailsWhenEncodedLengthExceedsAvailable(true);
+      }
+
+      [Test]
+      public void TestSkipValueFailsWhenEncodedLengthExceedsAvailableMap32()
+      {
+         DoTestSkipValueFailsWhenEncodedLengthExceedsAvailable(false);
+      }
+
+      private void DoTestSkipValueFailsWhenEncodedLengthExceedsAvailable(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+
+         byte[] payload = new byte[127];
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map8);
+            buffer.WriteUnsignedByte((byte)137);
+            buffer.WriteUnsignedByte((byte)2);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Map32);
+            buffer.WriteInt(143);
+            buffer.WriteInt(2);
+         }
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Str8);
+         buffer.WriteUnsignedByte((byte)4);
+         buffer.WriteBytes(new UTF8Encoding().GetBytes("test"));
+         buffer.WriteUnsignedByte((byte)EncodingCodes.VBin8);
+         buffer.WriteUnsignedByte((byte)127);
+         buffer.WriteBytes(payload);
+
+         ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.SkipValue(buffer, decoderState));
+      }
+
+      [Test]
+      public void TestDecodingOfDeeplyNestedMapOfMapsFromBuffer()
+      {
+         DoTestDecodingOfDeeplyNestedMapOfMaps(false, 10);
+      }
+
+      [Test]
+      public void TestDecodingOfDeeplyNestedMapOfMapsFromStream()
+      {
+         DoTestDecodingOfDeeplyNestedMapOfMaps(true, 10);
+      }
+
+      private void DoTestDecodingOfDeeplyNestedMapOfMaps(bool fromStream, uint depthLimit)
+      {
+         IDictionary<string, object> toEncode = new Dictionary<string, object>();
+         IDictionary<string, object> current = toEncode;
+
+         // Encodes one more than the max depth value set
+         for (int i = 0; i < depthLimit; ++i)
+         {
+            IDictionary<string, object> next = new Dictionary<string, object>();
+
+            current.Add(Guid.NewGuid().ToString(), next);
+            current = next;
+         }
+
+         IProtonBuffer buffer1 = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer1);
+
+         encoder.WriteMap(buffer1, encoderState, toEncode);
+
+         if (fromStream)
+         {
+            streamDecoderState.DepthLimit = depthLimit;
+
+            try
+            {
+               streamDecoder.ReadMap<string, object>(stream, streamDecoderState);
+               Assert.Fail("Should have thrown a Decode Exception");
+            }
+            catch (DecodeException) { }
+         }
+         else
+         {
+            decoderState.DepthLimit = depthLimit;
+
+            try
+            {
+               decoder.ReadMap<string, object>(buffer1, decoderState);
+               Assert.Fail("Should have thrown a Decode Exception");
+            }
+            catch (DecodeException) { }
+         }
+
+         // Encode up to the limit instead which should work
+         toEncode.Clear();
+         current = toEncode;
+         streamDecoderState.Reset();
+         decoderState.Reset();
+
+         for (int i = 0; i < depthLimit; ++i)
+         {
+            IDictionary<string, object> next = new Dictionary<string, object>();
+
+            current.Add(Guid.NewGuid().ToString(), next);
+            current = next;
+         }
+
+         IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Allocate();
+         stream = new ProtonBufferInputStream(buffer2);
+
+         encoder.WriteMap(buffer2, encoderState, toEncode);
+
+         if (fromStream)
+         {
+            streamDecoderState.DepthLimit = depthLimit + 1;
+
+            Assert.IsTrue(streamDecoder.ReadMap<string, object>(stream, streamDecoderState) is IDictionary);
+         }
+         else
+         {
+            decoderState.DepthLimit = depthLimit + 1;
+
+            Assert.IsTrue(decoder.ReadMap<string, object>(buffer2, decoderState) is IDictionary);
          }
       }
 

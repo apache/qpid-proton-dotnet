@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+using System;
 using Apache.Qpid.Proton.Buffer;
 
 namespace Apache.Qpid.Proton.Engine
@@ -42,5 +43,18 @@ namespace Apache.Qpid.Proton.Engine
       /// </summary>
       bool TraceFrames { get; set; }
 
+      /// <summary>
+      /// Sets the configured maximum number of Transfer frames that can make up a single completed
+      /// incoming delivery. If the delivery is not completed within this number of transfer frames the
+      /// engine may either close the associated link or the connection in its entirety. An engine
+      /// implementation may opt not to implement this feature in which case the value should be fixed
+      /// at zero and any assignment should be ignored. If the value is configured as zero then the
+      /// behavior should be to treat that as no limit was assigned.
+      /// </summary>
+      uint MaxTransfersPerDelivery
+      {
+         get => 0;
+         set => throw new NotSupportedException("Default configuration does not support assigning a max transfers value");
+      }
    }
 }

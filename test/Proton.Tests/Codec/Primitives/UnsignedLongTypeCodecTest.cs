@@ -18,6 +18,7 @@
 using System.IO;
 using NUnit.Framework;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Codec.Decoders;
 
 namespace Apache.Qpid.Proton.Codec.Primitives
 {
@@ -732,10 +733,13 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
          Stream stream = new ProtonBufferInputStream(buffer);
 
+         decoderState.MaxZeroWidthArrayElements = 100;
+         streamDecoderState.MaxZeroWidthArrayElements = 100;
+
          if (encoding == EncodingCodes.ULong)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
-            buffer.WriteInt(25);  // Size
+            buffer.WriteInt(21);  // Size
             buffer.WriteInt(2);   // Count
             buffer.WriteUnsignedByte(((byte)EncodingCodes.ULong));
             buffer.WriteUnsignedLong(1ul);   // [0]
@@ -744,7 +748,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          else if (encoding == EncodingCodes.SmallULong)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
-            buffer.WriteInt(11);  // Size
+            buffer.WriteInt(7);  // Size
             buffer.WriteInt(2);   // Count
             buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
             buffer.WriteUnsignedByte(1);   // [0]
@@ -753,7 +757,7 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          else
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Array32));
-            buffer.WriteInt(9);  // Size
+            buffer.WriteInt(5);  // Size
             buffer.WriteInt(2);   // Count
             buffer.WriteUnsignedByte(((byte)EncodingCodes.ULong0));
          }
@@ -785,6 +789,192 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          {
             Assert.AreEqual(1ul, array[0]);
             Assert.AreEqual(2ul, array[1]);
+         }
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array32()
+      {
+         TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array(EncodingCodes.Array32, false);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array32FromStream()
+      {
+         TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array(EncodingCodes.Array32, true);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array8()
+      {
+         TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array(EncodingCodes.Array8, false);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array8FromStream()
+      {
+         TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array(EncodingCodes.Array8, true);
+      }
+
+      private void TestDefaultsDecodeFailsForAnyNonZeroSizedULong0Array(EncodingCodes encodingCode, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         if (encodingCode == EncodingCodes.Array32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(5);  // Size
+            buffer.WriteInt(1);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.ULong0);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte(2);  // Size
+            buffer.WriteUnsignedByte(1);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.ULong0);
+         }
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => arrayDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => arrayDecoder.ReadValue(buffer, decoderState));
+         }
+      }
+
+      [Test]
+      public void TestDecodeWorksForInConfiguredLimitsULong0Array32()
+      {
+         TestDecodeWorksForInConfiguredLimitsULong0Array(EncodingCodes.Array32, false);
+      }
+
+      [Test]
+      public void TestDecodeWorksForInConfiguredLimitsULong0Array32FromStream()
+      {
+         TestDecodeWorksForInConfiguredLimitsULong0Array(EncodingCodes.Array32, true);
+      }
+
+      [Test]
+      public void TestDecodeWorksForInConfiguredLimitsULong0Array8()
+      {
+         TestDecodeWorksForInConfiguredLimitsULong0Array(EncodingCodes.Array8, false);
+      }
+
+      [Test]
+      public void TestDecodeWorksForInConfiguredLimitsULong0Array8FromStream()
+      {
+         TestDecodeWorksForInConfiguredLimitsULong0Array(EncodingCodes.Array8, true);
+      }
+
+      private void TestDecodeWorksForInConfiguredLimitsULong0Array(EncodingCodes encodingCode, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         decoderState.MaxZeroWidthArrayElements = 20;
+         streamDecoderState.MaxZeroWidthArrayElements = 20;
+
+         if (encodingCode == EncodingCodes.Array32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(5);   // Size
+            buffer.WriteInt(10);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.ULong0);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte(2);   // Size
+            buffer.WriteUnsignedByte(10);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.ULong0);
+         }
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.DoesNotThrow(() => arrayDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.DoesNotThrow(() => arrayDecoder.ReadValue(buffer, decoderState));
+         }
+      }
+
+      [Test]
+      public void TestDecodeFailsForToLargeULong0Array32()
+      {
+         TestDecodeFailsForToLargeForConfigurationULong0Array(EncodingCodes.Array32, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsForToLargeULong0Array32FromStream()
+      {
+         TestDecodeFailsForToLargeForConfigurationULong0Array(EncodingCodes.Array32, true);
+      }
+
+      [Test]
+      public void TestDecodeFailsForToLargeULong0Array8()
+      {
+         TestDecodeFailsForToLargeForConfigurationULong0Array(EncodingCodes.Array8, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsForToLargeULong0Array8FromStream()
+      {
+         TestDecodeFailsForToLargeForConfigurationULong0Array(EncodingCodes.Array8, true);
+      }
+
+      private void TestDecodeFailsForToLargeForConfigurationULong0Array(EncodingCodes encodingCode, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         decoderState.MaxZeroWidthArrayElements = 9;
+         streamDecoderState.MaxZeroWidthArrayElements = 9;
+
+         if (encodingCode == EncodingCodes.Array32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(5);  // Size
+            buffer.WriteInt(10);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.ULong0);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte(2);  // Size
+            buffer.WriteUnsignedByte(10);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.ULong0);
+         }
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => arrayDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => arrayDecoder.ReadValue(buffer, decoderState));
          }
       }
    }

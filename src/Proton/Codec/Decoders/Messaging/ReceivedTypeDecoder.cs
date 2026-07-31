@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
-   public sealed class ReceivedTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class ReceivedTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int RequiredReceivedListEntries = 2;
 
@@ -34,48 +34,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(Received);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => RequiredReceivedListEntries;
 
-         return ReadReceived(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => RequiredReceivedListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Received[] result = new Received[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadReceived(buffer, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Received ReadReceived(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Received ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Received result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count != RequiredReceivedListEntries)
-         {
-            throw new DecodeException("Invalid number of entries in Received list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -103,48 +68,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadReceived(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Received[] result = new Received[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadReceived(stream, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Received ReadReceived(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Received ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Received result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count != RequiredReceivedListEntries)
-         {
-            throw new DecodeException("Invalid number of entries in Received list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

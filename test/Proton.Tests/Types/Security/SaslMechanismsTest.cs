@@ -25,7 +25,7 @@ namespace Apache.Qpid.Proton.Types.Security
       [Test]
       public void TestToStringOnNonEmptyObject()
       {
-         Symbol[] mechanisms = new Symbol[] { Symbol.Lookup("EXTERNAL"), Symbol.Lookup("PLAIN") };
+         Symbol[] mechanisms = new Symbol[] { Symbol.SaslLookup("EXTERNAL"), Symbol.SaslLookup("PLAIN") };
          SaslMechanisms value = new SaslMechanisms();
 
          value.Mechanisms = mechanisms;
@@ -67,7 +67,7 @@ namespace Apache.Qpid.Proton.Types.Security
       [Test]
       public void TestCopy()
       {
-         Symbol[] mechanisms = new Symbol[] { Symbol.Lookup("EXTERNAL"), Symbol.Lookup("PLAIN") };
+         Symbol[] mechanisms = new Symbol[] { Symbol.SaslLookup("EXTERNAL"), Symbol.SaslLookup("PLAIN") };
          SaslMechanisms value = new SaslMechanisms();
 
          value.Mechanisms = mechanisms;

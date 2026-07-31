@@ -30,12 +30,12 @@ namespace Apache.Qpid.Proton.Codec.Encoders.Messaging
 
       protected override int GetMapEntries(MessageAnnotations value)
       {
-         return value?.Value?.Count ?? 0;
-      }
+         if (value == null || value.Value == null)
+         {
+            throw new EncodeException("MessageAnnotations must have an assigned Map payload");
+         }
 
-      protected override bool HasMap(MessageAnnotations value)
-      {
-         return value?.Value != null;
+         return value.Value.Count;
       }
 
       protected override void WriteMapEntries(IProtonBuffer buffer, IEncoderState state, MessageAnnotations value)

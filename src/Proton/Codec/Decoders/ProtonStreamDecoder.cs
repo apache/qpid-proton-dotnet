@@ -27,11 +27,29 @@ namespace Apache.Qpid.Proton.Codec.Decoders
    public sealed class ProtonStreamDecoder : IStreamDecoder
    {
       /// <summary>
+      /// The number of unknown described type decoders that are cached for performance
+      /// but limited for memory protection.
+      /// </summary>
+      public static readonly int UnknownDescribedTypeCacheLimit = 16;
+
+      /// <summary>
+      /// If the descriptor for an unknown described type is a Symbol then it must have a
+      /// length shorter than this value to be cached for future lookup.
+      /// </summary>
+      public static readonly int UnknownDescribedTypeDescriptorSizeLimit = 64;
+
+      /// <summary>
       /// The decoders for primitives are fixed and cannot be altered by users who want
       /// to register custom decoders. The decoders created here are stateless and can be
       /// made static to reduce overhead of creating Decoder instances.
       /// </summary>
       private static readonly IPrimitiveTypeDecoder[] primitiveDecoders = new IPrimitiveTypeDecoder[256];
+
+      public enum DecoderMode
+      {
+         Sasl,
+         Default
+      }
 
       static ProtonStreamDecoder()
       {
@@ -78,6 +96,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          // Initialize the locally used primitive type decoders for the main API
          symbol8Decoder = (Symbol8TypeDecoder)primitiveDecoders[(int)EncodingCodes.Sym8];
          symbol32Decoder = (Symbol32TypeDecoder)primitiveDecoders[(int)EncodingCodes.Sym32];
+         saslSymbol8Decoder = new SaslSymbol8TypeDecoder();
+         saslSymbol32Decoder = new SaslSymbol32TypeDecoder();
          binary8Decoder = (Binary8TypeDecoder)primitiveDecoders[(int)EncodingCodes.VBin8];
          binary32Decoder = (Binary32TypeDecoder)primitiveDecoders[(int)EncodingCodes.VBin32];
          list8Decoder = (List8TypeDecoder)primitiveDecoders[(int)EncodingCodes.List8];
@@ -96,6 +116,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          new Dictionary<object, IStreamDescribedTypeDecoder>();
 
       /// <summary>
+      /// Registry of decoders for described types which are not registered which can be updated with a
+      /// limited number of cached decoders to speed up processing
+      /// </summary>
+      private readonly IDictionary<object, IStreamDescribedTypeDecoder> unknownDescribedTypeDecoders =
+         new Dictionary<object, IStreamDescribedTypeDecoder>();
+
+      /// <summary>
       /// Quick access to decoders that handle AMQP types like Transfer, Properties etc.
       /// </summary>
       private readonly IStreamDescribedTypeDecoder[] amqpTypeDecoders = new IStreamDescribedTypeDecoder[256];
@@ -103,6 +130,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       // Internal Decoders used to prevent user to access Proton specific decoding methods
       private static readonly Symbol8TypeDecoder symbol8Decoder;
       private static readonly Symbol32TypeDecoder symbol32Decoder;
+      private static readonly SaslSymbol8TypeDecoder saslSymbol8Decoder;
+      private static readonly SaslSymbol32TypeDecoder saslSymbol32Decoder;
       private static readonly Binary8TypeDecoder binary8Decoder;
       private static readonly Binary32TypeDecoder binary32Decoder;
       private static readonly List8TypeDecoder list8Decoder;
@@ -111,6 +140,35 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       private static readonly Map32TypeDecoder map32Decoder;
       private static readonly String8TypeDecoder string8Decoder;
       private static readonly String32TypeDecoder string32Decoder;
+
+      private readonly DecoderMode decoderMode;
+      private readonly IPrimitiveTypeDecoder[] localPrimitiveDecoders;
+      private readonly AbstractSymbolTypeDecoder localSymbol8Decoder;
+      private readonly AbstractSymbolTypeDecoder localSymbol32Decoder;
+
+      public ProtonStreamDecoder() : this(DecoderMode.Default)
+      {
+      }
+
+      public ProtonStreamDecoder(DecoderMode mode)
+      {
+         decoderMode = mode;
+
+         if (decoderMode == DecoderMode.Sasl)
+         {
+            localSymbol8Decoder = saslSymbol8Decoder;
+            localSymbol32Decoder = saslSymbol32Decoder;
+            localPrimitiveDecoders = (IPrimitiveTypeDecoder[])primitiveDecoders.Clone();
+            localPrimitiveDecoders[(int)EncodingCodes.Sym8] = saslSymbol8Decoder;
+            localPrimitiveDecoders[(int)EncodingCodes.Sym32] = saslSymbol32Decoder;
+         }
+         else
+         {
+            localSymbol8Decoder = symbol8Decoder;
+            localSymbol32Decoder = symbol32Decoder;
+            localPrimitiveDecoders = primitiveDecoders;
+         }
+      }
 
       private ProtonStreamDecoderState cachedDecoderState;
 
@@ -493,8 +551,8 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
          return encodingCode switch
          {
-            EncodingCodes.Sym8 => symbol8Decoder.ReadValue(stream, state),
-            EncodingCodes.Sym32 => symbol32Decoder.ReadValue(stream, state),
+            EncodingCodes.Sym8 => localSymbol8Decoder.ReadValue(stream, state),
+            EncodingCodes.Sym32 => localSymbol32Decoder.ReadValue(stream, state),
             EncodingCodes.Null => null,
             _ => throw new DecodeException("Expected Symbol type but found encoding: " + encodingCode),
          };
@@ -570,9 +628,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public T ReadObject<T>(Stream stream, IStreamDecoderState state)
       {
-         object result = ReadObject(stream, state);
+         IStreamTypeDecoder decoder = ReadNextTypeDecoder(stream, state);
 
-         if (result == null)
+         if (decoder.DecodesType == typeof(void))
          {
             if (typeof(T).IsValueType)
             {
@@ -583,44 +641,48 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                return default;
             }
          }
-         else if (result.GetType().IsAssignableTo(typeof(T)))
+         else if (decoder.IsArrayType)
          {
-            return (T)result;
+            return (T)((IPrimitiveArrayTypeDecoder)decoder).ReadValue(stream, state, typeof(T));
+         }
+         else if (decoder.DecodesType.IsAssignableTo(typeof(T)))
+         {
+            return (T)decoder.ReadValue(stream, state);
          }
          else
          {
-            throw SignalUnexpectedType(result, typeof(T));
+            throw SignalUnexpectedType(decoder.DecodesType, typeof(T));
          }
       }
 
       public T[] ReadMultiple<T>(Stream stream, IStreamDecoderState state)
       {
-         object val = ReadObject(stream, state);
+         IStreamTypeDecoder decoder = ReadNextTypeDecoder(stream, state);
 
-         if (val == null)
+         if (decoder.DecodesType == typeof(void))
          {
-            return null;
-         }
-         else if (val.GetType().IsArray)
-         {
-            if (typeof(T).IsAssignableFrom(val.GetType().GetElementType()))
+            if (typeof(T).IsValueType)
             {
-               return (T[])val;
+               throw SignalUnexpectedType(typeof(T));
             }
             else
             {
-               throw SignalUnexpectedType(val, typeof(T).MakeArrayType());
+               return default;
             }
          }
-         else if (typeof(T).IsAssignableFrom(val.GetType()))
+         else if (decoder.IsArrayType)
+         {
+            return (T[])((IPrimitiveArrayTypeDecoder)decoder).ReadValue(stream, state, typeof(T));
+         }
+         else if (decoder.DecodesType.IsAssignableTo(typeof(T)))
          {
             T[] array = (T[])Array.CreateInstance(typeof(T), 1);
-            array[0] = (T)val;
+            array[0] = (T) decoder.ReadValue(stream, state);
             return array;
          }
          else
          {
-            throw SignalUnexpectedType(val, typeof(T).MakeArrayType());
+            throw SignalUnexpectedType(decoder.DecodesType, typeof(T));
          }
       }
 
@@ -673,7 +735,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          }
          else
          {
-            return primitiveDecoders[(byte)encodingCode];
+            return localPrimitiveDecoders[(byte)encodingCode];
          }
       }
 
@@ -688,9 +750,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders
             EncodingCodes.Sym32 => symbol32Decoder.ReadValue(stream, state),
             _ => throw new DecodeException("Expected Descriptor type but found encoding: " + encodingCode),
          };
+
          if (!describedTypeDecoders.TryGetValue(descriptor, out IStreamDescribedTypeDecoder streamTypeDecoder))
          {
-            streamTypeDecoder = HandleUnknownDescribedType(descriptor);
+            if (!unknownDescribedTypeDecoders.TryGetValue(descriptor, out streamTypeDecoder))
+            {
+                streamTypeDecoder = HandleUnknownDescribedType(descriptor);
+            }
          }
 
          return streamTypeDecoder;
@@ -739,22 +805,42 @@ namespace Apache.Qpid.Proton.Codec.Decoders
          return this;
       }
 
-      private static InvalidCastException SignalUnexpectedType(in Type type)
+      private static DecodeException SignalUnexpectedType(in Type type)
       {
-         return new InvalidCastException(
+         return new DecodeException(
             "Unexpected null decoding, Expected " + type.Name + ".");
       }
 
-      private static InvalidCastException SignalUnexpectedType(in object val, in Type type)
+      private static DecodeException SignalUnexpectedType(in object val, in Type type)
       {
-         return new InvalidCastException(
+         return new DecodeException(
             "Unexpected type " + val.GetType().Name + ". Expected " + type.Name + ".");
       }
 
       private IStreamDescribedTypeDecoder HandleUnknownDescribedType(in object descriptor)
       {
+         if (DecoderMode.Sasl == decoderMode)
+         {
+            throw new DecodeException("Cannot decode unknown described types from a SASL mode decoder");
+         }
+
+         bool canCache;
+
+         if (descriptor is Symbol symbol && symbol.Length > UnknownDescribedTypeDescriptorSizeLimit)
+         {
+            canCache = false;
+         }
+         else
+         {
+            canCache = descriptor is ulong;
+         }
+
          IStreamDescribedTypeDecoder typeDecoder = new UnknownDescribedTypeDecoder(descriptor);
-         describedTypeDecoders.Add(descriptor, (UnknownDescribedTypeDecoder)typeDecoder);
+
+         if (canCache && unknownDescribedTypeDecoders.Count < UnknownDescribedTypeCacheLimit)
+         {
+            unknownDescribedTypeDecoders.Add(descriptor, typeDecoder);
+         }
 
          return typeDecoder;
       }

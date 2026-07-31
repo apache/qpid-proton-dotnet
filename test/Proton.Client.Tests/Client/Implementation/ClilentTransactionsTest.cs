@@ -847,7 +847,8 @@ namespace Apache.Qpid.Proton.Client.Implementation
             peer.ExpectCoordinatorAttach().Respond();
             peer.RemoteFlow().WithLinkCredit(1).Queue();
             peer.ExpectDeclare().Accept(null);
-            peer.ExpectClose().WithError(AmqpError.DECODE_ERROR.ToString(), "The txn-id field cannot be omitted").Respond();
+            peer.ExpectClose().WithError(AmqpError.DECODE_ERROR.ToString(),
+               "Not enough list elements indicated in the encoded count, expected 1 but got 0").Respond();
             peer.Start();
 
             string remoteAddress = peer.ServerAddress;

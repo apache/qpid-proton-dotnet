@@ -375,5 +375,108 @@ namespace Apache.Qpid.Proton.Codec.Primitives
             Assert.AreEqual(source[i], array[i]);
          }
       }
+
+      [Test]
+      public void TestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType()
+      {
+         DoTestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType(false);
+      }
+
+      [Test]
+      public void TestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredTypeFS()
+      {
+         DoTestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType(true);
+      }
+
+      private void DoTestEncodeAndDecodeArrayOfPrimitivesAsUnregisteredType(bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         char[] values = new char[] { 'a', 'b', 'c' };
+
+         encoder.WriteObject(buffer, encoderState, values);
+
+         object result;
+         if (fromStream)
+         {
+            result = streamDecoder.ReadObject(stream, streamDecoderState);
+         }
+         else
+         {
+            result = decoder.ReadObject(buffer, decoderState);
+         }
+
+         Assert.IsTrue(result.GetType().IsArray);
+         Assert.IsTrue(result.GetType().GetElementType().IsPrimitive);
+
+         char[] resultArray = (char[])result;
+
+         Assert.AreEqual(values, resultArray);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForPrimitiveArrayIfCountIsToLargeArray32()
+      {
+         TestDefaultsDecodeFailsForPrimitiveArrayWhenCountIsToLarge(true, false);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForPrimitiveArrayIfCountIsToLargeArray32FromStream()
+      {
+         TestDefaultsDecodeFailsForPrimitiveArrayWhenCountIsToLarge(true, true);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForPrimitiveArrayIfCountIsToLargeArray8()
+      {
+         TestDefaultsDecodeFailsForPrimitiveArrayWhenCountIsToLarge(false, false);
+      }
+
+      [Test]
+      public void TestDefaultsDecodeFailsForPrimitiveArrayIfCountIsToLargeArray8FromStream()
+      {
+         TestDefaultsDecodeFailsForPrimitiveArrayWhenCountIsToLarge(false, true);
+      }
+
+      private void TestDefaultsDecodeFailsForPrimitiveArrayWhenCountIsToLarge(bool array32, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         streamDecoderState.MaxArraySize = 9;
+
+         if (array32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(9);  // Size
+            buffer.WriteInt(10);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Char);
+            buffer.WriteInt((byte)1);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte((byte)6);  // Size
+            buffer.WriteUnsignedByte((byte)10);  // Count
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Char);
+            buffer.WriteInt((byte)1);
+         }
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => arrayDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.IsTrue(typeDecoder is IPrimitiveArrayTypeDecoder);
+            IPrimitiveArrayTypeDecoder arrayDecoder = (IPrimitiveArrayTypeDecoder)typeDecoder;
+            Assert.Throws<DecodeException>(() => arrayDecoder.ReadValue(buffer, decoderState));
+         }
+      }
    }
 }

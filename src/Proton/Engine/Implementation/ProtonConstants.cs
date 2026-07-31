@@ -27,6 +27,12 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       /// </summary>
       public static readonly uint MinMaxAmqpFrameSize = 512;
 
+      /// <summary>
+      /// The engine default for the maximum number of transfer performatives allowed
+      /// before a delivery must be completed or the engine will consider it an error.
+      /// </summary>
+      public static readonly uint DefaultMaxTransfersPerDelivery = ushort.MaxValue;
+
       /**
        * The default AMQP max frame size used by the engine and connection if none is set
        * by the client or remote peer.

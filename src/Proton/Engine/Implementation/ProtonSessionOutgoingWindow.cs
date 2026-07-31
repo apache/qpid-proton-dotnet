@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private uint remoteIncomingWindow;
       private uint remoteNextIncomingId = 0;
 
-      private readonly SplayedDictionary<uint, ProtonOutgoingDelivery> unsettled = new();
+      private readonly UnsettledDictionary<ProtonOutgoingDelivery> unsettled = new(delivery => delivery.DeliveryId);
 
       public ProtonSessionOutgoingWindow(ProtonSession session)
       {
@@ -233,7 +233,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (disposition.HasLast() && disposition.Last != first)
          {
-            HandleRangedDisposition(disposition);
+            HandleRangedDisposition(disposition, unsettled);
          }
          else
          {
@@ -250,25 +250,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return disposition;
       }
 
-      private void HandleRangedDisposition(Disposition disposition)
+      private static void HandleRangedDisposition(Disposition disposition, UnsettledDictionary<ProtonOutgoingDelivery> unsettled)
       {
-         uint first = disposition.First;
-         uint last = disposition.Last;
-
-         uint index = first;
-
-         do
+         if (disposition.Settled)
          {
-            if (unsettled.TryGetValue(index, out ProtonOutgoingDelivery delivery))
+            unsettled.RemoveEach(disposition.First, disposition.Last, (delivery) =>
             {
-               if (disposition.Settled)
-               {
-                  unsettled.Remove(first);
-               }
                ((IProtonLink)delivery.Link).RemoteDisposition(disposition, delivery);
-            }
+            });
          }
-         while (index++ != last);
+         else
+         {
+            unsettled.ForEach(disposition.First, disposition.Last, (delivery) =>
+            {
+               ((IProtonLink)delivery.Link).RemoteDisposition(disposition, delivery);
+            });
+         }
       }
 
       #endregion

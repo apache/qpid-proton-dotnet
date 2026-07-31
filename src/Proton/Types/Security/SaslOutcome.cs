@@ -23,7 +23,7 @@ namespace Apache.Qpid.Proton.Types.Security
    public class SaslOutcome : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000044UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-outcome:list");
+      public static readonly Symbol DescriptorSymbol = Symbol.SaslLookup("amqp:sasl-outcome:list");
 
       public SaslOutcome() { }
 

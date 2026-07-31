@@ -44,6 +44,33 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
+      /// <summary>
+      /// Convert the given string array into an array of Symbol instances
+      /// </summary>
+      /// <param name="stringArray"></param>
+      /// <returns></returns>
+      public static Symbol[] ToSaslSymbolArray(string[] stringArray)
+      {
+         Symbol[] result = null;
+
+         if (stringArray != null)
+         {
+            result = new Symbol[stringArray.Length];
+            for (int i = 0; i < stringArray.Length; ++i)
+            {
+               result[i] = Symbol.SaslLookup(stringArray[i]);
+            }
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Convert the given string array into an array of Symbol instances using the
+      /// SASL Symbol cache as the source of symbol values.
+      /// </summary>
+      /// <param name="stringArray"></param>
+      /// <returns></returns>
       public static Symbol[] ToSymbolArray(IEnumerable<DeliveryStateType> stateTypeArray)
       {
          Symbol[] result = null;
@@ -96,6 +123,26 @@ namespace Apache.Qpid.Proton.Client.Implementation
          return result;
       }
 
+      public static Dictionary<Symbol, object> ToSaslSymbolKeyedMap<V>(IEnumerable<KeyValuePair<string, V>> stringsMap)
+      {
+         Dictionary<Symbol, object> result;
+
+         if (stringsMap != null)
+         {
+            result = new Dictionary<Symbol, object>();
+            foreach (KeyValuePair<string, V> entry in stringsMap)
+            {
+               result.Add(Symbol.SaslLookup(entry.Key), entry.Value);
+            }
+         }
+         else
+         {
+            result = null;
+         }
+
+         return result;
+      }
+
       public static Dictionary<string, object> ToStringKeyedMap<V>(IEnumerable<KeyValuePair<Symbol, V>> symbolMap)
       {
          Dictionary<string, object> result;
@@ -131,6 +178,31 @@ namespace Apache.Qpid.Proton.Client.Implementation
             foreach (string value in strings)
             {
                result.Add(Symbol.Lookup(value));
+            }
+         }
+         else
+         {
+            result = null;
+         }
+
+         return result;
+      }
+
+      /// <summary>
+      /// Converts an enumeration of string values into a set of Symbol values.
+      /// </summary>
+      /// <param name="strings">an enumeration of string values</param>
+      /// <returns>a set of Symbol value that match the input strings</returns>
+      public static ISet<Symbol> ToSaslSymbolSet(in IEnumerable<string> strings)
+      {
+         ISet<Symbol> result;
+
+         if (strings != null)
+         {
+            result = new HashSet<Symbol>();
+            foreach (string value in strings)
+            {
+               result.Add(Symbol.SaslLookup(value));
             }
          }
          else

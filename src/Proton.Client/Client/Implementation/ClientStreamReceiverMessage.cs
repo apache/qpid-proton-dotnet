@@ -51,7 +51,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
       private StreamState currentState = StreamState.IDLE;
       private MessageBodyInputStream bodyStream;
 
-      internal ClientStreamReceiverMessage(ClientStreamReceiver receiver, ClientStreamDelivery delivery, Stream deliveryStream)
+      internal ClientStreamReceiverMessage(ClientStreamReceiver receiver, ClientStreamDelivery delivery, StreamDecodeOptions decodeOptions, Stream deliveryStream)
       {
          this.receiver = receiver;
          this.delivery = delivery;
@@ -60,6 +60,16 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          this.protonDecoder = ProtonStreamDecoderFactory.Create();
          this.decoderState = protonDecoder.NewDecoderState();
+
+         // Configure the decoder state here which will then apply to all decode operations
+         decoderState.DepthLimit = decodeOptions.DepthLimit;
+         decoderState.MaxZeroWidthArrayElements = decodeOptions.MaxZeroWidthArrayElements;
+         decoderState.MaxStringSize = decodeOptions.MaxStringSize;
+         decoderState.MaxArraySize = decodeOptions.MaxArraySize;
+         decoderState.MaxListSize = decodeOptions.MaxListSize;
+         decoderState.MaxMapSize = decodeOptions.MaxMapSize;
+         decoderState.MaxBinarySize = decodeOptions.MaxBinarySize;
+         decoderState.MaxSymbolSize = decodeOptions.MaxSymbolSize;
       }
 
       public IStreamDelivery Delivery => delivery;

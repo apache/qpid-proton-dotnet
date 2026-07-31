@@ -554,5 +554,30 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          }
          catch (DecodeException) { }
       }
+
+      [Test]
+      public void TestReadTypeWithOverLargeEncodingFromStream()
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         streamDecoderState.MaxBinarySize = 100;
+
+         byte[] payload = new byte[byte.MaxValue];
+
+         buffer.WriteUnsignedByte(0); // Described Type Indicator
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)Data.DescriptorCode);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.VBin32);
+         buffer.WriteInt(byte.MaxValue); // Not enough bytes in buffer for this
+         buffer.WriteBytes(payload);
+
+         try
+         {
+            streamDecoder.ReadObject(stream, streamDecoderState);
+            Assert.Fail("Should not decode type with invalid encoding");
+         }
+         catch (DecodeException) { }
+      }
    }
 }

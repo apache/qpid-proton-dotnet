@@ -29,11 +29,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          int length = ReadSize(buffer, state);
 
-         if (length > buffer.ReadableBytes)
+         if (length > buffer.ReadableBytes || length < 0)
          {
             throw new DecodeException(
-                string.Format("Binary data size {0} is specified to be greater than the amount " +
-                              "of data available ({1})", length, buffer.ReadableBytes));
+               string.Format("Binary data size {0} is specified to be greater than the amount " +
+                             "of data available ({1})", (uint) length, buffer.ReadableBytes));
          }
 
          IProtonBuffer payload = buffer.Copy(buffer.ReadOffset, length);
@@ -45,10 +45,19 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
+         int length = ReadSize(stream, state);
+
+         if (length > state.MaxBinarySize || length < 0)
+         {
+            throw new DecodeException(String.Format(
+                  "Binary encoded length is specified to be greater than the maximum allowed length " +
+                  "l:(%d) m:(%d)", (uint) length, state.MaxBinarySize));
+         }
+
          try
          {
             return ProtonByteBufferAllocator.Instance.Wrap(
-               ProtonStreamReadUtils.ReadBytes(stream, ReadSize(stream, state)));
+               ProtonStreamReadUtils.ReadBytes(stream, length));
          }
          catch (IOException ex)
          {
@@ -60,11 +69,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          int length = ReadSize(buffer, state);
 
-         if (length > buffer.ReadableBytes)
+         if (length > buffer.ReadableBytes || length < 0)
          {
             throw new DecodeException(
                 string.Format("Binary data size {0} is specified to be greater than the amount " +
-                              "of data available ({1})", length, buffer.ReadableBytes));
+                              "of data available ({1})", (uint) length, buffer.ReadableBytes));
          }
 
          buffer.SkipBytes(length);
@@ -72,18 +81,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         try
+         int length = ReadSize(stream, state);
+
+         if (length > state.MaxBinarySize || length < 0)
          {
-            ProtonStreamReadUtils.SkipBytes(stream, ReadSize(stream, state));
+            throw new DecodeException(String.Format(
+                  "Binary encoded length is specified to be greater than the maximum allowed length " +
+                  "l:(%d) m:(%d)", length, state.MaxBinarySize));
          }
-         catch (ArgumentOutOfRangeException ex)
-         {
-            throw new DecodeException("Error while skipping Binary payload bytes", ex);
-         }
-         catch (IOException ex)
-         {
-            throw new DecodeException("Error while skipping Binary payload bytes", ex);
-         }
+
+         ProtonStreamReadUtils.SkipBytes(stream, (uint) length);
       }
 
       #region BinaryTypeDecoder abstract methods

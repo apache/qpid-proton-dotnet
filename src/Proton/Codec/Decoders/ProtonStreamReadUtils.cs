@@ -287,6 +287,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders
                throw new DecodeException("Stream was not able to skip the requested amount of bytes: " + amount);
             }
          }
+         catch (ArgumentOutOfRangeException ex)
+         {
+            throw new DecodeException(
+                string.Format("Error while attempting to skip {0} bytes in the given InputStream", amount), ex);
+         }
          catch (IOException ex)
          {
             throw new DecodeException(

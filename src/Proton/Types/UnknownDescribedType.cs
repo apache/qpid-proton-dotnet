@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Types
    /// </summary>
    public sealed class UnknownDescribedType : IDescribedType
    {
-      internal UnknownDescribedType(object descriptor, object described)
+      public UnknownDescribedType(object descriptor, object described)
       {
          Descriptor = descriptor;
          Described = described;

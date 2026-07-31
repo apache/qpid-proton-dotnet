@@ -24,7 +24,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 {
-   public sealed class HeaderTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class HeaderTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinHeaderListEntries = 0;
       private static readonly int MaxHeaderListEntries = 5;
@@ -35,53 +35,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(Header);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinHeaderListEntries;
 
-         return ReadHeader(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxHeaderListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Header[] result = new Header[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadHeader(buffer, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Header ReadHeader(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Header ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Header result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinHeaderListEntries)
-         {
-            throw new DecodeException("Not enough entries in Header list encoding: " + count);
-         }
-
-         if (count > MaxHeaderListEntries)
-         {
-            throw new DecodeException("To many entries in Header list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -118,53 +78,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadHeader(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-         IListTypeDecoder listDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
-
-         Header[] result = new Header[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadHeader(stream, state, listDecoder);
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Header ReadHeader(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Header ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Header result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         // Don't decode anything if things already look wrong.
-         if (count < MinHeaderListEntries)
-         {
-            throw new DecodeException("Not enough entries in Header list encoding: " + count);
-         }
-
-         if (count > MaxHeaderListEntries)
-         {
-            throw new DecodeException("To many entries in Header list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

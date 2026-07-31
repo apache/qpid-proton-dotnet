@@ -27,9 +27,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override Type DecodesType => typeof(uint);
 
+      public override bool IsZeroWidth => true;
+
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
-         return (uint) 0;
+         return (uint)0;
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
@@ -43,6 +45,26 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
+      }
+
+      protected override void ValidateArrayPreconditions(IProtonBuffer buffer, IDecoderState state, int count)
+      {
+         if (count > state.MaxZeroWidthArrayElements || count < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array size indicated {0} is greater than the amount of elements allowed for zero sized primitives ({1})",
+               (uint) count, state.MaxZeroWidthArrayElements));
+         }
+      }
+
+      protected override void ValidateArrayPreconditions(Stream stream, IStreamDecoderState state, int count)
+      {
+         if (count > state.MaxZeroWidthArrayElements || count < 0)
+         {
+            throw new DecodeException(string.Format(
+               "Array size indicated {0} is greater than the amount of elements allowed for zero sized primitives ({1})",
+               (uint) count, state.MaxZeroWidthArrayElements));
+         }
       }
    }
 }

@@ -27,7 +27,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    /// </summary>
    public sealed class PlainMechanism : AbstractMechanism
    {
-      public static readonly Symbol PLAIN = Symbol.Lookup("PLAIN");
+      public static readonly Symbol PLAIN = Symbol.SaslLookup("PLAIN");
 
       public override Symbol Name => PLAIN;
 

@@ -41,14 +41,6 @@ namespace Apache.Qpid.Proton.Codec.Encoders
       }
 
       /// <summary>
-      /// Returns false when the value to be encoded has no Map body and can be
-      /// written as a Null body type instead of a Map type.
-      /// </summary>
-      /// <param name="value">The value that is encoded as a map type</param>
-      /// <returns>if the map type needs a map body or can be null</returns>
-      protected abstract bool HasMap(M value);
-
-      /// <summary>
       /// Gets the number of elements that will result when this type is encoded
       /// into an AMQP Map type.
       /// </summary>
@@ -78,27 +70,20 @@ namespace Apache.Qpid.Proton.Codec.Encoders
 
          state.Encoder.WriteUnsignedLong(buffer, state, DescriptorCode);
 
-         if (HasMap(value))
-         {
-            int count = GetMapEntries(value);
-            EncodingCodes encodingCode = GetMapEncoding(value);
+         int count = GetMapEntries(value);
+         EncodingCodes encodingCode = GetMapEncoding(value);
 
-            buffer.EnsureWritable(sizeof(byte));
-            buffer.WriteUnsignedByte(((byte)encodingCode));
+         buffer.EnsureWritable(sizeof(byte));
+         buffer.WriteUnsignedByte(((byte)encodingCode));
 
-            switch (encodingCode)
-            {
-               case EncodingCodes.Map8:
-                  WriteSmallType(buffer, state, value, count);
-                  break;
-               case EncodingCodes.Map32:
-                  WriteLargeType(buffer, state, value, count);
-                  break;
-            }
-         }
-         else
+         switch (encodingCode)
          {
-            state.Encoder.WriteNull(buffer, state);
+            case EncodingCodes.Map8:
+               WriteSmallType(buffer, state, value, count);
+               break;
+            case EncodingCodes.Map32:
+               WriteLargeType(buffer, state, value, count);
+               break;
          }
       }
 

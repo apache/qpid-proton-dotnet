@@ -113,6 +113,11 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
       public IStreamReceiverMessage Message()
       {
+         return Message(new StreamDecodeOptions());
+      }
+
+      public IStreamReceiverMessage Message(StreamDecodeOptions options)
+      {
          if (rawInputStream != null && message == null)
          {
             throw new ClientIllegalStateException("Cannot access Delivery Message API after requesting an InputStream");
@@ -120,7 +125,7 @@ namespace Apache.Qpid.Proton.Client.Implementation
 
          if (message == null)
          {
-            message = new ClientStreamReceiverMessage(receiver, this, rawInputStream = new RawDeliveryInputStream(this));
+            message = new ClientStreamReceiverMessage(receiver, this, options, rawInputStream = new RawDeliveryInputStream(this));
          }
 
          return message;

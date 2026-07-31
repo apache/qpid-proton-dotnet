@@ -78,6 +78,8 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
       public uint InboundMaxFrameSize => effectiveMaxInboundFrameSize;
 
+      public uint MaxTransfersPerDelivery { get; set; } = ProtonConstants.DefaultMaxTransfersPerDelivery;
+
       #region Internal Engine API
 
       internal void RecomputeEffectiveFrameSizeLimits()

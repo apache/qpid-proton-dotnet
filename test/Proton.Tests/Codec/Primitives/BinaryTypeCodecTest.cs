@@ -510,5 +510,79 @@ namespace Apache.Qpid.Proton.Codec.Primitives
             Assert.AreEqual(source[i], decoded);
          }
       }
+
+      [Test]
+      public void TestStreamDecodeFailsWhenEncodedLengthExceedsConfigurationSym8()
+      {
+         DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(true);
+      }
+
+      [Test]
+      public void TestStreamDecodeFailsWhenEncodedLengthExceedsConfigurationSym32()
+      {
+         DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(false);
+      }
+
+      private void DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         byte[] payload = new byte[256];
+
+         streamDecoderState.MaxBinarySize = 24;
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.VBin8);
+            buffer.WriteUnsignedByte(127);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.VBin32);
+            buffer.WriteInt(127);
+         }
+         buffer.WriteBytes(payload);
+
+         IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(stream, streamDecoderState));
+      }
+
+      [Test]
+      public void TestStreamSkipValueFailsWhenEncodedLengthExceedsConfigurationSym8()
+      {
+         DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(true);
+      }
+
+      [Test]
+      public void TestStreamSkipValueFailsWhenEncodedLengthExceedsConfigurationSym32()
+      {
+         DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(false);
+      }
+
+      private void DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         byte[] payload = new byte[256];
+
+         streamDecoderState.MaxBinarySize = 24;
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.VBin8);
+            buffer.WriteUnsignedByte(127);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.VBin32);
+            buffer.WriteInt(127);
+         }
+         buffer.WriteBytes(payload);
+
+         IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.SkipValue(stream, streamDecoderState));
+      }
    }
 }

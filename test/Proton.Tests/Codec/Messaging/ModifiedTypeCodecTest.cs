@@ -291,7 +291,7 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
          buffer.WriteUnsignedByte(((byte)Modified.DescriptorCode));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.List8));
-         buffer.WriteUnsignedByte((byte)0);  // Size
+         buffer.WriteUnsignedByte((byte)1);  // Size
          buffer.WriteUnsignedByte((byte)0);  // Count
 
          object result;
@@ -329,7 +329,7 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          buffer.WriteUnsignedByte(((byte)EncodingCodes.SmallULong));
          buffer.WriteUnsignedByte(((byte)Modified.DescriptorCode));
          buffer.WriteUnsignedByte(((byte)EncodingCodes.List32));
-         buffer.WriteInt((byte)0);  // Size
+         buffer.WriteInt((byte)4);  // Size
          buffer.WriteInt((byte)0);  // Count
 
          object result;
@@ -381,13 +381,13 @@ namespace Apache.Qpid.Proton.Codec.Messaging
          if (mapType == EncodingCodes.Map32)
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Map32));
-            buffer.WriteInt((byte)0);  // Size
+            buffer.WriteInt((byte)4);  // Size
             buffer.WriteInt((byte)0);  // Count
          }
          else
          {
             buffer.WriteUnsignedByte(((byte)EncodingCodes.Map8));
-            buffer.WriteUnsignedByte((byte)0);  // Size
+            buffer.WriteUnsignedByte((byte)1);  // Size
             buffer.WriteUnsignedByte((byte)0);  // Count
          }
 

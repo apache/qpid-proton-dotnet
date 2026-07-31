@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Sasl.Client
    /// </remarks>
    public sealed class XOauth2Mechanism : AbstractMechanism
    {
-      public static readonly Symbol XOAUTH2 = Symbol.Lookup("XOAUTH2");
+      public static readonly Symbol XOAUTH2 = Symbol.SaslLookup("XOAUTH2");
 
       private readonly Regex ACCESS_TOKEN_PATTERN = new("^[\\x20-\\x7F]+$", RegexOptions.Compiled);
 

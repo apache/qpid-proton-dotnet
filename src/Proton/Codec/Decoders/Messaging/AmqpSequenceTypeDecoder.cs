@@ -33,7 +33,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(AmqpSequence);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      public override AmqpSequence ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
          ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
          IListTypeDecoder valueDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
@@ -59,14 +59,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
+         CheckIsExpectedType<IListTypeDecoder>(state.Decoder.ReadNextTypeDecoder(buffer, state)).SkipValue(buffer, state);
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      public override AmqpSequence ReadValue(Stream stream, IStreamDecoderState state)
       {
          IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
          IListTypeDecoder valueDecoder = CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder);
@@ -92,11 +88,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
+         CheckIsExpectedType<IListTypeDecoder>(state.Decoder.ReadNextTypeDecoder(stream, state)).SkipValue(stream, state);
       }
    }
 }

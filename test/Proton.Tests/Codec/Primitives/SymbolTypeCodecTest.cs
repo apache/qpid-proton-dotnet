@@ -622,5 +622,114 @@ namespace Apache.Qpid.Proton.Codec.Primitives
          Symbol value = (Symbol)result;
          Assert.AreEqual(expected, value);
       }
+
+      [Test]
+      public void TestStreamDecodeFailsWhenEncodedLengthExceedsConfigurationSym8()
+      {
+         DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(true);
+      }
+
+      [Test]
+      public void TestStreamDecodeFailsWhenEncodedLengthExceedsConfigurationSym32()
+      {
+         DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(false);
+      }
+
+      private void DoTestStreamDecodeFailsWhenEncodedLengthExceedsConfiguration(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         byte[] payload = new byte[256];
+
+         streamDecoderState.MaxSymbolSize = 24;
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym8);
+            buffer.WriteUnsignedByte(127);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym32);
+            buffer.WriteInt(127);
+         }
+         buffer.WriteBytes(payload);
+
+         IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(stream, streamDecoderState));
+      }
+
+      [Test]
+      public void TestStreamSkipValueFailsWhenEncodedLengthExceedsConfigurationSym8()
+      {
+         DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(true);
+      }
+
+      [Test]
+      public void TestStreamSkipValueFailsWhenEncodedLengthExceedsConfigurationSym32()
+      {
+         DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(false);
+      }
+
+      private void DoTestStreamSkipValueFailsWhenEncodedLengthExceedsConfiguration(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         byte[] payload = new byte[256];
+
+         streamDecoderState.MaxSymbolSize = 24;
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym8);
+            buffer.WriteUnsignedByte(127);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym32);
+            buffer.WriteInt(127);
+         }
+         buffer.WriteBytes(payload);
+
+         IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+         Assert.Throws<DecodeException>(() => typeDecoder.SkipValue(stream, streamDecoderState));
+      }
+
+            [Test]
+      public void TestDecoderSkipValueFailsWhenEncodedLengthExceedsRemainingStr8()
+      {
+         DoTestDecoderSkipValueFailsWhenEncodedLengthExceedsRemaining(true);
+      }
+
+      [Test]
+      public void TestDecoderSkipValueFailsWhenEncodedLengthExceedsRemainingStr32()
+      {
+         DoTestDecoderSkipValueFailsWhenEncodedLengthExceedsRemaining(false);
+      }
+
+      private void DoTestDecoderSkipValueFailsWhenEncodedLengthExceedsRemaining(bool smallEncoding)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate(8192);
+
+         byte[] payload = new byte[127];
+
+         if (smallEncoding)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym8);
+            buffer.WriteUnsignedByte(128);
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Sym32);
+            buffer.WriteInt(128);
+         }
+         buffer.WriteBytes(payload);
+
+         ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+         Assert.AreEqual(typeof(Symbol), typeDecoder.DecodesType);
+         Assert.Throws<DecodeException>(() => typeDecoder.SkipValue(buffer, decoderState));
+      }
    }
 }

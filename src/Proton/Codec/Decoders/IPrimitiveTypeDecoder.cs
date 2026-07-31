@@ -27,5 +27,9 @@ namespace Apache.Qpid.Proton.Codec
       /// </summary>
       EncodingCodes EncodingCode { get; }
 
+      /// <summary>
+      /// Returns true if this decoder return types that encode as zero width elements.
+      /// </summary>
+      bool IsZeroWidth { get; }
    }
 }

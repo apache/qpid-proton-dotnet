@@ -34,7 +34,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override Type DecodesType => typeof(Data);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
+      public override Data ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
          EncodingCodes encodingCode = (EncodingCodes)buffer.ReadByte();
          int size;
@@ -88,14 +88,10 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IBinaryTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
+         CheckIsExpectedType<IBinaryTypeDecoder>(state.Decoder.ReadNextTypeDecoder(buffer, state)).SkipValue(buffer, state);
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
+      public override Data ReadValue(Stream stream, IStreamDecoderState state)
       {
          EncodingCodes encodingCode = (EncodingCodes)ProtonStreamReadUtils.ReadByte(stream);
          int size;
@@ -112,6 +108,12 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
                return EmptyData;
             default:
                throw new DecodeException("Expected Binary type but found encoding: " + encodingCode);
+         }
+
+         if (size > state.MaxBinarySize)
+         {
+            throw new DecodeException("Binary data size " + size + " is specified to be greater than the " +
+                                      "configured max binary size (" + state.MaxBinarySize + ")");
          }
 
          return new Data(ProtonByteBufferAllocator.Instance.Wrap(ProtonStreamReadUtils.ReadBytes(stream, size)));
@@ -134,11 +136,7 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Messaging
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IBinaryTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
+         CheckIsExpectedType<IBinaryTypeDecoder>(state.Decoder.ReadNextTypeDecoder(stream, state)).SkipValue(stream, state);
       }
    }
 }

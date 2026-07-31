@@ -78,7 +78,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
          Stream stream = new ProtonBufferInputStream(buffer);
 
-         Symbol[] mechanisms = new Symbol[] { Symbol.Lookup("ANONYMOUS"), Symbol.Lookup("EXTERNAL") };
+         Symbol[] mechanisms = new Symbol[] { Symbol.SaslLookup("ANONYMOUS"), Symbol.SaslLookup("EXTERNAL") };
 
          SaslMechanisms input = new SaslMechanisms();
          input.Mechanisms = mechanisms;
@@ -117,14 +117,14 @@ namespace Apache.Qpid.Proton.Codec.Security
 
          SaslMechanisms mechanisms = new SaslMechanisms();
 
-         mechanisms.Mechanisms = new Symbol[] { Symbol.Lookup("ANONYMOUS") };
+         mechanisms.Mechanisms = new Symbol[] { Symbol.SaslLookup("ANONYMOUS") };
 
          for (int i = 0; i < 10; ++i)
          {
             encoder.WriteObject(buffer, encoderState, mechanisms);
          }
 
-         mechanisms.Mechanisms = new Symbol[] { Symbol.Lookup("ANONYMOUS"), Symbol.Lookup("EXTERNAL") };
+         mechanisms.Mechanisms = new Symbol[] { Symbol.SaslLookup("ANONYMOUS"), Symbol.SaslLookup("EXTERNAL") };
 
          encoder.WriteObject(buffer, encoderState, mechanisms);
 
@@ -158,7 +158,7 @@ namespace Apache.Qpid.Proton.Codec.Security
          Assert.IsTrue(result is SaslMechanisms);
 
          SaslMechanisms value = (SaslMechanisms)result;
-         Assert.AreEqual(new Symbol[] { Symbol.Lookup("ANONYMOUS"), Symbol.Lookup("EXTERNAL") }, value.Mechanisms);
+         Assert.AreEqual(new Symbol[] { Symbol.SaslLookup("ANONYMOUS"), Symbol.SaslLookup("EXTERNAL") }, value.Mechanisms);
       }
 
       [Test]
@@ -320,9 +320,9 @@ namespace Apache.Qpid.Proton.Codec.Security
          array[1] = new SaslMechanisms();
          array[2] = new SaslMechanisms();
 
-         array[0].Mechanisms = new Symbol[] { Symbol.Lookup("ANONYMOUS"), Symbol.Lookup("PLAIN"), Symbol.Lookup("EXTERNAL") };
-         array[1].Mechanisms = new Symbol[] { Symbol.Lookup("ANONYMOUS"), Symbol.Lookup("PLAIN") };
-         array[2].Mechanisms = new Symbol[] { Symbol.Lookup("ANONYMOUS") };
+         array[0].Mechanisms = new Symbol[] { Symbol.SaslLookup("ANONYMOUS"), Symbol.SaslLookup("PLAIN"), Symbol.SaslLookup("EXTERNAL") };
+         array[1].Mechanisms = new Symbol[] { Symbol.SaslLookup("ANONYMOUS"), Symbol.SaslLookup("PLAIN") };
+         array[2].Mechanisms = new Symbol[] { Symbol.SaslLookup("ANONYMOUS") };
 
          encoder.WriteObject(buffer, encoderState, array);
 
@@ -492,6 +492,182 @@ namespace Apache.Qpid.Proton.Codec.Security
                Assert.Fail("Should not decode type with invalid min entries");
             }
             catch (DecodeException) { }
+         }
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfValuesSizeIsToLargeArray8()
+      {
+         DoTestDecodeFailsWhenArrayOfValuesSizeIsToLarge(EncodingCodes.Array8, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfValuesSizeIsToLargeArray32()
+      {
+         DoTestDecodeFailsWhenArrayOfValuesSizeIsToLarge(EncodingCodes.Array32, false);
+      }
+
+      private void DoTestDecodeFailsWhenArrayOfValuesSizeIsToLarge(EncodingCodes arrayType, bool fromStream)
+      {
+         IProtonBuffer buffer2 = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer2);
+
+         if (arrayType == EncodingCodes.Array32)
+         {
+            buffer2.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer2.WriteInt(13);  // Size
+            buffer2.WriteInt(2);   // Count
+         }
+         else
+         {
+            buffer2.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer2.WriteUnsignedByte(10);  // Size
+            buffer2.WriteUnsignedByte(2);  // Count
+         }
+         buffer2.WriteUnsignedByte(0); // Described Type Indicator
+         buffer2.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer2.WriteUnsignedByte((byte)SaslMechanisms.DescriptorCode);
+         buffer2.WriteUnsignedByte((byte)EncodingCodes.List8);
+         buffer2.WriteUnsignedByte(1);  // Size
+         buffer2.WriteUnsignedByte(0);  // Count
+         buffer2.WriteUnsignedByte(1);  // Size
+         buffer2.WriteUnsignedByte(0);  // Count
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsNotNull(typeDecoder.DecodesType);
+            Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer2, decoderState);
+            Assert.IsNotNull(typeDecoder.DecodesType);
+            Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(buffer2, decoderState));
+         }
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray8()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array8, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray32()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array32, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray8FS()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array8, true);
+      }
+
+      [Test]
+      public void TestDecodeFailsWhenArrayOfTypeWithList0EncodingsArray32FS()
+      {
+         DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes.Array32, true);
+      }
+
+      private void DoTestDecodeFailsWhenArrayOfTypeWithList0Encodings(EncodingCodes arrayType, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         if (arrayType == EncodingCodes.Array32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array32);
+            buffer.WriteInt(8);  // Size
+            buffer.WriteInt(2);  // Count
+         }
+         else
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+            buffer.WriteUnsignedByte(5);  // Size
+            buffer.WriteUnsignedByte(2);  // Count
+         }
+         buffer.WriteUnsignedByte(0); // Described Type Indicator
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)SaslMechanisms.DescriptorCode);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.List0);
+
+         if (fromStream)
+         {
+            IStreamTypeDecoder typeDecoder = streamDecoder.ReadNextTypeDecoder(stream, streamDecoderState);
+            Assert.IsNotNull(typeDecoder.DecodesType);
+            Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(stream, streamDecoderState));
+         }
+         else
+         {
+            ITypeDecoder typeDecoder = decoder.ReadNextTypeDecoder(buffer, decoderState);
+            Assert.IsNotNull(typeDecoder.DecodesType);
+            Assert.Throws<DecodeException>(() => typeDecoder.ReadValue(buffer, decoderState));
+         }
+      }
+
+      [Test]
+      public void TestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType8()
+      {
+         DoTestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType(EncodingCodes.List8, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType32()
+      {
+         DoTestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType(EncodingCodes.List32, false);
+      }
+
+      [Test]
+      public void TestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType8FS()
+      {
+         DoTestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType(EncodingCodes.List8, true);
+      }
+
+      [Test]
+      public void TestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType32FS()
+      {
+         DoTestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType(EncodingCodes.List32, true);
+      }
+
+      private void DoTestDecodeFailsFastWhenMechanismsArrayIsNotTheExpectedType(EncodingCodes listType, bool fromStream)
+      {
+         IProtonBuffer buffer = ProtonByteBufferAllocator.Instance.Allocate();
+         Stream stream = new ProtonBufferInputStream(buffer);
+
+         buffer.WriteUnsignedByte((byte)0); // Described Type Indicator
+         buffer.WriteUnsignedByte((byte)EncodingCodes.SmallULong);
+         buffer.WriteUnsignedByte((byte)SaslMechanisms.DescriptorCode);
+         if (listType == EncodingCodes.List32)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.List32);
+            buffer.WriteInt((byte)24);  // Size
+            buffer.WriteInt((byte)1);  // Count
+         }
+         else if (listType == EncodingCodes.List8)
+         {
+            buffer.WriteUnsignedByte((byte)EncodingCodes.List8);
+            buffer.WriteUnsignedByte((byte)21);  // Size
+            buffer.WriteUnsignedByte((byte)1);  // Count
+         }
+
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Array8);
+         buffer.WriteUnsignedByte((byte)18);
+         buffer.WriteUnsignedByte((byte)1);
+         buffer.WriteUnsignedByte((byte)EncodingCodes.Uuid);
+         buffer.WriteLong(127);
+         buffer.WriteLong(721);
+
+         if (fromStream)
+         {
+            Assert.Throws<DecodeException>(() => streamDecoder.ReadObject(stream, streamDecoderState));
+            Assert.IsTrue(stream.CanRead);
+         }
+         else
+         {
+            Assert.Throws<DecodeException>(() => decoder.ReadObject(buffer, decoderState));
+            Assert.IsTrue(buffer.IsReadable);
          }
       }
    }

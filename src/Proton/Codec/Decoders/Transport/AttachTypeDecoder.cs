@@ -25,7 +25,7 @@ using Apache.Qpid.Proton.Types.Messaging;
 
 namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 {
-   public sealed class AttachTypeDecoder : AbstractDescribedTypeDecoder
+   public sealed class AttachTypeDecoder : AbstractDescribedListTypeDecoder
    {
       private static readonly int MinAttachListEntries = 3;
       private static readonly int MaxAttachListEntries = 14;
@@ -36,51 +36,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
 
       public override Type DecodesType => typeof(Attach);
 
-      public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+      protected override int MinListElements => MinAttachListEntries;
 
-         return ReadAttach(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
+      protected override int MaxListElements => MaxAttachListEntries;
 
-      public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         Attach[] result = new Attach[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadAttach(buffer, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
-      {
-         ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(buffer, state);
-      }
-
-      private static Attach ReadAttach(IProtonBuffer buffer, IDecoderState state, IListTypeDecoder listDecoder)
+      protected override Attach ReadType(int count, IProtonBuffer buffer, IDecoder decoder, IDecoderState state)
       {
          Attach result = new();
-
-         _ = listDecoder.ReadSize(buffer, state);
-         int count = listDecoder.ReadCount(buffer, state);
-
-         if (count < MinAttachListEntries)
-         {
-            throw new DecodeException(ErrorForMissingRequiredFields(count));
-         }
-
-         if (count > MaxAttachListEntries)
-         {
-            throw new DecodeException("To many entries in Attach list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {
@@ -153,51 +115,9 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Transport
          return result;
       }
 
-      public override object ReadValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         return ReadAttach(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-      }
-
-      public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         Attach[] result = new Attach[count];
-         for (int i = 0; i < count; ++i)
-         {
-            result[i] = ReadAttach(stream, state, CheckIsExpectedTypeAndCast<IListTypeDecoder>(decoder));
-         }
-
-         return result;
-      }
-
-      public override void SkipValue(Stream stream, IStreamDecoderState state)
-      {
-         IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-
-         CheckIsExpectedType<IListTypeDecoder>(decoder);
-
-         decoder.SkipValue(stream, state);
-      }
-
-      private static Attach ReadAttach(Stream stream, IStreamDecoderState state, IListTypeDecoder listDecoder)
+      protected override Attach ReadType(int count, Stream stream, IStreamDecoder decoder, IStreamDecoderState state)
       {
          Attach result = new();
-
-         _ = listDecoder.ReadSize(stream, state);
-         int count = listDecoder.ReadCount(stream, state);
-
-         if (count < MinAttachListEntries)
-         {
-            throw new DecodeException(ErrorForMissingRequiredFields(count));
-         }
-
-         if (count > MaxAttachListEntries)
-         {
-            throw new DecodeException("To many entries in Attach list encoding: " + count);
-         }
 
          for (int index = 0; index < count; ++index)
          {

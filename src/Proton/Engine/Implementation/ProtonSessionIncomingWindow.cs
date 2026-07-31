@@ -52,7 +52,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       private uint maxFrameSize;
       private uint incomingBytes;
 
-      private readonly SplayedDictionary<uint, ProtonIncomingDelivery> unsettled = new();
+      private readonly UnsettledDictionary<ProtonIncomingDelivery> unsettled = new(delivery => delivery.DeliveryId);
 
       public ProtonSessionIncomingWindow(ProtonSession session)
       {
@@ -133,15 +133,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
       /// <returns></returns>
       internal Transfer HandleTransfer(IProtonLink link, Transfer transfer, IProtonBuffer payload)
       {
-         incomingBytes += payload != null ? (uint)payload.ReadableBytes : 0;
-         incomingWindow--;
-         nextIncomingId++;
-
-         link.RemoteTransfer(transfer, payload, out ProtonIncomingDelivery delivery);
-
-         if (!delivery.IsSettled && !delivery.IsRemotelySettled && delivery.IsFirstTransfer)
+         if (incomingWindow-- == 0)
          {
-            unsettled.Add(delivery.DeliveryId, delivery);
+            engine.EngineFailed(new ProtocolViolationException(SessionError.WINDOW_VIOLATION,
+                "Sender violated session incoming window limit: " + link.Handle));
+         }
+         else
+         {
+            incomingBytes += payload != null ? (uint)payload.ReadableBytes : 0;
+            nextIncomingId++;
+
+            link.RemoteTransfer(transfer, payload, out ProtonIncomingDelivery delivery);
+
+            if (!delivery.IsSettled && !delivery.IsRemotelySettled && delivery.IsFirstTransfer)
+            {
+               unsettled.Add(delivery.DeliveryId, delivery);
+            }
          }
 
          return transfer;
@@ -159,7 +166,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          if (disposition.HasLast() && disposition.Last != first)
          {
-            HandleRangedDisposition(disposition);
+            HandleRangedDisposition(disposition, unsettled);
          }
          else
          {
@@ -177,27 +184,22 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          return disposition;
       }
 
-      private void HandleRangedDisposition(Disposition disposition)
+      private static void HandleRangedDisposition(Disposition disposition, UnsettledDictionary<ProtonIncomingDelivery> unsettled)
       {
-         uint first = disposition.First;
-         uint last = disposition.Last;
-         bool settled = disposition.Settled;
-
-         uint index = first;
-
-         do
+         if (disposition.Settled)
          {
-            if (unsettled.TryGetValue(index, out ProtonIncomingDelivery delivery))
+            unsettled.RemoveEach(disposition.First, disposition.Last, (delivery) =>
             {
-               if (settled)
-               {
-                  unsettled.Remove(index);
-               }
-
                ((IProtonLink)delivery.Link).RemoteDisposition(disposition, delivery);
-            }
+            });
          }
-         while (index++ != last);
+         else
+         {
+            unsettled.ForEach(disposition.First, disposition.Last, (delivery) =>
+            {
+               ((IProtonLink)delivery.Link).RemoteDisposition(disposition, delivery);
+            });
+         }
       }
 
       internal uint UpdateIncomingWindow()

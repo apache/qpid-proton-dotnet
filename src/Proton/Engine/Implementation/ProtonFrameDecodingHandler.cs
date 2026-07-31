@@ -381,7 +381,15 @@ namespace Apache.Qpid.Proton.Engine.Implementation
             if (frameBodySize > 0)
             {
                long startReadIndex = input.ReadOffset;
-               val = handler.decoder.ReadObject(input, handler.decoderState);
+
+               try
+               {
+                  val = handler.decoder.ReadObject(input, handler.decoderState);
+               }
+               finally
+               {
+                  handler.decoderState.Reset();
+               }
 
                // Copy the payload portion of the incoming bytes for now as the incoming may be
                // from a wrapped pooled buffer and for now we have no way of retaining or otherwise

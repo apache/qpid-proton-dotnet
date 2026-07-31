@@ -17,6 +17,7 @@
 
 using System;
 using Apache.Qpid.Proton.Types;
+using Apache.Qpid.Proton.Types.Transport;
 
 namespace Apache.Qpid.Proton.Engine.Exceptions
 {
@@ -100,7 +101,7 @@ namespace Apache.Qpid.Proton.Engine.Exceptions
       /// <summary>
       /// Returns the symbolic error condition that describes the violation error.
       /// </summary>
-      public Symbol ErrorCondition { get; internal set; }
+      public Symbol ErrorCondition { get; internal set; } = AmqpError.INTERNAL_ERROR;
 
    }
 }

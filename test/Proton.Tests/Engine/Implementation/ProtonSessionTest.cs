@@ -3078,5 +3078,90 @@ namespace Apache.Qpid.Proton.Engine.Implementation
 
          Assert.IsNull(failure);
       }
+
+      [Test]
+      public void TestSessionIncomingWindowExceededByRemoteTriggersEngineFailure()
+      {
+         const int TEST_MAX_FRAME_SIZE = 5 * 1024;
+         const int TEST_SESSION_CAPACITY = 15 * 1024;
+
+         IEngine engine = IEngineFactory.Proton.CreateNonSaslEngine();
+         engine.ErrorHandler(result => failure = result.FailureCause);
+         ProtonTestConnector peer = CreateTestPeer(engine);
+
+         uint expectedMaxFrameSize = TEST_MAX_FRAME_SIZE;
+
+         uint expectedWindowSize = TEST_SESSION_CAPACITY / TEST_MAX_FRAME_SIZE; // Window of three
+         uint sessionCapacity = TEST_SESSION_CAPACITY;
+
+         peer.ExpectAMQPHeader().RespondWithAMQPHeader();
+         peer.ExpectOpen().WithMaxFrameSize(expectedMaxFrameSize).Respond();
+         peer.ExpectBegin().WithIncomingWindow(expectedWindowSize).Respond();
+         peer.ExpectAttach().Respond();
+
+         IConnection connection = engine.Start();
+         connection.MaxFrameSize = TEST_MAX_FRAME_SIZE;
+         connection.Open();
+
+         ISession session = connection.Session();
+
+         session.IncomingCapacity = sessionCapacity;
+         session.Open();
+
+         Assert.AreEqual(sessionCapacity, session.RemainingIncomingCapacity);
+         Assert.AreEqual(sessionCapacity, session.IncomingCapacity, "Unexpected session capacity");
+
+         // Use a receiver to force more session window observations.
+         IReceiver receiver = session.Receiver("receiver");
+         receiver.Open();
+
+         int deliveryArrived = 0;
+         IIncomingDelivery delivered = null;
+         receiver.DeliveryReadHandler(delivery =>
+         {
+            deliveryArrived++;
+            delivered = delivery;
+         });
+
+         // Expect a flow and then use up the expected window of three transfers
+         peer.ExpectFlow().WithLinkCredit(4)
+                          .WithIncomingWindow(3);
+         peer.RemoteTransfer().WithDeliveryId(0)
+                              .WithDeliveryTag(new byte[] { 0 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(new byte[1000]).Also().Queue();
+         peer.RemoteTransfer().WithDeliveryId(1)
+                              .WithDeliveryTag(new byte[] { 1 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(new byte[1000]).Also().Queue();
+         peer.RemoteTransfer().WithDeliveryId(2)
+                              .WithDeliveryTag(new byte[] { 2 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(new byte[1000]).Also().Queue();
+
+         receiver.AddCredit(4);
+
+         peer.WaitForScriptToComplete();
+
+         Assert.AreEqual(3, deliveryArrived, "Unexpected delivery count");
+         Assert.IsNotNull(delivered);
+
+         // This exceeds the window and should cause the engine to fail
+         peer.ExpectClose();
+         peer.RemoteTransfer().WithDeliveryId(3)
+                              .WithDeliveryTag(new byte[] { 3 })
+                              .WithMore(false)
+                              .WithMessageFormat(0)
+                              .WithBody().WithData(new byte[1000]).Also().Now();
+
+         peer.WaitForScriptToComplete();
+
+         Assert.IsNotNull(failure);
+         Assert.IsTrue(failure is ProtocolViolationException);
+         Assert.AreEqual(SessionError.WINDOW_VIOLATION, ((ProtocolViolationException)failure).ErrorCondition);
+      }
    }
 }

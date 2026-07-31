@@ -24,7 +24,7 @@ namespace Apache.Qpid.Proton.Types.Security
    public class SaslResponse : ISaslPerformative
    {
       public static readonly ulong DescriptorCode = 0x0000000000000043UL;
-      public static readonly Symbol DescriptorSymbol = Symbol.Lookup("amqp:sasl-response:list");
+      public static readonly Symbol DescriptorSymbol = Symbol.SaslLookup("amqp:sasl-response:list");
 
       private IProtonBuffer response;
 

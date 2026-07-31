@@ -18,6 +18,7 @@
 using System;
 using System.IO;
 using Apache.Qpid.Proton.Buffer;
+using Apache.Qpid.Proton.Codec.Decoders.Primitives;
 using Apache.Qpid.Proton.Types;
 
 namespace Apache.Qpid.Proton.Codec.Decoders
@@ -40,14 +41,42 @@ namespace Apache.Qpid.Proton.Codec.Decoders
       public override object ReadValue(IProtonBuffer buffer, IDecoderState state)
       {
          ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
-         object described = decoder.ReadValue(buffer, state);
 
-         return new UnknownDescribedType(descriptor, described);
+         if (decoder is not IPrimitiveTypeDecoder)
+         {
+            throw new DecodeException("The described value must be an AMQP primitive type.");
+         }
+
+         return new UnknownDescribedType(descriptor, decoder.ReadValue(buffer, state));
       }
 
       public override Array ReadArrayElements(IProtonBuffer buffer, IDecoderState state, int count)
       {
          ITypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(buffer, state);
+
+         if (decoder is IPrimitiveTypeDecoder primitiveDecoder)
+         {
+            if (primitiveDecoder.IsZeroWidth)
+            {
+               if (count > state.MaxZeroWidthArrayElements)
+               {
+                  throw new DecodeException(
+                     "Array element count " + count + " is specified to be greater than limit for " +
+                     "zero sized encoded array types (" + state.MaxZeroWidthArrayElements + ")");
+               }
+            }
+            else if (count > buffer.ReadableBytes)
+            {
+               throw new DecodeException(
+                  "Array encoded length " + count + " is specified to be greater than the amount " +
+                  "of the remaining readable bytes (" + buffer.ReadableBytes + ")");
+            }
+         }
+         else
+         {
+            throw new DecodeException("The described value must be an AMQP primitive type.");
+         }
+
          UnknownDescribedType[] result = new UnknownDescribedType[count];
 
          for (int i = 0; i < count; ++i)
@@ -61,20 +90,57 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         state.Decoder.ReadNextTypeDecoder(buffer, state).SkipValue(buffer, state);
+         state.IncreaseDepth();
+
+         try
+         {
+            state.Decoder.ReadNextTypeDecoder(buffer, state).SkipValue(buffer, state);
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
 
       public override object ReadValue(Stream stream, IStreamDecoderState state)
       {
          IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
-         object described = decoder.ReadValue(stream, state);
 
-         return new UnknownDescribedType(descriptor, described);
+         if (decoder is not IPrimitiveTypeDecoder)
+         {
+            throw new DecodeException("The described value must be an AMQP primitive type.");
+         }
+
+         return new UnknownDescribedType(descriptor, decoder.ReadValue(stream, state));
       }
 
       public override Array ReadArrayElements(Stream stream, IStreamDecoderState state, int count)
       {
          IStreamTypeDecoder decoder = state.Decoder.ReadNextTypeDecoder(stream, state);
+
+         if (decoder is IPrimitiveTypeDecoder primitiveDecoder)
+         {
+            if (primitiveDecoder.IsZeroWidth)
+            {
+               if (count > state.MaxZeroWidthArrayElements)
+               {
+                  throw new DecodeException(
+                     "Array element count " + count + " is specified to be greater than limit for " +
+                     "zero sized encoded array types (" + state.MaxZeroWidthArrayElements + ")");
+               }
+            }
+            else if (count > state.MaxArraySize)
+            {
+               throw new DecodeException(
+                  "Array encoded length " + count + " is specified to be greater than the amount " +
+                  "of the configured max array length (" + state.MaxArraySize + ")");
+            }
+         }
+         else
+         {
+            throw new DecodeException("The described value must be an AMQP primitive type.");
+         }
+
          UnknownDescribedType[] result = new UnknownDescribedType[count];
 
          for (int i = 0; i < count; ++i)
@@ -88,7 +154,16 @@ namespace Apache.Qpid.Proton.Codec.Decoders
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         state.Decoder.ReadNextTypeDecoder(stream, state).SkipValue(stream, state);
+         state.IncreaseDepth();
+
+         try
+         {
+            state.Decoder.ReadNextTypeDecoder(stream, state).SkipValue(stream, state);
+         }
+         finally
+         {
+            state.DecreaseDepth();
+         }
       }
    }
 }

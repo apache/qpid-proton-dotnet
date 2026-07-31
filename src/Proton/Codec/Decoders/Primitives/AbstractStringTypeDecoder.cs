@@ -30,11 +30,11 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          int length = ReadSize(buffer, state);
 
-         if (length > buffer.ReadableBytes)
+         if (length > buffer.ReadableBytes || length < 0)
          {
             throw new DecodeException(string.Format(
-                    "String encoded size {0} is specified to be greater than the amount " +
-                    "of data available ({1})", length, buffer.ReadableBytes));
+                  "String encoded size {0} is specified to be greater than the amount " +
+                  "of data available ({1})", (uint) length, buffer.ReadableBytes));
          }
 
          if (length != 0)
@@ -51,6 +51,13 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
       {
          int length = ReadSize(stream, state);
 
+         if (length > state.MaxStringSize || length < 0)
+         {
+            throw new DecodeException(string.Format(
+                  "String encoded size {0} is specified to be greater than the amount " +
+                  "allowed by configuration ({1})", (uint) length, state.MaxStringSize));
+         }
+
          if (length != 0)
          {
             return state.DecodeUtf8(stream, length);
@@ -63,19 +70,30 @@ namespace Apache.Qpid.Proton.Codec.Decoders.Primitives
 
       public override void SkipValue(IProtonBuffer buffer, IDecoderState state)
       {
-         buffer.SkipBytes(ReadSize(buffer, state));
+         int length = ReadSize(buffer, state);
+
+         if (length > buffer.ReadableBytes || length < 0)
+         {
+            throw new DecodeException(string.Format(
+                  "String encoded size {0} is specified to be greater than the amount " +
+                  "of data available ({1})", (uint) length, buffer.ReadableBytes));
+         }
+
+         buffer.SkipBytes(length);
       }
 
       public override void SkipValue(Stream stream, IStreamDecoderState state)
       {
-         try
+         int length = ReadSize(stream, state);
+
+         if (length > state.MaxStringSize || length < 0)
          {
-            ProtonStreamReadUtils.SkipBytes(stream, ReadSize(stream, state));
+            throw new DecodeException(string.Format(
+                  "String encoded size {0} is specified to be greater than the amount " +
+                  "allowed by configuration ({1})", (uint) length, state.MaxStringSize));
          }
-         catch (IOException ex)
-         {
-            throw new DecodeException("Error while reading String payload bytes", ex);
-         }
+
+         ProtonStreamReadUtils.SkipBytes(stream, length);
       }
 
       protected abstract int ReadSize(IProtonBuffer buffer, IDecoderState state);

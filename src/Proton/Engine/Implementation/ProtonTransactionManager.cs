@@ -335,7 +335,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation
          {
             IProtonBuffer payload = delivery.ReadAll();
 
-            AmqpValue container = (AmqpValue)payloadDecoder.ReadObject(payload, payloadDecoder.CachedDecoderState);
+            AmqpValue container = payloadDecoder.ReadObject<AmqpValue>(payload, payloadDecoder.CachedDecoderState);
 
             if (container.Value is Declare)
             {

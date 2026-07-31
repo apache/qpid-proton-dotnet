@@ -31,7 +31,7 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
    {
       public static readonly ProtonDefaultSaslClientAuthenticator Instance = new();
 
-      private readonly Symbol ANONYMOUS = Symbol.Lookup("ANONYMOUS");
+      private readonly Symbol ANONYMOUS = Symbol.SaslLookup("ANONYMOUS");
 
       public void HandleSaslChallenge(ISaslClientContext context, IProtonBuffer challenge)
       {
@@ -40,7 +40,6 @@ namespace Apache.Qpid.Proton.Engine.Implementation.Sasl
 
       public void HandleSaslMechanisms(ISaslClientContext context, Symbol[] mechanisms)
       {
-
          if (mechanisms != null && Array.Find(mechanisms, element => ANONYMOUS.Equals(element)) != null)
          {
             context.SendChosenMechanism(ANONYMOUS, null, ProtonByteBufferAllocator.Instance.Allocate(0, 0));
