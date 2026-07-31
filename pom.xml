@@ -80,6 +80,7 @@
                   <exclude>**/licenses/**</exclude>
                   <exclude>qpid-proton/**</exclude>
                   <exclude>**/.vscode/</exclude>
+                  <exclude>**/*.csproj.lscache</exclude>
                   <exclude>**/bin/</exclude>
                   <exclude>**/obj/</exclude>
                </excludes>
